@@ -305,6 +305,33 @@ export class AuthService {
     };
   }
 
+  // ─── Get Profile ──────────────────────────────────────────────
+  async getProfile(userId: string, businessId: string) {
+    const [user, business, membership] = await Promise.all([
+      prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          avatarUrl: true,
+          mfaEnabled: true,
+          createdAt: true,
+        },
+      }),
+      prisma.business.findUniqueOrThrow({
+        where: { id: businessId },
+        select: { id: true, name: true, slug: true, healthScore: true },
+      }),
+      prisma.membership.findFirst({
+        where: { userId, businessId },
+        include: { role: { select: { id: true, name: true, permissions: true } } },
+      }),
+    ]);
+    return { user, business, role: membership?.role ?? null };
+  }
+
   // ─── Helpers ──────────────────────────────────────────────────
   private async generateTokens(
     user: { id: string; email: string },

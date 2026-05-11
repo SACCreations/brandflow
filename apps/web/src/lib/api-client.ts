@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '@/store/auth.store';
 
 export const apiClient = axios.create({
-  baseURL: process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001/api/v1',
+  baseURL: process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000/api/v1',
   withCredentials: true, // send cookies (refresh token)
   headers: { 'Content-Type': 'application/json' },
 });
@@ -16,25 +16,59 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// On 401, attempt refresh then retry once
+// 401 interceptor: attempt silent token refresh, then redirect to login
+let isRefreshing = false;
+let pendingQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = [];
+
+function drainQueue(token: string | null, err: unknown = null) {
+  pendingQueue.forEach((p) => (token ? p.resolve(token) : p.reject(err)));
+  pendingQueue = [];
+}
+
 apiClient.interceptors.response.use(
   (res) => res,
-  async (error) => {
-    const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
+  async (error: import('axios').AxiosError) => {
+    const original = error.config as import('axios').InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // Don't retry refresh endpoint itself to avoid loops
+    if (
+      error.response?.status === 401 &&
+      original &&
+      !original._retry &&
+      !original.url?.includes('/auth/refresh')
+    ) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          pendingQueue.push({
+            resolve: (token) => {
+              original.headers.Authorization = `Bearer ${token}`;
+              resolve(apiClient(original));
+            },
+            reject,
+          });
+        });
+      }
+
       original._retry = true;
+      isRefreshing = true;
+
       try {
-        const { data } = await apiClient.post('/auth/refresh');
-        useAuthStore.getState().setAuth(
-          useAuthStore.getState().user!,
-          data.data.accessToken,
-        );
-        original.headers.Authorization = `Bearer ${data.data.accessToken}`;
+        // refreshToken is sent automatically as httpOnly cookie
+        const res = await apiClient.post<{ data: { accessToken: string; refreshToken: string; expiresIn: number } }>('/auth/refresh', {});
+        const newToken = res.data.data.accessToken;
+        useAuthStore.getState().updateToken(newToken);
+        drainQueue(newToken);
+        original.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(original);
-      } catch {
+      } catch (refreshError) {
+        drainQueue(null, refreshError);
         useAuthStore.getState().logout();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
+
     return Promise.reject(error);
   },
 );

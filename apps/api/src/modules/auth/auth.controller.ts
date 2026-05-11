@@ -91,9 +91,9 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current authenticated user' })
+  @ApiOperation({ summary: 'Get current authenticated user profile' })
   me(@CurrentUser() user: JwtPayload) {
-    return user;
+    return this.authService.getProfile(user.sub, user.businessId);
   }
 
   @Post('mfa/setup')
