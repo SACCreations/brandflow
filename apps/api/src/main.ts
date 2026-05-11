@@ -18,8 +18,6 @@ async function bootstrap() {
   const config = app.get(ConfigService);
   const port = config.get<number>('app.port', 4000);
   const corsOrigins = config.get<string>('app.corsOrigins', 'http://localhost:3000');
-  console.log(`🔒 CORS Origins from config: "${corsOrigins}"`);
-  console.log(`🔒 Parsed origins:`, corsOrigins.split(',').map((o) => o.trim()));
 
   // ─── Security ────────────────────────────────────────────────
   app.use(
@@ -30,7 +28,9 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.enableCors({
-    origin: true,
+    origin: config.get('NODE_ENV') === 'production'
+      ? corsOrigins.split(',').map((o) => o.trim())
+      : true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });

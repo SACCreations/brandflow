@@ -6,4 +6,5 @@ export { RateLimiter } from './rate-limiter';
 export { OpenAIProvider } from './providers/openai';
 export { AnthropicProvider } from './providers/anthropic';
 export { FallbackProvider } from './providers/fallback';
+export * as encryption from './utils/encryption.utils';
 export type * from './types';

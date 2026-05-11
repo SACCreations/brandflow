@@ -7,8 +7,9 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { prisma } from '@brandflow/db';
 import type { Prisma, KnowledgeSource, KnowledgeEntry } from '@brandflow/db';
-import { LLMGateway, PromptEngine, QualityControl, CostTracker } from '@brandflow/ai';
+import { LLMGateway, PromptEngine, QualityControl, CostTracker, type LLMConfig } from '@brandflow/ai';
 import type { GenerateContentDto, UpdateContentDto, BrandContext } from '@brandflow/shared';
+import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 import { nanoid } from 'nanoid';
 
 @Injectable()
@@ -18,7 +19,10 @@ export class ContentService {
   private readonly qualityControl: QualityControl;
   private readonly costTracker: CostTracker;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly llmSettingsService: LlmSettingsService,
+  ) {
     this.gateway = new LLMGateway({
       defaultProvider: config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic',
       fallbackProvider: config.get('llm.fallbackProvider', 'anthropic') as 'anthropic' | 'openai',
@@ -141,11 +145,20 @@ export class ContentService {
     );
 
     // 4. Generate content
+    const llmSettings = await this.llmSettingsService.getSettings(businessId);
+    const decryptedApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId);
+
     const requestId = nanoid();
-    const { response, provider } = await this.gateway.complete(
+    const { response, provider: usedProvider } = await this.gateway.complete(
       systemPrompt,
       `Generate a ${dto.type} for ${dto.platform} about: ${sanitizedTopic}`,
-      { maxTokens: 1024, temperature: 0.75 },
+      {
+        provider: (llmSettings.provider as any) ?? 'openai',
+        model: llmSettings.model,
+        temperature: dto.temperature ?? llmSettings.temperature ?? 0.75,
+        maxTokens: dto.maxTokens ?? llmSettings.maxTokens ?? 1024,
+        apiKey: decryptedApiKey ?? undefined,
+      },
     );
 
     // 5. Quality check
@@ -208,7 +221,7 @@ export class ContentService {
     return {
       content,
       qualityCheck: qualityResult,
-      provider,
+      provider: usedProvider,
       requestId,
     };
   }

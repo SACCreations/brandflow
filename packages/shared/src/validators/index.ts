@@ -212,3 +212,14 @@ export const createApiKeySchema = z.object({
   expiresAt: z.coerce.date().optional(),
 });
 export type CreateApiKeyDto = z.infer<typeof createApiKeySchema>;
+
+// ─── LLM Settings ────────────────────────────────────────────────
+export const updateLlmSettingsSchema = z.object({
+  provider: z.enum(['openai', 'anthropic', 'google', 'fallback']).optional(),
+  model: z.string().max(100).optional(),
+  temperature: z.number().min(0).max(2).optional(),
+  maxTokens: z.number().int().min(1).max(32000).optional(),
+  apiKey: z.string().max(500).optional(),
+  isFallbackEnabled: z.boolean().optional(),
+});
+export type UpdateLlmSettingsDto = z.infer<typeof updateLlmSettingsSchema>;

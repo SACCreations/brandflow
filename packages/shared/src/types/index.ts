@@ -75,6 +75,17 @@ export interface QualityCheckResult {
   violations: QualityViolation[];
 }
 
+// ─── AI Providers ────────────────────────────────────────────────
+export type AIProvider = 'openai' | 'anthropic' | 'google' | 'fallback';
+
+export interface LLMConfig {
+  provider?: AIProvider;
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+  apiKey?: string;
+}
+
 // ─── AI Generation Request ────────────────────────────────────────
 export interface GenerationRequest {
   module: string;

@@ -35,11 +35,7 @@ export class LLMGateway {
   async complete(
     systemPrompt: string,
     userPrompt: string,
-    options: {
-      maxTokens?: number;
-      temperature?: number;
-      provider?: string;
-    } = {},
+    options: LLMConfig = {},
   ): Promise<{ response: ProviderResponse; requestId: string; provider: string }> {
     const requestId = uuidv4();
     const preferredProvider = options.provider ?? this.config.defaultProvider;
@@ -49,8 +45,26 @@ export class LLMGateway {
       userPrompt,
       maxTokens: options.maxTokens,
       temperature: options.temperature,
+      model: options.model,
       requestId,
     };
+
+    // If a custom API key is provided, we must use a temporary provider instance
+    if (options.apiKey) {
+      const tempProvider = this.createTemporaryProvider(preferredProvider, options.apiKey, options.model);
+      if (tempProvider) {
+        try {
+          const response = await this.withTimeout(
+            tempProvider.complete(request),
+            this.config.requestTimeoutMs,
+          );
+          return { response, requestId, provider: preferredProvider };
+        } catch (err) {
+          console.error(`[LLMGateway] Temporary provider ${preferredProvider} failed:`, err);
+          // Fall back to platform providers if allowed
+        }
+      }
+    }
 
     // Try preferred provider, then fallback chain
     const providerOrder = this.buildProviderChain(preferredProvider);
@@ -68,12 +82,22 @@ export class LLMGateway {
         return { response, requestId, provider: providerName };
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
-        // Log and try next provider
         console.error(`[LLMGateway] Provider ${providerName} failed:`, lastError.message);
       }
     }
 
     throw lastError ?? new Error('All providers failed');
+  }
+
+  private createTemporaryProvider(providerName: string, apiKey: string, model?: string): LLMProvider | null {
+    switch (providerName) {
+      case 'openai':
+        return new OpenAIProvider(apiKey, model);
+      case 'anthropic':
+        return new AnthropicProvider(apiKey, model);
+      default:
+        return null;
+    }
   }
 
   private buildProviderChain(preferred: string): string[] {
