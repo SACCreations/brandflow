@@ -1,0 +1,13 @@
+{
+  "extends": "@brandflow/tsconfig/nestjs.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "paths": {
+      "@brandflow/db": ["../../packages/db/src"],
+      "@brandflow/shared": ["../../packages/shared/src"],
+      "@brandflow/ai": ["../../packages/ai/src"]
+    }
+  },
+  "include": ["src/**/*", "../../packages/db/src/**/*", "../../packages/shared/src/**/*", "../../packages/ai/src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,559 @@
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("DATABASE_SHADOW_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Layer 0–1: Foundation
+// ─────────────────────────────────────────────────────────────────
+
+model Business {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  parentId    String?
+  whiteLabel  Json?
+  healthScore Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent      Business?      @relation("AgencyChildren", fields: [parentId], references: [id])
+  children    Business[]     @relation("AgencyChildren")
+  memberships Membership[]
+  brands      Brand[]
+  subscriptions Subscription[]
+  auditLogs   AuditLog[]
+  knowledgeSources KnowledgeSource[]
+  contents    Content[]
+  campaigns   Campaign[]
+  briefs      Brief[]
+  assets      Asset[]
+  templates   Template[]
+  socialAccounts SocialAccount[]
+  approvals   Approval[]
+  schedules   Schedule[]
+  publishJobs PublishJob[]
+  notifications Notification[]
+  automations Automation[]
+  automationRuns AutomationRun[]
+  analyticsEvents AnalyticsEvent[]
+  performanceMetrics PerformanceMetric[]
+  qualityChecks QualityCheck[]
+  costEvents  CostEvent[]
+  prompts     Prompt[]
+
+  @@map("businesses")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String?
+  mfaEnabled   Boolean  @default(false)
+  mfaSecret    String?
+  firstName    String?
+  lastName     String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships  Membership[]
+  sessions     Session[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Membership {
+  id         String   @id @default(uuid())
+  userId     String
+  businessId String
+  roleId     String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  role       Role     @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, businessId])
+  @@map("memberships")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  businessId  String?
+  name        String
+  permissions Json
+  isCustom    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  memberships Membership[]
+
+  @@map("roles")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  refreshToken String   @unique
+  deviceInfo   Json?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Subscription {
+  id                   String    @id @default(uuid())
+  businessId           String
+  plan                 String
+  status               String
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  currentPeriodEnd     DateTime?
+  seatLimit            Int       @default(3)
+  tokenBudget          Int       @default(100000)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  business             Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  businessId   String
+  userId       String?
+  action       String
+  entityType   String
+  entityId     String?
+  before       Json?
+  after        Json?
+  hash         String
+  previousHash String?
+  createdAt    DateTime @default(now())
+
+  business     Business @relation(fields: [businessId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model CostEvent {
+  id          String   @id @default(uuid())
+  businessId  String
+  module      String
+  model       String
+  inputTokens Int
+  outputTokens Int
+  costCents   Int
+  requestId   String
+  createdAt   DateTime @default(now())
+
+  business    Business @relation(fields: [businessId], references: [id])
+
+  @@map("cost_events")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Layer 2: Intelligence
+// ─────────────────────────────────────────────────────────────────
+
+model Brand {
+  id           String   @id @default(uuid())
+  businessId   String
+  name         String
+  positioning  String?
+  audience     String?
+  tone         Json?
+  visualRules  Json?
+  governance   Json?
+  healthScore  Int      @default(0)
+  version      Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  business         Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  knowledgeSources KnowledgeSource[]
+  contents         Content[]
+
+  @@map("brands")
+}
+
+model KnowledgeSource {
+  id           String    @id @default(uuid())
+  businessId   String
+  brandId      String
+  type         String
+  sourceUrl    String?
+  fileName     String?
+  status       String    @default("pending")
+  lastIngested DateTime?
+  createdAt    DateTime  @default(now())
+
+  business     Business         @relation(fields: [businessId], references: [id])
+  brand        Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  entries      KnowledgeEntry[]
+
+  @@map("knowledge_sources")
+}
+
+model KnowledgeEntry {
+  id         String    @id @default(uuid())
+  businessId String
+  sourceId   String
+  type       String
+  content    String    @db.Text
+  confidence Float     @default(1.0)
+  isStale    Boolean   @default(false)
+  staleAt    DateTime?
+  embedding  Bytes?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  source     KnowledgeSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@map("knowledge_entries")
+}
+
+model Prompt {
+  id               String   @id @default(uuid())
+  businessId       String?
+  module           String
+  layer            String
+  name             String
+  template         String   @db.Text
+  version          Int      @default(1)
+  isActive         Boolean  @default(true)
+  abVariant        String?
+  performanceScore Float?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  business         Business? @relation(fields: [businessId], references: [id])
+
+  @@map("prompts")
+}
+
+model QualityCheck {
+  id              String   @id @default(uuid())
+  businessId      String
+  contentId       String
+  passed          Boolean
+  confidenceScore Float
+  violations      Json?
+  checkedAt       DateTime @default(now())
+
+  business        Business @relation(fields: [businessId], references: [id])
+  content         Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@map("quality_checks")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Layer 3–4: Planning & Creation
+// ─────────────────────────────────────────────────────────────────
+
+model Campaign {
+  id           String   @id @default(uuid())
+  businessId   String
+  name         String
+  status       String   @default("draft")
+  healthScore  Int      @default(0)
+  clonedFromId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  business     Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  briefs       Brief[]
+  contents     Content[]
+  schedules    Schedule[]
+
+  @@map("campaigns")
+}
+
+model Brief {
+  id           String   @id @default(uuid())
+  businessId   String
+  campaignId   String?
+  objective    String
+  audience     String?
+  platform     String?
+  cta          String?
+  tone         String?
+  format       String?
+  contentType  String?
+  businessGoal String?
+  isComplete   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  business     Business  @relation(fields: [businessId], references: [id])
+  campaign     Campaign? @relation(fields: [campaignId], references: [id])
+  contents     Content[]
+
+  @@map("briefs")
+}
+
+model Content {
+  id             String   @id @default(uuid())
+  businessId     String
+  brandId        String
+  briefId        String?
+  campaignId     String?
+  platform       String
+  type           String
+  body           String   @db.Text
+  status         String   @default("draft")
+  qualityScore   Float?
+  promptId       String?
+  promptVersion  Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  business       Business         @relation(fields: [businessId], references: [id])
+  brand          Brand            @relation(fields: [brandId], references: [id])
+  brief          Brief?           @relation(fields: [briefId], references: [id])
+  campaign       Campaign?        @relation(fields: [campaignId], references: [id])
+  versions       ContentVersion[]
+  approvals      Approval[]
+  qualityChecks  QualityCheck[]
+  publishJobs    PublishJob[]
+
+  @@map("contents")
+}
+
+model ContentVersion {
+  id        String   @id @default(uuid())
+  contentId String
+  version   Int
+  body      String   @db.Text
+  editedBy  String?
+  createdAt DateTime @default(now())
+
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@map("content_versions")
+}
+
+model Asset {
+  id         String   @id @default(uuid())
+  businessId String
+  type       String
+  fileName   String
+  mimeType   String
+  s3Key      String
+  cdnUrl     String?
+  tags       Json?
+  metadata   Json?
+  version    Int      @default(1)
+  createdAt  DateTime @default(now())
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("assets")
+}
+
+model Template {
+  id               String   @id @default(uuid())
+  businessId       String?
+  type             String
+  name             String
+  body             String   @db.Text
+  placeholders     Json?
+  performanceScore Float?
+  usageCount       Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  business         Business? @relation(fields: [businessId], references: [id])
+
+  @@map("templates")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Layer 5–7: Operations
+// ─────────────────────────────────────────────────────────────────
+
+model SocialAccount {
+  id             String    @id @default(uuid())
+  businessId     String
+  platform       String
+  accountType    String
+  externalId     String
+  name           String
+  accessToken    String
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+  scopes         Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  business       Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  publishJobs    PublishJob[]
+
+  @@unique([businessId, platform, externalId])
+  @@map("social_accounts")
+}
+
+model Approval {
+  id          String    @id @default(uuid())
+  businessId  String
+  contentId   String
+  reviewerId  String?
+  reviewType  String
+  status      String    @default("pending")
+  slaDeadline DateTime?
+  note        String?
+  reason      String?
+  decidedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  business    Business @relation(fields: [businessId], references: [id])
+  content     Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@map("approvals")
+}
+
+model Schedule {
+  id              String    @id @default(uuid())
+  businessId      String
+  contentId       String?
+  campaignId      String?
+  socialAccountId String
+  scheduledAt     DateTime
+  timezone        String    @default("UTC")
+  type            String    @default("one_time")
+  recurringRule   String?
+  status          String    @default("pending")
+  createdAt       DateTime  @default(now())
+
+  business        Business  @relation(fields: [businessId], references: [id])
+  campaign        Campaign? @relation(fields: [campaignId], references: [id])
+
+  @@map("schedules")
+}
+
+model PublishJob {
+  id              String    @id @default(uuid())
+  businessId      String
+  contentId       String
+  socialAccountId String
+  status          String    @default("pending")
+  failureReason   String?
+  failureClass    String?
+  retryCount      Int       @default(0)
+  maxRetries      Int       @default(3)
+  nextRetryAt     DateTime?
+  publishedAt     DateTime?
+  externalPostId  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business        Business      @relation(fields: [businessId], references: [id])
+  content         Content       @relation(fields: [contentId], references: [id])
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id])
+
+  @@map("publish_jobs")
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  businessId  String
+  userId      String
+  type        String
+  channel     String
+  title       String
+  body        String?
+  isRead      Boolean   @default(false)
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  business    Business @relation(fields: [businessId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Layer 8–9: Automation & Analytics
+// ─────────────────────────────────────────────────────────────────
+
+model Automation {
+  id            String    @id @default(uuid())
+  businessId    String
+  name          String
+  triggerType   String
+  triggerConfig Json
+  steps         Json
+  isActive      Boolean   @default(false)
+  isDryRun      Boolean   @default(false)
+  errorPolicy   Json?
+  lastRunAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  business      Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  runs          AutomationRun[]
+
+  @@map("automations")
+}
+
+model AutomationRun {
+  id           String    @id @default(uuid())
+  automationId String
+  businessId   String
+  status       String
+  triggerEvent Json?
+  stepResults  Json?
+  failedAtStep Int?
+  isDryRun     Boolean   @default(false)
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  business     Business   @relation(fields: [businessId], references: [id])
+
+  @@map("automation_runs")
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(uuid())
+  businessId String
+  source     String
+  eventType  String
+  entityType String?
+  entityId   String?
+  payload    Json
+  createdAt  DateTime @default(now())
+
+  business   Business @relation(fields: [businessId], references: [id])
+
+  @@map("analytics_events")
+}
+
+model PerformanceMetric {
+  id          String   @id @default(uuid())
+  businessId  String
+  contentId   String
+  platform    String
+  reach       Int      @default(0)
+  impressions Int      @default(0)
+  engagement  Int      @default(0)
+  clicks      Int      @default(0)
+  ctr         Float    @default(0)
+  collectedAt DateTime @default(now())
+
+  business    Business @relation(fields: [businessId], references: [id])
+
+  @@map("performance_metrics")
+}
