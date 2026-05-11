@@ -22,48 +22,50 @@ export class AnalyticsService {
     return prisma.analyticsEvent.create({
       data: {
         businessId: payload.businessId,
-        contentId: payload.contentId,
-        platform: payload.platform,
+        source: payload.source ?? 'unknown',
         eventType: payload.eventType,
-        value: payload.value ?? 1,
-        occurredAt: payload.occurredAt ? new Date(payload.occurredAt) : new Date(),
-        meta: payload.meta ?? {},
+        entityType: payload.entityType ?? (payload.contentId ? 'content' : undefined),
+        entityId: payload.entityId ?? payload.contentId,
+        payload: {
+          ...(payload.platform ? { platform: payload.platform } : {}),
+          ...(payload.value !== undefined ? { value: payload.value } : {}),
+          ...(payload.meta ?? {}),
+          ...(payload.payload ?? {}),
+        },
       },
     });
   }
 
-  async getMetrics(businessId: string, brandId?: string, from?: string, to?: string) {
+  async getMetrics(businessId: string, _brandId?: string, from?: string, to?: string) {
     const where: Record<string, unknown> = { businessId };
     if (from || to) {
-      where['occurredAt'] = {
+      where['createdAt'] = {
         ...(from ? { gte: new Date(from) } : {}),
         ...(to ? { lte: new Date(to) } : {}),
       };
     }
 
-    const [total, byPlatform, byType] = await Promise.all([
+    const [total, bySource, byType] = await Promise.all([
       prisma.analyticsEvent.count({ where }),
       prisma.analyticsEvent.groupBy({
-        by: ['platform'],
+        by: ['source'],
         where,
-        _sum: { value: true },
         _count: true,
       }),
       prisma.analyticsEvent.groupBy({
         by: ['eventType'],
         where,
-        _sum: { value: true },
         _count: true,
       }),
     ]);
 
-    return { total, byPlatform, byType };
+    return { total, bySource, byType };
   }
 
   async getPerformanceMetrics(businessId: string, contentId?: string) {
     return prisma.performanceMetric.findMany({
       where: { businessId, ...(contentId ? { contentId } : {}) },
-      orderBy: { date: 'desc' },
+      orderBy: { collectedAt: 'desc' },
       take: 90,
     });
   }

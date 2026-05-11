@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { Logger } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
 import { QUEUES } from '@brandflow/shared';
 
@@ -18,13 +18,18 @@ export class PublishProcessor extends WorkerHost {
     const { scheduleId, businessId, contentId } = job.data;
     this.logger.log(`Processing publish job for schedule ${scheduleId}`);
 
+    // Look up schedule to get socialAccountId
+    const schedule = await prisma.schedule.findFirst({ where: { id: scheduleId, businessId } });
+    if (!schedule) throw new NotFoundException(`Schedule ${scheduleId} not found`);
+
     const publishJob = await prisma.publishJob.create({
       data: {
         businessId,
-        scheduleId,
         contentId,
+        socialAccountId: schedule.socialAccountId,
+        scheduleId,
         status: 'processing',
-        attemptNumber: job.attemptsMade + 1,
+        retryCount: job.attemptsMade,
       },
     });
 
@@ -35,15 +40,15 @@ export class PublishProcessor extends WorkerHost {
       await prisma.$transaction([
         prisma.publishJob.update({
           where: { id: publishJob.id },
-          data: { status: 'published', completedAt: new Date() },
+          data: { status: 'published', publishedAt: new Date() },
         }),
         prisma.schedule.update({
           where: { id: scheduleId },
-          data: { status: 'published', publishedAt: new Date() },
+          data: { status: 'published' },
         }),
         prisma.content.update({
           where: { id: contentId },
-          data: { status: 'published', publishedAt: new Date() },
+          data: { status: 'published' },
         }),
       ]);
 
@@ -56,9 +61,8 @@ export class PublishProcessor extends WorkerHost {
         where: { id: publishJob.id },
         data: {
           status: 'failed',
-          errorMessage: errMsg,
+          failureReason: errMsg,
           failureClass: this.classifyFailure(errMsg),
-          completedAt: new Date(),
         },
       });
 

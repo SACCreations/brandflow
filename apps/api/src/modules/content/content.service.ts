@@ -198,7 +198,7 @@ export class ContentService {
           contentId: created.id,
           passed: qualityResult.passed,
           confidenceScore: qualityResult.confidenceScore,
-          violations: qualityResult.violations,
+          violations: qualityResult.violations as unknown as Prisma.InputJsonValue,
         },
       });
 

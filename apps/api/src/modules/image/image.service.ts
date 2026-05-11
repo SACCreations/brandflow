@@ -35,23 +35,21 @@ export class ImageService {
     return { key, uploadUrl: `${this.endpoint}/${this.bucket}/${key}` };
   }
 
-  async findAll(businessId: string, brandId?: string) {
+  async findAll(businessId: string) {
     return prisma.asset.findMany({
-      where: { businessId, ...(brandId ? { brandId } : {}) },
+      where: { businessId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async registerAsset(businessId: string, data: { key: string; brandId?: string; name: string; mimeType: string; size?: number }) {
+  async registerAsset(businessId: string, data: { key: string; fileName: string; mimeType: string }) {
     return prisma.asset.create({
       data: {
         businessId,
-        brandId: data.brandId,
-        name: data.name,
-        url: data.key,
+        fileName: data.fileName,
+        s3Key: data.key,
         type: data.mimeType.startsWith('image/') ? 'image' : 'file',
         mimeType: data.mimeType,
-        size: data.size,
       },
     });
   }

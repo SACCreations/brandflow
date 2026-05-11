@@ -1,14 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { prisma } from '@brandflow/db';
+import { prisma, type Prisma } from '@brandflow/db';
 
 @Injectable()
 export class TemplateService {
-  async findAll(businessId: string, platform?: string) {
+  async findAll(businessId: string, type?: string) {
     return prisma.template.findMany({
       where: {
-        OR: [{ businessId }, { businessId: null }], // platform-level + workspace templates
-        ...(platform ? { platform } : {}),
-        isActive: true,
+        OR: [{ businessId }, { businessId: null }],
+        ...(type ? { type } : {}),
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -22,29 +21,35 @@ export class TemplateService {
 
   async create(
     businessId: string,
-    data: { name: string; platform?: string; structure: Record<string, unknown>; brandId?: string },
+    data: { name: string; type: string; body: string; placeholders?: Record<string, unknown> },
   ) {
     return prisma.template.create({
       data: {
         businessId,
         name: data.name,
-        platform: data.platform,
-        structure: data.structure,
-        brandId: data.brandId,
-        isActive: true,
+        type: data.type,
+        body: data.body,
+        placeholders: data.placeholders as unknown as Prisma.InputJsonValue | undefined,
       },
     });
   }
 
-  async update(id: string, businessId: string, data: { name?: string; structure?: Record<string, unknown>; isActive?: boolean }) {
+  async update(id: string, businessId: string, data: { name?: string; body?: string; placeholders?: Record<string, unknown> }) {
     const template = await prisma.template.findFirst({ where: { id, businessId } });
     if (!template) throw new NotFoundException('Template not found');
-    return prisma.template.update({ where: { id }, data });
+    return prisma.template.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.body !== undefined ? { body: data.body } : {}),
+        ...(data.placeholders !== undefined ? { placeholders: data.placeholders as unknown as Prisma.InputJsonValue } : {}),
+      },
+    });
   }
 
   async delete(id: string, businessId: string) {
     const template = await prisma.template.findFirst({ where: { id, businessId } });
     if (!template) throw new NotFoundException('Template not found');
-    return prisma.template.update({ where: { id }, data: { isActive: false } });
+    return prisma.template.delete({ where: { id } });
   }
 }

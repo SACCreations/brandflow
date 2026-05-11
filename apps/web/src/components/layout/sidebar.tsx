@@ -30,11 +30,18 @@ const NAV = [
   },
   {
     group: 'Publish',
-    items: [{ label: 'Calendar', href: '/publish/calendar', icon: '◷' }],
+    items: [
+      { label: 'Calendar', href: '/publish/calendar', icon: '◷' },
+      { label: 'Social Accounts', href: '/publish/social', icon: '◈' },
+    ],
   },
   {
     group: 'Automate',
     items: [{ label: 'Automations', href: '/automate/automations', icon: '⚡' }],
+  },
+  {
+    group: 'Insights',
+    items: [{ label: 'Analytics', href: '/analytics', icon: '◉' }],
   },
 ];
 
@@ -53,7 +60,7 @@ export function Sidebar() {
         {NAV.map((item) => {
           if ('href' in item) {
             return (
-              <NavLink key={item.href} href={item.href} icon={item.icon} label={item.label} pathname={pathname} />
+              <NavLink key={item.href} href={item.href ?? ''} icon={item.icon ?? ''} label={item.label ?? ''} pathname={pathname} />
             );
           }
           return (
@@ -62,7 +69,7 @@ export function Sidebar() {
                 {item.group}
               </p>
               {item.items.map((sub) => (
-                <NavLink key={sub.href} href={sub.href} icon={sub.icon} label={sub.label} pathname={pathname} />
+                <NavLink key={sub.href} href={sub.href} icon={sub.icon ?? ''} label={sub.label ?? ''} pathname={pathname} />
               ))}
             </div>
           );

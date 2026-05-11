@@ -16,8 +16,8 @@ export class ImageController {
 
   @Get()
   @ApiOperation({ summary: 'List uploaded assets' })
-  findAll(@CurrentUser() user: JwtPayload, @Query('brandId') brandId?: string) {
-    return this.imageService.findAll(user.businessId, brandId);
+  findAll(@CurrentUser() user: JwtPayload) {
+    return this.imageService.findAll(user.businessId);
   }
 
   @Post('upload-url')
@@ -34,7 +34,7 @@ export class ImageController {
   @ApiOperation({ summary: 'Register an uploaded asset' })
   register(
     @CurrentUser() user: JwtPayload,
-    @Body() data: { key: string; brandId?: string; name: string; mimeType: string; size?: number },
+    @Body() data: { key: string; fileName: string; mimeType: string },
   ) {
     return this.imageService.registerAsset(user.businessId, data);
   }

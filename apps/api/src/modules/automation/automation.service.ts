@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { prisma } from '@brandflow/db';
+import { prisma, type Prisma } from '@brandflow/db';
 import { QUEUES, type CreateAutomationDto } from '@brandflow/shared';
 
 @Injectable()
@@ -33,9 +33,9 @@ export class AutomationService {
         businessId,
         name: dto.name,
         triggerType: dto.triggerType,
-        triggerConfig: dto.triggerConfig ?? {},
-        steps: dto.steps,
-        errorPolicy: dto.errorPolicy ?? { onFailure: 'stop' },
+        triggerConfig: (dto.triggerConfig ?? {}) as unknown as Prisma.InputJsonValue,
+        steps: dto.steps as unknown as Prisma.InputJsonValue,
+        errorPolicy: (dto.errorPolicy ?? { onFailure: 'stop' }) as unknown as Prisma.InputJsonValue,
         isActive: true,
       },
     });
@@ -62,7 +62,7 @@ export class AutomationService {
     if (!automation.isActive) throw new NotFoundException('Automation is inactive');
 
     const run = await prisma.automationRun.create({
-      data: { automationId: id, businessId, status: 'queued', trigger: payload },
+      data: { automationId: id, businessId, status: 'queued', triggerEvent: payload as unknown as Prisma.InputJsonValue },
     });
 
     await this.automationQueue.add(

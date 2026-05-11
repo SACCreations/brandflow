@@ -30,7 +30,7 @@ export class TemplateController {
   @ApiOperation({ summary: 'Create a template' })
   create(
     @CurrentUser() user: JwtPayload,
-    @Body() data: { name: string; platform?: string; structure: Record<string, unknown>; brandId?: string },
+    @Body() data: { name: string; type: string; body: string; placeholders?: Record<string, unknown> },
   ) {
     return this.templateService.create(user.businessId, data);
   }

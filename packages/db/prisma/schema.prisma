@@ -328,6 +328,7 @@ model Content {
   approvals      Approval[]
   qualityChecks  QualityCheck[]
   publishJobs    PublishJob[]
+  schedules      Schedule[]
 
   @@map("contents")
 }
@@ -400,6 +401,7 @@ model SocialAccount {
 
   business       Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
   publishJobs    PublishJob[]
+  schedules      Schedule[]
 
   @@unique([businessId, platform, externalId])
   @@map("social_accounts")
@@ -437,8 +439,11 @@ model Schedule {
   status          String    @default("pending")
   createdAt       DateTime  @default(now())
 
-  business        Business  @relation(fields: [businessId], references: [id])
-  campaign        Campaign? @relation(fields: [campaignId], references: [id])
+  business        Business      @relation(fields: [businessId], references: [id])
+  campaign        Campaign?     @relation(fields: [campaignId], references: [id])
+  content         Content?      @relation(fields: [contentId], references: [id])
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id])
+  publishJobs     PublishJob[]
 
   @@map("schedules")
 }
@@ -448,6 +453,7 @@ model PublishJob {
   businessId      String
   contentId       String
   socialAccountId String
+  scheduleId      String?
   status          String    @default("pending")
   failureReason   String?
   failureClass    String?
@@ -462,6 +468,7 @@ model PublishJob {
   business        Business      @relation(fields: [businessId], references: [id])
   content         Content       @relation(fields: [contentId], references: [id])
   socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id])
+  schedule        Schedule?     @relation(fields: [scheduleId], references: [id])
 
   @@map("publish_jobs")
 }

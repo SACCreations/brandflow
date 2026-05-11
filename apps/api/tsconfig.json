@@ -2,6 +2,8 @@
   "extends": "@brandflow/tsconfig/nestjs.json",
   "compilerOptions": {
     "outDir": "dist",
+    "declaration": false,
+    "declarationMap": false,
     "paths": {
       "@brandflow/db": ["../../packages/db/src"],
       "@brandflow/shared": ["../../packages/shared/src"],

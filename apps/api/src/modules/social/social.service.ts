@@ -50,9 +50,10 @@ export class SocialService {
       select: {
         id: true,
         platform: true,
-        handle: true,
-        profileUrl: true,
-        expiresAt: true,
+        name: true,
+        externalId: true,
+        accountType: true,
+        tokenExpiresAt: true,
         createdAt: true,
         updatedAt: true,
         // NEVER return raw tokens
@@ -65,11 +66,12 @@ export class SocialService {
     businessId: string,
     platform: string,
     data: {
-      handle: string;
-      profileUrl?: string;
+      name: string;
+      externalId: string;
+      accountType?: string;
       accessToken: string;
       refreshToken?: string;
-      expiresAt?: Date;
+      tokenExpiresAt?: Date;
     },
   ) {
     const encryptedAccess = this.encrypt(data.accessToken);
@@ -81,13 +83,12 @@ export class SocialService {
       return prisma.socialAccount.update({
         where: { id: existing.id },
         data: {
-          handle: data.handle,
-          profileUrl: data.profileUrl,
+          name: data.name,
           accessToken: encryptedAccess,
           refreshToken: encryptedRefresh,
-          expiresAt: data.expiresAt,
+          tokenExpiresAt: data.tokenExpiresAt,
         },
-        select: { id: true, platform: true, handle: true, profileUrl: true, expiresAt: true },
+        select: { id: true, platform: true, name: true, externalId: true, tokenExpiresAt: true },
       });
     }
 
@@ -95,13 +96,14 @@ export class SocialService {
       data: {
         businessId,
         platform,
-        handle: data.handle,
-        profileUrl: data.profileUrl,
+        name: data.name,
+        externalId: data.externalId,
+        accountType: data.accountType ?? 'personal',
         accessToken: encryptedAccess,
         refreshToken: encryptedRefresh,
-        expiresAt: data.expiresAt,
+        tokenExpiresAt: data.tokenExpiresAt,
       },
-      select: { id: true, platform: true, handle: true, profileUrl: true, expiresAt: true },
+      select: { id: true, platform: true, name: true, externalId: true, tokenExpiresAt: true },
     });
   }
 
