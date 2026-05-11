@@ -174,13 +174,31 @@ model Brand {
   id           String   @id @default(uuid())
   businessId   String
   name         String
+  slug         String?
+  tagline      String?
+  description  String?
+  industry     String?
+  website      String?
+  foundedYear  Int?
+  headquarters String?
+  status       String   @default("published")
+  
   positioning  String?
   audience     String?
+  differentiators String?
   tone         Json?
   visualRules  Json?
   governance   Json?
+  
+  identity     Json?
+  marketing    Json?
+  designTokens Json?
+  assets       Json?
+  
   healthScore  Int      @default(0)
   version      Int      @default(1)
+  archivedAt   DateTime?
+  deletedAt    DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -188,6 +206,7 @@ model Brand {
   knowledgeSources KnowledgeSource[]
   contents         Content[]
 
+  @@unique([businessId, slug])
   @@map("brands")
 }
 

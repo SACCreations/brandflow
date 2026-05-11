@@ -18,16 +18,16 @@ export const registerSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
       'Password must contain uppercase, lowercase, number, and special character',
     ),
-  firstName: z.string().min(1).max(100).optional(),
-  lastName: z.string().min(1).max(100).optional(),
-  businessName: z.string().min(1).max(255).optional(),
+  firstName: z.string().min(1).max(100).nullish(),
+  lastName: z.string().min(1).max(100).nullish(),
+  businessName: z.string().min(1).max(255).nullish(),
 });
 export type RegisterDto = z.infer<typeof registerSchema>;
 
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
-  mfaCode: z.string().length(6).optional(),
+  mfaCode: z.string().length(6).nullish(),
 });
 export type LoginDto = z.infer<typeof loginSchema>;
 
@@ -57,7 +57,7 @@ export const createBusinessSchema = z.object({
     .min(2)
     .max(100)
     .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens only')
-    .optional(),
+    .nullish(),
 });
 export type CreateBusinessDto = z.infer<typeof createBusinessSchema>;
 
@@ -67,25 +67,58 @@ export type UpdateBusinessDto = z.infer<typeof updateBusinessSchema>;
 // ─── Brand ────────────────────────────────────────────────────────
 export const createBrandSchema = z.object({
   name: z.string().min(1).max(255),
-  positioning: z.string().max(1000).optional(),
-  audience: z.string().max(1000).optional(),
-  tone: z.array(z.string().max(50)).max(10).optional(),
+  slug: z.string().min(2).max(100).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens only').nullish(),
+  tagline: z.string().max(255).nullish(),
+  description: z.string().max(2000).nullish(),
+  industry: z.string().max(100).nullish(),
+  website: z.string().url().or(z.string().regex(/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/, 'Invalid URL format')).nullish().or(z.literal('')),
+  differentiators: z.string().max(2000).nullish().or(z.literal('')),
+  foundedYear: z.number().int().min(1800).max(new Date().getFullYear()).nullish(),
+  headquarters: z.string().max(255).nullish(),
+  status: z.enum(['draft', 'published', 'archived']).default('published'),
+  
+  positioning: z.string().max(2000).nullish().or(z.literal('')),
+  audience: z.string().max(2000).nullish().or(z.literal('')),
+  tone: z.union([z.string(), z.array(z.string().max(50))]).nullish().or(z.literal('')),
+  
   visualRules: z
     .object({
-      primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
-      secondaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
-      fontFamily: z.string().max(100).optional(),
-      logoUrls: z.array(z.string().url()).max(5).optional(),
+      primaryColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, 'Invalid Hex Color').nullish().or(z.literal('')),
+      secondaryColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, 'Invalid Hex Color').nullish().or(z.literal('')),
+      accentColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, 'Invalid Hex Color').nullish().or(z.literal('')),
+      fontFamily: z.string().max(100).nullish().or(z.literal('')),
+      headingFont: z.string().max(100).nullish().or(z.literal('')),
+      bodyFont: z.string().max(100).nullish().or(z.literal('')),
+      logoUrls: z.array(z.string().url()).max(10).nullish(),
     })
-    .optional(),
+    .nullish(),
+    
+  identity: z
+    .object({
+      mission: z.string().max(1000).nullish(),
+      vision: z.string().max(1000).nullish(),
+      values: z.array(z.string()).nullish(),
+      promise: z.string().max(500).nullish(),
+      personality: z.string().max(500).nullish(),
+    })
+    .nullish(),
+    
+  designTokens: z
+    .object({
+      borderRadius: z.string().nullish(),
+      shadows: z.string().nullish(),
+      spacing: z.string().nullish(),
+    })
+    .nullish(),
+    
   governance: z
     .object({
-      bannedPhrases: z.array(z.string().max(200)).max(100).optional(),
-      requiredPhrases: z.array(z.string().max(200)).max(50).optional(),
-      ctaPreferences: z.array(z.string().max(100)).max(10).optional(),
-      requiredDisclaimer: z.string().max(500).optional(),
+      bannedPhrases: z.union([z.string(), z.array(z.string().max(200))]).nullish().or(z.literal('')),
+      requiredPhrases: z.union([z.string(), z.array(z.string().max(200))]).nullish().or(z.literal('')),
+      ctaPreferences: z.union([z.string(), z.array(z.string().max(100))]).nullish().or(z.literal('')),
+      requiredDisclaimer: z.string().max(1000).nullish().or(z.literal('')),
     })
-    .optional(),
+    .nullish(),
 });
 export type CreateBrandDto = z.infer<typeof createBrandSchema>;
 
@@ -96,21 +129,21 @@ export type UpdateBrandDto = z.infer<typeof updateBrandSchema>;
 export const createKnowledgeSourceSchema = z.object({
   brandId: z.string().uuid(),
   type: z.enum(['pdf', 'docx', 'url', 'text', 'api', 'video_transcript']),
-  sourceUrl: z.string().url().optional(),
-  text: z.string().max(100_000).optional(),
+  sourceUrl: z.string().url().nullish(),
+  text: z.string().max(100_000).nullish(),
 });
 export type CreateKnowledgeSourceDto = z.infer<typeof createKnowledgeSourceSchema>;
 
 // ─── Content ──────────────────────────────────────────────────────
 export const generateContentSchema = z.object({
   brandId: z.string().uuid(),
-  briefId: z.string().uuid().optional(),
-  campaignId: z.string().uuid().optional(),
+  briefId: z.string().uuid().nullish(),
+  campaignId: z.string().uuid().nullish(),
   platform: z.enum(['linkedin', 'instagram', 'facebook', 'twitter', 'tiktok']),
   type: z.enum(['post', 'caption', 'ad_copy', 'blog_snippet', 'hook', 'cta', 'email', 'article']),
   topic: z.string().min(1).max(1000),
-  additionalContext: z.string().max(2000).optional(),
-  tone: z.string().max(100).optional(),
+  additionalContext: z.string().max(2000).nullish(),
+  tone: z.string().max(100).nullish(),
 });
 export type GenerateContentDto = z.infer<typeof generateContentSchema>;
 
@@ -122,47 +155,47 @@ export type UpdateContentDto = z.infer<typeof updateContentSchema>;
 // ─── Campaign ─────────────────────────────────────────────────────
 export const createCampaignSchema = z.object({
   name: z.string().min(1).max(255),
-  clonedFromId: z.string().uuid().optional(),
+  clonedFromId: z.string().uuid().nullish(),
 });
 export type CreateCampaignDto = z.infer<typeof createCampaignSchema>;
 
 export const updateCampaignSchema = z.object({
-  name: z.string().min(1).max(255).optional(),
-  status: z.enum(['draft', 'active', 'completed', 'archived']).optional(),
+  name: z.string().min(1).max(255).nullish(),
+  status: z.enum(['draft', 'active', 'completed', 'archived']).nullish(),
 });
 export type UpdateCampaignDto = z.infer<typeof updateCampaignSchema>;
 
 // ─── Brief ────────────────────────────────────────────────────────
 export const createBriefSchema = z.object({
-  campaignId: z.string().uuid().optional(),
+  campaignId: z.string().uuid().nullish(),
   objective: z.string().min(1).max(1000),
-  audience: z.string().max(500).optional(),
-  platform: z.enum(['linkedin', 'instagram', 'facebook', 'twitter', 'tiktok']).optional(),
-  cta: z.string().max(200).optional(),
-  tone: z.string().max(100).optional(),
-  format: z.enum(['post', 'carousel', 'story', 'reel', 'article', 'newsletter']).optional(),
-  contentType: z.enum(['organic', 'ad', 'blog']).optional(),
-  businessGoal: z.string().max(500).optional(),
+  audience: z.string().max(500).nullish(),
+  platform: z.enum(['linkedin', 'instagram', 'facebook', 'twitter', 'tiktok']).nullish(),
+  cta: z.string().max(200).nullish(),
+  tone: z.string().max(100).nullish(),
+  format: z.enum(['post', 'carousel', 'story', 'reel', 'article', 'newsletter']).nullish(),
+  contentType: z.enum(['organic', 'ad', 'blog']).nullish(),
+  businessGoal: z.string().max(500).nullish(),
 });
 export type CreateBriefDto = z.infer<typeof createBriefSchema>;
 
 // ─── Approval ─────────────────────────────────────────────────────
 export const submitApprovalDecisionSchema = z.object({
   status: z.enum(['approved', 'rejected', 'revision_requested']),
-  note: z.string().max(2000).optional(),
-  reason: z.string().max(2000).optional(),
+  note: z.string().max(2000).nullish(),
+  reason: z.string().max(2000).nullish(),
 });
 export type SubmitApprovalDecisionDto = z.infer<typeof submitApprovalDecisionSchema>;
 
 // ─── Schedule ─────────────────────────────────────────────────────
 export const createScheduleSchema = z.object({
-  contentId: z.string().uuid().optional(),
-  campaignId: z.string().uuid().optional(),
+  contentId: z.string().uuid().nullish(),
+  campaignId: z.string().uuid().nullish(),
   socialAccountId: z.string().uuid(),
   scheduledAt: z.coerce.date().min(new Date()),
   timezone: z.string().max(100).default('UTC'),
   type: z.enum(['one_time', 'recurring']).default('one_time'),
-  recurringRule: z.string().max(200).optional(),
+  recurringRule: z.string().max(200).nullish(),
 });
 export type CreateScheduleDto = z.infer<typeof createScheduleSchema>;
 
@@ -184,7 +217,7 @@ export const createAutomationSchema = z.object({
       retryDelayMs: z.number().int().min(1000).default(5000),
       circuitBreakerThreshold: z.number().int().min(1).default(5),
     })
-    .optional(),
+    .nullish(),
 });
 export type CreateAutomationDto = z.infer<typeof createAutomationSchema>;
 
@@ -194,7 +227,7 @@ export const createPromptSchema = z.object({
   layer: z.enum(['platform', 'business', 'brand', 'campaign']),
   name: z.string().min(1).max(255),
   template: z.string().min(1).max(20_000),
-  abVariant: z.string().max(10).optional(),
+  abVariant: z.string().max(10).nullish(),
 });
 export type CreatePromptDto = z.infer<typeof createPromptSchema>;
 
@@ -209,17 +242,17 @@ export type InviteMemberDto = z.infer<typeof inviteMemberSchema>;
 export const createApiKeySchema = z.object({
   name: z.string().min(1).max(100),
   scopes: z.array(z.string()).min(1),
-  expiresAt: z.coerce.date().optional(),
+  expiresAt: z.coerce.date().nullish(),
 });
 export type CreateApiKeyDto = z.infer<typeof createApiKeySchema>;
 
 // ─── LLM Settings ────────────────────────────────────────────────
 export const updateLlmSettingsSchema = z.object({
-  provider: z.enum(['openai', 'anthropic', 'google', 'fallback']).optional(),
-  model: z.string().max(100).optional(),
-  temperature: z.number().min(0).max(2).optional(),
-  maxTokens: z.number().int().min(1).max(32000).optional(),
-  apiKey: z.string().max(500).optional(),
-  isFallbackEnabled: z.boolean().optional(),
+  provider: z.enum(['openai', 'anthropic', 'google', 'fallback']).nullish(),
+  model: z.string().max(100).nullish(),
+  temperature: z.number().min(0).max(2).nullish(),
+  maxTokens: z.number().int().min(1).max(32000).nullish(),
+  apiKey: z.string().max(500).nullish(),
+  isFallbackEnabled: z.boolean().nullish(),
 });
 export type UpdateLlmSettingsDto = z.infer<typeof updateLlmSettingsSchema>;
