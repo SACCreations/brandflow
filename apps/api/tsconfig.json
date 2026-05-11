@@ -5,11 +5,11 @@
     "declaration": false,
     "declarationMap": false,
     "paths": {
-      "@brandflow/db": ["../../packages/db/src"],
-      "@brandflow/shared": ["../../packages/shared/src"],
-      "@brandflow/ai": ["../../packages/ai/src"]
+      "@brandflow/db": ["../../packages/db/dist"],
+      "@brandflow/shared": ["../../packages/shared/dist"],
+      "@brandflow/ai": ["../../packages/ai/dist"]
     }
   },
-  "include": ["src/**/*", "../../packages/db/src/**/*", "../../packages/shared/src/**/*", "../../packages/ai/src/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

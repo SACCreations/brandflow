@@ -18,15 +18,21 @@ async function bootstrap() {
   const config = app.get(ConfigService);
   const port = config.get<number>('app.port', 4000);
   const corsOrigins = config.get<string>('app.corsOrigins', 'http://localhost:3000');
+  console.log(`🔒 CORS Origins from config: "${corsOrigins}"`);
+  console.log(`🔒 Parsed origins:`, corsOrigins.split(',').map((o) => o.trim()));
 
   // ─── Security ────────────────────────────────────────────────
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      contentSecurityPolicy: process.env['NODE_ENV'] === 'production' ? undefined : false,
+    }),
+  );
   app.use(cookieParser());
   app.enableCors({
-    origin: corsOrigins.split(',').map((o) => o.trim()),
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // ─── Global Pipes & Filters ──────────────────────────────────
