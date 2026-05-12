@@ -403,7 +403,9 @@ model Brief {
   format       String?
   contentType  String?
   businessGoal String?
+  campaignTheme String?
   isComplete   Boolean  @default(false)
+  metadata     Json?
   createdAt    DateTime @default(now())
 
   business     Business  @relation(fields: [businessId], references: [id])
@@ -668,6 +670,8 @@ model PerformanceMetric {
   engagement  Int      @default(0)
   clicks      Int      @default(0)
   ctr         Float    @default(0)
+  roiCents    Int      @default(0)
+  sourceAttribution Json? // Map of knowledge source IDs and their contribution weights
   collectedAt DateTime @default(now())
 
   business    Business @relation(fields: [businessId], references: [id])

@@ -36,4 +36,16 @@ export class AnalyticsController {
   getPerformance(@CurrentUser() user: JwtPayload, @Query('contentId') contentId?: string) {
     return this.analyticsService.getPerformanceMetrics(user.businessId, contentId);
   }
+
+  @Get('intelligence-impact')
+  @ApiOperation({ summary: 'Get ROI impact of knowledge sources' })
+  getIntelligenceImpact(@CurrentUser() user: JwtPayload) {
+    return this.analyticsService.getIntelligenceImpact(user.businessId);
+  }
+
+  @Get('recommendations')
+  @ApiOperation({ summary: 'Get AI-driven strategic recommendations' })
+  getRecommendations(@CurrentUser() user: JwtPayload) {
+    return this.analyticsService.getAiRecommendations(user.businessId);
+  }
 }

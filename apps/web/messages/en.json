@@ -1,0 +1,14 @@
+{
+  "Common": {
+    "dashboard": "Dashboard",
+    "intelligence": "Intelligence",
+    "create": "Create",
+    "publish": "Publish",
+    "analytics": "Analytics",
+    "settings": "Settings"
+  },
+  "Knowledge": {
+    "title": "Knowledge Hub",
+    "subtitle": "The operational brain for your AI."
+  }
+}

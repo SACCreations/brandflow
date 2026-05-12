@@ -1,0 +1,14 @@
+{
+  "Common": {
+    "dashboard": "لوحة القيادة",
+    "intelligence": "الذكاء",
+    "create": "إنشاء",
+    "publish": "نشر",
+    "analytics": "التحليلات",
+    "settings": "الإعدادات"
+  },
+  "Knowledge": {
+    "title": "مركز المعرفة",
+    "subtitle": "العقل التشغيلي لذكائك الاصطناعي."
+  }
+}

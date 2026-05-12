@@ -10,10 +10,18 @@ export const metadata: Metadata = {
   description: 'Generate on-brand content, manage approvals, and schedule posts — all in one place.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ 
+  children,
+  params: { locale } 
+}: { 
+  children: React.ReactNode;
+  params: { locale: string };
+}) {
+  const isRtl = locale === 'ar';
+
   return (
-    <html lang="en" className={inter.variable}>
-      <body>
+    <html lang={locale} dir={isRtl ? 'rtl' : 'ltr'} className={inter.variable}>
+      <body className="antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

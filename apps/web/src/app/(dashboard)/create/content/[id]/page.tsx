@@ -12,7 +12,10 @@ import {
   Type,
   Layout,
   Share2,
-  Trash2
+  Trash2,
+  Target,
+  Users,
+  Zap
 } from 'lucide-react';
 import QualityChecksWidget from '@/components/editor/quality-checks-widget';
 
@@ -32,6 +35,30 @@ Join the 500+ founders who have already transformed their marketing workflow. Br
 
   return (
     <div className="flex h-[calc(100vh-120px)] flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Strategy Brief Context Bar */}
+      <div className="flex items-center gap-6 rounded-2xl bg-gray-900 px-6 py-3 text-white dark:bg-brand-500/10 dark:text-brand-400">
+        <div className="flex items-center gap-2">
+          <Target className="h-4 w-4 text-brand-400" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Objective:</span>
+          <span className="text-xs font-semibold">Launch Brandflow AI Intelligence Layer</span>
+        </div>
+        <div className="h-4 w-px bg-gray-700"></div>
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-brand-400" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Audience:</span>
+          <span className="text-xs font-semibold">Enterprise CMOs</span>
+        </div>
+        <div className="h-4 w-px bg-gray-700"></div>
+        <div className="flex items-center gap-2">
+          <Zap className="h-4 w-4 text-amber-400" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">CTA:</span>
+          <span className="text-xs font-semibold underline underline-offset-4">Book a Free Audit</span>
+        </div>
+        <button className="ml-auto text-[10px] font-bold uppercase tracking-widest text-brand-400 hover:text-white">
+          Edit Brief
+        </button>
+      </div>
+
       {/* Editor Header */}
       <div className="flex items-center justify-between border-b border-gray-200 bg-white pb-6 dark:border-gray-800 dark:bg-transparent">
         <div className="flex items-center gap-4">

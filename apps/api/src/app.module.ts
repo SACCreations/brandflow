@@ -24,6 +24,7 @@ import { ImageModule } from './modules/image/image.module';
 import { TemplateModule } from './modules/template/template.module';
 import { LlmSettingsModule } from './modules/llm-settings/llm-settings.module';
 import { QualityModule } from './modules/quality/quality.module';
+import { BriefModule } from './modules/brief/brief.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { QualityModule } from './modules/quality/quality.module';
     TemplateModule,
     LlmSettingsModule,
     QualityModule,
+    BriefModule,
   ],
 })
 export class AppModule {}
