@@ -43,7 +43,7 @@ export default function DashboardPage() {
           <div className="p-4 grid grid-cols-2 gap-3">
             {[
               { label: 'Generate Content', href: '/create/content', icon: '✦' },
-              { label: 'New Campaign', href: '/create/campaigns', icon: '◎' },
+              { label: 'New Campaign', href: '/campaigns', icon: '◎' },
               { label: 'View Approvals', href: '/review/approvals', icon: '✓' },
               { label: 'Schedule Post', href: '/publish/calendar', icon: '◷' },
             ].map((a) => (

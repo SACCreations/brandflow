@@ -16,7 +16,7 @@ const NAV = [
       { label: 'Brands', href: '/intelligence/brands', icon: '◈' },
       { label: 'Knowledge Hub', href: '/intelligence/knowledge', icon: '◉' },
       { label: 'Sources', href: '/intelligence/sources', icon: '⌥' },
-      { label: 'Review Queue', href: '/intelligence/review', icon: '✓' },
+      { label: 'Review Queue', href: '/review', icon: '✓' },
       { label: 'Monitor', href: '/intelligence/monitor', icon: '◷' },
     ],
   },
@@ -24,12 +24,12 @@ const NAV = [
     group: 'Create',
     items: [
       { label: 'Content', href: '/create/content', icon: '✦' },
-      { label: 'Campaigns', href: '/create/campaigns', icon: '◎' },
+      { label: 'Campaigns', href: '/campaigns', icon: '◎' },
     ],
   },
   {
     group: 'Review',
-    items: [{ label: 'Approvals', href: '/review/approvals', icon: '✓' }],
+    items: [{ label: 'Approvals', href: '/review', icon: '✓' }],
   },
   {
     group: 'Publish',
@@ -40,7 +40,7 @@ const NAV = [
   },
   {
     group: 'Automate',
-    items: [{ label: 'Automations', href: '/automate/automations', icon: '⚡' }],
+    items: [{ label: 'Automations', href: '/automations', icon: '⚡' }],
   },
   {
     group: 'Insights',

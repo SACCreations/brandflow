@@ -137,4 +137,12 @@ export class CampaignService {
 
     return cloned;
   }
+
+  async remove(id: string, businessId: string) {
+    // Check if campaign exists and belongs to business
+    await this.findOne(id, businessId);
+    return prisma.campaign.delete({
+      where: { id }
+    });
+  }
 }

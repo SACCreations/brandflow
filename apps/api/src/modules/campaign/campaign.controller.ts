@@ -54,4 +54,9 @@ export class CampaignController {
   ) {
     return this.campaignService.clone(id, user.businessId, name);
   }
+
+  @Post(':id/delete') // Using POST for delete to avoid some proxy issues, or just use @Delete
+  remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.campaignService.remove(id, user.businessId);
+  }
 }

@@ -16,48 +16,76 @@ import {
   Eye,
   ArrowRight,
   Zap,
-  Info
+  Info,
+  Loader2
 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
+import { useToast } from '@brandflow/ui';
+
+interface Approval {
+  id: string;
+  contentId: string;
+  status: string;
+  reviewType: string;
+  note: string | null;
+  createdAt: string;
+  content: {
+    id: string;
+    body: string;
+    type: string;
+    platform: string;
+    qualityScore: number;
+    qualityChecks: any[];
+  };
+}
 
 export default function ReviewQueuePage() {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [activeReview, setActiveReview] = useState<any>(null);
+  const [activeReview, setActiveReview] = useState<Approval | null>(null);
+  const [activeTab, setActiveTab] = useState('pending');
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const reviews = [
-    { 
-      id: '1', 
-      title: 'Summer Launch / LinkedIn Announcement', 
-      platform: 'LinkedIn', 
-      author: 'AI Generator', 
-      qualityScore: 94, 
-      violations: 0,
-      deadline: '2h left',
-      status: 'pending',
-      body: "We're thrilled to announce the Summer Growth 2024 initiative! Our goal is to empower enterprise teams with the best AI operations tools..."
+  const { data: queue, isLoading, isError } = useQuery({
+    queryKey: ['approvals', activeTab],
+    queryFn: async () => {
+      const res = await apiClient.get('/approvals/queue', { params: { status: activeTab } });
+      return res.data.data as Approval[];
     },
-    { 
-      id: '2', 
-      title: 'Product Feature Highlight / Twitter', 
-      platform: 'Twitter', 
-      author: 'Sarah Chen', 
-      qualityScore: 68, 
-      violations: 2,
-      deadline: '5h left',
-      status: 'pending',
-      body: "Check out our new AI Quality Guard! It's the best tool ever made for content checking. No more mistakes, ever! #AI #BrandFlow"
+  });
+
+  const decideMutation = useMutation({
+    mutationFn: async ({ id, status, note }: { id: string, status: string, note?: string }) => {
+      const res = await apiClient.post(`/approvals/${id}/decide`, { status, note });
+      return res.data.data;
     },
-    { 
-      id: '3', 
-      title: 'Early Adopter Case Study', 
-      platform: 'LinkedIn', 
-      author: 'AI Generator', 
-      qualityScore: 88, 
-      violations: 1,
-      deadline: '1d left',
-      status: 'pending',
-      body: "Discover how top-tier agencies are using Brandflow to scale their creative output by 5x while maintaining 100% brand consistency."
-    }
-  ];
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['approvals'] });
+      toast({ title: 'Decision Recorded', description: 'The content has been reviewed.' });
+      setActiveReview(null);
+    },
+  });
+
+  const bulkApproveMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const res = await apiClient.post('/approvals/bulk-approve', { ids });
+      return res.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['approvals'] });
+      toast({ title: 'Bulk Approved', description: `${selectedItems.length} items have been approved.` });
+      setSelectedItems([]);
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
@@ -72,10 +100,12 @@ export default function ReviewQueuePage() {
             <Clock className="h-4 w-4" /> History
           </button>
           <button 
-            disabled={selectedItems.length === 0}
+            onClick={() => bulkApproveMutation.mutate(selectedItems)}
+            disabled={selectedItems.length === 0 || bulkApproveMutation.isPending}
             className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all disabled:opacity-50"
           >
-            <CheckCircle2 className="h-4 w-4" /> Bulk Approve ({selectedItems.length})
+            {bulkApproveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            Bulk Approve ({selectedItems.length})
           </button>
         </div>
       </div>
@@ -87,8 +117,18 @@ export default function ReviewQueuePage() {
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
             <div className="flex items-center gap-4 text-sm font-bold text-gray-400">
-              <button className="text-brand-600 border-b-2 border-brand-600 pb-4 -mb-4">Awaiting Review ({reviews.length})</button>
-              <button className="hover:text-gray-600 pb-4 -mb-4">Resolved</button>
+              <button 
+                onClick={() => setActiveTab('pending')}
+                className={`${activeTab === 'pending' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4`}
+              >
+                Awaiting Review ({queue?.length || 0})
+              </button>
+              <button 
+                onClick={() => setActiveTab('approved')}
+                className={`${activeTab === 'approved' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4`}
+              >
+                Resolved
+              </button>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative">
@@ -104,44 +144,52 @@ export default function ReviewQueuePage() {
           </div>
 
           <div className="space-y-4">
-            {reviews.map((review) => (
-              <div 
-                key={review.id} 
-                onClick={() => setActiveReview(review)}
-                className={`group relative overflow-hidden rounded-2xl border transition-all hover:shadow-lg cursor-pointer ${
-                  activeReview?.id === review.id ? 'border-brand-500 bg-brand-50/20 ring-1 ring-brand-500 dark:bg-brand-500/5' : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 hover:border-gray-300'
-                }`}
-              >
-                <div className="p-5">
-                  <div className="flex items-start justify-between">
-                    <div className="flex gap-4">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedItems.includes(review.id)}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          setSelectedItems(prev => e.target.checked ? [...prev, review.id] : prev.filter(id => id !== review.id));
-                        }}
-                        className="mt-1 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" 
-                      />
-                      <div>
-                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">{review.title}</h3>
-                        <div className="mt-1 flex items-center gap-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                          <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> {review.platform}</span>
-                          <span className="text-gray-200">|</span>
-                          <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-amber-500" /> SLA: {review.deadline}</span>
+            {queue?.length === 0 ? (
+              <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 text-sm font-medium text-gray-400 dark:border-gray-800">
+                Queue is empty.
+              </div>
+            ) : (
+              queue?.map((review) => (
+                <div 
+                  key={review.id} 
+                  onClick={() => setActiveReview(review)}
+                  className={`group relative overflow-hidden rounded-2xl border transition-all hover:shadow-lg cursor-pointer ${
+                    activeReview?.id === review.id ? 'border-brand-500 bg-brand-50/20 ring-1 ring-brand-500 dark:bg-brand-500/5' : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex gap-4">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedItems.includes(review.id)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            setSelectedItems(prev => e.target.checked ? [...prev, review.id] : prev.filter(id => id !== review.id));
+                          }}
+                          className="mt-1 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" 
+                        />
+                        <div>
+                          <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                            {review.content.type}: {review.content.body.substring(0, 40)}...
+                          </h3>
+                          <div className="mt-1 flex items-center gap-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                            <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> {review.content.platform}</span>
+                            <span className="text-gray-200">|</span>
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-amber-500" /> {new Date(review.createdAt).toLocaleDateString()}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black ${
-                      review.qualityScore > 80 ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                    }`}>
-                      {review.qualityScore}% SCORE
+                      <div className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black ${
+                        review.content.qualityScore > 80 ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                      }`}>
+                        {Math.round(review.content.qualityScore * 100)}% SCORE
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -160,12 +208,14 @@ export default function ReviewQueuePage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
                       <span className="text-[10px] font-bold text-gray-400 uppercase">Brand Voice</span>
-                      <div className="text-xl font-black text-emerald-500">98%</div>
+                      <div className="text-xl font-black text-emerald-500">
+                        {Math.round(activeReview.content.qualityScore * 100)}%
+                      </div>
                     </div>
                     <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
                       <span className="text-[10px] font-bold text-gray-400 uppercase">Fact Accuracy</span>
-                      <div className={`text-xl font-black ${activeReview.violations > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
-                        {activeReview.violations > 0 ? 'Review Needed' : 'Verified'}
+                      <div className={`text-xl font-black ${activeReview.content.qualityScore < 0.7 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                        {activeReview.content.qualityScore < 0.7 ? 'Review Needed' : 'Verified'}
                       </div>
                     </div>
                   </div>
@@ -174,31 +224,40 @@ export default function ReviewQueuePage() {
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Content Body</label>
                     <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-sm text-gray-700 leading-relaxed dark:border-gray-800 dark:bg-gray-800/30 dark:text-gray-300">
-                      {activeReview.body}
+                      {activeReview.content.body}
                     </div>
                   </div>
 
                   {/* Violations / Insights */}
-                  {activeReview.violations > 0 && (
+                  {activeReview.content.qualityScore < 0.8 && (
                     <div className="rounded-xl border border-amber-100 bg-amber-50/30 p-4 dark:border-amber-500/20 dark:bg-amber-500/5">
                       <div className="flex items-center gap-2 mb-2 text-amber-700 dark:text-amber-400">
                         <AlertTriangle className="h-4 w-4" />
-                        <span className="text-xs font-bold uppercase">Critical Warnings</span>
+                        <span className="text-xs font-bold uppercase">Quality Insights</span>
                       </div>
-                      <ul className="space-y-2 text-[11px] text-amber-800/70 dark:text-amber-400/70 leading-relaxed list-disc pl-4">
-                        <li>Superlative claim "best tool ever made" is unverifiable.</li>
-                        <li>Hallucination risk: No source knowledge found for "No more mistakes, ever".</li>
-                      </ul>
+                      <p className="text-[11px] text-amber-800/70 dark:text-amber-400/70 leading-relaxed">
+                        This content has a slightly lower quality score. Consider checking for brand voice alignment and factual consistency.
+                      </p>
                     </div>
                   )}
 
                   {/* Actions */}
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-50 dark:border-gray-800">
-                    <button className="flex items-center justify-center gap-2 rounded-xl border border-red-200 py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-all dark:border-red-900 dark:hover:bg-red-900/20">
-                      <XCircle className="h-4 w-4" /> Reject
+                    <button 
+                      onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'rejected' })}
+                      disabled={decideMutation.isPending}
+                      className="flex items-center justify-center gap-2 rounded-xl border border-red-200 py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-all dark:border-red-900 dark:hover:bg-red-900/20"
+                    >
+                      {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+                      Reject
                     </button>
-                    <button className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all">
-                      <CheckCircle2 className="h-4 w-4" /> Approve
+                    <button 
+                      onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'approved' })}
+                      disabled={decideMutation.isPending}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
+                    >
+                      {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                      Approve
                     </button>
                   </div>
                   <button className="w-full flex items-center justify-center gap-2 text-xs font-bold text-gray-400 hover:text-gray-600">

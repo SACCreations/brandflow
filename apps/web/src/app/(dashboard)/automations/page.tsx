@@ -17,39 +17,76 @@ import {
   Activity,
   Trash2,
   ToggleRight,
-  ToggleLeft
+  ToggleLeft,
+  Loader2
 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
+import { useToast } from '@brandflow/ui';
+import { formatDistanceToNow } from 'date-fns';
+
+interface Automation {
+  id: string;
+  name: string;
+  triggerType: string;
+  triggerConfig: any;
+  steps: any[];
+  isActive: boolean;
+  lastRunAt: string | null;
+  createdAt: string;
+  _count: {
+    runs: number;
+  };
+}
 
 export default function AutomationsPage() {
-  const [automations, setAutomations] = useState([
-    { 
-      id: 1, 
-      name: 'Auto-Schedule Approved LinkedIn', 
-      trigger: 'Content Status → Approved', 
-      actions: ['Schedule for 9 AM', 'Notify Author'], 
-      isActive: true, 
-      successRate: 99.2, 
-      lastRun: '10m ago' 
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: automations, isLoading, isError } = useQuery({
+    queryKey: ['automations'],
+    queryFn: async () => {
+      const res = await apiClient.get('/automations');
+      return res.data.data as Automation[];
     },
-    { 
-      id: 2, 
-      name: 'Hallucination Alert', 
-      trigger: 'Quality Score < 70', 
-      actions: ['Mark for Review', 'Slack Alert'], 
-      isActive: true, 
-      successRate: 100, 
-      lastRun: '2h ago' 
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiClient.patch(`/automations/${id}/toggle`);
+      return res.data.data;
     },
-    { 
-      id: 3, 
-      name: 'Weekly Archive', 
-      trigger: 'Every Sunday', 
-      actions: ['Archive Campaign'], 
-      isActive: false, 
-      successRate: 0, 
-      lastRun: 'Never' 
-    }
-  ]);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['automations'] });
+      toast({
+        title: 'Status Updated',
+        description: 'Automation state has been toggled.',
+      });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
+        <AlertCircle className="h-12 w-12 text-red-500" />
+        <h2 className="text-xl font-bold">Failed to load automations</h2>
+        <button 
+          onClick={() => queryClient.invalidateQueries({ queryKey: ['automations'] })}
+          className="rounded-xl bg-brand-600 px-6 py-2 text-sm font-bold text-white"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
@@ -65,8 +102,8 @@ export default function AutomationsPage() {
 
       {/* Analytics Mini-Bar */}
       <div className="grid gap-6 md:grid-cols-4">
-        <AutoStat label="Active Rules" value="12" icon={<Zap className="h-4 w-4 text-brand-500" />} />
-        <AutoStat label="Tasks Automated" value="2.4K" icon={<Activity className="h-4 w-4 text-emerald-500" />} />
+        <AutoStat label="Active Rules" value={automations?.filter(a => a.isActive).length.toString() || '0'} icon={<Zap className="h-4 w-4 text-brand-500" />} />
+        <AutoStat label="Tasks Automated" value={automations?.reduce((acc, a) => acc + a._count.runs, 0).toString() || '0'} icon={<Activity className="h-4 w-4 text-emerald-500" />} />
         <AutoStat label="Success Rate" value="99.8%" icon={<CheckCircle2 className="h-4 w-4 text-blue-500" />} />
         <AutoStat label="Time Saved" value="14h" icon={<Clock className="h-4 w-4 text-purple-500" />} />
       </div>
@@ -90,55 +127,61 @@ export default function AutomationsPage() {
             </div>
           </div>
 
-          {automations.map((auto) => (
-            <div key={auto.id} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
-              <div className="flex items-start justify-between">
-                <div className="flex gap-4">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${auto.isActive ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10' : 'bg-gray-50 text-gray-400 dark:bg-gray-800'}`}>
-                    <Zap className="h-6 w-6" />
+          {automations?.length === 0 ? (
+            <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 text-sm font-medium text-gray-400 dark:border-gray-800">
+              No automations created yet.
+            </div>
+          ) : (
+            automations?.map((auto) => (
+              <div key={auto.id} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
+                <div className="flex items-start justify-between">
+                  <div className="flex gap-4">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${auto.isActive ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10' : 'bg-gray-50 text-gray-400 dark:bg-gray-800'}`}>
+                      <Zap className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">{auto.name}</h3>
+                      <div className="mt-1 flex items-center gap-3 text-xs font-medium text-gray-400">
+                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Last run: {auto.lastRunAt ? formatDistanceToNow(new Date(auto.lastRunAt)) + ' ago' : 'Never'}</span>
+                        <span className="text-gray-200">|</span>
+                        <span className="flex items-center gap-1 text-emerald-500">Runs: {auto._count.runs}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{auto.name}</h3>
-                    <div className="mt-1 flex items-center gap-3 text-xs font-medium text-gray-400">
-                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Last run: {auto.lastRun}</span>
-                      <span className="text-gray-200">|</span>
-                      <span className="flex items-center gap-1 text-emerald-500">{auto.successRate}% Success rate</span>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => toggleMutation.mutate(auto.id)}
+                      disabled={toggleMutation.isPending}
+                      className="text-brand-600 disabled:opacity-50"
+                    >
+                      {auto.isActive ? <ToggleRight className="h-8 w-8" /> : <ToggleLeft className="h-8 w-8 text-gray-300" />}
+                    </button>
+                    <button className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                      <MoreVertical className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex items-center gap-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">When</span>
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{auto.triggerType}</span>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-gray-300" />
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Then</span>
+                    <div className="flex gap-2">
+                      {auto.steps.map((step, i) => (
+                        <span key={i} className="rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-brand-600 shadow-sm dark:bg-gray-700 dark:text-brand-400">
+                          {step.type}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => {
-                    const newAutos = [...automations];
-                    newAutos[auto.id-1].isActive = !newAutos[auto.id-1].isActive;
-                    setAutomations(newAutos);
-                  }} className="text-brand-600">
-                    {auto.isActive ? <ToggleRight className="h-8 w-8" /> : <ToggleLeft className="h-8 w-8 text-gray-300" />}
-                  </button>
-                  <button className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
-                    <MoreVertical className="h-4 w-4" />
-                  </button>
-                </div>
               </div>
-
-              <div className="mt-6 flex items-center gap-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">When</span>
-                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{auto.trigger}</span>
-                </div>
-                <ArrowRight className="h-4 w-4 text-gray-300" />
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Then</span>
-                  <div className="flex gap-2">
-                    {auto.actions.map((act, i) => (
-                      <span key={i} className="rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-brand-600 shadow-sm dark:bg-gray-700 dark:text-brand-400">
-                        {act}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Sidebar Activity Feed */}
@@ -220,3 +263,4 @@ function ActivityItem({ title, detail, time, status }: any) {
     </div>
   );
 }
+
