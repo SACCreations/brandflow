@@ -49,6 +49,7 @@ model Business {
   qualityChecks QualityCheck[]
   costEvents  CostEvent[]
   prompts     Prompt[]
+  llmSettings  LlmSettings?
 
   @@map("businesses")
 }
@@ -173,13 +174,31 @@ model Brand {
   id           String   @id @default(uuid())
   businessId   String
   name         String
+  slug         String?
+  tagline      String?
+  description  String?
+  industry     String?
+  website      String?
+  foundedYear  Int?
+  headquarters String?
+  status       String   @default("published")
+  
   positioning  String?
   audience     String?
+  differentiators String?
   tone         Json?
   visualRules  Json?
   governance   Json?
+  
+  identity     Json?
+  marketing    Json?
+  designTokens Json?
+  assets       Json?
+  
   healthScore  Int      @default(0)
   version      Int      @default(1)
+  archivedAt   DateTime?
+  deletedAt    DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -187,6 +206,7 @@ model Brand {
   knowledgeSources KnowledgeSource[]
   contents         Content[]
 
+  @@unique([businessId, slug])
   @@map("brands")
 }
 
@@ -563,4 +583,21 @@ model PerformanceMetric {
   business    Business @relation(fields: [businessId], references: [id])
 
   @@map("performance_metrics")
+}
+
+model LlmSettings {
+  id               String   @id @default(uuid())
+  businessId       String   @unique
+  provider         String   @default("openai") // openai, anthropic, etc.
+  model            String   @default("gpt-4o")
+  temperature      Float    @default(0.7)
+  maxTokens        Int      @default(2000)
+  apiKey           String?  @db.Text // Encrypted at rest
+  isFallbackEnabled Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("llm_settings")
 }

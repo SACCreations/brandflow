@@ -43,6 +43,15 @@ const NAV = [
     group: 'Insights',
     items: [{ label: 'Analytics', href: '/analytics', icon: '◉' }],
   },
+  {
+    group: 'Settings',
+    items: [
+      { label: 'Business', href: '/settings/business', icon: '⚙' },
+      { label: 'LLM Settings', href: '/settings/llm', icon: '◈' },
+      { label: 'Billing', href: '/settings/billing', icon: '＄' },
+      { label: 'Team', href: '/settings/team', icon: '👥' },
+    ],
+  },
 ];
 
 export function Sidebar() {

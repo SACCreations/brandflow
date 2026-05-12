@@ -17,7 +17,7 @@ export class OpenAIProvider implements LLMProvider {
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
     const response = await this.client.chat.completions.create({
-      model: this.model,
+      model: request.model ?? this.model,
       messages: [
         { role: 'system', content: request.systemPrompt },
         { role: 'user', content: request.userPrompt },

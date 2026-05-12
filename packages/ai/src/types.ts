@@ -1,4 +1,4 @@
-import type { AIProvider, BrandContext, GenerationRequest, GenerationResponse, QualityCheckResult } from '@brandflow/shared';
+import type { AIProvider, BrandContext, GenerationRequest, GenerationResponse, LLMConfig, QualityCheckResult } from '@brandflow/shared';
 
 // ─── Provider Interface ───────────────────────────────────────────
 export interface LLMProvider {
@@ -14,6 +14,7 @@ export interface ProviderRequest {
   maxTokens?: number;
   temperature?: number;
   requestId: string;
+  model?: string;
 }
 
 export interface ProviderResponse {
@@ -65,4 +66,5 @@ export type {
   QualityViolation,
   BrandContext,
   CostEventPayload,
+  LLMConfig,
 } from '@brandflow/shared';

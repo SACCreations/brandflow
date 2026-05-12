@@ -17,7 +17,7 @@ export class AnthropicProvider implements LLMProvider {
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
     const response = await this.client.messages.create({
-      model: this.model,
+      model: request.model ?? this.model,
       max_tokens: request.maxTokens ?? 1024,
       system: request.systemPrompt,
       messages: [{ role: 'user', content: request.userPrompt }],

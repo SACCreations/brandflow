@@ -32,6 +32,7 @@ export class SchedulerService {
   }
 
   async create(businessId: string, dto: CreateScheduleDto) {
+    if (!dto.contentId) throw new BadRequestException('contentId is required');
     const content = await prisma.content.findFirst({ where: { id: dto.contentId, businessId } });
     if (!content) throw new NotFoundException('Content not found');
     if (content.status !== 'approved') {
@@ -58,7 +59,7 @@ export class SchedulerService {
     const delay = new Date(dto.scheduledAt).getTime() - Date.now();
     await this.publishQueue.add(
       'publish',
-      { scheduleId: schedule.id, businessId, contentId: dto.contentId },
+      { scheduleId: schedule.id, businessId, contentId: dto.contentId! },
       { delay: Math.max(delay, 0), jobId: schedule.id, attempts: 3, backoff: { type: 'exponential', delay: 60000 } },
     );
 

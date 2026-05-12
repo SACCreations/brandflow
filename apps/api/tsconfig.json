@@ -4,7 +4,12 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": false,
-    "declarationMap": false
+    "declarationMap": false,
+    "paths": {
+      "@brandflow/db": ["../../packages/db/dist"],
+      "@brandflow/shared": ["../../packages/shared/dist"],
+      "@brandflow/ai": ["../../packages/ai/dist"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

@@ -34,8 +34,20 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new user and workspace' })
   async register(
     @Body(new ZodValidationPipe(registerSchema)) dto: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.register(dto);
+    const result = await this.authService.register(dto);
+
+    // Set refresh token as httpOnly cookie
+    res.cookie('refreshToken', result.tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env['NODE_ENV'] === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/api/v1/auth',
+    });
+
+    return result;
   }
 
   @Post('login')

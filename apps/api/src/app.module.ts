@@ -22,6 +22,7 @@ import { AutomationModule } from './modules/automation/automation.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { ImageModule } from './modules/image/image.module';
 import { TemplateModule } from './modules/template/template.module';
+import { LlmSettingsModule } from './modules/llm-settings/llm-settings.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { TemplateModule } from './modules/template/template.module';
     AnalyticsModule,
     ImageModule,
     TemplateModule,
+    LlmSettingsModule,
   ],
 })
 export class AppModule {}

@@ -17,16 +17,22 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
   const port = config.get<number>('app.port', 4000);
-  const corsOrigins = config.get<string>('app.corsOrigins', 'http://localhost:3000');
+  const corsOrigins = config.get<string>('app.corsOrigins', 'http://localhost:3002');
 
   // ─── Security ────────────────────────────────────────────────
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      contentSecurityPolicy: process.env['NODE_ENV'] === 'production' ? undefined : false,
+    }),
+  );
   app.use(cookieParser());
   app.enableCors({
-    origin: corsOrigins.split(',').map((o) => o.trim()),
+    origin: config.get('NODE_ENV') === 'production'
+      ? corsOrigins.split(',').map((o) => o.trim())
+      : true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // ─── Global Pipes & Filters ──────────────────────────────────
@@ -80,3 +86,4 @@ bootstrap().catch((err) => {
   console.error('Fatal startup error:', err);
   process.exit(1);
 });
+

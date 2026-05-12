@@ -34,7 +34,9 @@ export class CampaignService {
 
   async update(id: string, businessId: string, dto: UpdateCampaignDto) {
     await this.findById(id, businessId);
-    return prisma.campaign.update({ where: { id }, data: dto });
+    const { ...updateDto } = dto;
+    Object.keys(updateDto).forEach(key => (updateDto as any)[key] === null && delete (updateDto as any)[key]);
+    return prisma.campaign.update({ where: { id }, data: updateDto });
   }
 
   async clone(id: string, businessId: string) {
