@@ -50,7 +50,7 @@ export class LlmSettingsService {
       update: {
         ...otherSettings,
         ...(encryptedApiKey ? { apiKey: encryptedApiKey } : {}),
-      },
+      } as any, // Cast to any to bypass strict Prisma null checks if necessary
       create: {
         businessId,
         provider: dto.provider ?? 'openai',

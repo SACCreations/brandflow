@@ -4,8 +4,8 @@ export default registerAs('app', () => ({
   port: parseInt(process.env['APP_PORT'] ?? '4000', 10),
   nodeEnv: process.env['NODE_ENV'] ?? 'development',
   url: process.env['APP_URL'] ?? 'http://localhost:4000',
-  webUrl: process.env['WEB_URL'] ?? 'http://localhost:3000',
-  corsOrigins: process.env['CORS_ORIGINS'] ?? 'http://localhost:3000',
+  webUrl: process.env['WEB_URL'] ?? 'http://localhost:3002',
+  corsOrigins: process.env['CORS_ORIGINS'] ?? 'http://localhost:3002',
   jwt: {
     secret: process.env['JWT_SECRET'] ?? '',
     refreshSecret: process.env['JWT_REFRESH_SECRET'] ?? '',

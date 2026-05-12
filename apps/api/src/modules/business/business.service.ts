@@ -23,7 +23,9 @@ export class BusinessService {
       });
       if (existing) throw new ConflictException('Slug is already taken');
     }
-    return prisma.business.update({ where: { id }, data: dto });
+    const { ...updateDto } = dto;
+    Object.keys(updateDto).forEach(key => (updateDto as any)[key] === null && delete (updateDto as any)[key]);
+    return prisma.business.update({ where: { id }, data: updateDto });
   }
 
   async getMembers(businessId: string) {

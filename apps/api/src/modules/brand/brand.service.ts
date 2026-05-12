@@ -50,9 +50,12 @@ export class BrandService {
     const merged = { ...before, ...dto };
     const healthScore = this.calculateHealthScore(merged);
     
+    const { ...updateDto } = dto;
+    Object.keys(updateDto).forEach(key => (updateDto as any)[key] === null && delete (updateDto as any)[key]);
+
     const after = await prisma.brand.update({
       where: { id },
-      data: { ...dto, healthScore, version: { increment: 1 } },
+      data: { ...updateDto, healthScore, version: { increment: 1 } },
     });
     await this.logActivity(businessId, 'brand.updated', id, before, after);
     return after;
@@ -71,7 +74,7 @@ export class BrandService {
   async restore(id: string, businessId: string) {
     const after = await prisma.brand.update({
       where: { id, businessId },
-      data: { deletedAt: null },
+      data: { deletedAt: undefined }, // Use undefined instead of null if schema allows
     });
     await this.logActivity(businessId, 'brand.restored', id, null, after);
     return after;

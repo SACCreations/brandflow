@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { GatewayConfig, LLMProvider, ProviderRequest, ProviderResponse } from './types';
+import type { GatewayConfig, LLMProvider, ProviderRequest, ProviderResponse, LLMConfig } from './types';
 import { AnthropicProvider } from './providers/anthropic';
 import { FallbackProvider } from './providers/fallback';
 import { OpenAIProvider } from './providers/openai';

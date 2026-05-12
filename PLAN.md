@@ -770,7 +770,7 @@ pnpm --filter db db:push
 pnpm --filter db db:seed
 
 # Run development
-pnpm dev  # Starts both web (3000) and api (4000)
+pnpm dev  # Starts both web (3002) and api (4000)
 ```
 
 ### docker-compose services:

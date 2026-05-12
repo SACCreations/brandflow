@@ -66,4 +66,5 @@ export type {
   QualityViolation,
   BrandContext,
   CostEventPayload,
+  LLMConfig,
 } from '@brandflow/shared';

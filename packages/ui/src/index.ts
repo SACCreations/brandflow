@@ -14,4 +14,6 @@ export * from './components/toast';
 export * from './components/tooltip';
 export { useToast, toast } from './hooks/use-toast';
 export * from './components/progress';
+export * from './components/accordion';
+export { Textarea } from './components/textarea';
 export { cn } from './lib/utils';
