@@ -50,6 +50,7 @@ model Business {
   qualityChecks QualityCheck[]
   costEvents  CostEvent[]
   prompts     Prompt[]
+  customers   Customer[]
   llmSettings  LlmSettings?
 
   @@map("businesses")
@@ -131,6 +132,23 @@ model Subscription {
   business             Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
+}
+
+model Customer {
+  id          String   @id @default(uuid())
+  businessId  String
+  name        String
+  email       String?
+  company     String?
+  phone       String?
+  status      String   @default("active") // active, lead, inactive
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("customers")
 }
 
 model AuditLog {

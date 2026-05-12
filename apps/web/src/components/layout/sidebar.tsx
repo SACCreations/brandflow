@@ -53,6 +53,7 @@ const NAV = [
       { label: 'LLM Settings', href: '/settings/llm', icon: '◈' },
       { label: 'Billing', href: '/settings/billing', icon: '＄' },
       { label: 'Team', href: '/settings/team', icon: '👥' },
+      { label: 'Clients', href: '/settings/clients', icon: '💼' },
     ],
   },
 ];

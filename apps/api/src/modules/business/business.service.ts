@@ -48,4 +48,59 @@ export class BusinessService {
     const business = await prisma.business.findUnique({ where: { id: businessId } });
     return business?.healthScore ?? 0;
   }
+
+  async inviteMember(businessId: string, email: string, roleName: string) {
+    // Check if user exists
+    let user = await prisma.user.findUnique({ where: { email } });
+    
+    if (!user) {
+      // In a real app, send an email invite. Here we create a placeholder user.
+      user = await prisma.user.create({
+        data: {
+          email,
+          firstName: email.split('@')[0],
+          lastName: 'Guest',
+          // Random password for guest
+          passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$unusable',
+        }
+      });
+    }
+
+    // Check if already a member
+    const existing = await prisma.membership.findUnique({
+      where: { userId_businessId: { userId: user.id, businessId } }
+    });
+    if (existing) throw new ConflictException('User is already a member of this workspace');
+
+    // Find role
+    let role = await prisma.role.findFirst({
+      where: { businessId: null, name: roleName }
+    });
+    
+    if (!role) {
+      // Default to viewer if role not found
+      role = await prisma.role.findFirst({
+        where: { businessId: null, name: 'viewer' }
+      });
+    }
+
+    if (!role) {
+       // Create viewer role if it doesn't exist at all
+       role = await prisma.role.create({
+        data: { name: 'viewer', permissions: ['read:*'], isCustom: false },
+      });
+    }
+
+    return prisma.membership.create({
+      data: {
+        userId: user.id,
+        businessId,
+        roleId: role.id
+      },
+      include: {
+        user: { select: { id: true, email: true, firstName: true, lastName: true } },
+        role: true
+      }
+    });
+  }
 }

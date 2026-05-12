@@ -52,6 +52,15 @@ export class BusinessController {
     return this.businessService.removeMember(user.businessId, userId);
   }
 
+  @Patch('members/invite')
+  @ApiOperation({ summary: 'Invite a member to the workspace' })
+  inviteMember(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: { email: string; role: string },
+  ) {
+    return this.businessService.inviteMember(user.businessId, dto.email, dto.role);
+  }
+
   @Get('health')
   @ApiOperation({ summary: 'Get workspace health score' })
   getHealth(@CurrentUser() user: JwtPayload) {
