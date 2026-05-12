@@ -51,6 +51,7 @@ model Business {
   costEvents  CostEvent[]
   prompts     Prompt[]
   customers   Customer[]
+  projects    Project[]
   llmSettings  LlmSettings?
 
   @@map("businesses")
@@ -147,8 +148,29 @@ model Customer {
   updatedAt   DateTime @updatedAt
 
   business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  projects    Project[]
 
   @@map("customers")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  businessId  String
+  customerId  String?
+  name        String
+  description String?  @db.Text
+  status      String   @default("active") // active, completed, archived
+  startDate   DateTime?
+  endDate     DateTime?
+  budget      Int?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@map("projects")
 }
 
 model AuditLog {

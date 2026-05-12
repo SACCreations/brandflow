@@ -26,6 +26,7 @@ import { LlmSettingsModule } from './modules/llm-settings/llm-settings.module';
 import { QualityModule } from './modules/quality/quality.module';
 import { BriefModule } from './modules/brief/brief.module';
 import { CustomerModule } from './modules/customer/customer.module';
+import { ProjectModule } from './modules/project/project.module';
 
 @Module({
   imports: [
@@ -89,6 +90,7 @@ import { CustomerModule } from './modules/customer/customer.module';
     QualityModule,
     BriefModule,
     CustomerModule,
+    ProjectModule,
   ],
 })
 export class AppModule {}
