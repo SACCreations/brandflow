@@ -25,7 +25,7 @@ export class BusinessService {
     }
     const { ...updateDto } = dto;
     Object.keys(updateDto).forEach(key => (updateDto as any)[key] === null && delete (updateDto as any)[key]);
-    return prisma.business.update({ where: { id }, data: updateDto });
+    return prisma.business.update({ where: { id }, data: updateDto as any });
   }
 
   async getMembers(businessId: string) {

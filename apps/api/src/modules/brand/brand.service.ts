@@ -41,7 +41,7 @@ export class BrandService {
 
   async create(businessId: string, dto: CreateBrandDto) {
     const healthScore = this.calculateHealthScore(dto);
-    const brand = await prisma.brand.create({ data: { ...dto, businessId, healthScore } });
+    const brand = await prisma.brand.create({ data: { ...dto, businessId, healthScore } as any });
     await this.logActivity(businessId, 'brand.created', brand.id, null, brand);
     return brand;
   }
@@ -56,7 +56,7 @@ export class BrandService {
 
     const after = await prisma.brand.update({
       where: { id },
-      data: { ...updateDto, healthScore, version: { increment: 1 } },
+      data: { ...updateDto, healthScore, version: { increment: 1 } } as any,
     });
     await this.logActivity(businessId, 'brand.updated', id, before, after);
     return after;

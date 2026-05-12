@@ -72,7 +72,7 @@ export class PublishService {
         prompt,
         { temperature: 0.7 }
       );
-      return response.text;
+      return response.content;
     } catch (error) {
       this.logger.error(`Failed to tailor content for ${platform}`, error);
       return body; // Fallback to original

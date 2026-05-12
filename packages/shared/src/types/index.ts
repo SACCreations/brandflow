@@ -1,3 +1,5 @@
+import type { AIProvider } from '../constants';
+
 // ─── JWT Payload ──────────────────────────────────────────────────
 export interface JwtPayload {
   sub: string; // userId
@@ -75,8 +77,7 @@ export interface QualityCheckResult {
   violations: QualityViolation[];
 }
 
-// ─── AI Providers ────────────────────────────────────────────────
-export type AIProvider = 'openai' | 'anthropic' | 'google' | 'fallback';
+// ─── AI Providers (handled in constants) ──────────────────────────
 
 export interface LLMConfig {
   provider?: AIProvider;
@@ -84,6 +85,7 @@ export interface LLMConfig {
   temperature?: number;
   maxTokens?: number;
   apiKey?: string;
+  jsonMode?: boolean;
 }
 
 // ─── AI Generation Request ────────────────────────────────────────

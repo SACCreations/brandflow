@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { BriefService } from './brief.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { GetUser } from '../auth/decorators/get-user.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '@brandflow/shared';
 
 @Controller('briefs')
 @UseGuards(JwtAuthGuard)
@@ -9,40 +10,40 @@ export class BriefController {
   constructor(private readonly briefService: BriefService) {}
 
   @Get()
-  findAll(@GetUser('businessId') businessId: string) {
-    return this.briefService.findAll(businessId);
+  findAll(@CurrentUser() user: JwtPayload) {
+    return this.briefService.findAll(user.businessId);
   }
 
   @Post()
-  create(@GetUser('businessId') businessId: string, @Body() dto: any) {
-    return this.briefService.create(businessId, dto);
+  create(@CurrentUser() user: JwtPayload, @Body() dto: any) {
+    return this.briefService.create(user.businessId, dto);
   }
 
   @Post('template/:type')
   createFromTemplate(
-    @GetUser('businessId') businessId: string,
+    @CurrentUser() user: JwtPayload,
     @Param('type') type: string,
   ) {
-    return this.briefService.createFromTemplate(businessId, type);
+    return this.briefService.createFromTemplate(user.businessId, type);
   }
 
   @Get('suggestions')
   getAiSuggestions(
-    @GetUser('businessId') businessId: string,
+    @CurrentUser() user: JwtPayload,
     @Query('field') field: string,
     @Query('context') context: string,
   ) {
     const parsedContext = context ? JSON.parse(context) : {};
-    return this.briefService.getAiSuggestions(businessId, field, parsedContext);
+    return this.briefService.getAiSuggestions(user.businessId, field, parsedContext);
   }
 
   @Get(':id')
-  findOne(@GetUser('businessId') businessId: string, @Param('id') id: string) {
-    return this.briefService.findById(id, businessId);
+  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.briefService.findById(id, user.businessId);
   }
 
   @Get(':id/validate')
-  validate(@GetUser('businessId') businessId: string, @Param('id') id: string) {
-    return this.briefService.validate(id, businessId);
+  validate(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.briefService.validate(id, user.businessId);
   }
 }

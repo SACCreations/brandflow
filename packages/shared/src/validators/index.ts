@@ -144,6 +144,8 @@ export const generateContentSchema = z.object({
   topic: z.string().min(1).max(1000),
   additionalContext: z.string().max(2000).nullish(),
   tone: z.string().max(100).nullish(),
+  temperature: z.number().min(0).max(2).nullish(),
+  maxTokens: z.number().int().min(1).max(32000).nullish(),
 });
 export type GenerateContentDto = z.infer<typeof generateContentSchema>;
 

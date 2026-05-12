@@ -91,7 +91,9 @@ export class QualityService {
     violations.forEach((v) => {
       counts[v.type] = (counts[v.type] || 0) + 1;
     });
-    return Object.keys(counts).reduce((a, b) => (counts[a] > counts[b] ? a : b));
+    return Object.keys(counts).reduce((a, b) => 
+      (counts[a] || 0) > (counts[b] || 0) ? a : b
+    );
   }
 
   private generateRemediationHint(violations: any[]): string {

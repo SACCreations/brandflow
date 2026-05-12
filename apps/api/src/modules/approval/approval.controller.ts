@@ -1,50 +1,46 @@
-import {
-  Controller, Get, Post, Body, Param, UseGuards, ParseUUIDPipe, Query,
-} from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { ApprovalService } from './approval.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
-import { submitApprovalDecisionSchema, type SubmitApprovalDecisionDto, type JwtPayload } from '@brandflow/shared';
+import type { JwtPayload } from '@brandflow/shared';
 
-@ApiTags('approval')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('approvals')
+@UseGuards(JwtAuthGuard)
 export class ApprovalController {
   constructor(private readonly approvalService: ApprovalService) {}
 
-  @Get()
-  @ApiOperation({ summary: 'List pending approvals' })
-  findPending(@CurrentUser() user: JwtPayload) {
-    return this.approvalService.findPending(user.businessId);
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get an approval record' })
-  findById(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: JwtPayload) {
-    return this.approvalService.findById(id, user.businessId);
-  }
-
-  @Post()
-  @ApiOperation({ summary: 'Request approval for content' })
-  request(
+  @Get('queue')
+  getQueue(
     @CurrentUser() user: JwtPayload,
-    @Body('contentId') contentId: string,
-    @Body('reviewerId') reviewerId?: string,
-    @Body('slaHours') slaHours?: number,
+    @Query('status') status: string
   ) {
-    return this.approvalService.requestApproval(contentId, user.businessId, reviewerId, slaHours);
+    return this.approvalService.getQueue(user.businessId, status);
   }
 
   @Post(':id/decide')
-  @ApiOperation({ summary: 'Approve, reject, or request revision' })
-  decide(
-    @Param('id', ParseUUIDPipe) id: string,
+  submitDecision(
     @CurrentUser() user: JwtPayload,
-    @Body(new ZodValidationPipe(submitApprovalDecisionSchema)) dto: SubmitApprovalDecisionDto,
+    @Param('id') id: string,
+    @Body('status') status: 'approved' | 'rejected',
+    @Body('note') note: string
   ) {
-    return this.approvalService.decide(id, user.businessId, user.sub, dto);
+    return this.approvalService.submitDecision(id, user.businessId, status, note);
+  }
+
+  @Post('request')
+  requestApproval(
+    @CurrentUser() user: JwtPayload,
+    @Body('contentId') contentId: string,
+    @Body('reviewType') reviewType: string
+  ) {
+    return this.approvalService.requestApproval(user.businessId, contentId, reviewType);
+  }
+
+  @Post('bulk-approve')
+  bulkApprove(
+    @CurrentUser() user: JwtPayload,
+    @Body('ids') ids: string[]
+  ) {
+    return this.approvalService.bulkApprove(ids, user.businessId);
   }
 }

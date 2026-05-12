@@ -1,89 +1,140 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
-import type { Prisma, Brief } from '@brandflow/db';
-import type { CreateCampaignDto, UpdateCampaignDto, CreateBriefDto } from '@brandflow/shared';
 
 @Injectable()
 export class CampaignService {
-  async findAll(businessId: string) {
+  async findAll(businessId: string, includeArchived = false) {
     return prisma.campaign.findMany({
-      where: { businessId },
+      where: { 
+        businessId,
+        archivedAt: includeArchived ? undefined : null
+      },
       orderBy: { createdAt: 'desc' },
       include: {
-        _count: { select: { contents: true, briefs: true, schedules: true } },
-      },
+        _count: {
+          select: { contents: true, briefs: true, schedules: true }
+        }
+      }
     });
   }
 
-  async findById(id: string, businessId: string) {
+  async findOne(id: string, businessId: string) {
     const campaign = await prisma.campaign.findFirst({
       where: { id, businessId },
       include: {
         briefs: true,
-        contents: { select: { id: true, platform: true, type: true, status: true, createdAt: true } },
-        schedules: { orderBy: { scheduledAt: 'asc' } },
-      },
+        contents: {
+          include: { approvals: true, schedules: true }
+        },
+        schedules: {
+          include: { socialAccount: true }
+        },
+        assets: true,
+        templates: true
+      }
     });
     if (!campaign) throw new NotFoundException('Campaign not found');
     return campaign;
   }
 
-  async create(businessId: string, dto: CreateCampaignDto) {
-    return prisma.campaign.create({ data: { ...dto, businessId, status: 'draft' } });
-  }
-
-  async update(id: string, businessId: string, dto: UpdateCampaignDto) {
-    await this.findById(id, businessId);
-    const { ...updateDto } = dto;
-    Object.keys(updateDto).forEach(key => (updateDto as any)[key] === null && delete (updateDto as any)[key]);
-    return prisma.campaign.update({ where: { id }, data: updateDto });
-  }
-
-  async clone(id: string, businessId: string) {
-    const source = await prisma.campaign.findFirst({
-      where: { id, businessId },
-      include: { briefs: true },
+  async create(businessId: string, dto: any) {
+    return prisma.campaign.create({
+      data: {
+        ...dto,
+        businessId,
+      },
     });
-    if (!source) throw new NotFoundException('Campaign not found');
+  }
 
-    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const clone = await tx.campaign.create({
+  async update(id: string, businessId: string, dto: any) {
+    return prisma.campaign.update({
+      where: { id },
+      data: dto
+    });
+  }
+
+  async archive(id: string, businessId: string) {
+    return this.update(id, businessId, {
+      archivedAt: new Date(),
+      status: 'archived'
+    });
+  }
+
+  async calculateHealth(id: string, businessId: string) {
+    const campaign = await this.findOne(id, businessId);
+    
+    let strategyScore = 0;
+    let approvalScore = 0;
+    let scheduleScore = 0;
+
+    // 1. Strategy Score (Brief completeness)
+    if (campaign.briefs.length > 0) {
+      const completeBriefs = campaign.briefs.filter(b => b.isComplete).length;
+      strategyScore = (completeBriefs / campaign.briefs.length) * 100;
+    }
+
+    // 2. Approval Score (Content status)
+    if (campaign.contents.length > 0) {
+      const approvedContent = campaign.contents.filter(c => c.status === 'approved').length;
+      approvalScore = (approvedContent / campaign.contents.length) * 100;
+    }
+
+    // 3. Schedule Score (Future coverage)
+    if (campaign.schedules.length > 0) {
+      const pendingSchedules = campaign.schedules.filter(s => s.status === 'pending').length;
+      scheduleScore = (pendingSchedules / Math.max(campaign.contents.length, 1)) * 100;
+    }
+
+    const healthScore = Math.round((strategyScore + approvalScore + scheduleScore) / 3);
+
+    await prisma.campaign.update({
+      where: { id },
+      data: { healthScore }
+    });
+
+    return { healthScore, components: { strategyScore, approvalScore, scheduleScore } };
+  }
+
+  async clone(id: string, businessId: string, newName: string) {
+    const original = await this.findOne(id, businessId);
+
+    const cloned = await prisma.campaign.create({
+      data: {
+        businessId,
+        name: newName,
+        description: original.description,
+        status: 'draft',
+        startDate: original.startDate,
+        endDate: original.endDate,
+        clonedFromId: id,
+        metadata: original.metadata as any,
+      }
+    });
+
+    // Clone Briefs
+    for (const brief of original.briefs) {
+      await prisma.brief.create({
         data: {
           businessId,
-          name: `${source.name} (Copy)`,
-          status: 'draft',
-          clonedFromId: source.id,
-        },
+          campaignId: cloned.id,
+          objective: brief.objective,
+          audience: brief.audience,
+          platform: brief.platform,
+          cta: brief.cta,
+          tone: brief.tone,
+          format: brief.format,
+          contentType: brief.contentType,
+          businessGoal: brief.businessGoal,
+          campaignTheme: brief.campaignTheme,
+          isComplete: brief.isComplete,
+          metadata: brief.metadata as any,
+        }
       });
+    }
 
-      if (source.briefs.length > 0) {
-        await tx.brief.createMany({
-          data: source.briefs.map((b: Brief) => ({
-            businessId,
-            campaignId: clone.id,
-            objective: b.objective,
-            audience: b.audience,
-            platform: b.platform,
-            cta: b.cta,
-            tone: b.tone,
-            format: b.format,
-            contentType: b.contentType,
-            businessGoal: b.businessGoal,
-          })),
-        });
-      }
+    // Note: In production, we might also clone templates or automations
+    // but we usually skip cloning 'Contents' and 'Schedules' as they are execution-specific.
 
-      return clone;
-    });
-  }
-
-  async addBrief(campaignId: string, businessId: string, dto: CreateBriefDto) {
-    await this.findById(campaignId, businessId);
-    return prisma.brief.create({ data: { ...dto, campaignId, businessId } });
-  }
-
-  async delete(id: string, businessId: string) {
-    await this.findById(id, businessId);
-    return prisma.campaign.update({ where: { id }, data: { status: 'archived' } });
+    return cloned;
   }
 }

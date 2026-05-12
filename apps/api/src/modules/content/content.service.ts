@@ -154,7 +154,7 @@ export class ContentService {
       `Generate a ${dto.type} for ${dto.platform} about: ${sanitizedTopic}`,
       {
         provider: (llmSettings.provider as any) ?? 'openai',
-        model: llmSettings.model,
+        model: llmSettings.model ?? undefined,
         temperature: dto.temperature ?? llmSettings.temperature ?? 0.75,
         maxTokens: dto.maxTokens ?? llmSettings.maxTokens ?? 1024,
         apiKey: decryptedApiKey ?? undefined,

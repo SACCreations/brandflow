@@ -79,7 +79,7 @@ export class BriefService {
       { temperature: 0.8 }
     );
 
-    return { suggestion: response.text };
+    return { suggestion: response.content };
   }
 
   async validate(id: string, businessId: string) {

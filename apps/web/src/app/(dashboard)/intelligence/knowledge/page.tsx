@@ -52,6 +52,7 @@ export default function KnowledgeDashboard() {
           
           <div className="relative group">
             <button 
+              onClick={() => setIsModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700"
             >
               <Plus className="h-4 w-4" />

@@ -163,7 +163,7 @@ export class KnowledgeProcessor extends WorkerHost {
         { model: 'gpt-4o-mini' }
       );
 
-      const atoms = JSON.parse(response.text);
+      const atoms = JSON.parse(response.content);
       return Array.isArray(atoms) ? atoms : chunks.map(c => ({ type: 'fact', content: c, confidence: 0.8 }));
     } catch (err) {
       this.logger.warn(`AI Classification failed, falling back to basic parsing: ${err}`);

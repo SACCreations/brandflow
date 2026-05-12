@@ -135,6 +135,37 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
 
+        {/* Knowledge Atom ROI Table */}
+        <div className="lg:col-span-12">
+          <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden dark:border-gray-800 dark:bg-gray-900">
+            <div className="border-b border-gray-100 bg-gray-50/50 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
+                <BrainCircuit className="h-4 w-4 text-brand-600" /> Knowledge Impact Matrix
+              </h3>
+              <span className="text-[10px] font-bold text-gray-400">Attributed Engagement (90 Days)</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 dark:border-gray-800">
+                    <th className="px-6 py-4 font-bold text-gray-400 uppercase tracking-tighter text-[10px]">Knowledge Source</th>
+                    <th className="px-6 py-4 font-bold text-gray-400 uppercase tracking-tighter text-[10px]">Usage Count</th>
+                    <th className="px-6 py-4 font-bold text-gray-400 uppercase tracking-tighter text-[10px]">Avg. Sentiment</th>
+                    <th className="px-6 py-4 font-bold text-gray-400 uppercase tracking-tighter text-[10px]">Engagement Impact</th>
+                    <th className="px-6 py-4 font-bold text-gray-400 uppercase tracking-tighter text-[10px]">ROI Attribution</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                  <KnowledgeRow name="Sales Deck V4" usage={42} sentiment="Positive" impact={92} roi="$4,200" color="bg-brand-500" />
+                  <KnowledgeRow name="Product Roadmap 2024" usage={28} sentiment="Neutral" impact={76} roi="$2,850" color="bg-emerald-500" />
+                  <KnowledgeRow name="Website Crawl (main)" usage={115} sentiment="Positive" impact={64} roi="$1,920" color="bg-blue-500" />
+                  <KnowledgeRow name="Technical Whitepaper" usage={12} sentiment="Complex" impact={42} roi="$980" color="bg-amber-500" />
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         {/* AI Recommendations */}
         <div className="lg:col-span-12">
           <div className="rounded-2xl border border-brand-100 bg-brand-50/20 p-8 dark:border-brand-500/20 dark:bg-brand-500/5">
@@ -161,6 +192,34 @@ export default function AnalyticsDashboard() {
 
       </div>
     </div>
+  );
+}
+
+function KnowledgeRow({ name, usage, sentiment, impact, roi, color }: any) {
+  return (
+    <tr className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+      <td className="px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className={`h-2 w-2 rounded-full ${color}`} />
+          <span className="font-bold text-gray-900 dark:text-white">{name}</span>
+        </div>
+      </td>
+      <td className="px-6 py-4 text-xs font-medium text-gray-500">{usage} posts</td>
+      <td className="px-6 py-4">
+        <span className="rounded-md bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+          {sentiment}
+        </span>
+      </td>
+      <td className="px-6 py-4">
+        <div className="flex items-center gap-2">
+          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className={`h-full ${color}`} style={{ width: `${impact}%` }} />
+          </div>
+          <span className="text-[10px] font-bold text-gray-400">{impact}%</span>
+        </div>
+      </td>
+      <td className="px-6 py-4 font-black text-gray-900 dark:text-white">{roi}</td>
+    </tr>
   );
 }
 
