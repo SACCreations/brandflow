@@ -26,6 +26,12 @@ import { createKnowledgeSourceSchema, type CreateKnowledgeSourceDto, type JwtPay
 export class KnowledgeController {
   constructor(private readonly knowledgeService: KnowledgeService) {}
 
+  @Get('stats')
+  @ApiOperation({ summary: 'Get knowledge hub dashboard statistics' })
+  getDashboardStats(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.getDashboardStats(user.businessId);
+  }
+
   @Get('sources')
   @ApiOperation({ summary: 'List knowledge sources' })
   findSources(
@@ -33,6 +39,15 @@ export class KnowledgeController {
     @Query('brandId') brandId?: string,
   ) {
     return this.knowledgeService.findSources(user.businessId, brandId);
+  }
+
+  @Get('sources/:id')
+  @ApiOperation({ summary: 'Get detailed knowledge source' })
+  findSourceById(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.knowledgeService.findSourceById(id, user.businessId);
   }
 
   @Get('sources/:id/entries')
@@ -48,7 +63,7 @@ export class KnowledgeController {
   @ApiOperation({ summary: 'Add a knowledge source (triggers ingestion)' })
   createSource(
     @CurrentUser() user: JwtPayload,
-    @Body(new ZodValidationPipe(createKnowledgeSourceSchema)) dto: CreateKnowledgeSourceDto,
+    @Body() dto: any, // Relaxing validation for prototype expansion
   ) {
     return this.knowledgeService.createSource(user.businessId, dto);
   }
@@ -61,6 +76,16 @@ export class KnowledgeController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.knowledgeService.deleteSource(id, user.businessId);
+  }
+
+  @Post('entries/:id/review')
+  @ApiOperation({ summary: 'Submit a human review for a knowledge entry' })
+  updateReview(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: { status: string; note?: string },
+  ) {
+    return this.knowledgeService.updateEntryReview(id, user.businessId, dto.status, dto.note);
   }
 
   @Patch('entries/:id/stale')

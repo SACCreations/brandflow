@@ -14,7 +14,10 @@ const NAV = [
     group: 'Intelligence',
     items: [
       { label: 'Brands', href: '/intelligence/brands', icon: '◈' },
-      { label: 'Knowledge', href: '/intelligence/knowledge', icon: '◉' },
+      { label: 'Knowledge Hub', href: '/intelligence/knowledge', icon: '◉' },
+      { label: 'Sources', href: '/intelligence/sources', icon: '⌥' },
+      { label: 'Review Queue', href: '/intelligence/review', icon: '✓' },
+      { label: 'Monitor', href: '/intelligence/monitor', icon: '◷' },
     ],
   },
   {

@@ -34,8 +34,9 @@ export class BrandService {
     const vr = typeof brand.visualRules === 'object' ? brand.visualRules : undefined;
     if (vr?.primaryColor) score += 1;
     if (brand.tone && Array.isArray(brand.tone) && brand.tone.length > 0) score += 1;
+    if (brand.defaultLocale) score += 1;
 
-    return Math.round((score / totalFields) * 100);
+    return Math.round((score / (totalFields + 1)) * 100);
   }
 
   async create(businessId: string, dto: CreateBrandDto) {

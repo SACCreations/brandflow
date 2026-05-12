@@ -23,6 +23,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { ImageModule } from './modules/image/image.module';
 import { TemplateModule } from './modules/template/template.module';
 import { LlmSettingsModule } from './modules/llm-settings/llm-settings.module';
+import { QualityModule } from './modules/quality/quality.module';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { LlmSettingsModule } from './modules/llm-settings/llm-settings.module';
     ImageModule,
     TemplateModule,
     LlmSettingsModule,
+    QualityModule,
   ],
 })
 export class AppModule {}
