@@ -7,9 +7,12 @@ import { apiClient } from '@/lib/api-client';
 import { Badge, Button, Card } from '@brandflow/ui';
 import {
   ArrowLeft,
+  CheckCircle2,
   Building2,
   Calendar,
+  Clock3,
   DollarSign,
+  FileText,
   FolderKanban,
   Loader2,
   Sparkles,
@@ -47,6 +50,20 @@ interface BrandSummary {
   industry: string | null;
 }
 
+interface BriefSummary {
+  id: string;
+  objective: string;
+  platform: string | null;
+  contentType: string | null;
+  format: string | null;
+  campaignTheme: string | null;
+  isComplete: boolean;
+  createdAt: string;
+  metadata?: {
+    status?: 'draft' | 'in_review' | 'approved';
+  } | null;
+}
+
 export default function ProjectDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -72,6 +89,23 @@ export default function ProjectDetailPage() {
     enabled: !!linkedBrandId,
   });
 
+  const { data: latestBrief } = useQuery({
+    queryKey: ['project-latest-brief', projectId],
+    queryFn: async () => {
+      try {
+        const res = await apiClient.get(`/briefs/project/${projectId}/latest`);
+        return (res.data.data ?? null) as BriefSummary | null;
+      } catch (error: any) {
+        if (error?.response?.status === 404) {
+          return null;
+        }
+
+        throw error;
+      }
+    },
+    enabled: !!projectId,
+  });
+
   if (isLoading) {
     return (
       <div className="flex h-[420px] items-center justify-center">
@@ -95,6 +129,7 @@ export default function ProjectDetailPage() {
   }
 
   const brandCreated = searchParams.get('brandCreated') === '1';
+  const briefSaved = searchParams.get('briefSaved') === '1';
 
   return (
     <div className="space-y-8">
@@ -129,12 +164,30 @@ export default function ProjectDetailPage() {
               <Sparkles className="h-4 w-4" /> Analyse brand
             </Button>
           </Link>
+          <Link href={`/create/brief?projectId=${project.id}`}>
+            <Button variant="outline" className="gap-2">
+              <FileText className="h-4 w-4" /> Create brief
+            </Button>
+          </Link>
+          {latestBrief && (
+            <Link href={`/create/brief?projectId=${project.id}&briefId=${latestBrief.id}`}>
+              <Button variant="outline" className="gap-2">
+                <Clock3 className="h-4 w-4" /> View latest brief
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
       {brandCreated && (
         <Card className="border-emerald-200 bg-emerald-50/70 p-4 text-sm text-emerald-800">
           The new brand draft was saved and linked back to this project.
+        </Card>
+      )}
+
+      {briefSaved && (
+        <Card className="border-emerald-200 bg-emerald-50/70 p-4 text-sm text-emerald-800">
+          The project brief is saved and ready to guide content, campaigns, and approvals.
         </Card>
       )}
 
@@ -157,28 +210,88 @@ export default function ProjectDetailPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Linked brand</h2>
-          {linkedBrand ? (
-            <div className="mt-4 space-y-4">
-              <div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">{linkedBrand.name}</p>
-                <p className="text-xs text-gray-500">{linkedBrand.industry || 'Industry not set'}</p>
+        <div className="space-y-6">
+          <Card className="p-6">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Linked brand</h2>
+            {linkedBrand ? (
+              <div className="mt-4 space-y-4">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{linkedBrand.name}</p>
+                  <p className="text-xs text-gray-500">{linkedBrand.industry || 'Industry not set'}</p>
+                </div>
+                <div className="rounded-xl border border-gray-100 p-4 dark:border-gray-800">
+                  <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Health score</div>
+                  <div className="mt-2 text-2xl font-black text-brand-600">{linkedBrand.healthScore}%</div>
+                </div>
+                <Link href={`/intelligence/brands/${linkedBrand.id}`}>
+                  <Button variant="outline" className="w-full">Open linked brand</Button>
+                </Link>
               </div>
-              <div className="rounded-xl border border-gray-100 p-4 dark:border-gray-800">
-                <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Health score</div>
-                <div className="mt-2 text-2xl font-black text-brand-600">{linkedBrand.healthScore}%</div>
+            ) : (
+              <div className="mt-4 rounded-xl border border-dashed border-gray-200 p-5 text-sm text-gray-500 dark:border-gray-800">
+                This project does not have a linked brand yet. Run the analyzer to create one from client or project sources.
               </div>
-              <Link href={`/intelligence/brands/${linkedBrand.id}`}>
-                <Button variant="outline" className="w-full">Open linked brand</Button>
-              </Link>
+            )}
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Latest brief</h2>
+              <Badge className={getBriefStatusClass(latestBrief?.metadata?.status)}>
+                {formatBriefStatus(latestBrief?.metadata?.status)}
+              </Badge>
             </div>
-          ) : (
-            <div className="mt-4 rounded-xl border border-dashed border-gray-200 p-5 text-sm text-gray-500 dark:border-gray-800">
-              This project does not have a linked brand yet. Run the analyzer to create one from client or project sources.
-            </div>
-          )}
-        </Card>
+
+            {latestBrief ? (
+              <div className="mt-4 space-y-4">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{latestBrief.objective}</p>
+                  <p className="mt-2 text-xs text-gray-500">
+                    {latestBrief.platform || 'platform not set'} • {latestBrief.contentType || 'content type not set'} • {latestBrief.format || 'format not set'}
+                  </p>
+                </div>
+
+                {latestBrief.campaignTheme && (
+                  <div className="rounded-xl border border-gray-100 p-4 text-sm text-gray-600 dark:border-gray-800 dark:text-gray-300">
+                    {latestBrief.campaignTheme}
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between rounded-xl border border-gray-100 p-4 dark:border-gray-800">
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Readiness</div>
+                    <div className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
+                      {latestBrief.isComplete ? 'Complete and ready for delivery' : 'Still missing a few required fields'}
+                    </div>
+                  </div>
+                  {latestBrief.isComplete ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                  ) : (
+                    <Clock3 className="h-5 w-5 text-amber-500" />
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <Link href={`/create/brief?projectId=${project.id}&briefId=${latestBrief.id}`} className="flex-1">
+                    <Button variant="outline" className="w-full">Open brief</Button>
+                  </Link>
+                  <Link href={`/create/brief?projectId=${project.id}`} className="flex-1">
+                    <Button className="w-full">New version</Button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 space-y-4 rounded-xl border border-dashed border-gray-200 p-5 text-sm text-gray-500 dark:border-gray-800">
+                <p>No brief exists for this project yet. Create one to define goals, audience, tone, and delivery constraints.</p>
+                <Link href={`/create/brief?projectId=${project.id}`}>
+                  <Button className="w-full gap-2">
+                    <FileText className="h-4 w-4" /> Create first brief
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </Card>
+        </div>
       </div>
     </div>
   );
@@ -194,4 +307,16 @@ function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string;
       <div className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{value}</div>
     </div>
   );
+}
+
+function formatBriefStatus(status?: 'draft' | 'in_review' | 'approved') {
+  if (status === 'in_review') return 'In review';
+  if (status === 'approved') return 'Approved';
+  return 'Draft';
+}
+
+function getBriefStatusClass(status?: 'draft' | 'in_review' | 'approved') {
+  if (status === 'approved') return 'bg-emerald-50 text-emerald-700';
+  if (status === 'in_review') return 'bg-amber-50 text-amber-700';
+  return 'bg-gray-100 text-gray-700';
 }

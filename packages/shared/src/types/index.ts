@@ -199,6 +199,16 @@ export interface BrandAnalysisResult {
   model: string;
 }
 
+export interface BriefWorkflowMetadata {
+  projectId?: string | null;
+  customerId?: string | null;
+  brandId?: string | null;
+  status: 'draft' | 'in_review' | 'approved';
+  source: 'manual' | 'project' | 'campaign';
+  deliverables: string[];
+  constraints: string[];
+}
+
 // ─── Webhook Event ────────────────────────────────────────────────
 export interface WebhookEvent {
   id: string;

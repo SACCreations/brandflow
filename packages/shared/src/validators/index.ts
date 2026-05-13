@@ -226,6 +226,17 @@ export const updateCampaignSchema = z.object({
 export type UpdateCampaignDto = z.infer<typeof updateCampaignSchema>;
 
 // ─── Brief ────────────────────────────────────────────────────────
+export const briefWorkflowMetadataSchema = z.object({
+  projectId: z.string().uuid().nullish(),
+  customerId: z.string().uuid().nullish(),
+  brandId: z.string().uuid().nullish(),
+  status: z.enum(['draft', 'in_review', 'approved']).default('draft'),
+  source: z.enum(['manual', 'project', 'campaign']).default('manual'),
+  deliverables: z.array(z.string().min(1).max(255)).max(20).default([]),
+  constraints: z.array(z.string().min(1).max(500)).max(20).default([]),
+});
+export type BriefWorkflowMetadataDto = z.infer<typeof briefWorkflowMetadataSchema>;
+
 export const createBriefSchema = z.object({
   campaignId: z.string().uuid().nullish(),
   objective: z.string().min(1).max(1000),
@@ -236,8 +247,13 @@ export const createBriefSchema = z.object({
   format: z.enum(['post', 'carousel', 'story', 'reel', 'article', 'newsletter']).nullish(),
   contentType: z.enum(['organic', 'ad', 'blog']).nullish(),
   businessGoal: z.string().max(500).nullish(),
+  campaignTheme: z.string().max(500).nullish(),
+  metadata: briefWorkflowMetadataSchema.nullish(),
 });
 export type CreateBriefDto = z.infer<typeof createBriefSchema>;
+
+export const updateBriefSchema = createBriefSchema.partial();
+export type UpdateBriefDto = z.infer<typeof updateBriefSchema>;
 
 // ─── Approval ─────────────────────────────────────────────────────
 export const submitApprovalDecisionSchema = z.object({
