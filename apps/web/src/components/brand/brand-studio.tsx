@@ -153,7 +153,6 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
 
   return (
     <div className="fixed inset-0 z-50 flex bg-white dark:bg-gray-950 overflow-hidden text-gray-900 dark:text-gray-100 print:relative print:overflow-visible">
-      <CommandPalette open={open} setOpen={setOpen} />
       {/* 1. Left Navigation Sidebar (Fixed) */}
       <aside className="w-64 border-r border-gray-100 dark:border-gray-800 hidden lg:flex flex-col fixed h-screen bg-white dark:bg-gray-950 z-20 print:hidden">
         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
@@ -358,6 +357,8 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
       </aside>
 
       <CommandPalette 
+        open={open}
+        setOpen={setOpen}
         onJump={scrollToSection} 
         onSave={async () => {
           const submitBtn = document.querySelector('button[type="submit"]') as HTMLButtonElement;

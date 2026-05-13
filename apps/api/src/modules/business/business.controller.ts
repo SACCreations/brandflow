@@ -28,6 +28,12 @@ export class BusinessController {
     return this.businessService.findById(user.businessId);
   }
 
+  @Get('dashboard')
+  @ApiOperation({ summary: 'Get workspace dashboard summary' })
+  getDashboard(@CurrentUser() user: JwtPayload) {
+    return this.businessService.getDashboardSummary(user.businessId);
+  }
+
   @Patch()
   @ApiOperation({ summary: 'Update workspace settings' })
   update(

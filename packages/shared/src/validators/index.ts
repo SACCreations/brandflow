@@ -64,6 +64,64 @@ export type CreateBusinessDto = z.infer<typeof createBusinessSchema>;
 export const updateBusinessSchema = createBusinessSchema.partial();
 export type UpdateBusinessDto = z.infer<typeof updateBusinessSchema>;
 
+// ─── Brand Analysis ──────────────────────────────────────────────
+export const brandAnalysisSourceSchema = z.object({
+  type: z.enum(['url', 'text']),
+  value: z.string().min(1).max(100_000),
+  label: z.string().max(255).nullish(),
+});
+export type BrandAnalysisSourceDto = z.infer<typeof brandAnalysisSourceSchema>;
+
+export const brandAnalysisRequestSchema = z
+  .object({
+    sourceIds: z.array(z.string().uuid()).min(1).max(10).nullish(),
+    sources: z.array(brandAnalysisSourceSchema).min(1).max(5).nullish(),
+  })
+  .refine((value) => (value.sourceIds?.length ?? 0) + (value.sources?.length ?? 0) > 0, {
+    message: 'At least one source is required for brand analysis',
+    path: ['sourceIds'],
+  });
+export type BrandAnalysisRequestDto = z.infer<typeof brandAnalysisRequestSchema>;
+
+export const brandAnalysisBrandSchema = z.object({
+  name: z.string().min(1).max(255),
+  tagline: z.string().max(255).nullish(),
+  description: z.string().max(2000).nullish(),
+  industry: z.string().max(100).nullish(),
+  website: z.string().max(500).nullish(),
+  positioning: z.string().max(2000).nullish(),
+  audience: z.string().max(2000).nullish(),
+  differentiators: z.string().max(2000).nullish(),
+  tone: z.array(z.string().min(1).max(50)).max(12).default([]),
+  governance: z.object({
+    bannedPhrases: z.array(z.string().min(1).max(200)).max(20).default([]),
+    requiredPhrases: z.array(z.string().min(1).max(200)).max(20).default([]),
+    ctaPreferences: z.array(z.string().min(1).max(100)).max(20).default([]),
+    requiredDisclaimer: z.string().max(1000).nullish(),
+  }),
+});
+export type BrandAnalysisBrandDto = z.infer<typeof brandAnalysisBrandSchema>;
+
+export const brandAnalysisResultSchema = z.object({
+  brand: brandAnalysisBrandSchema,
+  diagnostics: z.object({
+    sourceCount: z.number().int().min(1),
+    evidenceCount: z.number().int().min(1),
+    warnings: z.array(z.string()).default([]),
+    sources: z.array(z.object({
+      type: z.enum(['knowledge_source', 'url', 'text']),
+      label: z.string().min(1).max(255),
+      url: z.string().max(1000).nullish(),
+      evidenceCount: z.number().int().min(0),
+      status: z.string().max(100).nullish(),
+    })),
+  }),
+  requestId: z.string().min(1),
+  provider: z.string().min(1),
+  model: z.string().min(1),
+});
+export type BrandAnalysisResultDto = z.infer<typeof brandAnalysisResultSchema>;
+
 // ─── Brand ────────────────────────────────────────────────────────
 export const createBrandSchema = z.object({
   name: z.string().min(1).max(255),
@@ -239,6 +297,46 @@ export const inviteMemberSchema = z.object({
   roleId: z.string().uuid(),
 });
 export type InviteMemberDto = z.infer<typeof inviteMemberSchema>;
+
+// ─── Customers ───────────────────────────────────────────────────
+export const createCustomerSchema = z.object({
+  name: z.string().min(1).max(255),
+  email: z.string().email().max(255).nullish().or(z.literal('')),
+  company: z.string().max(255).nullish().or(z.literal('')),
+  phone: z.string().max(50).nullish().or(z.literal('')),
+  status: z.enum(['active', 'lead', 'inactive']).default('active'),
+  metadata: z.record(z.unknown()).nullish(),
+});
+export type CreateCustomerDto = z.infer<typeof createCustomerSchema>;
+
+export const updateCustomerSchema = createCustomerSchema.partial();
+export type UpdateCustomerDto = z.infer<typeof updateCustomerSchema>;
+
+// ─── Projects ────────────────────────────────────────────────────
+const projectPayloadSchema = z.object({
+  customerId: z.string().uuid().nullish(),
+  name: z.string().min(1).max(255),
+  description: z.string().max(5000).nullish().or(z.literal('')),
+  status: z.enum(['active', 'completed', 'archived']).default('active'),
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
+  budget: z.number().int().min(0).max(1_000_000_000).nullish(),
+  metadata: z.record(z.unknown()).nullish(),
+});
+
+export const createProjectSchema = projectPayloadSchema.refine((value) => !value.startDate || !value.endDate || value.endDate >= value.startDate, {
+    message: 'endDate must be on or after startDate',
+    path: ['endDate'],
+  });
+export type CreateProjectDto = z.infer<typeof createProjectSchema>;
+
+export const updateProjectSchema = projectPayloadSchema
+  .partial()
+  .refine((value) => !value.startDate || !value.endDate || value.endDate >= value.startDate, {
+    message: 'endDate must be on or after startDate',
+    path: ['endDate'],
+  });
+export type UpdateProjectDto = z.infer<typeof updateProjectSchema>;
 
 // ─── API Key ─────────────────────────────────────────────────────
 export const createApiKeySchema = z.object({

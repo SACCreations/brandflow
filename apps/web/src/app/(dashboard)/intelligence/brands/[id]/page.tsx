@@ -73,7 +73,9 @@ export default function BrandEditPage() {
       <BrandStudio 
         title="Edit Brand"
         initialData={brand}
-        onSubmit={(data) => mutation.mutateAsync(data)}
+        onSubmit={async (data) => {
+          await mutation.mutateAsync(data);
+        }}
         isLoading={mutation.isPending}
       />
     </div>

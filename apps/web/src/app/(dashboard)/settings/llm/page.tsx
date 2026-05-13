@@ -21,10 +21,12 @@ export default function LlmSettingsPage() {
     },
   });
 
-  const { register, handleSubmit, formState: { errors, isDirty }, reset } = useForm<UpdateLlmSettingsDto>({
+  const { register, handleSubmit, watch, formState: { errors, isDirty }, reset } = useForm<UpdateLlmSettingsDto>({
     resolver: zodResolver(updateLlmSettingsSchema),
     values: settings,
   });
+
+  const temperatureValue = watch('temperature') ?? settings?.temperature ?? 0.7;
 
   const mutation = useMutation({
     mutationFn: async (data: UpdateLlmSettingsDto) => {
@@ -91,7 +93,7 @@ export default function LlmSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Temperature ({register('temperature').value})</label>
+              <label className="text-sm font-medium">Temperature ({temperatureValue})</label>
               <input
                 type="range"
                 min="0"

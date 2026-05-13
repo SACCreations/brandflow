@@ -38,7 +38,9 @@ export default function BrandCreatePage() {
     <div>
       <BrandStudio 
         title="Create New Brand"
-        onSubmit={(data) => mutation.mutateAsync(data)}
+        onSubmit={async (data) => {
+          await mutation.mutateAsync(data);
+        }}
         isLoading={mutation.isPending}
       />
     </div>

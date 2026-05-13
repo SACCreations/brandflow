@@ -3,10 +3,10 @@ import { BrandController } from './brand.controller';
 import { BrandService } from './brand.service';
 import { BrandAnalyserController } from './brand-analyser.controller';
 import { BrandAnalyserService } from './brand-analyser.service';
-import { KnowledgeModule } from '../knowledge/knowledge.module';
+import { LlmSettingsModule } from '../llm-settings/llm-settings.module';
 
 @Module({
-  imports: [KnowledgeModule],
+  imports: [LlmSettingsModule],
   controllers: [BrandController, BrandAnalyserController],
   providers: [BrandService, BrandAnalyserService],
   exports: [BrandService, BrandAnalyserService],

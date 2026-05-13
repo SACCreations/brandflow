@@ -49,6 +49,186 @@ export class BusinessService {
     return business?.healthScore ?? 0;
   }
 
+  async getDashboardSummary(businessId: string) {
+    const periodStart = new Date();
+    periodStart.setDate(1);
+    periodStart.setHours(0, 0, 0, 0);
+
+    const [
+      business,
+      contentCreated,
+      pendingApprovals,
+      postsScheduled,
+      usedThisPeriod,
+      recentContent,
+      recentApprovals,
+      recentSchedules,
+      recentBrands,
+      recentCampaigns,
+    ] = await Promise.all([
+      prisma.business.findUnique({
+        where: { id: businessId },
+        include: {
+          subscriptions: { orderBy: { createdAt: 'desc' }, take: 1 },
+          _count: { select: { memberships: true, brands: true } },
+        },
+      }),
+      prisma.content.count({ where: { businessId } }),
+      prisma.approval.count({ where: { businessId, status: 'pending' } }),
+      prisma.schedule.count({
+        where: {
+          businessId,
+          status: 'pending',
+          scheduledAt: { gte: new Date() },
+        },
+      }),
+      prisma.costEvent.aggregate({
+        where: {
+          businessId,
+          createdAt: { gte: periodStart },
+        },
+        _sum: { inputTokens: true, outputTokens: true },
+      }),
+      prisma.content.findMany({
+        where: { businessId },
+        orderBy: { createdAt: 'desc' },
+        take: 4,
+        select: {
+          id: true,
+          createdAt: true,
+          platform: true,
+          type: true,
+          status: true,
+          brand: { select: { name: true } },
+        },
+      }),
+      prisma.approval.findMany({
+        where: { businessId },
+        orderBy: { createdAt: 'desc' },
+        take: 4,
+        select: {
+          id: true,
+          createdAt: true,
+          status: true,
+          reviewType: true,
+          content: { select: { id: true, platform: true, type: true } },
+        },
+      }),
+      prisma.schedule.findMany({
+        where: { businessId },
+        orderBy: { createdAt: 'desc' },
+        take: 4,
+        select: {
+          id: true,
+          createdAt: true,
+          scheduledAt: true,
+          status: true,
+          content: { select: { id: true, platform: true, type: true } },
+        },
+      }),
+      prisma.brand.findMany({
+        where: { businessId, deletedAt: null },
+        orderBy: { updatedAt: 'desc' },
+        take: 3,
+        select: {
+          id: true,
+          name: true,
+          updatedAt: true,
+          healthScore: true,
+        },
+      }),
+      prisma.campaign.findMany({
+        where: { businessId },
+        orderBy: { updatedAt: 'desc' },
+        take: 3,
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          updatedAt: true,
+        },
+      }),
+    ]);
+
+    if (!business) {
+      throw new NotFoundException('Business not found');
+    }
+
+    const tokenUsageUsed = (usedThisPeriod._sum.inputTokens ?? 0) + (usedThisPeriod._sum.outputTokens ?? 0);
+    const tokenUsageLimit = business.subscriptions[0]?.tokenBudget ?? 0;
+    const tokenUsagePercentage = tokenUsageLimit > 0
+      ? Math.min(100, Math.round((tokenUsageUsed / tokenUsageLimit) * 100))
+      : 0;
+
+    const recentActivity = [
+      ...recentContent.map((item) => ({
+        id: `content-${item.id}`,
+        type: 'content',
+        title: `${item.platform} ${item.type} created`,
+        description: item.brand?.name
+          ? `Draft content for ${item.brand.name}`
+          : `Content moved to ${item.status}`,
+        timestamp: item.createdAt,
+        href: `/create/content/${item.id}`,
+      })),
+      ...recentApprovals.map((item) => ({
+        id: `approval-${item.id}`,
+        type: 'approval',
+        title: `${item.reviewType} approval ${item.status}`,
+        description: item.content
+          ? `${item.content.platform} ${item.content.type} is in the review queue`
+          : 'Approval workflow updated',
+        timestamp: item.createdAt,
+        href: '/review/approvals',
+      })),
+      ...recentSchedules.map((item) => ({
+        id: `schedule-${item.id}`,
+        type: 'schedule',
+        title: item.status === 'published' ? 'Post published' : 'Post scheduled',
+        description: item.content
+          ? `${item.content.platform} ${item.content.type} set for ${new Date(item.scheduledAt).toLocaleString()}`
+          : `Scheduled for ${new Date(item.scheduledAt).toLocaleString()}`,
+        timestamp: item.createdAt,
+        href: '/publish/calendar',
+      })),
+      ...recentBrands.map((item) => ({
+        id: `brand-${item.id}`,
+        type: 'brand',
+        title: 'Brand updated',
+        description: `${item.name} is now at ${item.healthScore}% health`,
+        timestamp: item.updatedAt,
+        href: `/intelligence/brands/${item.id}`,
+      })),
+      ...recentCampaigns.map((item) => ({
+        id: `campaign-${item.id}`,
+        type: 'campaign',
+        title: 'Campaign updated',
+        description: `${item.name} is currently ${item.status}`,
+        timestamp: item.updatedAt,
+        href: `/campaigns/${item.id}`,
+      })),
+    ]
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 8);
+
+    return {
+      stats: {
+        contentCreated,
+        pendingApprovals,
+        postsScheduled,
+        tokenUsage: {
+          used: tokenUsageUsed,
+          limit: tokenUsageLimit,
+          percentage: tokenUsagePercentage,
+        },
+        brands: business._count.brands,
+        teamMembers: business._count.memberships,
+        workspaceHealth: business.healthScore,
+      },
+      recentActivity,
+    };
+  }
+
   async inviteMember(businessId: string, email: string, roleName: string) {
     // Check if user exists
     let user = await prisma.user.findUnique({ where: { email } });

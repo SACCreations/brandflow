@@ -1,837 +1,244 @@
-# BrandFlow — Implementation Plan
+# BrandFlow — Architecture & Delivery Index
 
-**AI Brand & Marketing Automation Platform**
-Version 2.0 | May 2026
+**Agency-first AI brand and marketing operations platform**  
+Updated: May 2026
+
+This file is the architecture and execution index for the repository.
+
+- For the product roadmap, see `docs/agency-first-saas-roadmap.md`
+- For the source-of-truth domain model, see `packages/db/prisma/schema.prisma`
+- For the current module wiring, see `apps/api/src/app.module.ts`
 
 ---
 
-## 1. Architecture & Stack
+## 1. Product direction
 
-### Monorepo (Turborepo)
+BrandFlow is being built as a top-level SaaS product for teams that run brand, content, approvals, publishing, and performance workflows in one place.
 
-```
+The current implementation direction is:
+
+- **Serve both segments eventually, but optimize first for agencies**
+- Support **multi-client delivery**, **brand intelligence**, **content operations**, and **usage-based AI workflows**
+- Grow from a strong backend/module foundation into a cohesive product experience instead of a set of isolated tools
+
+### Primary ICP
+
+1. **Agency owners and operators** managing multiple clients, brands, and projects
+2. **Marketing teams** running one workspace with multiple contributors
+3. **Future enterprise customers** needing white-label, governance, and compliance controls
+
+---
+
+## 2. Repository structure
+
+```text
 brandflow/
 ├── apps/
-│   ├── web/                  # Next.js 15 frontend
-│   └── api/                  # NestJS backend
+│   ├── api/                  # NestJS API and async workers
+│   └── web/                  # Next.js dashboard application
 ├── packages/
-│   ├── ui/                   # shadcn/ui component library
-│   ├── db/                   # Prisma schema, migrations, seed
 │   ├── ai/                   # LLM gateway, prompt engine, quality control
-│   └── shared/               # Types, constants, validators (zod)
-├── infra/                    # Docker, docker-compose, IaC
-├── docs/                     # ADRs, API docs, runbooks
-├── turbo.json
+│   ├── db/                   # Prisma schema, client, seed, RLS helpers
+│   ├── shared/               # Shared types, validators, constants
+│   ├── tsconfig/             # Central TS config presets
+│   └── ui/                   # Shared React UI primitives
+├── docs/                     # Product docs, ADRs, runbooks, roadmap
+├── infra/                    # Local infra and deployment support
 ├── package.json
-├── .env.example
+├── turbo.json
 └── PLAN.md
 ```
 
-### Tech Stack
+### Runtime defaults
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 15, TypeScript, Tailwind CSS 4, shadcn/ui |
-| Backend | NestJS 11, TypeScript |
-| Database | PostgreSQL 16 (Row-Level Security) |
-| ORM | Prisma 6 |
-| Cache | Redis 7 |
-| Queue | BullMQ |
-| Storage | S3-compatible (AWS S3 / MinIO local) |
-| AI | Internal LLM Gateway (OpenAI, Anthropic, open-source fallback) |
-| Auth | Custom JWT + refresh rotation, OAuth 2.0, optional SAML |
-| Billing | Stripe (subscriptions, metering, invoices) |
-| Observability | OpenTelemetry, structured JSON logging, Sentry |
-| CI/CD | GitHub Actions |
-| Containerization | Docker, docker-compose (dev), Kubernetes (prod) |
+- Web local dev: `http://localhost:3002`
+- API local dev: `http://localhost:4000`
+- API docs in development: `http://localhost:4000/docs`
 
 ---
 
-## 2. Backend Module Map
+## 3. Architecture overview
 
-```
-apps/api/src/
-├── main.ts
-├── app.module.ts
-├── common/
-│   ├── guards/               # AuthGuard, RolesGuard, TenantGuard
-│   ├── interceptors/         # LoggingInterceptor, TenantInterceptor
-│   ├── decorators/           # @CurrentUser, @Roles, @TenantId
-│   ├── filters/              # GlobalExceptionFilter
-│   ├── middleware/            # TenantContextMiddleware, RateLimitMiddleware
-│   └── pipes/                # ZodValidationPipe
-├── modules/
-│   ├── auth/                 # Login, register, OAuth, MFA, sessions, tokens
-│   ├── business/             # Workspace CRUD, onboarding, health score
-│   ├── brand/                # Brand profiles, assets, governance rules
-│   ├── knowledge/            # Ingestion pipeline, KB entries, staleness
-│   ├── prompt/               # Versioned prompts, layers, A/B, routing
-│   ├── content/              # Generator, editor, versions, briefs
-│   ├── image/                # Image generation, compliance, alt text
-│   ├── template/             # Template CRUD, placeholders, performance
-│   ├── campaign/             # Campaign container, cloning, health score
-│   ├── approval/             # Workflow engine, SLA, escalation, compliance
-│   ├── social/               # Account connector, OAuth tokens, refresh
-│   ├── scheduler/            # Scheduling, timezone, optimal time
-│   ├── automation/           # Triggers, flows, blocks, error recovery
-│   └── analytics/            # Event pipeline, metrics, learning loop
-└── config/
-    ├── database.config.ts
-    ├── redis.config.ts
-    ├── s3.config.ts
-    ├── stripe.config.ts
-    └── llm.config.ts
-```
+### Application layers
 
-Each module follows NestJS convention:
-```
-modules/auth/
-├── auth.module.ts
-├── auth.controller.ts
-├── auth.service.ts
-├── auth.guard.ts
-├── dto/
-│   ├── login.dto.ts
-│   ├── register.dto.ts
-│   └── refresh-token.dto.ts
-├── strategies/
-│   ├── jwt.strategy.ts
-│   ├── google.strategy.ts
-│   └── github.strategy.ts
-└── auth.spec.ts
-```
+| Layer | Responsibility | Main locations |
+| --- | --- | --- |
+| Experience | Auth, dashboard, workspace flows, dashboards, editors | `apps/web` |
+| API | Business logic, auth, queues, publishing, SaaS rules | `apps/api` |
+| Domain model | Multi-tenant schema and relations | `packages/db/prisma/schema.prisma` |
+| AI platform | Provider routing, prompt resolution, quality control, cost tracking | `packages/ai` |
+| Shared contracts | DTOs, schemas, constants, types | `packages/shared` |
+| Design system | Shared UI components and utility functions | `packages/ui` |
+
+### Core system shape
+
+1. **Workspace and access** — auth, memberships, roles, sessions, subscriptions
+2. **Agency operating model** — businesses, child businesses, customers, projects
+3. **Intelligence system** — brands, knowledge sources, entries, prompts, quality
+4. **Planning and creation** — briefs, campaigns, content, templates, assets
+5. **Operations layer** — approvals, schedules, publish jobs, social accounts, notifications
+6. **Learning and monetization** — analytics events, performance metrics, cost events, LLM settings
 
 ---
 
-## 3. Frontend Structure
+## 4. Backend module inventory
 
-```
-apps/web/
-├── app/                      # Next.js App Router
-│   ├── (auth)/
-│   │   ├── login/
-│   │   ├── register/
-│   │   └── forgot-password/
-│   ├── (dashboard)/
-│   │   ├── layout.tsx        # Sidebar + TopBar shell
-│   │   ├── page.tsx          # Home dashboard
-│   │   ├── intelligence/
-│   │   │   ├── brands/
-│   │   │   ├── knowledge/
-│   │   │   └── prompts/
-│   │   ├── planning/
-│   │   │   ├── briefs/
-│   │   │   └── campaigns/
-│   │   ├── create/
-│   │   │   ├── content/
-│   │   │   ├── images/
-│   │   │   ├── design/
-│   │   │   └── templates/
-│   │   ├── libraries/
-│   │   │   ├── assets/
-│   │   │   ├── content/
-│   │   │   └── brand/
-│   │   ├── review/
-│   │   │   ├── approvals/
-│   │   │   ├── compliance/
-│   │   │   └── audit/
-│   │   ├── publish/
-│   │   │   ├── calendar/
-│   │   │   ├── queue/
-│   │   │   └── connections/
-│   │   ├── automate/
-│   │   │   ├── builder/
-│   │   │   └── active/
-│   │   ├── analytics/
-│   │   │   ├── performance/
-│   │   │   └── insights/
-│   │   └── settings/
-│   │       ├── workspace/
-│   │       ├── team/
-│   │       ├── billing/
-│   │       ├── api-keys/
-│   │       ├── integrations/
-│   │       └── llm/
-│   └── api/                  # Next.js API routes (BFF proxy)
-├── components/
-│   ├── layout/               # Sidebar, TopBar, Breadcrumbs
-│   ├── content/              # ContentEditor, ContentCard
-│   ├── brand/                # BrandProfileForm, BrandAssets
-│   ├── campaign/             # CampaignBuilder, CampaignHealth
-│   ├── calendar/             # CalendarView, ScheduleCard
-│   ├── approval/             # ApprovalQueue, ReviewPanel
-│   ├── automation/           # FlowBuilder, TriggerConfig
-│   └── analytics/            # Charts, MetricCards
-├── hooks/
-├── lib/
-│   ├── api-client.ts         # Typed fetch wrapper
-│   ├── auth.ts               # Session management
-│   └── utils.ts
-├── stores/                   # Zustand stores
-└── styles/
-```
+The API already exposes most of the platform surface through top-level feature modules:
+
+| Module | Purpose | Current role in product |
+| --- | --- | --- |
+| `auth` | Register, login, refresh, MFA, OAuth, sessions | Core foundation |
+| `business` | Workspace settings, members, invites | Core foundation |
+| `brand` | Brand identities, health score, AI analysis | Strategic differentiator |
+| `knowledge` | Ingestion pipeline, entries, reviews, jobs | Strategic differentiator |
+| `prompt` | Layered prompt versioning | AI control plane |
+| `content` | AI generation, versions, quality, cost tracking | Core creation engine |
+| `brief` | Brief capture and AI suggestions | Planning layer |
+| `campaign` | Campaign grouping and health | Planning layer |
+| `approval` | Review queue and decisions | Operations layer |
+| `social` | Social account connection and token handling | Operations layer |
+| `scheduler` | Scheduling and publish queue handoff | Operations layer |
+| `automation` | Triggered workflow execution | Growth/scale layer |
+| `analytics` | Event collection and attribution | Monetization/learning layer |
+| `customer` | Client CRM records | Agency operating model |
+| `project` | Client delivery/projects | Agency operating model |
+| `image` | Asset upload and creative generation scaffolding | Creation support |
+| `template` | Reusable content templates | Creation support |
+| `llm-settings` | Per-business provider and API-key config | AI controls |
+| `quality` | Content validation and remediation | Governance layer |
 
 ---
 
-## 4. Database Schema (Core Entities)
+## 5. Frontend product surface
 
-All tables include: `id UUID PK DEFAULT gen_random_uuid()`, `created_at`, `updated_at`, `business_id UUID NOT NULL` (tenant key).
+The Next.js dashboard is broad, but current maturity is mixed.
 
-### Layer 0–1: Foundation
+### Already API-backed or close to operational
 
-```prisma
-model Business {
-  id              String   @id @default(uuid())
-  name            String
-  slug            String   @unique
-  parentId        String?  // Agency parent
-  whiteLabel      Json?    // logo, domain, colors
-  healthScore     Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+- `intelligence/brands`
+- `campaigns`
+- `projects`
+- `settings/clients`
+- `automations`
+- auth flows and shared dashboard shell
 
-  parent          Business?      @relation("AgencyChildren", fields: [parentId], references: [id])
-  children        Business[]     @relation("AgencyChildren")
-  memberships     Membership[]
-  brands          Brand[]
-  subscriptions   Subscription[]
-  auditLogs       AuditLog[]
-}
+### Present in navigation but still static, mock-heavy, or partial
 
-model User {
-  id              String   @id @default(uuid())
-  email           String   @unique
-  passwordHash    String?
-  mfaEnabled      Boolean  @default(false)
-  mfaSecret       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+- `dashboard`
+- `intelligence/knowledge`
+- `analytics`
+- `publish/social`
+- `settings/billing`
+- parts of review/publish/intelligence monitoring
 
-  memberships     Membership[]
-  sessions        Session[]
-}
+### Practical implication
 
-model Membership {
-  id              String   @id @default(uuid())
-  userId          String
-  businessId      String
-  roleId          String
-  createdAt       DateTime @default(now())
+The main implementation focus is **productization**:
 
-  user            User     @relation(fields: [userId], references: [id])
-  business        Business @relation(fields: [businessId], references: [id])
-  role            Role     @relation(fields: [roleId], references: [id])
-
-  @@unique([userId, businessId])
-}
-
-model Role {
-  id              String   @id @default(uuid())
-  businessId      String?  // null = system role
-  name            String
-  permissions     Json     // string[]
-  isCustom        Boolean  @default(false)
-  createdAt       DateTime @default(now())
-
-  memberships     Membership[]
-}
-
-model Session {
-  id              String   @id @default(uuid())
-  userId          String
-  refreshToken    String   @unique
-  deviceInfo      Json?
-  expiresAt       DateTime
-  createdAt       DateTime @default(now())
-
-  user            User     @relation(fields: [userId], references: [id])
-}
-
-model Subscription {
-  id              String   @id @default(uuid())
-  businessId      String
-  plan            String   // starter, growth, agency, enterprise
-  status          String   // active, past_due, canceled, trialing
-  stripeCustomerId    String?
-  stripeSubscriptionId String?
-  currentPeriodEnd    DateTime?
-  seatLimit       Int      @default(3)
-  tokenBudget     Int      @default(100000)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  business        Business @relation(fields: [businessId], references: [id])
-}
-
-model AuditLog {
-  id              String   @id @default(uuid())
-  businessId      String
-  userId          String?
-  action          String
-  entityType      String
-  entityId        String?
-  before          Json?
-  after           Json?
-  hash            String   // SHA-256 chain
-  previousHash    String?
-  createdAt       DateTime @default(now())
-
-  business        Business @relation(fields: [businessId], references: [id])
-}
-
-model CostEvent {
-  id              String   @id @default(uuid())
-  businessId      String
-  module          String   // generation, compliance, analysis
-  model           String   // gpt-4o, claude-sonnet, etc.
-  inputTokens     Int
-  outputTokens    Int
-  costCents       Int
-  requestId       String
-  createdAt       DateTime @default(now())
-}
-```
-
-### Layer 2: Intelligence
-
-```prisma
-model Brand {
-  id              String   @id @default(uuid())
-  businessId      String
-  name            String
-  positioning     String?
-  audience        String?
-  tone            Json?    // string[]
-  visualRules     Json?    // colors, typography, logo URLs
-  governance      Json?    // banned phrases, required phrases, CTA prefs
-  healthScore     Int      @default(0)
-  version         Int      @default(1)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  business        Business @relation(fields: [businessId], references: [id])
-  knowledgeSources KnowledgeSource[]
-  contents        Content[]
-}
-
-model KnowledgeSource {
-  id              String   @id @default(uuid())
-  businessId      String
-  brandId         String
-  type            String   // pdf, docx, url, text, api
-  sourceUrl       String?
-  fileName        String?
-  status          String   // pending, processing, completed, failed
-  lastIngested    DateTime?
-  createdAt       DateTime @default(now())
-
-  brand           Brand    @relation(fields: [brandId], references: [id])
-  entries         KnowledgeEntry[]
-}
-
-model KnowledgeEntry {
-  id              String   @id @default(uuid())
-  businessId      String
-  sourceId        String
-  type            String   // fact, faq, claim, offer, pain_point, testimonial
-  content         String
-  confidence      Float    @default(1.0)
-  isStale         Boolean  @default(false)
-  staleAt         DateTime?
-  embedding       Bytes?   // vector embedding for RAG
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  source          KnowledgeSource @relation(fields: [sourceId], references: [id])
-}
-
-model Prompt {
-  id              String   @id @default(uuid())
-  businessId      String?  // null = platform-level
-  module          String   // social, ad, blog, compliance
-  layer           String   // platform, business, brand, campaign
-  name            String
-  template        String   @db.Text
-  version         Int      @default(1)
-  isActive        Boolean  @default(true)
-  abVariant       String?  // A, B, control
-  performanceScore Float?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
-model QualityCheck {
-  id              String   @id @default(uuid())
-  businessId      String
-  contentId       String
-  passed          Boolean
-  confidenceScore Float
-  violations      Json?    // {type, severity, detail}[]
-  checkedAt       DateTime @default(now())
-}
-```
-
-### Layer 3–4: Planning & Creation
-
-```prisma
-model Campaign {
-  id              String   @id @default(uuid())
-  businessId      String
-  name            String
-  status          String   // draft, active, completed, archived
-  healthScore     Int      @default(0)
-  clonedFromId    String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  briefs          Brief[]
-  contents        Content[]
-  schedules       Schedule[]
-}
-
-model Brief {
-  id              String   @id @default(uuid())
-  businessId      String
-  campaignId      String?
-  objective       String
-  audience        String?
-  platform        String?  // linkedin, instagram, facebook, twitter
-  cta             String?
-  tone            String?
-  format          String?  // post, carousel, story, reel, article
-  contentType     String?  // organic, ad, blog
-  businessGoal    String?
-  isComplete      Boolean  @default(false)
-  createdAt       DateTime @default(now())
-
-  campaign        Campaign? @relation(fields: [campaignId], references: [id])
-  contents        Content[]
-}
-
-model Content {
-  id              String   @id @default(uuid())
-  businessId      String
-  brandId         String
-  briefId         String?
-  campaignId      String?
-  platform        String
-  type            String   // post, caption, ad_copy, blog_snippet, hook, cta
-  body            String   @db.Text
-  status          String   // draft, in_review, revision_requested, approved, scheduled, published, archived
-  qualityScore    Float?
-  promptId        String?
-  promptVersion   Int?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  brand           Brand    @relation(fields: [brandId], references: [id])
-  brief           Brief?   @relation(fields: [briefId], references: [id])
-  campaign        Campaign? @relation(fields: [campaignId], references: [id])
-  versions        ContentVersion[]
-  approvals       Approval[]
-  qualityChecks   QualityCheck[]
-  publishJobs     PublishJob[]
-}
-
-model ContentVersion {
-  id              String   @id @default(uuid())
-  contentId       String
-  version         Int
-  body            String   @db.Text
-  editedBy        String?
-  createdAt       DateTime @default(now())
-
-  content         Content  @relation(fields: [contentId], references: [id])
-}
-
-model Asset {
-  id              String   @id @default(uuid())
-  businessId      String
-  type            String   // image, logo, video, document
-  fileName        String
-  mimeType        String
-  s3Key           String
-  cdnUrl          String?
-  tags            Json?    // string[]
-  metadata        Json?
-  version         Int      @default(1)
-  createdAt       DateTime @default(now())
-}
-
-model Template {
-  id              String   @id @default(uuid())
-  businessId      String?  // null = global
-  type            String   // social_post, ad, creative, campaign, workflow
-  name            String
-  body            String   @db.Text
-  placeholders    Json?    // string[]
-  performanceScore Float?
-  usageCount      Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-```
-
-### Layer 5–7: Operations
-
-```prisma
-model SocialAccount {
-  id              String   @id @default(uuid())
-  businessId      String
-  platform        String   // linkedin, instagram, facebook
-  accountType     String   // personal, company, page
-  externalId      String
-  name            String
-  accessToken     String   // encrypted
-  refreshToken    String?  // encrypted
-  tokenExpiresAt  DateTime?
-  scopes          Json?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  publishJobs     PublishJob[]
-}
-
-model Approval {
-  id              String   @id @default(uuid())
-  businessId      String
-  contentId       String
-  reviewerId      String?
-  reviewType      String   // internal, client, owner
-  status          String   // pending, approved, rejected, revision_requested
-  slaDeadline     DateTime?
-  note            String?
-  reason          String?  // rejection reason
-  decidedAt       DateTime?
-  createdAt       DateTime @default(now())
-
-  content         Content  @relation(fields: [contentId], references: [id])
-}
-
-model Schedule {
-  id              String   @id @default(uuid())
-  businessId      String
-  contentId       String?
-  campaignId      String?
-  socialAccountId String
-  scheduledAt     DateTime
-  timezone        String   @default("UTC")
-  type            String   // one_time, recurring
-  recurringRule   String?  // cron expression
-  status          String   // pending, published, cancelled
-  createdAt       DateTime @default(now())
-
-  campaign        Campaign? @relation(fields: [campaignId], references: [id])
-}
-
-model PublishJob {
-  id              String   @id @default(uuid())
-  businessId      String
-  contentId       String
-  socialAccountId String
-  status          String   // pending, processing, published, failed, retrying, dead_letter
-  failureReason   String?
-  failureClass    String?  // token_expired, api_failure, invalid_media, rate_limit
-  retryCount      Int      @default(0)
-  maxRetries      Int      @default(3)
-  nextRetryAt     DateTime?
-  publishedAt     DateTime?
-  externalPostId  String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  content         Content       @relation(fields: [contentId], references: [id])
-  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id])
-}
-
-model Notification {
-  id              String   @id @default(uuid())
-  businessId      String
-  userId          String
-  type            String   // approval_pending, publish_failed, publish_success, token_expiry, sla_breach
-  channel         String   // in_app, email, webhook
-  title           String
-  body            String?
-  isRead          Boolean  @default(false)
-  deliveredAt     DateTime?
-  createdAt       DateTime @default(now())
-}
-```
-
-### Layer 8–9: Automation & Analytics
-
-```prisma
-model Automation {
-  id              String   @id @default(uuid())
-  businessId      String
-  name            String
-  triggerType     String   // cron, event, webhook
-  triggerConfig   Json     // cron expression, event name, webhook path
-  steps           Json     // ordered block definitions
-  isActive        Boolean  @default(false)
-  isDryRun        Boolean  @default(false)
-  errorPolicy     Json?    // retry counts, circuit breaker config
-  lastRunAt       DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
-model AutomationRun {
-  id              String   @id @default(uuid())
-  automationId    String
-  businessId      String
-  status          String   // running, completed, failed, paused
-  triggerEvent    Json?
-  stepResults     Json?    // per-step outcome
-  failedAtStep    Int?
-  isDryRun        Boolean  @default(false)
-  startedAt       DateTime @default(now())
-  completedAt     DateTime?
-}
-
-model AnalyticsEvent {
-  id              String   @id @default(uuid())
-  businessId      String
-  source          String   // publish, approval, generation, social_api
-  eventType       String
-  entityType      String?
-  entityId        String?
-  payload         Json
-  createdAt       DateTime @default(now())
-}
-
-model PerformanceMetric {
-  id              String   @id @default(uuid())
-  businessId      String
-  contentId       String
-  platform        String
-  reach           Int      @default(0)
-  impressions     Int      @default(0)
-  engagement      Int      @default(0)
-  clicks          Int      @default(0)
-  ctr             Float    @default(0)
-  collectedAt     DateTime @default(now())
-}
-```
+- connect currently isolated CRUD flows into full journeys
+- convert mock dashboards into live API-backed screens
+- tighten information architecture around the agency-first experience
 
 ---
 
-## 5. packages/ai — LLM Gateway Design
+## 6. Domain model highlights
 
-```
-packages/ai/
-├── src/
-│   ├── gateway.ts            # Route requests to correct provider
-│   ├── providers/
-│   │   ├── openai.ts
-│   │   ├── anthropic.ts
-│   │   └── fallback.ts
-│   ├── prompt-engine.ts      # Resolve prompt layers, inject context
-│   ├── quality-control.ts    # Fact-check, hallucination detect, brand validate
-│   ├── cost-tracker.ts       # Emit CostEvent per request
-│   ├── rate-limiter.ts       # Per-business token budget enforcement
-│   └── types.ts
-├── package.json
-└── tsconfig.json
-```
+The Prisma schema already supports the intended SaaS shape.
 
-**Request flow:**
-```
-User Request
-  → Prompt Engine (resolve layers, inject brand/KB context)
-  → Cost Check (budget remaining?)
-  → LLM Gateway (route to provider)
-  → Quality Control (fact-check, brand compliance)
-  → Cost Event (emit usage)
-  → Response
-```
+### Strong foundations already present
+
+- **Hierarchical workspaces** through `Business.parentId`
+- **White-label potential** through `Business.whiteLabel`
+- **Usage and billing primitives** through `Subscription`, `CostEvent`, `LlmSettings`
+- **Agency operations** through `Customer` and `Project`
+- **Brand intelligence** through `Brand`, `KnowledgeSource`, `KnowledgeEntry`, `Prompt`, `QualityCheck`
+- **Execution system** through `Approval`, `Schedule`, `PublishJob`, `Automation`, `AutomationRun`
+- **Learning loop** through `AnalyticsEvent` and `PerformanceMetric`
+
+### Source of truth
+
+Do not duplicate the schema here. Use:
+
+- `packages/db/prisma/schema.prisma` as the canonical data model
+- `packages/db/src/rls.ts` for tenant-context and isolation behavior
 
 ---
 
-## 6. packages/db — Prisma + RLS
+## 7. Product maturity snapshot
 
-```
-packages/db/
-├── prisma/
-│   ├── schema.prisma
-│   ├── migrations/
-│   └── seed.ts
-├── src/
-│   ├── client.ts             # PrismaClient singleton
-│   ├── rls.ts                # SET app.current_tenant_id before queries
-│   └── types.ts              # Re-export generated types
-├── package.json
-└── tsconfig.json
-```
+### What is already strong
 
-**Row-Level Security**: PostgreSQL RLS policies on every tenant-scoped table:
-```sql
-ALTER TABLE contents ENABLE ROW LEVEL SECURITY;
-CREATE POLICY tenant_isolation ON contents
-  USING (business_id = current_setting('app.current_tenant_id')::uuid);
-```
+- broad backend module coverage
+- coherent multi-tenant schema
+- AI generation path with cost tracking and quality checks
+- auth/session bootstrapping and workspace creation
+- early agency-facing surfaces via clients and projects
 
-Prisma `$executeRaw` sets tenant context before each request via middleware.
+### What still needs product work
+
+- real social connectors and publish reliability
+- live analytics and billing UX
+- better permissions and tenant-context enforcement depth
+- replacement of mock dashboards with production data
+- clearer agency/client workspace UX and navigation
 
 ---
 
-## 7. Phased Delivery Plan
+## 8. Current implementation priorities
 
-### Phase 1 — MVP (Weeks 1–12)
+### Priority 1 — Platform stabilization
 
-**Goal:** First paying customer publishes their first post.
+- tighten tenant and permission enforcement
+- reduce configuration drift and tooling warnings
+- improve operational visibility around generation, approvals, queues, and publishing
 
-| Week | Sprint Focus | Deliverables |
-|------|-------------|-------------|
-| 1–2 | **Infra & Foundation** | Monorepo setup (Turborepo), Docker dev env, PostgreSQL + Redis, Prisma schema (Foundation tables), RLS policies, CI pipeline, env config |
-| 3–4 | **Auth & Billing** | Email/password auth, JWT + refresh rotation, OAuth (Google), MFA (TOTP), session management, Stripe integration (Starter plan), subscription lifecycle, TenantGuard |
-| 5–6 | **Brand & Knowledge** | Brand CRUD + governance rules, knowledge ingestion pipeline (PDF, DOCX, URL, text), KB entry management, staleness detection, embedding generation |
-| 7–8 | **AI Core & Content** | LLM Gateway (OpenAI + Anthropic), prompt engine (versioned, layered), content generator (social posts), quality control (fact-check + brand compliance), cost tracking |
-| 9–10 | **Approval & Publishing** | Approval workflow (draft → approved → published), basic compliance checker (rule engine), LinkedIn connector (OAuth + publish), publishing queue + DLQ, scheduler (one-time) |
-| 11–12 | **Dashboard & Polish** | Home dashboard, observability (structured logging, tracing, health checks), onboarding wizard, content editor (basic), rate limiting, E2E testing, staging deploy |
+### Priority 2 — Agency operating core
 
-**Phase 1 Exit Criteria:**
-- [ ] Auth flow complete (email + OAuth + MFA)
-- [ ] At least 1 Stripe plan live with metering
-- [ ] Brand → Knowledge → Generate → Approve → Publish flow works end-to-end
-- [ ] LinkedIn publishing with DLQ and retry
-- [ ] Publish success rate > 98%
-- [ ] Quality control catches brand violations
-- [ ] RLS enforced on all tenant tables
-- [ ] Observability: logs, traces, error tracking live
-- [ ] 3 paying businesses onboarded
+- connect business, customers, projects, and brands into one coherent workflow
+- support agency teams managing multiple client engagements without screen-hopping
 
-### Phase 2 — Growth (Weeks 13–24)
+### Priority 3 — Intelligence-to-execution loop
 
-**Goal:** Agency accounts live, automation running, multi-channel publishing.
+- brand + knowledge → prompt resolution → content generation → approval → schedule → publish → analytics
 
-| Week | Sprint Focus | Deliverables |
-|------|-------------|-------------|
-| 13–14 | **Image & Design** | Image generator (template-based + AI), image compliance, alt text, web design editor (canvas), asset library with CDN |
-| 15–16 | **Multi-Channel** | Instagram connector, Facebook connector, per-platform preview, content calendar (monthly/weekly), drag-and-drop reschedule |
-| 17–18 | **Campaign Module** | Campaign CRUD, briefs system, campaign health score, campaign cloning, cross-campaign view |
-| 19–20 | **Automation Engine** | Trigger system (cron + event), flow builder UI, automation blocks (generate → approve → schedule → publish), basic error handling |
-| 21–22 | **Agency & API** | Agency parent/child model, reseller billing, client portals, REST API (OpenAPI spec), API keys, webhook events, developer docs |
-| 23–24 | **Analytics v1** | Analytics event pipeline, performance dashboard (reach, engagement, CTR), content library with performance tagging, best-time-to-post |
+### Priority 4 — Monetization and controls
 
-**Phase 2 Exit Criteria:**
-- [ ] 3 social platforms publishing successfully
-- [ ] Campaign → multi-post → multi-channel flow works
-- [ ] At least 1 automation running in production
-- [ ] Agency with 3+ child businesses active
-- [ ] Public API serving external integrations
-- [ ] Analytics dashboard showing real metrics
+- live billing, entitlements, usage dashboards, token budgets, and plan-aware feature gating
 
-### Phase 3 — Scale (Weeks 25–40)
-
-**Goal:** Enterprise accounts, platform intelligence, self-optimizing system.
-
-| Week | Sprint Focus | Deliverables |
-|------|-------------|-------------|
-| 25–28 | **Intelligence Loop** | Learning loop (performance → prompt optimization), prompt A/B testing framework, regression detection, content decay tracking |
-| 29–32 | **Advanced Automation** | Error recovery (step-level retry, circuit breaker), dry-run mode, flow simulation, human escalation, partial flow recovery |
-| 33–36 | **Enterprise** | SAML SSO, white-label (custom domain, branding), multi-language + locale, GDPR tooling (export, delete, DPA), data warehouse export |
-| 37–40 | **Mobile & Scale** | PWA (approval on mobile, push notifications), cross-business recommendations, advanced analytics (cohort analysis, comparative periods), platform admin dashboard |
+The detailed phased roadmap for this work lives in `docs/agency-first-saas-roadmap.md`.
 
 ---
 
-## 8. Key Infrastructure Decisions
+## 9. Engineering conventions for this repo
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| **Tenant isolation** | PostgreSQL RLS | DB-level enforcement, no app-layer leaks |
-| **Auth tokens** | JWT access (15min) + refresh rotation (7d) | Stateless auth with revocation capability |
-| **Queue** | BullMQ on Redis | Native Node.js, reliable, DLQ support built-in |
-| **File storage** | S3 + CDN (CloudFront) | Scalable, MinIO for local dev |
-| **AI routing** | Internal gateway, not direct API calls | Cost tracking, fallback chains, prompt versioning |
-| **Audit log** | Append-only with SHA-256 chain | Compliance-ready, tamper-evident |
-| **Billing events** | Emit on every AI call | Usage-based pricing requires accurate metering from day 1 |
-| **Prompt management** | Versioned in DB, not hardcoded | Rollback, A/B test, regression tracking |
-| **API design** | REST + OpenAPI | SDK generation, developer portal |
-| **State management (FE)** | Zustand + TanStack Query | Lightweight, server-state focused |
+- Use the root workspace package manager: **pnpm**, not per-package npm installs
+- Prefer root scripts such as `pnpm build`, `pnpm typecheck`, and `pnpm test`
+- Treat `packages/db/prisma/schema.prisma` as the canonical domain contract
+- Prefer shared package changes over duplicating logic inside `apps/api` or `apps/web`
+- Keep navigation aligned with features that are genuinely live; do not overexpose mock screens
 
 ---
 
-## 9. Development Environment Setup
+## 10. Document map
 
-```bash
-# Prerequisites
-node >= 20, pnpm >= 9, docker, docker-compose
-
-# Clone & install
-git clone <repo> && cd brandflow
-pnpm install
-
-# Start infrastructure
-docker-compose up -d  # PostgreSQL, Redis, MinIO
-
-# Setup database
-pnpm --filter db db:push
-pnpm --filter db db:seed
-
-# Run development
-pnpm dev  # Starts both web (3002) and api (4000)
-```
-
-### docker-compose services:
-- `postgres:16` — port 5432
-- `redis:7` — port 6379
-- `minio` — port 9000 (S3-compatible local storage)
+| Document | Purpose |
+| --- | --- |
+| `PLAN.md` | Architecture, repo structure, implementation priorities |
+| `docs/agency-first-saas-roadmap.md` | Product roadmap, phases, release sequencing |
+| `packages/db/prisma/schema.prisma` | Canonical domain model |
+| `apps/api/src/app.module.ts` | Active backend module composition |
+| `apps/web/src/components/layout/sidebar.tsx` | Current product navigation and IA |
 
 ---
 
-## 10. Testing Strategy
+## 11. Immediate execution checklist
 
-| Type | Tool | Coverage Target |
-|------|------|----------------|
-| Unit | Vitest | Services, utilities, prompt engine |
-| Integration | Vitest + Testcontainers | DB queries, queue processing, API endpoints |
-| E2E | Playwright | Critical flows: auth → generate → approve → publish |
-| API | Supertest | All REST endpoints |
-| Load | k6 | Publishing queue, AI gateway under load |
-
-**Critical test scenarios (Phase 1):**
-1. Full publish flow: brand → knowledge → generate → quality check → approve → schedule → publish
-2. Tenant isolation: User A cannot see User B's data
-3. DLQ: Failed publish → retry → dead letter → manual retry
-4. Cost enforcement: Hard limit blocks generation
-5. Token refresh: Expired OAuth token → auto-refresh → retry publish
+- [ ] stabilize TypeScript/tooling warnings and shared config drift
+- [ ] document the agency-first roadmap in repo docs
+- [ ] convert dashboard, analytics, knowledge, and billing screens from mock to live data
+- [ ] formalize the agency/client/project operating flow
+- [ ] connect the end-to-end intelligence-to-publishing journey
 
 ---
 
-## 11. Security Checklist
-
-- [x] Password hashing: argon2id
-- [x] JWT: short-lived access (15min), refresh rotation
-- [x] RLS on all tenant tables
-- [x] Rate limiting per endpoint per business
-- [x] Prompt injection detection on user inputs
-- [x] Content safety filter on AI outputs
-- [x] OAuth token encryption at rest
-- [x] CORS restricted to known origins
-- [x] CSRF protection on state-changing endpoints
-- [x] Input validation (Zod) on all endpoints
-- [x] SQL injection prevention (Prisma parameterized queries)
-- [x] File upload validation (type, size, content scanning)
-- [x] Secrets management (env vars, never in code)
-- [x] Audit logging on all sensitive actions
-
----
-
-## 12. Monitoring & Alerting
-
-| Metric | Threshold | Action |
-|--------|-----------|--------|
-| Publish success rate | < 98% | Page on-call |
-| API p95 latency | > 2s | Alert in Slack |
-| Queue backlog | > 100 jobs | Alert + scale workers |
-| Error rate | > 1% of requests | Page on-call |
-| Token budget at 80% | Per business | Notify business admin |
-| OAuth token expiry | 7 days before | Notify + in-app prompt |
-| DLQ depth | > 10 jobs | Alert + dashboard flag |
-| AI quality check failure rate | > 20% | Alert AI team |
-
----
-
-*BrandFlow — Implementation Plan v2.0*
-*Generated May 2026*
+*BrandFlow architecture index — maintained alongside active implementation.*

@@ -156,6 +156,49 @@ export interface BrandContext {
   knowledgeEntries?: string[];
 }
 
+export interface BrandAnalysisSourceInput {
+  type: 'url' | 'text';
+  value: string;
+  label?: string | null;
+}
+
+export interface BrandAnalysisBrandDraft {
+  name: string;
+  tagline?: string | null;
+  description?: string | null;
+  industry?: string | null;
+  website?: string | null;
+  positioning?: string | null;
+  audience?: string | null;
+  differentiators?: string | null;
+  tone: string[];
+  governance: {
+    bannedPhrases: string[];
+    requiredPhrases: string[];
+    ctaPreferences: string[];
+    requiredDisclaimer?: string | null;
+  };
+}
+
+export interface BrandAnalysisResult {
+  brand: BrandAnalysisBrandDraft;
+  diagnostics: {
+    sourceCount: number;
+    evidenceCount: number;
+    warnings: string[];
+    sources: Array<{
+      type: 'knowledge_source' | 'url' | 'text';
+      label: string;
+      url?: string | null;
+      evidenceCount: number;
+      status?: string | null;
+    }>;
+  };
+  requestId: string;
+  provider: string;
+  model: string;
+}
+
 // ─── Webhook Event ────────────────────────────────────────────────
 export interface WebhookEvent {
   id: string;

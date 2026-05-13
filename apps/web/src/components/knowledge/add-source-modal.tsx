@@ -247,7 +247,8 @@ function FileSourceForm({ onBack, onSuccess }: any) {
   };
 
   const handleSubmit = async () => {
-    if (files.length === 0) return setError('Please select a file');
+    const firstFile = files[0];
+    if (!firstFile) return setError('Please select a file');
     setIsSubmitting(true);
     setError(null);
 
@@ -258,9 +259,9 @@ function FileSourceForm({ onBack, onSuccess }: any) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: files[0].name,
+          name: firstFile.name,
           type: 'pdf', // Simplification for now
-          url: files[0].name,
+          url: firstFile.name,
           trustLevel: 'high'
         })
       });

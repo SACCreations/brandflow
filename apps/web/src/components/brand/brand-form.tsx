@@ -222,7 +222,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Brand Name</label>
               <Input {...register('name')} placeholder="e.g. Acme Corp" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
-              {errors.name && <p className="text-xs text-red-500 font-bold">{errors.name.message as string}</p>}
+              {errors['name'] && <p className="text-xs text-red-500 font-bold">{errors['name'].message as string}</p>}
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Industry</label>

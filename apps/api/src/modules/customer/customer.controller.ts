@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   ParseUUIDPipe,
 } from '@nestjs/common';
@@ -13,7 +14,14 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { CustomerService } from './customer.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { JwtPayload } from '@brandflow/shared';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import {
+  createCustomerSchema,
+  updateCustomerSchema,
+  type CreateCustomerDto,
+  type JwtPayload,
+  type UpdateCustomerDto,
+} from '@brandflow/shared';
 
 @ApiTags('customers')
 @ApiBearerAuth()
@@ -24,8 +32,12 @@ export class CustomerController {
 
   @Get()
   @ApiOperation({ summary: 'List all customers' })
-  findAll(@CurrentUser() user: JwtPayload) {
-    return this.customerService.findAll(user.businessId);
+  findAll(
+    @CurrentUser() user: JwtPayload,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.customerService.findAll(user.businessId, { status, search });
   }
 
   @Get(':id')
@@ -39,7 +51,10 @@ export class CustomerController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new customer' })
-  create(@CurrentUser() user: JwtPayload, @Body() data: any) {
+  create(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(createCustomerSchema)) data: CreateCustomerDto,
+  ) {
     return this.customerService.create(user.businessId, data);
   }
 
@@ -48,7 +63,7 @@ export class CustomerController {
   update(
     @CurrentUser() user: JwtPayload,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() data: any,
+    @Body(new ZodValidationPipe(updateCustomerSchema)) data: UpdateCustomerDto,
   ) {
     return this.customerService.update(id, user.businessId, data);
   }

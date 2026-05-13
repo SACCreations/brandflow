@@ -1,22 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { 
-  Briefcase, 
   Plus, 
   Search, 
-  Filter, 
-  MoreVertical, 
   Mail, 
   Phone, 
   Building2, 
-  Globe, 
   Trash2, 
   Edit3, 
-  CheckCircle2, 
   X,
   Loader2,
-  User
+  User,
+  AlertCircle,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
@@ -30,6 +27,9 @@ interface Client {
   company: string | null;
   phone: string | null;
   status: string;
+  _count?: {
+    projects: number;
+  };
   createdAt: string;
 }
 
@@ -38,6 +38,8 @@ export default function ClientsSettingsPage() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'lead' | 'inactive'>('all');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -47,9 +49,14 @@ export default function ClientsSettingsPage() {
   });
 
   const { data: clients, isLoading, isError } = useQuery({
-    queryKey: ['clients'],
+    queryKey: ['clients', searchQuery, statusFilter],
     queryFn: async () => {
-      const res = await apiClient.get('/customers');
+      const res = await apiClient.get('/customers', {
+        params: {
+          search: searchQuery || undefined,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+        },
+      });
       return res.data.data as Client[];
     },
   });
@@ -93,6 +100,13 @@ export default function ClientsSettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       toast({ title: 'Client Removed', description: 'The client has been deleted.' });
     },
+    onError: (err: any) => {
+      toast({
+        title: 'Delete Failed',
+        description: err.response?.data?.message || 'This client could not be removed.',
+        variant: 'destructive',
+      });
+    },
   });
 
   const resetForm = () => {
@@ -117,8 +131,6 @@ export default function ClientsSettingsPage() {
       toast({ title: 'Validation Error', description: 'Client name is required.', variant: 'destructive' });
       return;
     }
-    
-    console.log('Submitting Client:', formData);
     
     if (editingClient) {
       updateMutation.mutate({ id: editingClient.id, data: formData });
@@ -169,9 +181,24 @@ export default function ClientsSettingsPage() {
       {/* Grid of Clients */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
         <div className="flex items-center gap-6">
-          <span className="text-sm font-bold text-brand-600 border-b-2 border-brand-600 pb-4 -mb-4">All Clients ({clients?.length || 0})</span>
-          <span className="text-sm font-bold text-gray-400 hover:text-gray-600 cursor-pointer">Active</span>
-          <span className="text-sm font-bold text-gray-400 hover:text-gray-600 cursor-pointer">Leads</span>
+          {[
+            { label: `All Clients (${clients?.length || 0})`, value: 'all' },
+            { label: 'Active', value: 'active' },
+            { label: 'Leads', value: 'lead' },
+            { label: 'Inactive', value: 'inactive' },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setStatusFilter(tab.value as typeof statusFilter)}
+              className={`text-sm font-bold pb-4 -mb-4 border-b-2 transition-colors ${
+                statusFilter === tab.value
+                  ? 'text-brand-600 border-brand-600'
+                  : 'text-gray-400 border-transparent hover:text-gray-600'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -179,6 +206,8 @@ export default function ClientsSettingsPage() {
             <input 
               type="text" 
               placeholder="Search database..." 
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
               className="rounded-xl border border-gray-100 bg-white pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
             />
           </div>
@@ -193,6 +222,12 @@ export default function ClientsSettingsPage() {
                 <Building2 className="h-6 w-6" />
               </div>
               <div className="flex gap-1">
+                <Link
+                  href={`/settings/clients/${client.id}`}
+                  className="rounded-lg px-3 py-2 text-xs font-bold text-brand-600 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-brand-50"
+                >
+                  View
+                </Link>
                 <button 
                   onClick={() => handleEdit(client)}
                   className="rounded-lg p-2 text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -214,6 +249,9 @@ export default function ClientsSettingsPage() {
             </div>
 
             <div className="mt-6 space-y-3">
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <Building2 className="h-3.5 w-3.5 text-gray-400" /> {client._count?.projects ?? 0} linked project{(client._count?.projects ?? 0) === 1 ? '' : 's'}
+              </div>
               {client.email && (
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Mail className="h-3.5 w-3.5 text-gray-400" /> {client.email}

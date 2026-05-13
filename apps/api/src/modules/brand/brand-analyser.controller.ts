@@ -8,7 +8,8 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { BrandAnalyserService } from './brand-analyser.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import type { JwtPayload } from '@brandflow/shared';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import { brandAnalysisRequestSchema, type BrandAnalysisRequestDto, type JwtPayload } from '@brandflow/shared';
 
 @ApiTags('intelligence')
 @ApiBearerAuth()
@@ -21,8 +22,8 @@ export class BrandAnalyserController {
   @ApiOperation({ summary: 'Analyse multiple knowledge sources to extract brand identity' })
   analyse(
     @CurrentUser() user: JwtPayload,
-    @Body('sourceIds') sourceIds: string[],
+    @Body(new ZodValidationPipe(brandAnalysisRequestSchema)) dto: BrandAnalysisRequestDto,
   ) {
-    return this.brandAnalyserService.analyse(user.businessId, sourceIds);
+    return this.brandAnalyserService.analyse(user.businessId, dto);
   }
 }

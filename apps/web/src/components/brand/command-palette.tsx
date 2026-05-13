@@ -23,8 +23,10 @@ import {
 import { useRouter } from 'next/navigation';
 
 interface CommandPaletteProps {
-  onJump: (id: string) => void;
-  onSave: () => void;
+  onJump?: (id: string) => void;
+  onSave?: () => void;
+  open?: boolean;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const COMMANDS = [
@@ -37,44 +39,55 @@ const COMMANDS = [
   { id: 'settings', label: 'Brand Settings', icon: Settings, category: 'Actions' },
 ];
 
-export function CommandPalette({ onJump, onSave }: CommandPaletteProps) {
-  const [open, setOpen] = React.useState(false);
+export function CommandPalette({ onJump, onSave, open, setOpen }: CommandPaletteProps) {
+  const [internalOpen, setInternalOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const router = useRouter();
+
+  const isControlled = typeof open === 'boolean' && !!setOpen;
+  const paletteOpen = isControlled ? open : internalOpen;
+  const updateOpen = React.useCallback((value: boolean | ((current: boolean) => boolean)) => {
+    if (setOpen) {
+      setOpen(value as React.SetStateAction<boolean>);
+      return;
+    }
+
+    setInternalOpen(value as React.SetStateAction<boolean>);
+  }, [setOpen]);
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        updateOpen((current) => !current);
       }
     };
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
-  }, []);
+  }, [updateOpen]);
 
   const filteredCommands = query === '' 
     ? COMMANDS 
     : COMMANDS.filter(cmd => cmd.label.toLowerCase().includes(query.toLowerCase()));
 
   const handleSelect = (id: string) => {
-    setOpen(false);
-    if (id === 'save') onSave();
+    updateOpen(false);
+    if (id === 'save') onSave?.();
     else if (id === 'back') router.push('/intelligence/brands');
-    else onJump(id);
+    else onJump?.(id);
   };
 
   return (
     <>
       <button 
-        onClick={() => setOpen(true)}
+        onClick={() => updateOpen(true)}
         className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-brand-600 transition-all hover:scale-105 group"
       >
         <Command className="w-3.5 h-3.5" />
         <span>Press <kbd className="font-sans font-bold text-gray-900 dark:text-gray-100 group-hover:text-brand-600">⌘K</kbd> to open Command Palette</span>
       </button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={paletteOpen} onOpenChange={updateOpen}>
         <DialogContent className="p-0 overflow-hidden sm:max-w-[550px] top-[20%] translate-y-0 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
           <DialogTitle className="sr-only">Command Palette</DialogTitle>
           <DialogDescription className="sr-only">Search and execute commands within the brand studio.</DialogDescription>
