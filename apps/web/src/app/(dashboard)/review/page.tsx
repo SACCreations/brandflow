@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useState } from 'react';
 import { 
   CheckCircle2, 
@@ -21,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { useToast } from '@brandflow/ui';
+import { Button, useToast } from '@brandflow/ui';
 
 interface Approval {
   id: string;
@@ -29,6 +30,7 @@ interface Approval {
   status: string;
   reviewType: string;
   note: string | null;
+  reason?: string | null;
   createdAt: string;
   content: {
     id: string;
@@ -36,7 +38,21 @@ interface Approval {
     type: string;
     platform: string;
     qualityScore: number;
-    qualityChecks: any[];
+    brand?: {
+      name: string;
+    };
+    brief?: {
+      objective: string;
+      cta: string | null;
+    } | null;
+    campaign?: {
+      id: string;
+      name: string;
+    } | null;
+    qualityChecks: Array<{
+      confidenceScore: number;
+      remediation?: string | null;
+    }>;
   };
 }
 
@@ -44,6 +60,7 @@ export default function ReviewQueuePage() {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [activeReview, setActiveReview] = useState<Approval | null>(null);
   const [activeTab, setActiveTab] = useState('pending');
+  const [reviewNote, setReviewNote] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -55,6 +72,11 @@ export default function ReviewQueuePage() {
     },
   });
 
+  const handleSelectReview = (review: Approval) => {
+    setActiveReview(review);
+    setReviewNote(review.note || review.reason || '');
+  };
+
   const decideMutation = useMutation({
     mutationFn: async ({ id, status, note }: { id: string, status: string, note?: string }) => {
       const res = await apiClient.post(`/approvals/${id}/decide`, { status, note });
@@ -64,6 +86,7 @@ export default function ReviewQueuePage() {
       queryClient.invalidateQueries({ queryKey: ['approvals'] });
       toast({ title: 'Decision Recorded', description: 'The content has been reviewed.' });
       setActiveReview(null);
+      setReviewNote('');
     },
   });
 
@@ -127,7 +150,13 @@ export default function ReviewQueuePage() {
                 onClick={() => setActiveTab('approved')}
                 className={`${activeTab === 'approved' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4`}
               >
-                Resolved
+                Approved
+              </button>
+              <button 
+                onClick={() => setActiveTab('revision_requested')}
+                className={`${activeTab === 'revision_requested' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4`}
+              >
+                Revisions
               </button>
             </div>
             <div className="flex items-center gap-2">
@@ -152,7 +181,7 @@ export default function ReviewQueuePage() {
               queue?.map((review) => (
                 <div 
                   key={review.id} 
-                  onClick={() => setActiveReview(review)}
+                  onClick={() => handleSelectReview(review)}
                   className={`group relative overflow-hidden rounded-2xl border transition-all hover:shadow-lg cursor-pointer ${
                     activeReview?.id === review.id ? 'border-brand-500 bg-brand-50/20 ring-1 ring-brand-500 dark:bg-brand-500/5' : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 hover:border-gray-300'
                   }`}
@@ -177,6 +206,12 @@ export default function ReviewQueuePage() {
                             <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> {review.content.platform}</span>
                             <span className="text-gray-200">|</span>
                             <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-amber-500" /> {new Date(review.createdAt).toLocaleDateString()}</span>
+                            {review.content.brand?.name && (
+                              <>
+                                <span className="text-gray-200">|</span>
+                                <span>{review.content.brand.name}</span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -220,6 +255,16 @@ export default function ReviewQueuePage() {
                     </div>
                   </div>
 
+                  {activeReview.content.brief && (
+                    <div className="rounded-xl border border-gray-100 bg-gray-50/40 p-4 text-sm dark:border-gray-800 dark:bg-gray-800/20">
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Brief context</div>
+                      <div className="mt-2 font-medium text-gray-900 dark:text-white">{activeReview.content.brief.objective}</div>
+                      {activeReview.content.brief.cta && (
+                        <div className="mt-1 text-xs text-gray-500">CTA: {activeReview.content.brief.cta}</div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Content Preview */}
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Content Body</label>
@@ -241,10 +286,20 @@ export default function ReviewQueuePage() {
                     </div>
                   )}
 
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Reviewer note</label>
+                    <textarea
+                      value={reviewNote}
+                      onChange={(event) => setReviewNote(event.target.value)}
+                      className="min-h-[96px] w-full rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-sm text-gray-700 outline-none focus:border-brand-500 dark:border-gray-800 dark:bg-gray-800/30 dark:text-gray-300"
+                      placeholder="Add revision guidance, risk notes, or approval context..."
+                    />
+                  </div>
+
                   {/* Actions */}
-                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-50 dark:border-gray-800">
+                  <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-50 dark:border-gray-800">
                     <button 
-                      onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'rejected' })}
+                      onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'rejected', note: reviewNote })}
                       disabled={decideMutation.isPending}
                       className="flex items-center justify-center gap-2 rounded-xl border border-red-200 py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-all dark:border-red-900 dark:hover:bg-red-900/20"
                     >
@@ -252,7 +307,15 @@ export default function ReviewQueuePage() {
                       Reject
                     </button>
                     <button 
-                      onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'approved' })}
+                      onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'revision_requested', note: reviewNote })}
+                      disabled={decideMutation.isPending}
+                      className="flex items-center justify-center gap-2 rounded-xl border border-amber-200 py-3 text-sm font-bold text-amber-700 hover:bg-amber-50 transition-all dark:border-amber-900 dark:hover:bg-amber-900/20"
+                    >
+                      {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                      Changes
+                    </button>
+                    <button 
+                      onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'approved', note: reviewNote })}
                       disabled={decideMutation.isPending}
                       className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
                     >
@@ -260,9 +323,24 @@ export default function ReviewQueuePage() {
                       Approve
                     </button>
                   </div>
-                  <button className="w-full flex items-center justify-center gap-2 text-xs font-bold text-gray-400 hover:text-gray-600">
-                    <MessageSquare className="h-4 w-4" /> Request Changes (Feedback)
-                  </button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link href={`/create/content/${activeReview.content.id}`}>
+                      <Button variant="outline" className="w-full gap-2">
+                        <Eye className="h-4 w-4" /> Open editor
+                      </Button>
+                    </Link>
+                    {activeReview.content.campaign?.id ? (
+                      <Link href={`/campaigns/${activeReview.content.campaign.id}`}>
+                        <Button variant="outline" className="w-full gap-2">
+                          <ArrowRight className="h-4 w-4" /> Open campaign
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button variant="outline" className="w-full gap-2" disabled>
+                        <Info className="h-4 w-4" /> No campaign
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

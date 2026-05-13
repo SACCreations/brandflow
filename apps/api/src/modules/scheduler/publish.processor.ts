@@ -55,19 +55,40 @@ export class PublishProcessor extends WorkerHost {
       this.logger.log(`Successfully published schedule ${scheduleId}`);
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : String(error);
+      const maxAttempts = typeof job.opts.attempts === 'number' ? job.opts.attempts : 1;
+      const isFinalAttempt = job.attemptsMade + 1 >= maxAttempts;
       this.logger.error(`Failed to publish schedule ${scheduleId}: ${errMsg}`);
 
       await prisma.publishJob.update({
         where: { id: publishJob.id },
         data: {
-          status: 'failed',
+          status: isFinalAttempt ? 'failed' : 'retrying',
           failureReason: errMsg,
           failureClass: this.classifyFailure(errMsg),
+          nextRetryAt: isFinalAttempt ? null : this.getNextRetryAt(job.attemptsMade + 1),
         },
       });
 
+      if (isFinalAttempt) {
+        await prisma.$transaction([
+          prisma.schedule.update({
+            where: { id: scheduleId },
+            data: { status: 'failed' },
+          }),
+          prisma.content.update({
+            where: { id: contentId },
+            data: { status: 'approved' },
+          }),
+        ]);
+      }
+
       throw error;
     }
+  }
+
+  private getNextRetryAt(attemptNumber: number): Date {
+    const delayMs = Math.min(60_000 * 2 ** Math.max(attemptNumber - 1, 0), 15 * 60_000);
+    return new Date(Date.now() + delayMs);
   }
 
   private classifyFailure(message: string): string {

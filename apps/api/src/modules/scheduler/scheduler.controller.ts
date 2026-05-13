@@ -17,8 +17,12 @@ export class SchedulerController {
 
   @Get()
   @ApiOperation({ summary: 'List scheduled posts' })
-  findAll(@CurrentUser() user: JwtPayload, @Query('campaignId') campaignId?: string) {
-    return this.schedulerService.findAll(user.businessId, campaignId);
+  findAll(
+    @CurrentUser() user: JwtPayload,
+    @Query('campaignId') campaignId?: string,
+    @Query('contentId') contentId?: string,
+  ) {
+    return this.schedulerService.findAll(user.businessId, { campaignId, contentId });
   }
 
   @Get(':id')
@@ -34,6 +38,12 @@ export class SchedulerController {
     @Body(new ZodValidationPipe(createScheduleSchema)) dto: CreateScheduleDto,
   ) {
     return this.schedulerService.create(user.businessId, dto);
+  }
+
+  @Post(':id/retry')
+  @ApiOperation({ summary: 'Retry a failed publish schedule' })
+  retry(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: JwtPayload) {
+    return this.schedulerService.retry(id, user.businessId);
   }
 
   @Delete(':id')

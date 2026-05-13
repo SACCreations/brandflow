@@ -1,11 +1,16 @@
 import {
-  Controller, Get, Post, Delete, Body, Param, UseGuards, ParseUUIDPipe, HttpCode, HttpStatus, Query,
+  Controller, Get, Post, Delete, Body, Param, UseGuards, ParseUUIDPipe, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { SocialService } from './social.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import type { JwtPayload } from '@brandflow/shared';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import {
+  connectSocialAccountSchema,
+  type ConnectSocialAccountDto,
+  type JwtPayload,
+} from '@brandflow/shared';
 
 @ApiTags('social')
 @ApiBearerAuth()
@@ -18,6 +23,15 @@ export class SocialController {
   @ApiOperation({ summary: 'List connected social accounts' })
   findAll(@CurrentUser() user: JwtPayload) {
     return this.socialService.findAll(user.businessId);
+  }
+
+  @Post('accounts')
+  @ApiOperation({ summary: 'Connect or update a social account' })
+  connect(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(connectSocialAccountSchema)) dto: ConnectSocialAccountDto,
+  ) {
+    return this.socialService.connect(user.businessId, dto);
   }
 
   @Delete('accounts/:id')

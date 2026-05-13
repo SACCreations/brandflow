@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { prisma } from '@brandflow/db';
 import * as crypto from 'node:crypto';
+import type { ConnectSocialAccountDto } from '@brandflow/shared';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
@@ -54,12 +59,32 @@ export class SocialService {
         externalId: true,
         accountType: true,
         tokenExpiresAt: true,
+        scopes: true,
         createdAt: true,
         updatedAt: true,
+        _count: {
+          select: {
+            schedules: true,
+            publishJobs: true,
+          },
+        },
         // NEVER return raw tokens
       },
+      orderBy: { updatedAt: 'desc' },
     });
     return accounts;
+  }
+
+  async connect(businessId: string, dto: ConnectSocialAccountDto) {
+    return this.upsert(businessId, dto.platform, {
+      name: dto.name.trim(),
+      externalId: dto.externalId.trim(),
+      accountType: dto.accountType.trim(),
+      accessToken: dto.accessToken,
+      refreshToken: dto.refreshToken ?? undefined,
+      tokenExpiresAt: dto.tokenExpiresAt ?? undefined,
+      scopes: dto.scopes,
+    });
   }
 
   async upsert(
@@ -72,23 +97,41 @@ export class SocialService {
       accessToken: string;
       refreshToken?: string;
       tokenExpiresAt?: Date;
+      scopes?: string[];
     },
   ) {
     const encryptedAccess = this.encrypt(data.accessToken);
     const encryptedRefresh = data.refreshToken ? this.encrypt(data.refreshToken) : null;
 
-    const existing = await prisma.socialAccount.findFirst({ where: { businessId, platform } });
+    const existing = await prisma.socialAccount.findFirst({
+      where: { businessId, platform, externalId: data.externalId },
+    });
 
     if (existing) {
+      const existingScopes = Array.isArray(existing.scopes)
+        ? existing.scopes.map((scope) => String(scope))
+        : undefined;
+
       return prisma.socialAccount.update({
         where: { id: existing.id },
         data: {
           name: data.name,
+          externalId: data.externalId,
+          accountType: data.accountType ?? existing.accountType,
           accessToken: encryptedAccess,
           refreshToken: encryptedRefresh,
           tokenExpiresAt: data.tokenExpiresAt,
+          scopes: data.scopes ?? existingScopes,
         },
-        select: { id: true, platform: true, name: true, externalId: true, tokenExpiresAt: true },
+        select: {
+          id: true,
+          platform: true,
+          name: true,
+          externalId: true,
+          accountType: true,
+          tokenExpiresAt: true,
+          scopes: true,
+        },
       });
     }
 
@@ -102,8 +145,17 @@ export class SocialService {
         accessToken: encryptedAccess,
         refreshToken: encryptedRefresh,
         tokenExpiresAt: data.tokenExpiresAt,
+        scopes: data.scopes ?? [],
       },
-      select: { id: true, platform: true, name: true, externalId: true, tokenExpiresAt: true },
+      select: {
+        id: true,
+        platform: true,
+        name: true,
+        externalId: true,
+        accountType: true,
+        tokenExpiresAt: true,
+        scopes: true,
+      },
     });
   }
 
@@ -119,6 +171,19 @@ export class SocialService {
   async remove(id: string, businessId: string) {
     const account = await prisma.socialAccount.findFirst({ where: { id, businessId } });
     if (!account) throw new NotFoundException('Social account not found');
+
+    const pendingSchedules = await prisma.schedule.count({
+      where: {
+        businessId,
+        socialAccountId: id,
+        status: 'pending',
+      },
+    });
+
+    if (pendingSchedules > 0) {
+      throw new BadRequestException('Cancel pending schedules before disconnecting this account.');
+    }
+
     return prisma.socialAccount.delete({ where: { id } });
   }
 

@@ -278,12 +278,37 @@ export const updateBriefSchema = createBriefSchema.partial();
 export type UpdateBriefDto = z.infer<typeof updateBriefSchema>;
 
 // ─── Approval ─────────────────────────────────────────────────────
+export const requestApprovalSchema = z.object({
+  contentId: z.string().uuid(),
+  reviewType: z.enum(['internal', 'client', 'owner', 'legal']).default('internal'),
+});
+export type RequestApprovalDto = z.infer<typeof requestApprovalSchema>;
+
 export const submitApprovalDecisionSchema = z.object({
   status: z.enum(['approved', 'rejected', 'revision_requested']),
   note: z.string().max(2000).nullish(),
   reason: z.string().max(2000).nullish(),
 });
 export type SubmitApprovalDecisionDto = z.infer<typeof submitApprovalDecisionSchema>;
+
+export const bulkApprovalSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+  note: z.string().max(2000).nullish(),
+});
+export type BulkApprovalDto = z.infer<typeof bulkApprovalSchema>;
+
+// ─── Social Accounts ─────────────────────────────────────────────
+export const connectSocialAccountSchema = z.object({
+  platform: z.enum(['linkedin', 'instagram', 'facebook', 'twitter', 'tiktok']),
+  accountType: z.string().min(1).max(50).default('company'),
+  externalId: z.string().min(1).max(255),
+  name: z.string().min(1).max(255),
+  accessToken: z.string().min(1).max(5000),
+  refreshToken: z.string().max(5000).nullish(),
+  tokenExpiresAt: z.coerce.date().nullish(),
+  scopes: z.array(z.string().min(1).max(100)).max(50).default([]),
+});
+export type ConnectSocialAccountDto = z.infer<typeof connectSocialAccountSchema>;
 
 // ─── Schedule ─────────────────────────────────────────────────────
 export const createScheduleSchema = z.object({

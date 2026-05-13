@@ -1,5 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { prisma } from '@brandflow/db';
+import { APPROVAL_STATUSES, type ApprovalStatus, type ReviewType } from '@brandflow/shared';
 
 @Injectable()
 export class ApprovalService {
@@ -7,15 +13,28 @@ export class ApprovalService {
    * Retrieves the pending approval queue for a specific business/user.
    */
   async getQueue(businessId: string, status = 'pending') {
+    const normalizedStatus = APPROVAL_STATUSES.includes(status as ApprovalStatus)
+      ? (status as ApprovalStatus)
+      : 'pending';
+
     return prisma.approval.findMany({
       where: { 
         businessId,
-        status
+        status: normalizedStatus,
       },
       include: {
         content: {
           include: {
             brand: true,
+            brief: {
+              select: {
+                id: true,
+                objective: true,
+                audience: true,
+                cta: true,
+              },
+            },
+            campaign: { select: { id: true, name: true, status: true } },
             qualityChecks: {
               orderBy: { checkedAt: 'desc' },
               take: 1
@@ -30,54 +49,85 @@ export class ApprovalService {
   /**
    * Initiates an approval request for a piece of content.
    */
-  async requestApproval(businessId: string, contentId: string, reviewType: string = 'brand_check') {
-    const content = await prisma.content.findUnique({ where: { id: contentId } });
+  async requestApproval(businessId: string, contentId: string, reviewType: ReviewType = 'internal') {
+    const content = await prisma.content.findFirst({
+      where: { id: contentId, businessId },
+      include: {
+        approvals: {
+          where: { status: 'pending' },
+          select: { id: true },
+        },
+      },
+    });
     if (!content) throw new NotFoundException('Content not found');
 
-    // Update content status to pending_approval
-    await prisma.content.update({
-      where: { id: contentId },
-      data: { status: 'pending_approval' }
-    });
+    if (['published', 'archived', 'scheduled'].includes(content.status)) {
+      throw new BadRequestException(`Content in ${content.status} status cannot enter review.`);
+    }
 
-    return prisma.approval.create({
-      data: {
-        businessId,
-        contentId,
-        reviewType,
-        status: 'pending',
-        slaDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h SLA
-      }
+    if (content.approvals.length > 0) {
+      throw new ConflictException('This content already has a pending approval request.');
+    }
+
+    return prisma.$transaction(async (tx) => {
+      await tx.content.update({
+        where: { id: contentId },
+        data: { status: 'in_review' },
+      });
+
+      return tx.approval.create({
+        data: {
+          businessId,
+          contentId,
+          reviewType,
+          status: 'pending',
+          slaDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+      });
     });
   }
 
   /**
    * Submits a decision (Approve/Reject) on an approval item.
    */
-  async submitDecision(id: string, businessId: string, status: 'approved' | 'rejected', note?: string) {
+  async submitDecision(
+    id: string,
+    businessId: string,
+    status: 'approved' | 'rejected' | 'revision_requested',
+    note?: string,
+    reason?: string,
+  ) {
     const approval = await prisma.approval.findFirst({
-      where: { id, businessId }
+      where: { id, businessId },
+      include: {
+        content: { select: { id: true } },
+      },
     });
 
     if (!approval) throw new NotFoundException('Approval not found');
+    if (approval.status !== 'pending') {
+      throw new ConflictException('This approval has already been decided.');
+    }
 
-    const updatedApproval = await prisma.approval.update({
-      where: { id },
-      data: {
-        status,
-        note,
-        decidedAt: new Date()
-      }
-    });
+    const contentStatus = status === 'approved' ? 'approved' : 'revision_requested';
 
-    // Update the content status based on the decision
-    await prisma.content.update({
-      where: { id: approval.contentId },
-      data: { 
-        status: status === 'approved' ? 'approved' : 'rejected',
-        // In rejection, we might want to record the reason/note on the content itself or a version
-      }
-    });
+    const [updatedApproval] = await prisma.$transaction([
+      prisma.approval.update({
+        where: { id },
+        data: {
+          status,
+          note,
+          reason,
+          decidedAt: new Date(),
+        },
+      }),
+      prisma.content.update({
+        where: { id: approval.contentId },
+        data: { 
+          status: contentStatus,
+        },
+      }),
+    ]);
 
     return updatedApproval;
   }
@@ -85,10 +135,10 @@ export class ApprovalService {
   /**
    * Performs bulk approval actions.
    */
-  async bulkApprove(ids: string[], businessId: string) {
+  async bulkApprove(ids: string[], businessId: string, note?: string) {
     const results = [];
     for (const id of ids) {
-      results.push(await this.submitDecision(id, businessId, 'approved', 'Bulk approved by manager'));
+      results.push(await this.submitDecision(id, businessId, 'approved', note ?? 'Bulk approved by manager'));
     }
     return results;
   }

@@ -67,6 +67,13 @@ export class ContentService {
           },
         },
         campaign: { select: { id: true, name: true, status: true } },
+        schedules: {
+          include: {
+            socialAccount: { select: { id: true, platform: true, name: true } },
+            publishJobs: { orderBy: { createdAt: 'desc' }, take: 1 },
+          },
+          orderBy: { scheduledAt: 'asc' },
+        },
         versions: { orderBy: { version: 'desc' } },
         approvals: { orderBy: { createdAt: 'desc' } },
         qualityChecks: { orderBy: { checkedAt: 'desc' }, take: 1 },
