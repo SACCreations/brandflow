@@ -236,6 +236,10 @@ model Brand {
   identity     Json?
   marketing    Json?
   designTokens Json?
+  strategy     Json?    // { targetLocation, ageGroup, interests, postingFrequency, festivalPosts, offerPosts, preferredTypes, contentLanguage }
+  competitors  Json?    // [{ name, website, strengths, weaknesses }]
+  contactInfo  Json?    // { personName, phoneNumber, email }
+  socialAccess Json?    // { metaBusinessManagerId, adAccountId }
   
   healthScore  Int      @default(0)
   version      Int      @default(1)

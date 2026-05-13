@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createBrandSchema, type CreateBrandDto } from '@brandflow/shared';
+import { apiClient } from '@/lib/api-client';
 import { 
   Card, 
   Input, 
@@ -114,6 +115,26 @@ const sanitizeInitialData = (data: any) => {
       bannedPhrases: Array.isArray(cleaned.governance?.bannedPhrases) ? cleaned.governance.bannedPhrases : [],
       requiredPhrases: Array.isArray(cleaned.governance?.requiredPhrases) ? cleaned.governance.requiredPhrases : [],
       requiredDisclaimer: cleaned.governance?.requiredDisclaimer || ''
+    },
+    strategy: {
+      targetLocation: cleaned.strategy?.targetLocation || '',
+      ageGroup: cleaned.strategy?.ageGroup || '',
+      interests: cleaned.strategy?.interests || '',
+      postingFrequency: cleaned.strategy?.postingFrequency || 'weekly',
+      festivalPosts: !!cleaned.strategy?.festivalPosts,
+      offerPosts: !!cleaned.strategy?.offerPosts,
+      contentLanguage: cleaned.strategy?.contentLanguage || 'english',
+      preferredTypes: Array.isArray(cleaned.strategy?.preferredTypes) ? cleaned.strategy.preferredTypes : ['Poster', 'Reel']
+    },
+    competitors: Array.isArray(cleaned.competitors) ? cleaned.competitors : [],
+    contactInfo: {
+      personName: cleaned.contactInfo?.personName || '',
+      phoneNumber: cleaned.contactInfo?.phoneNumber || '',
+      email: cleaned.contactInfo?.email || ''
+    },
+    socialAccess: {
+      metaBusinessManagerId: cleaned.socialAccess?.metaBusinessManagerId || '',
+      adAccountId: cleaned.socialAccess?.adAccountId || ''
     }
   };
 };
@@ -165,6 +186,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
     register('designTokens.shadows');
     register('designTokens.spacing');
     register('assets.documents');
+    register('strategy.postingFrequency');
+    register('strategy.festivalPosts');
+    register('strategy.offerPosts');
+    register('strategy.contentLanguage');
+    register('strategy.preferredTypes');
+    register('socialAccess.metaBusinessManagerId');
+    register('socialAccess.adAccountId');
+    register('competitors');
   }, [register]);
 
   React.useEffect(() => {
@@ -249,10 +278,28 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Description</label>
             <Textarea 
-              {...register('description')}
-              className="w-full min-h-[120px] rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-              placeholder="Tell us about your brand..."
+              {...register('description')} 
+              placeholder="Tell us about your brand..." 
+              className="min-h-[100px] bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl"
             />
+          </div>
+
+          <div className="pt-6 border-t border-gray-100 dark:border-gray-800 space-y-4">
+             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Business Contact (Internal)</label>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                   <label className="text-[9px] font-bold text-gray-500 ml-1">Contact Person</label>
+                   <Input {...register('contactInfo.personName')} placeholder="Full Name" className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                </div>
+                <div className="space-y-1.5">
+                   <label className="text-[9px] font-bold text-gray-500 ml-1">Phone</label>
+                   <Input {...register('contactInfo.phoneNumber')} placeholder="+1..." className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                </div>
+                <div className="space-y-1.5">
+                   <label className="text-[9px] font-bold text-gray-500 ml-1">Email</label>
+                   <Input {...register('contactInfo.email')} placeholder="contact@brand.com" className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                </div>
+             </div>
           </div>
         </Card>
       </section>
@@ -509,11 +556,30 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-6 bg-white dark:bg-gray-900 rounded-3xl">
-           <Textarea 
-             {...register('audience')} 
-             placeholder="Describe your ideal customers, demographics, and pain points..." 
-             className="min-h-[160px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
-           />
+           <div className="space-y-2">
+             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Target Customers</label>
+             <Textarea 
+               {...register('audience')} 
+               placeholder="Describe your ideal customers, demographics, and pain points..." 
+               className="min-h-[120px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
+             />
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Target Location</label>
+                <Input {...register('strategy.targetLocation')} placeholder="e.g. Global, USA, Tamil Nadu" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Age Group</label>
+                <Input {...register('strategy.ageGroup')} placeholder="e.g. 18-35, Professionals" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+              </div>
+           </div>
+
+           <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Interests & Behaviors</label>
+              <Input {...register('strategy.interests')} placeholder="e.g. Tech enthusiasts, sustainable living, remote workers" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+           </div>
         </Card>
       </section>
 
@@ -528,21 +594,202 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-6 bg-white dark:bg-gray-900 rounded-3xl">
-           <div className="space-y-4">
-              <label className="text-sm font-black uppercase tracking-widest text-gray-400">Main Competitors</label>
-              <Textarea 
-                {...register('competitors')} 
-                placeholder="List your top 3-5 competitors and their strengths/weaknesses..." 
-                className="min-h-[120px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
-              />
+           <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-black uppercase tracking-widest text-gray-400">Main Competitors</label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-xl font-bold h-8"
+                  onClick={() => {
+                    const current = values.competitors || [];
+                    setValue('competitors', [...current, { name: '', website: '', strengths: '', weaknesses: '' }]);
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Add Competitor
+                </Button>
+              </div>
+
+              {values.competitors?.map((comp: any, idx: number) => (
+                <div key={idx} className="p-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/30 space-y-4 relative group">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const newComps = values.competitors.filter((_: any, i: number) => i !== idx);
+                      setValue('competitors', newComps);
+                    }}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input 
+                      placeholder="Competitor Name" 
+                      value={comp.name} 
+                      onChange={(e) => {
+                        const newComps = [...values.competitors];
+                        newComps[idx].name = e.target.value;
+                        setValue('competitors', newComps);
+                      }}
+                      className="bg-white dark:bg-gray-950" 
+                    />
+                    <Input 
+                      placeholder="Website URL" 
+                      value={comp.website} 
+                      onChange={(e) => {
+                        const newComps = [...values.competitors];
+                        newComps[idx].website = e.target.value;
+                        setValue('competitors', newComps);
+                      }}
+                      className="bg-white dark:bg-gray-950" 
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Textarea 
+                      placeholder="Strengths..." 
+                      value={comp.strengths} 
+                      onChange={(e) => {
+                        const newComps = [...values.competitors];
+                        newComps[idx].strengths = e.target.value;
+                        setValue('competitors', newComps);
+                      }}
+                      className="bg-white dark:bg-gray-950 text-xs min-h-[60px]" 
+                    />
+                    <Textarea 
+                      placeholder="Weaknesses..." 
+                      value={comp.weaknesses} 
+                      onChange={(e) => {
+                        const newComps = [...values.competitors];
+                        newComps[idx].weaknesses = e.target.value;
+                        setValue('competitors', newComps);
+                      }}
+                      className="bg-white dark:bg-gray-950 text-xs min-h-[60px]" 
+                    />
+                  </div>
+                </div>
+              ))}
+
+              {(!values.competitors || values.competitors.length === 0) && (
+                <div className="py-12 border-2 border-dashed border-gray-100 rounded-3xl text-center">
+                  <p className="text-xs text-gray-400 font-medium">No competitors added. Listing competitors helps AI analyze your market positioning.</p>
+                </div>
+              )}
            </div>
-           <div className="space-y-4 pt-4">
+           
+           <div className="space-y-4 pt-6 border-t border-gray-100">
               <label className="text-sm font-black uppercase tracking-widest text-gray-400">Market Differentiators</label>
               <Textarea 
                 {...register('differentiators')} 
                 placeholder="What makes you stand out from the crowd?" 
-                className="min-h-[120px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
+                className="min-h-[100px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
               />
+           </div>
+        </Card>
+      </section>
+
+      {/* 7.5 Content Strategy */}
+      <section id="content-strategy" className="space-y-8 scroll-mt-24">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">08</div>
+            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Content Strategy</h2>
+          </div>
+          <p className="text-gray-500 font-medium px-10">Define delivery and scheduling preferences.</p>
+        </div>
+
+        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Posting Frequency</label>
+                  <Select 
+                    value={values.strategy?.postingFrequency} 
+                    onValueChange={(val) => setValue('strategy.postingFrequency', val, { shouldDirty: true })}
+                  >
+                    <SelectTrigger className="h-12 bg-gray-50/50 border-gray-100 rounded-xl">
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="bi-weekly">Bi-Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Content Language</label>
+                  <Select 
+                    value={values.strategy?.contentLanguage} 
+                    onValueChange={(val) => setValue('strategy.contentLanguage', val, { shouldDirty: true })}
+                  >
+                    <SelectTrigger className="h-12 bg-gray-50/50 border-gray-100 rounded-xl">
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="english">English</SelectItem>
+                      <SelectItem value="tamil">Tamil</SelectItem>
+                      <SelectItem value="mixed">Mixed (Tanglish)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Preferred Formats</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Poster', 'Reel', 'Video', 'Carousel', 'Blog', 'Newsletter'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => {
+                          const current = values.strategy?.preferredTypes || [];
+                          if (current.includes(type)) {
+                            setValue('strategy.preferredTypes', current.filter((t: string) => t !== type));
+                          } else {
+                            setValue('strategy.preferredTypes', [...current, type]);
+                          }
+                        }}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border",
+                          values.strategy?.preferredTypes?.includes(type)
+                            ? "bg-brand-600 text-white border-brand-600 shadow-sm"
+                            : "bg-gray-50 dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700 hover:border-brand-200"
+                        )}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <label className="text-xs font-bold text-gray-900 dark:text-white">Festival Content</label>
+                      <p className="text-[10px] text-gray-500">Auto-generate posts for major festivals.</p>
+                    </div>
+                    <Switch 
+                      checked={values.strategy?.festivalPosts} 
+                      onCheckedChange={(checked) => setValue('strategy.festivalPosts', checked, { shouldDirty: true })} 
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <label className="text-xs font-bold text-gray-900 dark:text-white">Promotional Offers</label>
+                      <p className="text-[10px] text-gray-500">Enable AI-driven offer and discount content.</p>
+                    </div>
+                    <Switch 
+                      checked={values.strategy?.offerPosts} 
+                      onCheckedChange={(checked) => setValue('strategy.offerPosts', checked, { shouldDirty: true })} 
+                    />
+                  </div>
+                </div>
+              </div>
            </div>
         </Card>
       </section>
@@ -714,7 +961,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {['LinkedIn', 'Instagram', 'Twitter / X', 'Facebook'].map(plat => (
+              {['LinkedIn', 'Instagram', 'Twitter / X', 'Facebook', 'YouTube'].map(plat => (
                 <div key={plat} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 transition-all hover:border-brand-200 group">
                    <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center shadow-sm">
@@ -723,16 +970,40 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       <span className="text-xs font-black uppercase tracking-tight text-gray-900 dark:text-white">{plat}</span>
                    </div>
                    <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    className="rounded-xl h-8 text-[10px] font-black uppercase tracking-widest border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-brand-50 hover:text-brand-600"
-                    onClick={() => toast({ title: 'Social Integration', description: `Redirecting to ${plat} OAuth...` })}
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      className="rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-brand-600 hover:text-white transition-all"
+                      onClick={async () => {
+                        try {
+                          await apiClient.post('/brands/connect-social', { platform: plat });
+                          toast({ title: 'Connected', description: `Successfully linked ${plat} account.` });
+                        } catch (err) {
+                          toast({ title: 'Connection Failed', description: 'Could not connect account.', variant: 'destructive' });
+                        }
+                      }}
                    >
                     Connect
                    </Button>
                 </div>
               ))}
+           </div>
+
+           <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800 space-y-6">
+              <div className="flex items-center gap-3 mb-2">
+                <ShieldCheck className="w-5 h-5 text-gray-400" />
+                <h4 className="text-sm font-black uppercase tracking-tight text-gray-900 dark:text-white">Business & Ad Account Access</h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Meta Business Manager ID</label>
+                  <Input {...register('socialAccess.metaBusinessManagerId')} placeholder="e.g. 123456789012345" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Ad Account ID</label>
+                  <Input {...register('socialAccess.adAccountId')} placeholder="e.g. act_123456789" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+                </div>
+              </div>
            </div>
         </Card>
       </section>

@@ -90,4 +90,13 @@ export class BrandController {
   ) {
     return this.brandService.getBrandContext(id, user.businessId);
   }
+
+  @Post('connect-social')
+  @ApiOperation({ summary: 'Connect a social account (simulated for demo)' })
+  connectSocial(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: { platform: string },
+  ) {
+    return this.brandService.connectSocial(user.businessId, dto.platform);
+  }
 }
