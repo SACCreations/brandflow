@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { Badge, Button, Card } from '@brandflow/ui';
+import { Badge, Button, Card, useToast } from '@brandflow/ui';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -52,6 +52,7 @@ interface BrandSummary {
 
 interface BriefSummary {
   id: string;
+  campaignId: string | null;
   objective: string;
   platform: string | null;
   contentType: string | null;
@@ -68,6 +69,7 @@ export default function ProjectDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const projectId = params['id'] as string;
+  const { toast } = useToast();
 
   const { data: project, isLoading, isError } = useQuery({
     queryKey: ['project-detail', projectId],
@@ -130,6 +132,23 @@ export default function ProjectDetailPage() {
 
   const brandCreated = searchParams.get('brandCreated') === '1';
   const briefSaved = searchParams.get('briefSaved') === '1';
+
+  const createCampaignMutation = useMutation({
+    mutationFn: async (briefId: string) => {
+      const res = await apiClient.post(`/campaigns/from-brief/${briefId}`);
+      return res.data.data as { id: string };
+    },
+    onSuccess: (campaign) => {
+      window.location.href = `/campaigns/${campaign.id}`;
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Unable to create campaign',
+        description: error?.response?.data?.message || 'Approve the brief first, then try again.',
+        variant: 'destructive',
+      });
+    },
+  });
 
   return (
     <div className="space-y-8">
@@ -272,6 +291,26 @@ export default function ProjectDetailPage() {
                 </div>
 
                 <div className="flex gap-3">
+                  {latestBrief.metadata?.status === 'approved' && !latestBrief.campaignId && (
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => createCampaignMutation.mutate(latestBrief.id)}
+                      disabled={createCampaignMutation.isPending}
+                    >
+                      {createCampaignMutation.isPending ? 'Creating…' : 'Create campaign'}
+                    </Button>
+                  )}
+                  {latestBrief.metadata?.status === 'approved' && (
+                    <Link href={`/create/content?briefId=${latestBrief.id}${latestBrief.campaignId ? `&campaignId=${latestBrief.campaignId}` : ''}`} className="flex-1">
+                      <Button variant="outline" className="w-full">Generate content</Button>
+                    </Link>
+                  )}
+                  {latestBrief.campaignId && (
+                    <Link href={`/campaigns/${latestBrief.campaignId}`} className="flex-1">
+                      <Button variant="outline" className="w-full">Open campaign</Button>
+                    </Link>
+                  )}
                   <Link href={`/create/brief?projectId=${project.id}&briefId=${latestBrief.id}`} className="flex-1">
                     <Button variant="outline" className="w-full">Open brief</Button>
                   </Link>

@@ -36,7 +36,16 @@ interface CampaignDetail {
   healthScore: number;
   startDate: string | null;
   endDate: string | null;
-  briefs: any[];
+  briefs: Array<{
+    id: string;
+    platform: string | null;
+    contentType: string | null;
+    objective: string;
+    isComplete: boolean;
+    metadata?: {
+      status?: 'draft' | 'in_review' | 'approved';
+    } | null;
+  }>;
   contents: any[];
   schedules: any[];
   assets: any[];
@@ -97,6 +106,10 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     status: content.status
   }));
 
+  const latestApprovedBrief = [...(campaign.briefs || [])]
+    .reverse()
+    .find((brief) => brief.isComplete && brief.metadata?.status === 'approved');
+
   const handleGenerateSuggestion = () => {
     toast({
       title: "Generating Strategy...",
@@ -140,7 +153,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
             <Settings className="h-4 w-4" /> Campaign Settings
           </button>
           <Link 
-            href={`/create/content?campaignId=${id}`}
+            href={latestApprovedBrief ? `/create/content?campaignId=${id}&briefId=${latestApprovedBrief.id}` : `/create/content?campaignId=${id}`}
             className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700"
           >
             <Plus className="h-4 w-4" /> Add Content
@@ -193,13 +206,13 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 <p className="text-xs text-gray-400 italic">No briefs created yet.</p>
               ) : (
                 campaign.briefs?.map(brief => (
-                  <button key={brief.id} className="flex w-full items-center justify-between rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-left transition-all hover:border-brand-500 dark:border-gray-800 dark:bg-gray-800/30">
+                  <Link key={brief.id} href={`/create/brief?campaignId=${id}&briefId=${brief.id}`} className="flex w-full items-center justify-between rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-left transition-all hover:border-brand-500 dark:border-gray-800 dark:bg-gray-800/30">
                     <div className="flex items-center gap-3">
                       <Target className="h-4 w-4 text-brand-600" />
                       <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{brief.platform} {brief.contentType} Strategy</span>
                     </div>
                     {brief.isComplete ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Clock className="h-4 w-4 text-amber-500" />}
-                  </button>
+                  </Link>
                 ))
               )}
             </div>

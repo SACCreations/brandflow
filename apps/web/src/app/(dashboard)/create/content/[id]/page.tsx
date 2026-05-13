@@ -1,6 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
+import { useToast } from '@brandflow/ui';
 import { 
   ArrowLeft, 
   Save, 
@@ -15,23 +19,98 @@ import {
   Trash2,
   Target,
   Users,
-  Zap
+  Zap,
+  Loader2,
 } from 'lucide-react';
 import QualityChecksWidget from '@/components/editor/quality-checks-widget';
 
-export default function ContentEditorPage() {
-  const [content, setContent] = useState(`## Elevate Your SaaS Growth with Brandflow AI
+interface ContentDetail {
+  id: string;
+  body: string;
+  status: string;
+  platform: string;
+  type: string;
+  createdAt: string;
+  updatedAt: string;
+  brand: {
+    id: string;
+    name: string;
+  };
+  brief?: {
+    id: string;
+    objective: string;
+    audience: string | null;
+    cta: string | null;
+  } | null;
+  campaign?: {
+    id: string;
+    name: string;
+    status: string;
+  } | null;
+  qualityChecks: Array<{
+    passed: boolean;
+    confidenceScore: number;
+    category?: string | null;
+    remediation?: string | null;
+    violations?: Array<{
+      type: string;
+      severity: 'low' | 'medium' | 'high';
+      detail: string;
+      position?: number;
+    }> | null;
+  }>;
+}
 
-In today's fast-paced digital landscape, consistency is everything. But for growing SaaS brands, maintaining a unified voice across social, ads, and blogs is a constant struggle.
+export default function ContentEditorPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const { toast } = useToast();
+  const [content, setContent] = useState('');
 
-Brandflow AI is the first enterprise-grade operating system designed to automate your brand intelligence. By connecting your whitepapers, sales decks, and website, we build a living "brain" that ensures every piece of content you generate is 100% accurate.
+  const { data, isLoading } = useQuery({
+    queryKey: ['content-editor', id],
+    queryFn: async () => {
+      const res = await apiClient.get(`/content/${id}`);
+      return res.data.data as ContentDetail;
+    },
+  });
 
-**Key Benefits:**
-* **Fact-Checked Accuracy:** Never worry about hallucinations again.
-* **Scale with Soul:** Maintain your unique tone at 10x the volume.
-* **Multichannel Ready:** One-click publishing to LinkedIn, Twitter, and more.
+  useEffect(() => {
+    if (data?.body) {
+      setContent(data.body);
+    }
+  }, [data?.body]);
 
-Join the 500+ founders who have already transformed their marketing workflow. Brandflow increases marketing productivity by 40%.`);
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiClient.patch(`/content/${id}`, { body: content });
+      return res.data.data as ContentDetail;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Content saved',
+        description: 'A new version was recorded for this draft.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Unable to save content',
+        description: error?.response?.data?.message || 'Please try again.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  if (isLoading || !data) {
+    return (
+      <div className="flex h-[420px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+      </div>
+    );
+  }
+
+  const latestQualityCheck = data.qualityChecks?.[0];
+  const violations = Array.isArray(latestQualityCheck?.violations) ? latestQualityCheck.violations : [];
+  const backHref = data.campaign ? `/campaigns/${data.campaign.id}` : '/content';
 
   return (
     <div className="flex h-[calc(100vh-120px)] flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -40,42 +119,44 @@ Join the 500+ founders who have already transformed their marketing workflow. Br
         <div className="flex items-center gap-2">
           <Target className="h-4 w-4 text-brand-400" />
           <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Objective:</span>
-          <span className="text-xs font-semibold">Launch Brandflow AI Intelligence Layer</span>
+          <span className="text-xs font-semibold">{data.brief?.objective || 'No linked brief'}</span>
         </div>
         <div className="h-4 w-px bg-gray-700"></div>
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-brand-400" />
           <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Audience:</span>
-          <span className="text-xs font-semibold">Enterprise CMOs</span>
+          <span className="text-xs font-semibold">{data.brief?.audience || 'Not set'}</span>
         </div>
         <div className="h-4 w-px bg-gray-700"></div>
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-amber-400" />
           <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">CTA:</span>
-          <span className="text-xs font-semibold underline underline-offset-4">Book a Free Audit</span>
+          <span className="text-xs font-semibold underline underline-offset-4">{data.brief?.cta || 'Not set'}</span>
         </div>
-        <button className="ml-auto text-[10px] font-bold uppercase tracking-widest text-brand-400 hover:text-white">
-          Edit Brief
-        </button>
+        {data.brief && (
+          <Link href={`/create/brief?briefId=${data.brief.id}${data.campaign ? `&campaignId=${data.campaign.id}` : ''}`} className="ml-auto text-[10px] font-bold uppercase tracking-widest text-brand-400 hover:text-white">
+            Edit Brief
+          </Link>
+        )}
       </div>
 
       {/* Editor Header */}
       <div className="flex items-center justify-between border-b border-gray-200 bg-white pb-6 dark:border-gray-800 dark:bg-transparent">
         <div className="flex items-center gap-4">
-          <button className="rounded-xl border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800">
+          <Link href={backHref} className="rounded-xl border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800">
             <ArrowLeft className="h-5 w-5" />
-          </button>
+          </Link>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Q4 SaaS Growth Campaign</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">{data.campaign?.name || data.brand.name}</h1>
             <p className="text-xs text-gray-500 flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
-              Draft • Last saved 2m ago
+              <span className={`flex h-2 w-2 rounded-full ${data.status === 'approved' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+              {data.status} • {data.platform} • {data.type}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800">
-            <Save className="h-4 w-4" /> Save
+          <button onClick={() => saveMutation.mutate()} className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800">
+            {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save
           </button>
           <button className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700">
             <Send className="h-4 w-4" /> Review & Publish
@@ -127,7 +208,7 @@ Join the 500+ founders who have already transformed their marketing workflow. Br
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Platform:</span>
-              <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/10">LinkedIn</span>
+              <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/10">{data.platform}</span>
             </div>
           </div>
         </div>
@@ -135,14 +216,11 @@ Join the 500+ founders who have already transformed their marketing workflow. Br
         {/* Right Sidebar (Quality Guard) */}
         <div className="lg:col-span-3 h-full">
           <QualityChecksWidget 
-            score={78} 
-            passed={false} 
-            violations={[
-              { type: 'factual_error', severity: 'high', detail: 'Marketing productivity claim (40%) contradicts Knowledge Hub (25%).' },
-              { type: 'tone_mismatch', severity: 'medium', detail: 'Content tone is more casual than defined brand voice.' },
-              { type: 'banned_phrase', severity: 'low', detail: 'Avoid using "Transform your workflow" as it is overused in SaaS.' }
-            ]}
-            remediation="Update productivity statistics to match validated whitepaper facts and refine the tone to be more authoritative."
+            score={Math.round(latestQualityCheck?.confidenceScore ?? data.qualityChecks?.[0]?.confidenceScore ?? 0)} 
+            passed={latestQualityCheck?.passed ?? true} 
+            violations={violations}
+            category={latestQualityCheck?.category ?? undefined}
+            remediation={latestQualityCheck?.remediation ?? undefined}
           />
         </div>
       </div>

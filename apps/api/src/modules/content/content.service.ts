@@ -51,6 +51,22 @@ export class ContentService {
       where: { id, businessId },
       include: {
         brand: true,
+        brief: {
+          select: {
+            id: true,
+            objective: true,
+            audience: true,
+            cta: true,
+            platform: true,
+            tone: true,
+            format: true,
+            contentType: true,
+            businessGoal: true,
+            campaignTheme: true,
+            metadata: true,
+          },
+        },
+        campaign: { select: { id: true, name: true, status: true } },
         versions: { orderBy: { version: 'desc' } },
         approvals: { orderBy: { createdAt: 'desc' } },
         qualityChecks: { orderBy: { checkedAt: 'desc' }, take: 1 },
@@ -85,9 +101,20 @@ export class ContentService {
       throw new ForbiddenException('Token budget exhausted for this billing period');
     }
 
+    const briefContext = dto.briefId
+      ? await this.resolveBriefContext(dto.briefId, businessId, dto.campaignId)
+      : null;
+
+    const effectiveBrandId = dto.brandId ?? briefContext?.brandId;
+    if (!effectiveBrandId) {
+      throw new BadRequestException('A linked brand is required to generate content.');
+    }
+
+    const effectiveCampaignId = dto.campaignId ?? briefContext?.campaignId ?? undefined;
+
     // 2. Resolve brand context
     const brand = await prisma.brand.findFirst({
-      where: { id: dto.brandId, businessId },
+      where: { id: effectiveBrandId, businessId },
       include: {
         knowledgeSources: {
           where: { status: 'completed' },
@@ -132,14 +159,14 @@ export class ContentService {
       },
       {
         businessId,
-        brandId: dto.brandId,
+        brandId: effectiveBrandId,
         brand: brandContext,
         knowledgeEntries: brandContext.knowledgeEntries,
         extra: {
           topic: sanitizedTopic,
           platform: dto.platform,
           type: dto.type,
-          additional_context: dto.additionalContext ?? '',
+          additional_context: this.buildGenerationContext(dto.additionalContext, briefContext),
         },
       },
     );
@@ -183,9 +210,9 @@ export class ContentService {
       const created = await tx.content.create({
         data: {
           businessId,
-          brandId: dto.brandId,
-          briefId: dto.briefId,
-          campaignId: dto.campaignId,
+          brandId: effectiveBrandId,
+          briefId: dto.briefId ?? null,
+          campaignId: effectiveCampaignId ?? null,
           platform: dto.platform,
           type: dto.type,
           body: response.content,
@@ -274,5 +301,135 @@ Topic: {{topic}}
 {{additional_context}}
 
 Write high-quality, engaging content appropriate for ${platform}. Stay true to the brand voice.`;
+  }
+
+  private async resolveBriefContext(
+    briefId: string,
+    businessId: string,
+    requestedCampaignId?: string | null,
+  ) {
+    const brief = await prisma.brief.findFirst({
+      where: { id: briefId, businessId },
+      select: {
+        id: true,
+        campaignId: true,
+        objective: true,
+        audience: true,
+        cta: true,
+        platform: true,
+        tone: true,
+        format: true,
+        contentType: true,
+        businessGoal: true,
+        campaignTheme: true,
+        isComplete: true,
+        metadata: true,
+      },
+    });
+
+    if (!brief) {
+      throw new NotFoundException('Brief not found');
+    }
+
+    const metadata = this.asRecord(brief.metadata);
+    const briefStatus = metadata['status'] === 'approved'
+      ? 'approved'
+      : metadata['status'] === 'in_review'
+        ? 'in_review'
+        : 'draft';
+
+    if (!brief.isComplete || briefStatus !== 'approved') {
+      throw new BadRequestException('Only approved and complete briefs can generate content.');
+    }
+
+    if (requestedCampaignId && brief.campaignId && brief.campaignId !== requestedCampaignId) {
+      throw new BadRequestException('The selected brief does not belong to the selected campaign.');
+    }
+
+    const effectiveCampaignId = requestedCampaignId ?? brief.campaignId ?? null;
+    if (effectiveCampaignId) {
+      await this.assertCampaignOwnership(businessId, effectiveCampaignId);
+    }
+
+    return {
+      ...brief,
+      brandId: this.getOptionalString(metadata['brandId']),
+      deliverables: this.getStringArray(metadata['deliverables']),
+      constraints: this.getStringArray(metadata['constraints']),
+      status: briefStatus,
+      campaignId: effectiveCampaignId,
+    };
+  }
+
+  private buildGenerationContext(
+    additionalContext: string | null | undefined,
+    briefContext:
+      | {
+          objective: string;
+          audience: string | null;
+          cta: string | null;
+          tone: string | null;
+          campaignTheme: string | null;
+          businessGoal: string | null;
+          deliverables: string[];
+          constraints: string[];
+        }
+      | null,
+  ) {
+    const segments = [this.normalizeOptionalText(additionalContext)];
+
+    if (briefContext) {
+      segments.push(
+        [
+          `Brief objective: ${briefContext.objective}`,
+          briefContext.audience ? `Audience: ${briefContext.audience}` : null,
+          briefContext.businessGoal ? `Business goal: ${briefContext.businessGoal}` : null,
+          briefContext.campaignTheme ? `Campaign theme: ${briefContext.campaignTheme}` : null,
+          briefContext.tone ? `Preferred tone: ${briefContext.tone}` : null,
+          briefContext.cta ? `Primary CTA: ${briefContext.cta}` : null,
+          briefContext.deliverables.length > 0 ? `Deliverables: ${briefContext.deliverables.join(', ')}` : null,
+          briefContext.constraints.length > 0 ? `Constraints: ${briefContext.constraints.join(', ')}` : null,
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      );
+    }
+
+    return segments.filter(Boolean).join('\n\n');
+  }
+
+  private async assertCampaignOwnership(businessId: string, campaignId: string) {
+    const campaign = await prisma.campaign.findFirst({
+      where: { id: campaignId, businessId },
+      select: { id: true },
+    });
+
+    if (!campaign) {
+      throw new BadRequestException('Selected campaign does not belong to this workspace.');
+    }
+  }
+
+  private asRecord(value: Prisma.JsonValue | null | undefined) {
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  }
+
+  private getOptionalString(value: unknown) {
+    return typeof value === 'string' && value.trim() ? value.trim() : null;
+  }
+
+  private getStringArray(value: unknown) {
+    if (!Array.isArray(value)) return [];
+
+    return value
+      .filter((item): item is string => typeof item === 'string')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  private normalizeOptionalText(value: string | null | undefined) {
+    const normalized = value?.trim();
+    return normalized ? normalized : undefined;
   }
 }

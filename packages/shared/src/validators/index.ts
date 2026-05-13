@@ -194,7 +194,7 @@ export type CreateKnowledgeSourceDto = z.infer<typeof createKnowledgeSourceSchem
 
 // ─── Content ──────────────────────────────────────────────────────
 export const generateContentSchema = z.object({
-  brandId: z.string().uuid(),
+  brandId: z.string().uuid().nullish(),
   briefId: z.string().uuid().nullish(),
   campaignId: z.string().uuid().nullish(),
   platform: z.enum(['linkedin', 'instagram', 'facebook', 'twitter', 'tiktok']),
@@ -204,6 +204,9 @@ export const generateContentSchema = z.object({
   tone: z.string().max(100).nullish(),
   temperature: z.number().min(0).max(2).nullish(),
   maxTokens: z.number().int().min(1).max(32000).nullish(),
+}).refine((value) => Boolean(value.brandId || value.briefId), {
+  message: 'Either brandId or briefId is required',
+  path: ['brandId'],
 });
 export type GenerateContentDto = z.infer<typeof generateContentSchema>;
 
@@ -213,15 +216,34 @@ export const updateContentSchema = z.object({
 export type UpdateContentDto = z.infer<typeof updateContentSchema>;
 
 // ─── Campaign ─────────────────────────────────────────────────────
-export const createCampaignSchema = z.object({
+export const campaignWorkflowMetadataSchema = z.object({
+  source: z.enum(['manual', 'brief', 'clone']).default('manual'),
+  sourceBriefId: z.string().uuid().nullish(),
+  projectId: z.string().uuid().nullish(),
+  customerId: z.string().uuid().nullish(),
+  brandId: z.string().uuid().nullish(),
+});
+export type CampaignWorkflowMetadataDto = z.infer<typeof campaignWorkflowMetadataSchema>;
+
+const campaignPayloadSchema = z.object({
   name: z.string().min(1).max(255),
+  description: z.string().max(5000).nullish().or(z.literal('')),
+  status: z.enum(['draft', 'active', 'completed', 'archived']).default('draft'),
+  startDate: z.coerce.date().nullish(),
+  endDate: z.coerce.date().nullish(),
   clonedFromId: z.string().uuid().nullish(),
+  metadata: campaignWorkflowMetadataSchema.nullish(),
+});
+
+export const createCampaignSchema = campaignPayloadSchema.refine((value) => !value.startDate || !value.endDate || value.endDate >= value.startDate, {
+  message: 'endDate must be on or after startDate',
+  path: ['endDate'],
 });
 export type CreateCampaignDto = z.infer<typeof createCampaignSchema>;
 
-export const updateCampaignSchema = z.object({
-  name: z.string().min(1).max(255).nullish(),
-  status: z.enum(['draft', 'active', 'completed', 'archived']).nullish(),
+export const updateCampaignSchema = campaignPayloadSchema.partial().refine((value) => !value.startDate || !value.endDate || value.endDate >= value.startDate, {
+  message: 'endDate must be on or after startDate',
+  path: ['endDate'],
 });
 export type UpdateCampaignDto = z.infer<typeof updateCampaignSchema>;
 

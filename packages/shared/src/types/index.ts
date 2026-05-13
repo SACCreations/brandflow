@@ -209,6 +209,14 @@ export interface BriefWorkflowMetadata {
   constraints: string[];
 }
 
+export interface CampaignWorkflowMetadata {
+  source: 'manual' | 'brief' | 'clone';
+  sourceBriefId?: string | null;
+  projectId?: string | null;
+  customerId?: string | null;
+  brandId?: string | null;
+}
+
 // ─── Webhook Event ────────────────────────────────────────────────
 export interface WebhookEvent {
   id: string;
