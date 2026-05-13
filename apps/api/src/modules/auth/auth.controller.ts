@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Body,
+  UnauthorizedException,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -79,9 +80,9 @@ export class AuthController {
     @Req() req: Request,
   ) {
     // Accept token from body or cookie
-    const token = dto.refreshToken || (req.cookies as Record<string, string>)?.['refreshToken'];
+    const token = dto.refreshToken?.trim() || (req.cookies as Record<string, string>)?.['refreshToken'];
     if (!token) {
-      return { error: 'Refresh token required' };
+      throw new UnauthorizedException('Refresh token required');
     }
     return this.authService.refresh(token);
   }

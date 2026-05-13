@@ -1,14 +1,11 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   Globe, 
   FileText, 
-  Link as LinkIcon, 
-  Plus, 
-  Search,
   Upload,
-  Rss,
   Layout,
   Database,
   Cloud,
@@ -19,30 +16,74 @@ import {
   Loader2,
   AlertCircle
 } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
 
 type SourceType = 'web' | 'file' | 'integration' | 'api' | null;
+
+interface BrandOption {
+  id: string;
+  name: string;
+}
+
+interface SourceFormSharedProps {
+  brandId: string;
+  brands: BrandOption[];
+  isBrandsLoading: boolean;
+  setBrandId: (brandId: string) => void;
+}
+
+function inferFileSourceType(fileName: string) {
+  const extension = fileName.split('.').pop()?.toLowerCase();
+
+  if (extension === 'pdf') {
+    return 'pdf';
+  }
+
+  if (extension === 'doc' || extension === 'docx') {
+    return 'docx';
+  }
+
+  return 'text';
+}
 
 export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState<SourceType>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedBrandId, setSelectedBrandId] = useState('');
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const { data: brands = [], isLoading: isBrandsLoading } = useQuery({
+    queryKey: ['brands'],
+    queryFn: async () => {
+      const response = await apiClient.get<{ data: BrandOption[] }>('/brands');
+      return response.data.data;
+    },
+    enabled: isOpen,
+    staleTime: 60_000,
+  });
 
   if (!isOpen) return null;
 
   const reset = () => {
     setStep(1);
     setSelectedType(null);
-    setIsSubmitting(false);
+    setSelectedBrandId('');
     setSuccess(false);
-    setError(null);
     onClose();
   };
 
   const handleSourceCreated = () => {
+    void queryClient.invalidateQueries({ queryKey: ['knowledge-stats'] });
     setSuccess(true);
     setTimeout(reset, 2000);
+  };
+
+  const sharedFormProps: SourceFormSharedProps = {
+    brandId: selectedBrandId,
+    brands,
+    isBrandsLoading,
+    setBrandId: setSelectedBrandId,
   };
 
   return (
@@ -102,11 +143,11 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
             )}
 
             {step === 2 && selectedType === 'web' && (
-              <WebSourceForm onBack={() => setStep(1)} onSuccess={handleSourceCreated} />
+              <WebSourceForm onBack={() => setStep(1)} onSuccess={handleSourceCreated} {...sharedFormProps} />
             )}
 
             {step === 2 && selectedType === 'file' && (
-              <FileSourceForm onBack={() => setStep(1)} onSuccess={handleSourceCreated} />
+              <FileSourceForm onBack={() => setStep(1)} onSuccess={handleSourceCreated} {...sharedFormProps} />
             )}
 
             {step === 2 && selectedType === 'integration' && (
@@ -114,11 +155,38 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
             )}
 
             {step === 2 && selectedType === 'api' && (
-              <ApiSourceForm onBack={() => setStep(1)} onSuccess={handleSourceCreated} />
+              <ApiSourceForm onBack={() => setStep(1)} onSuccess={handleSourceCreated} {...sharedFormProps} />
             )}
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+function BrandSelector({ brandId, brands, isBrandsLoading, setBrandId }: SourceFormSharedProps) {
+  return (
+    <div>
+      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+        Attach to brand
+      </label>
+      <select
+        value={brandId}
+        onChange={(event) => setBrandId(event.target.value)}
+        className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800 dark:text-white"
+      >
+        <option value="">{isBrandsLoading ? 'Loading brands…' : 'Select a brand'}</option>
+        {brands.map((brand) => (
+          <option key={brand.id} value={brand.id}>
+            {brand.name}
+          </option>
+        ))}
+      </select>
+      {!isBrandsLoading && brands.length === 0 ? (
+        <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+          Create a brand first before adding knowledge sources.
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -141,38 +209,33 @@ function SourceOption({ icon, title, description, onClick }: any) {
   );
 }
 
-function WebSourceForm({ onBack, onSuccess }: any) {
+function WebSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, setBrandId }: any) {
   const [method, setMethod] = useState('single');
   const [url, setUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
+    if (!brandId) return setError('Please select a brand');
     if (!url) return setError('Please enter a URL');
     setIsSubmitting(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/knowledge/sources', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: url.split('/')[2] || url,
-          type: method === 'rss' ? 'rss' : 'url',
-          url,
-          config: { method, depth: 1 },
-          trustLevel: 'high'
-        })
+      await apiClient.post('/knowledge/sources', {
+        brandId,
+        name: url.split('/')[2] || url,
+        type: 'url',
+        sourceUrl: url,
+        trustLevel: 'high',
+        syncFrequency: method === 'single' ? 'manual' : 'daily',
+        metadata: { method, depth: 1 },
+        config: { method, depth: 1 },
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Failed to connect source');
-      }
 
       onSuccess();
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.response?.data?.message || err.message || 'Failed to connect source');
     } finally {
       setIsSubmitting(false);
     }
@@ -200,6 +263,7 @@ function WebSourceForm({ onBack, onSuccess }: any) {
       </div>
 
       <div className="mt-6 space-y-4">
+        <BrandSelector brandId={brandId} brands={brands} isBrandsLoading={isBrandsLoading} setBrandId={setBrandId} />
         <div>
           <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
             {method === 'single' ? 'Enter URL' : method === 'sitemap' ? 'Sitemap XML URL' : 'RSS Feed URL'}
@@ -224,7 +288,7 @@ function WebSourceForm({ onBack, onSuccess }: any) {
         <button onClick={onBack} className="px-6 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">Cancel</button>
         <button 
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isBrandsLoading || brands.length === 0}
           className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-8 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700 disabled:opacity-50"
         >
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Start Ingestion'}
@@ -234,7 +298,7 @@ function WebSourceForm({ onBack, onSuccess }: any) {
   );
 }
 
-function FileSourceForm({ onBack, onSuccess }: any) {
+function FileSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, setBrandId }: any) {
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -248,28 +312,32 @@ function FileSourceForm({ onBack, onSuccess }: any) {
 
   const handleSubmit = async () => {
     const firstFile = files[0];
+    if (!brandId) return setError('Please select a brand');
     if (!firstFile) return setError('Please select a file');
     setIsSubmitting(true);
     setError(null);
 
     try {
-      // In a real app, we'd upload to S3/Cloud Storage here
-      // For this prototype, we'll simulate the source creation
-      const response = await fetch('/api/knowledge/sources', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: firstFile.name,
-          type: 'pdf', // Simplification for now
-          url: firstFile.name,
-          trustLevel: 'high'
-        })
+      await apiClient.post('/knowledge/sources', {
+        brandId,
+        name: firstFile.name,
+        type: inferFileSourceType(firstFile.name),
+        sourceUrl: `file://${encodeURIComponent(firstFile.name)}`,
+        trustLevel: 'high',
+        metadata: {
+          fileName: firstFile.name,
+          fileSize: firstFile.size,
+          mimeType: firstFile.type || 'application/octet-stream',
+        },
+        config: {
+          fileName: firstFile.name,
+          uploadPending: true,
+        },
       });
 
-      if (!response.ok) throw new Error('Failed to ingest file');
       onSuccess();
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.response?.data?.message || err.message || 'Failed to ingest file');
     } finally {
       setIsSubmitting(false);
     }
@@ -292,9 +360,13 @@ function FileSourceForm({ onBack, onSuccess }: any) {
         multiple 
       />
 
+      <div className="mt-8 space-y-4">
+        <BrandSelector brandId={brandId} brands={brands} isBrandsLoading={isBrandsLoading} setBrandId={setBrandId} />
+      </div>
+
       <div 
         onClick={() => fileInputRef.current?.click()}
-        className="mt-8 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-12 dark:border-gray-800 dark:bg-gray-800/30 transition-all hover:border-brand-500 hover:bg-brand-50/10 group cursor-pointer"
+        className="mt-6 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-12 dark:border-gray-800 dark:bg-gray-800/30 transition-all hover:border-brand-500 hover:bg-brand-50/10 group cursor-pointer"
       >
         <div className="rounded-full bg-white p-4 shadow-sm dark:bg-gray-800 group-hover:scale-110 transition-transform">
           <Upload className="h-8 w-8 text-brand-600" />
@@ -317,7 +389,7 @@ function FileSourceForm({ onBack, onSuccess }: any) {
         <button onClick={onBack} className="px-6 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">Cancel</button>
         <button 
           onClick={handleSubmit}
-          disabled={isSubmitting || files.length === 0}
+          disabled={isSubmitting || files.length === 0 || isBrandsLoading || brands.length === 0}
           className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-8 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700 disabled:opacity-50"
         >
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Upload and Ingest'}
@@ -327,33 +399,31 @@ function FileSourceForm({ onBack, onSuccess }: any) {
   );
 }
 
-function ApiSourceForm({ onBack, onSuccess }: any) {
+function ApiSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, setBrandId }: any) {
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
+    if (!brandId) return setError('Please select a brand');
     if (!name || !content) return setError('Please fill all fields');
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      const response = await fetch('/api/knowledge/sources', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          type: 'api',
-          url: 'manual-input',
-          config: { content },
-          trustLevel: 'high'
-        })
+      await apiClient.post('/knowledge/sources', {
+        brandId,
+        name,
+        type: 'text',
+        text: content,
+        trustLevel: 'high',
+        metadata: { inputMode: 'manual' },
       });
 
-      if (!response.ok) throw new Error('Failed to save knowledge');
       onSuccess();
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.response?.data?.message || err.message || 'Failed to save knowledge');
     } finally {
       setIsSubmitting(false);
     }
@@ -369,6 +439,7 @@ function ApiSourceForm({ onBack, onSuccess }: any) {
       <p className="mt-2 text-gray-500 dark:text-gray-400">Paste raw text, snippets, or connect custom data.</p>
 
       <div className="mt-8 space-y-4">
+        <BrandSelector brandId={brandId} brands={brands} isBrandsLoading={isBrandsLoading} setBrandId={setBrandId} />
         <div>
           <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Reference Name</label>
           <input 
@@ -401,7 +472,7 @@ function ApiSourceForm({ onBack, onSuccess }: any) {
         <button onClick={onBack} className="px-6 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">Cancel</button>
         <button 
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isBrandsLoading || brands.length === 0}
           className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-8 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700 disabled:opacity-50"
         >
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Knowledge'}

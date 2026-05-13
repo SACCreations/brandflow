@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { formatDistanceToNow } from 'date-fns';
 import { 
   Database, 
   Search, 
@@ -17,22 +19,49 @@ import {
   Globe
 } from 'lucide-react';
 import AddSourceModal from '@/components/knowledge/add-source-modal';
+import { apiClient } from '@/lib/api-client';
+
+interface KnowledgeStatsResponse {
+  totalSources: number;
+  totalEntries: number;
+  pendingReviews: number;
+  healthScore: number;
+  averageConfidence: number;
+  recentJobs: Array<{
+    id: string;
+    status: string;
+    stage: string;
+    createdAt: string;
+    source?: {
+      name: string | null;
+      type: string;
+    } | null;
+  }>;
+  sourcesByStatus: Record<string, number>;
+}
 
 export default function KnowledgeDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // Mock data for UI preview (in production this would be fetched from /api/knowledge/stats)
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['knowledge-stats'],
+    queryFn: async () => {
+      const response = await apiClient.get<{ data: KnowledgeStatsResponse }>('/knowledge/stats');
+      return response.data.data;
+    },
+    staleTime: 30_000,
+  });
+
   const stats = {
-    totalSources: 42,
-    totalEntries: 1248,
-    pendingReviews: 12,
-    healthScore: 92,
-    avgConfidence: 0.88,
-    recentActivity: [
-      { id: 1, type: 'url', name: 'processdrive.com/pricing', status: 'completed', time: '2m ago' },
-      { id: 2, type: 'pdf', name: 'Q4_Strategy.pdf', status: 'processing', time: '5m ago' },
-      { id: 3, type: 'api', name: 'Notion: Marketing Wiki', status: 'failed', time: '15m ago' },
-    ]
+    totalSources: data?.totalSources ?? 0,
+    totalEntries: data?.totalEntries ?? 0,
+    pendingReviews: data?.pendingReviews ?? 0,
+    healthScore: Math.round(data?.healthScore ?? 0),
+    avgConfidence: data?.averageConfidence ?? 0,
   };
+
+  const recentActivity = data?.recentJobs ?? [];
+  const statusMix = Object.entries(data?.sourcesByStatus ?? {});
+  const totalStatusCount = statusMix.reduce((sum, [, count]) => sum + count, 0);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -82,27 +111,27 @@ export default function KnowledgeDashboard() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard 
           title="Intelligence Health" 
-          value={`${stats.healthScore}%`} 
+          value={isLoading ? '—' : `${stats.healthScore}%`} 
           description="Global accuracy & freshness"
           icon={<BrainCircuit className="h-6 w-6 text-brand-500" />}
-          trend="+2.4%"
-          trendUp={true}
+          trend={isLoading ? undefined : `${stats.pendingReviews} pending`}
+          trendUp={stats.pendingReviews < 5}
         />
         <StatCard 
           title="Knowledge Atoms" 
-          value={stats.totalEntries.toLocaleString()} 
+          value={isLoading ? '—' : stats.totalEntries.toLocaleString()} 
           description="Classified facts & claims"
           icon={<Database className="h-6 w-6 text-blue-500" />}
         />
         <StatCard 
           title="Avg. Confidence" 
-          value={`${(stats.avgConfidence * 100).toFixed(0)}%`} 
+          value={isLoading ? '—' : `${(stats.avgConfidence * 100).toFixed(0)}%`} 
           description="AI extraction certainty"
           icon={<ShieldCheck className="h-6 w-6 text-emerald-500" />}
         />
         <StatCard 
           title="Review Queue" 
-          value={stats.pendingReviews} 
+          value={isLoading ? '—' : stats.pendingReviews} 
           description="Requires human validation"
           icon={<Clock className="h-6 w-6 text-amber-500" />}
           alert={stats.pendingReviews > 10}
@@ -116,8 +145,13 @@ export default function KnowledgeDashboard() {
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Live Ingestion Activity</h3>
             <button className="text-sm font-medium text-brand-600 hover:underline">View Monitor</button>
           </div>
-          <div className="space-y-4">
-            {stats.recentActivity.map((activity) => (
+          {isError ? (
+            <div className="rounded-xl border border-red-100 bg-red-50/80 p-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-500/10 dark:text-red-300">
+              Unable to load live ingestion activity right now.
+            </div>
+          ) : recentActivity.length > 0 ? (
+            <div className="space-y-4">
+              {recentActivity.map((activity) => (
               <div key={activity.id} className="flex items-center justify-between rounded-xl border border-gray-50 bg-gray-50/50 p-4 dark:border-gray-800/50 dark:bg-gray-800/30">
                 <div className="flex items-center gap-4">
                   <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
@@ -130,8 +164,10 @@ export default function KnowledgeDashboard() {
                      <AlertCircle className="h-5 w-5" />}
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{activity.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{activity.type} • {activity.time}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">{activity.source?.name || 'Untitled source'}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                      {activity.source?.type || activity.stage} • {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -144,18 +180,33 @@ export default function KnowledgeDashboard() {
                   </span>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-gray-200 p-8 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
+              No ingestion jobs yet. Add a knowledge source to start populating your brand brain.
+            </div>
+          )}
         </div>
 
         {/* Knowledge Distribution */}
         <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-          <h3 className="mb-6 text-lg font-bold text-gray-900 dark:text-white">Classification Mix</h3>
+          <h3 className="mb-6 text-lg font-bold text-gray-900 dark:text-white">Source Status Mix</h3>
           <div className="space-y-5">
-            <ProgressItem label="Product Features" percentage={45} color="bg-blue-500" />
-            <ProgressItem label="Marketing Claims" percentage={28} color="bg-brand-500" />
-            <ProgressItem label="Customer FAQ" percentage={15} color="bg-emerald-500" />
-            <ProgressItem label="Compliance/Legal" percentage={12} color="bg-amber-500" />
+            {statusMix.length > 0 ? (
+              statusMix.map(([status, count], index) => (
+                <ProgressItem
+                  key={status}
+                  label={status.replace(/_/g, ' ')}
+                  percentage={totalStatusCount > 0 ? Math.round((count / totalStatusCount) * 100) : 0}
+                  color={STATUS_COLORS[index % STATUS_COLORS.length]}
+                />
+              ))
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Add a source to see ingestion status distribution.
+              </p>
+            )}
           </div>
           <div className="mt-8 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
             <p className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
@@ -163,7 +214,9 @@ export default function KnowledgeDashboard() {
               AI Insight
             </p>
             <p className="mt-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              Your "Marketing Claims" area is growing fast. Consider running a human validation cycle to ensure brand alignment.
+              {stats.pendingReviews > 0
+                ? `${stats.pendingReviews} knowledge item${stats.pendingReviews === 1 ? '' : 's'} still need human review. Clearing the queue will improve trust in downstream generation.`
+                : 'Your review queue is clear. Keep feeding high-quality sources to improve generation grounding.'}
             </p>
           </div>
         </div>
@@ -173,6 +226,8 @@ export default function KnowledgeDashboard() {
     </div>
   );
 }
+
+const STATUS_COLORS = ['bg-blue-500', 'bg-brand-500', 'bg-emerald-500', 'bg-amber-500', 'bg-red-500'];
 
 function StatCard({ title, value, description, icon, trend, trendUp, alert }: any) {
   return (

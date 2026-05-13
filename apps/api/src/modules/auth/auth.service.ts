@@ -10,11 +10,11 @@ import { ConfigService } from '@nestjs/config';
 import * as argon2 from 'argon2';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
+import { randomBytes, randomUUID } from 'crypto';
 import { prisma } from '@brandflow/db';
 import type { Prisma } from '@brandflow/db';
 import type { AuthResponse, AuthTokens, JwtPayload, RefreshTokenPayload } from '@brandflow/shared';
 import type { RegisterDto, LoginDto } from '@brandflow/shared';
-import { nanoid } from 'nanoid';
 
 @Injectable()
 export class AuthService {
@@ -259,7 +259,7 @@ export class AuthService {
       // Auto-register OAuth users
       const registerResult = await this.register({
         email,
-        password: nanoid(32), // random, unusable password for OAuth users
+        password: randomBytes(24).toString('base64url'), // random, unusable password for OAuth users
         firstName,
         lastName,
       });
@@ -348,7 +348,7 @@ export class AuthService {
     const refreshExpiry = this.config.get<string>('app.jwt.refreshExpiry', '7d');
     const refreshPayload: RefreshTokenPayload = {
       sub: user.id,
-      sessionId: nanoid(),
+      sessionId: randomUUID(),
     };
 
     const [accessToken, refreshToken] = await Promise.all([

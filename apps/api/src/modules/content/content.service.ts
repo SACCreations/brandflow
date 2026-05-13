@@ -4,13 +4,13 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { prisma } from '@brandflow/db';
 import type { Prisma, KnowledgeSource, KnowledgeEntry } from '@brandflow/db';
 import { LLMGateway, PromptEngine, QualityControl, CostTracker, type LLMConfig } from '@brandflow/ai';
 import type { GenerateContentDto, UpdateContentDto, BrandContext } from '@brandflow/shared';
 import { LlmSettingsService } from '../llm-settings/llm-settings.service';
-import { nanoid } from 'nanoid';
 
 @Injectable()
 export class ContentService {
@@ -182,7 +182,7 @@ export class ContentService {
     const llmSettings = await this.llmSettingsService.getSettings(businessId);
     const decryptedApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId);
 
-    const requestId = nanoid();
+    const requestId = randomUUID();
     const { response, provider: usedProvider } = await this.gateway.complete(
       systemPrompt,
       `Generate a ${dto.type} for ${dto.platform} about: ${sanitizedTopic}`,

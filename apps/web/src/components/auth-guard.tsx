@@ -11,14 +11,16 @@ import { useAuthStore } from '@/store/auth.store';
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const accessToken = useAuthStore((s) => s.accessToken);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const isRefreshingSession = useAuthStore((s) => s.isRefreshingSession);
 
   useEffect(() => {
-    if (!accessToken) {
+    if (hasHydrated && !isRefreshingSession && !accessToken) {
       router.replace('/login');
     }
-  }, [accessToken, router]);
+  }, [accessToken, hasHydrated, isRefreshingSession, router]);
 
-  if (!accessToken) {
+  if (!hasHydrated || isRefreshingSession || !accessToken) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-600 border-t-transparent" />
