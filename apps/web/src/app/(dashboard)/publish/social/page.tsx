@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, CheckCircle2, Link2, Loader2, ShieldCheck, Trash2 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
@@ -30,6 +31,8 @@ const platforms = [
 
 export default function SocialAccountsPage() {
   const { toast } = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
     platform: 'linkedin',
@@ -56,6 +59,26 @@ export default function SocialAccountsPage() {
       return acc;
     }, {});
   }, [accounts]);
+
+  useEffect(() => {
+    const linkedinStatus = searchParams.get('linkedin');
+    const linkedinMessage = searchParams.get('linkedin_message');
+
+    if (!linkedinStatus) {
+      return;
+    }
+
+    toast({
+      title: linkedinStatus === 'connected' ? 'LinkedIn connected' : 'LinkedIn connection failed',
+      description: linkedinMessage || (linkedinStatus === 'connected'
+        ? 'The LinkedIn account is now available for scheduling and publishing.'
+        : 'Please review your LinkedIn app settings and try again.'),
+      variant: linkedinStatus === 'connected' ? 'default' : 'destructive',
+    });
+
+    queryClient.invalidateQueries({ queryKey: ['social-accounts'] });
+    router.replace('/publish/social');
+  }, [queryClient, router, searchParams, toast]);
 
   const connectMutation = useMutation({
     mutationFn: async () => {
@@ -97,6 +120,25 @@ export default function SocialAccountsPage() {
     },
   });
 
+  const linkedinOauthMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiClient.get('/social/linkedin/auth-url', {
+        params: { returnTo: '/publish/social' },
+      });
+      return res.data.data as { authUrl: string };
+    },
+    onSuccess: ({ authUrl }) => {
+      window.location.assign(authUrl);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Unable to start LinkedIn OAuth',
+        description: error?.response?.data?.message || 'Please confirm the LinkedIn app is configured in the API environment.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const disconnectMutation = useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/social/accounts/${id}`);
@@ -125,7 +167,7 @@ export default function SocialAccountsPage() {
           <p className="mt-2 text-gray-500 dark:text-gray-400">Connect publishing destinations so approved content can move from editor to queue without handoffs falling through the floorboards.</p>
         </div>
         <div className="rounded-2xl border border-brand-100 bg-brand-50/70 px-4 py-3 text-sm text-brand-700 dark:border-brand-500/20 dark:bg-brand-500/10 dark:text-brand-300">
-          OAuth callbacks are still phase-two work, so this screen supports secure manual account registration for now.
+          LinkedIn OAuth is now wired end to end. The manual form stays here for test environments and upcoming platform connectors.
         </div>
       </div>
 
@@ -147,6 +189,27 @@ export default function SocialAccountsPage() {
                 {accountCounts[platform.id] ?? 0}
               </span>
             </div>
+            <Button
+              variant="outline"
+              className="mt-4 w-full gap-2"
+              onClick={() => {
+                if (platform.id === 'linkedin') {
+                  linkedinOauthMutation.mutate();
+                  return;
+                }
+
+                toast({
+                  title: `${platform.label} is next in line`,
+                  description: 'LinkedIn is the first production connector; the other OAuth flows are queued behind it.',
+                });
+              }}
+              disabled={linkedinOauthMutation.isPending && platform.id === 'linkedin'}
+            >
+              {linkedinOauthMutation.isPending && platform.id === 'linkedin'
+                ? <Loader2 className="h-4 w-4 animate-spin" />
+                : <Link2 className="h-4 w-4" />}
+              {platform.id === 'linkedin' ? 'Connect with OAuth' : 'Coming next'}
+            </Button>
           </div>
         ))}
       </div>

@@ -4,19 +4,46 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { prisma } from '@brandflow/db';
 import * as crypto from 'node:crypto';
+import type { Response } from 'express';
 import type { ConnectSocialAccountDto } from '@brandflow/shared';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
 const TAG_LENGTH = 16;
+const LINKEDIN_DEFAULT_SCOPES = ['openid', 'profile', 'email', 'w_member_social'] as const;
+
+interface LinkedInOAuthState {
+  businessId: string;
+  returnTo: string;
+  nonce: string;
+}
+
+interface LinkedInTokenResponse {
+  access_token?: string;
+  expires_in?: number;
+  scope?: string;
+  refresh_token?: string;
+  error?: string;
+  error_description?: string;
+}
+
+interface LinkedInUserInfo {
+  sub?: string;
+  name?: string;
+  email?: string;
+}
 
 @Injectable()
 export class SocialService {
   private readonly encKey: Buffer;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly jwtService: JwtService,
+  ) {
     const key = config.get<string>('app.encryptionKey');
     if (!key || key.length < 32) {
       throw new Error('ENCRYPTION_KEY must be at least 32 characters');
@@ -187,17 +214,180 @@ export class SocialService {
     return prisma.socialAccount.delete({ where: { id } });
   }
 
-  /**
-   * Placeholder: LinkedIn OAuth callback handler
-   * Exchange code for tokens, store encrypted, return social account record.
-   */
-  async handleLinkedInCallback(
-    businessId: string,
-    code: string,
-    redirectUri: string,
-  ) {
-    // TODO: implement LinkedIn OAuth token exchange in Phase 2
-    // For MVP, return a stub indicating the flow is ready
-    throw new BadRequestException('LinkedIn OAuth not yet implemented — coming in Phase 2');
+  async createLinkedInAuthUrl(businessId: string, returnTo?: string) {
+    const { clientId, callbackUrl } = this.getLinkedInConfig();
+    const safeReturnTo = this.sanitizeReturnTo(returnTo);
+    const state = await this.jwtService.signAsync(
+      {
+        businessId,
+        returnTo: safeReturnTo,
+        nonce: crypto.randomUUID(),
+      } satisfies LinkedInOAuthState,
+      { expiresIn: '10m' },
+    );
+
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: clientId,
+      redirect_uri: callbackUrl,
+      state,
+      scope: LINKEDIN_DEFAULT_SCOPES.join(' '),
+    });
+
+    return {
+      authUrl: `https://www.linkedin.com/oauth/v2/authorization?${params.toString()}`,
+      stateExpiresIn: '10m',
+    };
+  }
+
+  async handleLinkedInCallback({
+    code,
+    state,
+    error,
+    errorDescription,
+    res,
+  }: {
+    code?: string;
+    state?: string;
+    error?: string;
+    errorDescription?: string;
+    res: Response;
+  }) {
+    let oauthState: LinkedInOAuthState | null = null;
+
+    try {
+      oauthState = state
+        ? await this.jwtService.verifyAsync<LinkedInOAuthState>(state)
+        : null;
+    } catch {
+      const fallbackUrl = this.buildSocialRedirect('/publish/social', 'error', 'Invalid or expired LinkedIn OAuth state.');
+      return res.redirect(fallbackUrl);
+    }
+
+    const returnTo = this.sanitizeReturnTo(oauthState?.returnTo);
+
+    if (error) {
+      const message = errorDescription || error;
+      return res.redirect(this.buildSocialRedirect(returnTo, 'error', message));
+    }
+
+    if (!code) {
+      return res.redirect(this.buildSocialRedirect(returnTo, 'error', 'LinkedIn did not provide an authorization code.'));
+    }
+
+    try {
+      const tokenResponse = await this.exchangeLinkedInCodeForToken(code);
+      const accessToken = tokenResponse.access_token;
+
+      if (!accessToken) {
+        throw new BadRequestException(tokenResponse.error_description || tokenResponse.error || 'LinkedIn did not return an access token.');
+      }
+
+      const profile = await this.fetchLinkedInUserInfo(accessToken);
+      const externalId = profile.sub || profile.email;
+
+      if (!oauthState?.businessId || !externalId) {
+        throw new BadRequestException('Unable to resolve the LinkedIn account identity.');
+      }
+
+      const account = await this.upsert(oauthState.businessId, 'linkedin', {
+        name: profile.name || profile.email || 'LinkedIn account',
+        externalId,
+        accountType: 'personal',
+        accessToken,
+        refreshToken: tokenResponse.refresh_token,
+        tokenExpiresAt: tokenResponse.expires_in
+          ? new Date(Date.now() + tokenResponse.expires_in * 1000)
+          : undefined,
+        scopes: tokenResponse.scope?.split(' ').filter(Boolean) ?? [...LINKEDIN_DEFAULT_SCOPES],
+      });
+
+      return res.redirect(this.buildSocialRedirect(returnTo, 'connected', undefined, account.id));
+    } catch (callbackError) {
+      const message = callbackError instanceof Error ? callbackError.message : 'LinkedIn connection failed.';
+      return res.redirect(this.buildSocialRedirect(returnTo, 'error', message));
+    }
+  }
+
+  private sanitizeReturnTo(returnTo?: string | null): string {
+    if (!returnTo || !returnTo.startsWith('/')) {
+      return '/publish/social';
+    }
+
+    return returnTo.startsWith('//') ? '/publish/social' : returnTo;
+  }
+
+  private buildSocialRedirect(returnTo: string, status: 'connected' | 'error', message?: string, accountId?: string) {
+    const webUrl = this.config.get<string>('app.webUrl', 'http://localhost:3002');
+    const target = new URL(returnTo, webUrl);
+    target.searchParams.set('linkedin', status);
+
+    if (message) {
+      target.searchParams.set('linkedin_message', message);
+    }
+
+    if (accountId) {
+      target.searchParams.set('accountId', accountId);
+    }
+
+    return target.toString();
+  }
+
+  private getLinkedInConfig() {
+    const clientId = process.env['LINKEDIN_CLIENT_ID'];
+    const clientSecret = process.env['LINKEDIN_CLIENT_SECRET'];
+    const callbackUrl = process.env['LINKEDIN_CALLBACK_URL'] || `${this.config.get<string>('app.url', 'http://localhost:4000')}/social/linkedin/callback`;
+
+    if (!clientId || !clientSecret) {
+      throw new BadRequestException('LinkedIn OAuth is not configured. Add LINKEDIN_CLIENT_ID and LINKEDIN_CLIENT_SECRET.');
+    }
+
+    return { clientId, clientSecret, callbackUrl };
+  }
+
+  private async exchangeLinkedInCodeForToken(code: string): Promise<LinkedInTokenResponse> {
+    const { clientId, clientSecret, callbackUrl } = this.getLinkedInConfig();
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: callbackUrl,
+      client_id: clientId,
+      client_secret: clientSecret,
+    });
+
+    const response = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
+      signal: AbortSignal.timeout(15_000),
+    });
+
+    const payload = await response.json() as LinkedInTokenResponse;
+
+    if (!response.ok) {
+      throw new BadRequestException(payload.error_description || payload.error || `LinkedIn token exchange failed (${response.status}).`);
+    }
+
+    return payload;
+  }
+
+  private async fetchLinkedInUserInfo(accessToken: string): Promise<LinkedInUserInfo> {
+    const response = await fetch('https://api.linkedin.com/v2/userinfo', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      signal: AbortSignal.timeout(15_000),
+    });
+
+    const payload = await response.json() as LinkedInUserInfo & { message?: string };
+
+    if (!response.ok) {
+      throw new BadRequestException(payload.message || `LinkedIn profile lookup failed (${response.status}).`);
+    }
+
+    return payload;
   }
 }

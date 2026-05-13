@@ -1,13 +1,14 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
 import { LLMGateway } from '@brandflow/ai';
+import { SocialService } from './social.service';
 
 @Injectable()
 export class PublishService {
   private readonly logger = new Logger(PublishService.name);
   private readonly ai: LLMGateway;
 
-  constructor() {
+  constructor(private readonly socialService: SocialService) {
     this.ai = new LLMGateway({ defaultProvider: 'openai' });
   }
 
@@ -51,6 +52,38 @@ export class PublishService {
     return jobs;
   }
 
+  async publishContent(contentId: string, socialAccountId: string, businessId: string) {
+    const [content, account] = await Promise.all([
+      prisma.content.findFirst({
+        where: { id: contentId, businessId },
+        include: { brand: true },
+      }),
+      prisma.socialAccount.findFirst({
+        where: { id: socialAccountId, businessId },
+      }),
+    ]);
+
+    if (!content) {
+      throw new NotFoundException('Content not found');
+    }
+
+    if (!account) {
+      throw new NotFoundException('Social account not found');
+    }
+
+    if (account.tokenExpiresAt && account.tokenExpiresAt.getTime() <= Date.now()) {
+      throw new BadRequestException('LinkedIn token expired. Reconnect the account before publishing.');
+    }
+
+    switch (account.platform) {
+      case 'linkedin': {
+        return this.publishLinkedInPost(content.body, account, businessId);
+      }
+      default:
+        throw new BadRequestException(`Platform ${account.platform} is not supported for direct publishing yet.`);
+    }
+  }
+
   private async tailorContent(body: string, platform: string, brand: any): Promise<string> {
     const platformRules: Record<string, string> = {
       twitter: 'Keep it concise, under 280 characters. Use 1-2 relevant hashtags. Use a punchy tone.',
@@ -76,6 +109,67 @@ export class PublishService {
     } catch (error) {
       this.logger.error(`Failed to tailor content for ${platform}`, error);
       return body; // Fallback to original
+    }
+  }
+
+  private async publishLinkedInPost(
+    body: string,
+    account: {
+      id: string;
+      externalId: string;
+      accountType: string;
+      platform: string;
+    },
+    businessId: string,
+  ) {
+    const { accessToken } = await this.socialService.getDecryptedTokens(account.id, businessId);
+    const authorType = account.accountType === 'organization' ? 'organization' : 'person';
+
+    const response = await fetch('https://api.linkedin.com/rest/posts', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'LinkedIn-Version': '202405',
+        'X-Restli-Protocol-Version': '2.0.0',
+      },
+      body: JSON.stringify({
+        author: `urn:li:${authorType}:${account.externalId}`,
+        commentary: body,
+        visibility: 'PUBLIC',
+        distribution: {
+          feedDistribution: 'MAIN_FEED',
+          targetEntities: [],
+          thirdPartyDistributionChannels: [],
+        },
+        lifecycleState: 'PUBLISHED',
+        isReshareDisabledByAuthor: false,
+      }),
+      signal: AbortSignal.timeout(20_000),
+    });
+
+    const text = await response.text();
+    const payload = text ? this.tryParseJson(text) : {};
+
+    if (!response.ok) {
+      const message = typeof payload === 'object' && payload && 'message' in payload
+        ? String((payload as { message?: unknown }).message)
+        : `LinkedIn publish failed (${response.status}).`;
+      throw new BadRequestException(message);
+    }
+
+    const externalPostId = response.headers.get('x-restli-id')
+      || (typeof payload === 'object' && payload && 'id' in payload ? String((payload as { id?: unknown }).id) : null)
+      || `linkedin:${account.externalId}:${Date.now()}`;
+
+    return { externalPostId };
+  }
+
+  private tryParseJson(value: string): unknown {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
     }
   }
 

@@ -3,6 +3,7 @@ import { Job } from 'bullmq';
 import { Logger, NotFoundException } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
 import { QUEUES } from '@brandflow/shared';
+import { PublishService } from '../social/publish.service';
 
 interface PublishJobData {
   scheduleId: string;
@@ -13,6 +14,10 @@ interface PublishJobData {
 @Processor(QUEUES.PUBLISH)
 export class PublishProcessor extends WorkerHost {
   private readonly logger = new Logger(PublishProcessor.name);
+
+  constructor(private readonly publishService: PublishService) {
+    super();
+  }
 
   async process(job: Job<PublishJobData>): Promise<void> {
     const { scheduleId, businessId, contentId } = job.data;
@@ -34,13 +39,21 @@ export class PublishProcessor extends WorkerHost {
     });
 
     try {
-      // TODO Phase 2: Route to actual platform connector (LinkedIn, Instagram, etc.)
       this.logger.log(`Publishing content ${contentId} for schedule ${scheduleId}`);
+      const publishResult = await this.publishService.publishContent(
+        contentId,
+        schedule.socialAccountId,
+        businessId,
+      );
 
       await prisma.$transaction([
         prisma.publishJob.update({
           where: { id: publishJob.id },
-          data: { status: 'published', publishedAt: new Date() },
+          data: {
+            status: 'published',
+            publishedAt: new Date(),
+            externalPostId: publishResult.externalPostId,
+          },
         }),
         prisma.schedule.update({
           where: { id: scheduleId },

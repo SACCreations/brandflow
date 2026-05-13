@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
@@ -48,7 +48,12 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor(), new TransformInterceptor());
 
   // ─── API Prefix ──────────────────────────────────────────────
-  app.setGlobalPrefix('api/v1', { exclude: ['health'] });
+  app.setGlobalPrefix('api/v1', {
+    exclude: [
+      'health',
+      { path: 'social/linkedin/callback', method: RequestMethod.GET },
+    ],
+  });
 
   // ─── Swagger ─────────────────────────────────────────────────
   if (config.get('NODE_ENV') !== 'production') {
