@@ -177,6 +177,45 @@ export const createBrandSchema = z.object({
       requiredDisclaimer: z.string().max(1000).nullish().or(z.literal('')),
     })
     .nullish(),
+
+  strategy: z
+    .object({
+      targetLocation: z.string().max(255).nullish().or(z.literal('')),
+      ageGroup: z.string().max(100).nullish().or(z.literal('')),
+      interests: z.string().max(1000).nullish().or(z.literal('')),
+      postingFrequency: z.enum(['daily', 'weekly', 'bi-weekly', 'monthly']).nullish(),
+      festivalPosts: z.boolean().default(false),
+      offerPosts: z.boolean().default(false),
+      preferredTypes: z.array(z.string()).nullish(), // Poster, Reel, Video, Carousel, Blog
+      contentLanguage: z.enum(['tamil', 'english', 'mixed']).default('english'),
+    })
+    .nullish(),
+
+  socialAccess: z
+    .object({
+      metaBusinessManagerId: z.string().max(100).nullish().or(z.literal('')),
+      adAccountId: z.string().max(100).nullish().or(z.literal('')),
+    })
+    .nullish(),
+
+  competitors: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(255),
+        website: z.string().url().nullish().or(z.literal('')),
+        strengths: z.string().max(1000).nullish().or(z.literal('')),
+        weaknesses: z.string().max(1000).nullish().or(z.literal('')),
+      }),
+    )
+    .nullish(),
+
+  contactInfo: z
+    .object({
+      personName: z.string().max(255).nullish().or(z.literal('')),
+      phoneNumber: z.string().max(50).nullish().or(z.literal('')),
+      email: z.string().email().nullish().or(z.literal('')),
+    })
+    .nullish(),
 });
 export type CreateBrandDto = z.infer<typeof createBrandSchema>;
 

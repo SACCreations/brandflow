@@ -10,7 +10,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { AuthResponse } from '@brandflow/shared';
 
-export default function LoginPage() {
+import { Suspense } from 'react';
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -109,6 +111,14 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
 

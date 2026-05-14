@@ -1,178 +1,194 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { format, formatDistanceToNow } from 'date-fns';
-import {
-  BadgeCheck,
-  CreditCard,
-  Coins,
-  Users,
-  Sparkles,
-  Building2,
-  FolderKanban,
-  Briefcase,
-  AlertCircle,
+import React from 'react';
+import { 
+  Check, 
+  Zap, 
+  ShieldCheck, 
+  CreditCard, 
+  ArrowUpRight, 
+  BarChart3,
+  Infinity
 } from 'lucide-react';
-import { apiClient } from '@/lib/api-client';
-
-interface BillingSummaryResponse {
-  workspace: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-  subscription: {
-    plan: string;
-    status: string;
-    currentPeriodEnd: string | null;
-    seatLimit: number;
-    tokenBudget: number;
-    stripeCustomerId: string | null;
-    stripeSubscriptionId: string | null;
-  } | null;
-  usage: {
-    tokensUsed: number;
-    tokenBudget: number;
-    tokenUsagePercentage: number;
-    costCents: number;
-    inputTokens: number;
-    outputTokens: number;
-    seatsUsed: number;
-    seatLimit: number;
-    seatUsagePercentage: number;
-    contentCreatedThisPeriod: number;
-  };
-  resources: {
-    brands: number;
-    customers: number;
-    projects: number;
-  };
-}
+import { cn } from '@brandflow/ui';
 
 export default function BillingSettingsPage() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['billing-summary'],
-    queryFn: async () => {
-      const res = await apiClient.get<{ data: BillingSummaryResponse }>('/business/billing');
-      return res.data.data;
+  const currentPlan = 'Starter';
+  
+  const plans = [
+    {
+      name: 'Starter',
+      price: '$15',
+      tokens: '100',
+      description: 'Perfect for small businesses starting their AI journey.',
+      features: ['1 Active Brand', '100 AI Tokens /mo', 'Standard Media Library', 'Email Support'],
+      highlight: false
     },
-    staleTime: 60_000,
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-600 border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (isError || !data) {
-    return (
-      <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-500/10 dark:text-red-300">
-        Billing data is temporarily unavailable. Please refresh and try again.
-      </div>
-    );
-  }
-
-  const subscription = data.subscription;
+    {
+      name: 'Pro',
+      price: '$49',
+      tokens: '500',
+      description: 'Advanced features for growing brands and startups.',
+      features: ['5 Active Brands', '500 AI Tokens /mo', 'Advanced Intelligence', 'Priority Support', 'Custom Brand Tones'],
+      highlight: true
+    },
+    {
+      name: 'Elite',
+      price: '$199',
+      tokens: '2,500',
+      description: 'Unlimited power for agencies and multi-brand enterprises.',
+      features: ['Unlimited Brands', '2,500 AI Tokens /mo', 'API Access', 'Dedicated Success Manager', 'Custom Workflows'],
+      highlight: false
+    }
+  ];
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Billing & Subscription</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
-            Live plan, usage, and AI spend for <span className="font-semibold text-gray-700 dark:text-gray-300">{data.workspace.name}</span>.
-          </p>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">Manage your subscription, tokens, and payment methods.</p>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm dark:border-gray-800 dark:bg-gray-900">
-          <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Current cycle</div>
-          <div className="mt-1 font-semibold text-gray-900 dark:text-white">
-            {subscription?.currentPeriodEnd
-              ? `Ends ${format(new Date(subscription.currentPeriodEnd), 'MMM d, yyyy')}`
-              : 'No billing cycle set'}
+        <button className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+          <BarChart3 className="h-4 w-4" />
+          View Usage History
+        </button>
+      </div>
+
+      {/* Usage Stats */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 dark:bg-brand-500/10">
+              <Zap className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Token Usage</h3>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-black text-gray-900 dark:text-white">42</span>
+            <span className="text-gray-400 font-bold uppercase text-[10px] tracking-tighter">/ 100 tokens</span>
+          </div>
+          <div className="mt-6 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className="h-full bg-brand-600 transition-all" style={{ width: '42%' }} />
+          </div>
+          <p className="mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Resets in 18 days</p>
+        </div>
+
+        <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 dark:bg-blue-500/10">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Active Brands</h3>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-black text-gray-900 dark:text-white">1</span>
+            <span className="text-gray-400 font-bold uppercase text-[10px] tracking-tighter">/ 1 brands</span>
+          </div>
+          <div className="mt-6 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className="h-full bg-blue-500 transition-all" style={{ width: '100%' }} />
+          </div>
+          <p className="mt-4 text-[10px] font-bold text-amber-600 uppercase tracking-widest">Limit reached</p>
+        </div>
+
+        <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 dark:bg-emerald-500/10">
+              <CreditCard className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Next Payment</h3>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-4xl font-black text-gray-900 dark:text-white">$15.00</span>
+            <span className="text-gray-500 font-bold text-xs mt-1">Due on June 1st, 2026</span>
+          </div>
+          <div className="mt-6 flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Auto-pay enabled</p>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 lg:col-span-1">
-          <div className="mb-6 flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-brand-600" />
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Plan Status</h2>
-              </div>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Workspace subscription and entitlement state.</p>
-            </div>
-            <StatusBadge status={subscription?.status ?? 'inactive'} />
-          </div>
+      {/* Plans Section */}
+      <div className="space-y-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Choose the right plan for your vision</h2>
+          <p className="mt-2 text-gray-500">Scale your brand intelligence as you grow.</p>
+        </div>
 
-          {subscription ? (
-            <div className="space-y-5">
-              <div>
-                <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Current plan</div>
-                <div className="mt-2 text-3xl font-black text-gray-900 dark:text-white">{formatLabel(subscription.plan)}</div>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {subscription.currentPeriodEnd
-                    ? `${formatDistanceToNow(new Date(subscription.currentPeriodEnd), { addSuffix: true })}`
-                    : 'Billing period unavailable'}
-                </p>
-              </div>
+        <div className="grid gap-8 md:grid-cols-3">
+          {plans.map((plan) => (
+            <div 
+              key={plan.name}
+              className={cn(
+                "relative flex flex-col rounded-[2.5rem] border p-8 transition-all duration-300 hover:shadow-2xl",
+                plan.highlight 
+                  ? "border-brand-200 bg-brand-50/30 dark:border-brand-500/20 dark:bg-brand-500/5 shadow-xl scale-105 z-10" 
+                  : "border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900"
+              )}
+            >
+              {plan.highlight && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-brand-600 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-lg">
+                  Most Popular
+                </div>
+              )}
 
-              <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
-                <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Stripe linkage</div>
-                <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                  {subscription.stripeCustomerId && subscription.stripeSubscriptionId
-                    ? 'Connected'
-                    : 'Not connected yet — local billing mode'}
+              <div className="mb-8">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{plan.name}</h3>
+                <p className="mt-2 text-sm text-gray-500 leading-relaxed">{plan.description}</p>
+                <div className="mt-6 flex items-baseline gap-1">
+                  <span className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter">{plan.price}</span>
+                  <span className="text-gray-400 font-bold text-sm">/mo</span>
                 </div>
               </div>
 
-              <div className="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
-                Stripe checkout and self-serve plan switching are the next billing milestones, but your live usage tracking is already here.
+              <div className="flex-1 space-y-4 mb-10">
+                {plan.features.map((feature) => (
+                  <div key={feature} className="flex items-center gap-3">
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-600/10 text-brand-600">
+                      <Check className="h-3 w-3" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{feature}</span>
+                  </div>
+                ))}
               </div>
+
+              <button 
+                className={cn(
+                  "flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black uppercase tracking-widest transition-all",
+                  currentPlan === plan.name
+                    ? "bg-gray-100 text-gray-500 cursor-default dark:bg-gray-800"
+                    : plan.highlight
+                      ? "bg-brand-600 text-white shadow-lg shadow-brand-500/25 hover:bg-brand-700 hover:-translate-y-1"
+                      : "bg-gray-900 text-white hover:bg-black dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+                )}
+              >
+                {currentPlan === plan.name ? 'Current Plan' : 'Switch Plan'}
+                {currentPlan !== plan.name && <ArrowUpRight className="h-4 w-4" />}
+              </button>
             </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-gray-200 p-6 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
-              No subscription record found for this workspace yet.
-            </div>
-          )}
+          ))}
         </div>
+      </div>
 
-        <div className="space-y-6 lg:col-span-2">
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            <UsageCard title="Monthly AI Spend" value={formatCurrency(data.usage.costCents)} helper="Current month cost events" icon={<Coins className="h-5 w-5 text-amber-500" />} />
-            <UsageCard title="Content Created" value={String(data.usage.contentCreatedThisPeriod)} helper="Generated this period" icon={<Sparkles className="h-5 w-5 text-brand-500" />} />
-            <UsageCard title="Seats in Use" value={`${data.usage.seatsUsed}/${data.usage.seatLimit || 0}`} helper="Workspace members" icon={<Users className="h-5 w-5 text-blue-500" />} />
-            <UsageCard title="Token Budget" value={`${data.usage.tokenUsagePercentage}%`} helper={`${formatCompactNumber(data.usage.tokensUsed)} used`} icon={<BadgeCheck className="h-5 w-5 text-emerald-500" />} />
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <ProgressPanel title="AI Token Usage" current={data.usage.tokensUsed} limit={data.usage.tokenBudget} percentage={data.usage.tokenUsagePercentage} description="Combined input and output tokens recorded this billing period." />
-            <ProgressPanel title="Seat Utilization" current={data.usage.seatsUsed} limit={data.usage.seatLimit} percentage={data.usage.seatUsagePercentage} description="How close the workspace is to its seat limit." />
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <h2 className="mb-6 text-lg font-bold text-gray-900 dark:text-white">Workspace Footprint</h2>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <FootprintCard label="Brands" value={data.resources.brands} icon={<Building2 className="h-5 w-5 text-brand-600" />} />
-              <FootprintCard label="Clients" value={data.resources.customers} icon={<Briefcase className="h-5 w-5 text-blue-600" />} />
-              <FootprintCard label="Projects" value={data.resources.projects} icon={<FolderKanban className="h-5 w-5 text-emerald-600" />} />
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 text-amber-500" />
+      {/* Payment Method */}
+      <div className="rounded-[2.5rem] border border-gray-100 bg-white p-8 dark:border-gray-800 dark:bg-gray-900 overflow-hidden relative">
+        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+          <CreditCard className="w-64 h-64 -rotate-12" />
+        </div>
+        <div className="relative z-10">
+          <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">Payment Method</h3>
+          <p className="mt-1 text-sm text-gray-500 mb-8">Manage your credit cards and billing information.</p>
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between p-6 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-4 mb-4 md:mb-0">
+              <div className="w-12 h-8 bg-black rounded flex items-center justify-center text-white text-[10px] font-bold">VISA</div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Plan-aware next steps</h2>
-                <p className="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-                  Your billing screen is now driven by live usage and subscription data. The next step is hooking this into self-serve checkout, entitlements, and upgrade prompts when token or seat thresholds are crossed.
-                </p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">•••• •••• •••• 4242</p>
+                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Expires 12/28</p>
               </div>
             </div>
+            <button className="text-xs font-black uppercase tracking-widest text-brand-600 hover:text-brand-700 transition-colors">Edit Method</button>
           </div>
         </div>
       </div>

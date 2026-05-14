@@ -240,7 +240,7 @@ export class CampaignService {
     return {
       businessId,
       name: dto.name.trim(),
-      description: this.normalizeOptionalText(dto.description) ?? null,
+      description: (dto.description && typeof dto.description === 'string' ? dto.description.trim() : null) || null,
       status: dto.status,
       startDate: dto.startDate ?? null,
       endDate: dto.endDate ?? null,
@@ -260,15 +260,31 @@ export class CampaignService {
       throw new BadRequestException('Campaign end date cannot be earlier than the start date.');
     }
 
-    return {
-      ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
-      ...(dto.description !== undefined ? { description: this.normalizeOptionalText(dto.description) ?? null } : {}),
-      ...(dto.status !== undefined ? { status: dto.status } : {}),
-      ...(dto.startDate !== undefined ? { startDate: dto.startDate ?? null } : {}),
-      ...(dto.endDate !== undefined ? { endDate: dto.endDate ?? null } : {}),
-      ...(dto.clonedFromId !== undefined ? { clonedFromId: dto.clonedFromId ?? null } : {}),
-      ...(dto.metadata !== undefined ? { metadata: dto.metadata as unknown as Prisma.InputJsonValue } : {}),
-    };
+    const payload: Prisma.CampaignUncheckedUpdateInput = {};
+
+    if (dto.name !== undefined) {
+      payload.name = dto.name?.trim() ?? existing.name;
+    }
+    if (dto.description !== undefined) {
+      payload.description = (dto.description && typeof dto.description === 'string' ? dto.description.trim() : null) || null;
+    }
+    if (dto.status !== undefined && dto.status !== null) {
+      payload.status = dto.status;
+    }
+    if (dto.startDate !== undefined) {
+      payload.startDate = dto.startDate ?? null;
+    }
+    if (dto.endDate !== undefined) {
+      payload.endDate = dto.endDate ?? null;
+    }
+    if (dto.clonedFromId !== undefined) {
+      payload.clonedFromId = dto.clonedFromId ?? null;
+    }
+    if (dto.metadata !== undefined) {
+      payload.metadata = dto.metadata as unknown as Prisma.InputJsonValue;
+    }
+
+    return payload;
   }
 
   private normalizeBriefMetadata(metadata: Prisma.JsonValue | null) {

@@ -46,9 +46,16 @@ const GROUPS = [
     label: 'Intelligence',
     sections: [
       { id: 'voice', label: 'Brand Voice', icon: MessageSquare },
-      { id: 'audience', label: 'Audience', icon: Users },
-      { id: 'competitors', label: 'Competitors', icon: Users },
       { id: 'knowledge', label: 'Knowledge Base', icon: Globe },
+    ]
+  },
+  {
+    id: 'strategy',
+    label: 'Market Strategy',
+    sections: [
+      { id: 'audience', label: 'Audience Deep-Dive', icon: Users },
+      { id: 'competitors', label: 'Competitors', icon: Users },
+      { id: 'content-strategy', label: 'Content Strategy', icon: MessageSquare },
     ]
   },
   {

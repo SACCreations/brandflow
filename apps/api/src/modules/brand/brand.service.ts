@@ -20,23 +20,48 @@ export class BrandService {
 
   private calculateHealthScore(brand: any): number {
     let score = 0;
-    let totalFields = 10;
-    
-    if (brand.name?.trim()) score += 1;
-    if (brand.industry?.trim()) score += 1;
-    if (brand.tagline?.trim()) score += 1;
-    if (brand.description?.trim()) score += 1;
-    if (brand.website?.trim()) score += 1;
-    if (brand.positioning?.trim()) score += 1;
-    if (brand.audience?.trim()) score += 1;
-    if (brand.differentiators?.trim()) score += 1;
-    
-    const vr = typeof brand.visualRules === 'object' ? brand.visualRules : undefined;
-    if (vr?.primaryColor) score += 1;
-    if (brand.tone && Array.isArray(brand.tone) && brand.tone.length > 0) score += 1;
-    if (brand.defaultLocale) score += 1;
+    const weights = {
+      basic: 1,      // name, industry, tagline, description, website
+      strategy: 2,   // positioning, audience, strategy object
+      visuals: 2,    // visualRules, tone
+      competitors: 1,
+      contact: 1
+    };
 
-    return Math.round((score / (totalFields + 1)) * 100);
+    let totalPossible = 0;
+
+    // Basic Details (5 points)
+    if (brand.name?.trim()) score += weights.basic; totalPossible += weights.basic;
+    if (brand.industry?.trim()) score += weights.basic; totalPossible += weights.basic;
+    if (brand.tagline?.trim()) score += weights.basic; totalPossible += weights.basic;
+    if (brand.description?.trim()) score += weights.basic; totalPossible += weights.basic;
+    if (brand.website?.trim()) score += weights.basic; totalPossible += weights.basic;
+
+    // Strategy & Intelligence (6 points)
+    if (brand.positioning?.trim()) score += weights.strategy; totalPossible += weights.strategy;
+    if (brand.audience?.trim()) score += weights.strategy; totalPossible += weights.strategy;
+    
+    const strategy = typeof brand.strategy === 'object' ? brand.strategy : undefined;
+    if (strategy?.targetLocation || strategy?.interests) score += weights.strategy;
+    totalPossible += weights.strategy;
+
+    // Visuals & Voice (4 points)
+    const vr = typeof brand.visualRules === 'object' ? brand.visualRules : undefined;
+    if (vr?.primaryColor && vr?.fontFamily) score += weights.visuals;
+    totalPossible += weights.visuals;
+
+    if (brand.tone && (Array.isArray(brand.tone) ? brand.tone.length > 0 : !!brand.tone)) score += weights.visuals;
+    totalPossible += weights.visuals;
+
+    // Market context (1 point)
+    if (brand.competitors && Array.isArray(brand.competitors) && brand.competitors.length > 0) score += weights.competitors;
+    totalPossible += weights.competitors;
+
+    // Contact info (1 point)
+    if (brand.contactInfo?.personName || brand.contactInfo?.email) score += weights.contact;
+    totalPossible += weights.contact;
+
+    return Math.round((score / totalPossible) * 100);
   }
 
   async create(businessId: string, dto: CreateBrandDto) {
@@ -113,5 +138,18 @@ export class BrandService {
     });
     if (!brand) throw new NotFoundException('Brand not found');
     return brand;
+  }
+
+  async connectSocial(businessId: string, platform: string) {
+    return prisma.socialAccount.create({
+      data: {
+        businessId,
+        platform,
+        accountType: 'business',
+        externalId: `ext_${platform}_${Math.random().toString(36).substring(7)}`,
+        name: `Connected ${platform} Account`,
+        accessToken: 'simulated_token',
+      },
+    });
   }
 }
