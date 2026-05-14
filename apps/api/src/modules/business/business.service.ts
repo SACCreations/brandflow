@@ -229,6 +229,85 @@ export class BusinessService {
     };
   }
 
+  async getBillingSummary(businessId: string) {
+    const periodStart = new Date();
+    periodStart.setDate(1);
+    periodStart.setHours(0, 0, 0, 0);
+
+    const [business, usageTotals, contentCreatedThisPeriod] = await Promise.all([
+      prisma.business.findUnique({
+        where: { id: businessId },
+        include: {
+          subscriptions: { orderBy: { createdAt: 'desc' }, take: 1 },
+          _count: { select: { memberships: true, brands: true, customers: true, projects: true } },
+        },
+      }),
+      prisma.costEvent.aggregate({
+        where: {
+          businessId,
+          createdAt: { gte: periodStart },
+        },
+        _sum: {
+          inputTokens: true,
+          outputTokens: true,
+          costCents: true,
+        },
+      }),
+      prisma.content.count({
+        where: {
+          businessId,
+          createdAt: { gte: periodStart },
+        },
+      }),
+    ]);
+
+    if (!business) {
+      throw new NotFoundException('Business not found');
+    }
+
+    const subscription = business.subscriptions[0] ?? null;
+    const tokensUsed = (usageTotals._sum.inputTokens ?? 0) + (usageTotals._sum.outputTokens ?? 0);
+    const tokenBudget = subscription?.tokenBudget ?? 0;
+    const seatLimit = subscription?.seatLimit ?? 0;
+    const seatsUsed = business._count.memberships;
+
+    return {
+      workspace: {
+        id: business.id,
+        name: business.name,
+        slug: business.slug,
+      },
+      subscription: subscription
+        ? {
+            plan: subscription.plan,
+            status: subscription.status,
+            currentPeriodEnd: subscription.currentPeriodEnd,
+            seatLimit: subscription.seatLimit,
+            tokenBudget: subscription.tokenBudget,
+            stripeCustomerId: subscription.stripeCustomerId,
+            stripeSubscriptionId: subscription.stripeSubscriptionId,
+          }
+        : null,
+      usage: {
+        tokensUsed,
+        tokenBudget,
+        tokenUsagePercentage: tokenBudget > 0 ? Math.min(100, Math.round((tokensUsed / tokenBudget) * 100)) : 0,
+        costCents: usageTotals._sum.costCents ?? 0,
+        inputTokens: usageTotals._sum.inputTokens ?? 0,
+        outputTokens: usageTotals._sum.outputTokens ?? 0,
+        seatsUsed,
+        seatLimit,
+        seatUsagePercentage: seatLimit > 0 ? Math.min(100, Math.round((seatsUsed / seatLimit) * 100)) : 0,
+        contentCreatedThisPeriod,
+      },
+      resources: {
+        brands: business._count.brands,
+        customers: business._count.customers,
+        projects: business._count.projects,
+      },
+    };
+  }
+
   async inviteMember(businessId: string, email: string, roleName: string) {
     // Check if user exists
     let user = await prisma.user.findUnique({ where: { email } });

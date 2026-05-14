@@ -34,6 +34,12 @@ export class BusinessController {
     return this.businessService.getDashboardSummary(user.businessId);
   }
 
+  @Get('billing')
+  @ApiOperation({ summary: 'Get workspace billing and usage summary' })
+  getBilling(@CurrentUser() user: JwtPayload) {
+    return this.businessService.getBillingSummary(user.businessId);
+  }
+
   @Patch()
   @ApiOperation({ summary: 'Update workspace settings' })
   update(

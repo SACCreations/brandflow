@@ -31,6 +31,16 @@ export class AnalyticsController {
     return this.analyticsService.getMetrics(user.businessId, brandId, from, to);
   }
 
+  @Get('summary')
+  @ApiOperation({ summary: 'Get analytics dashboard summary' })
+  getSummary(
+    @CurrentUser() user: JwtPayload,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.analyticsService.getSummary(user.businessId, from, to);
+  }
+
   @Get('performance')
   @ApiOperation({ summary: 'Get performance metrics for content' })
   getPerformance(@CurrentUser() user: JwtPayload, @Query('contentId') contentId?: string) {

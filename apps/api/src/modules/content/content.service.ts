@@ -86,7 +86,7 @@ export class ContentService {
   async generate(businessId: string, userId: string, dto: GenerateContentDto) {
     // 1. Check token budget
     const subscription = await prisma.subscription.findFirst({
-      where: { businessId, status: 'active' },
+      where: { businessId, status: { in: ['active', 'trialing'] } },
     });
     if (!subscription) {
       throw new ForbiddenException('No active subscription found');
