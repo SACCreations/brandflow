@@ -7,7 +7,7 @@ import { apiClient } from '@/lib/api-client';
 import { BrandWizard } from '@/components/brand/brand-wizard';
 import { useToast } from '@brandflow/ui';
 
-export default function BrandCreatePage() {
+export default function BrandOnboardingPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -20,16 +20,27 @@ export default function BrandCreatePage() {
       localStorage.removeItem('brand_draft_new');
       queryClient.invalidateQueries({ queryKey: ['brands'] });
       toast({
-        title: 'Brand created',
-        description: 'New brand identity has been successfully created.',
+        title: 'Brand onboarding complete',
+        description: 'Your brand identity has been successfully initialized.',
       });
       router.push('/intelligence/brands');
     },
     onError: (error: any) => {
+      console.error('Onboarding Error Details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      
+      const validationErrors = error.response?.data?.errors;
+      const detailMessage = Array.isArray(validationErrors) 
+        ? validationErrors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')
+        : error.response?.data?.message;
+
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: error.response?.data?.message || 'Failed to create brand.',
+        title: 'Onboarding failed',
+        description: detailMessage || 'Something went wrong during onboarding.',
       });
     },
   });
@@ -37,7 +48,7 @@ export default function BrandCreatePage() {
   return (
     <div className="bg-white dark:bg-gray-950">
       <BrandWizard 
-        title="Brand Onboarding Wizard"
+        title="Enterprise Brand Onboarding"
         onSubmit={async (data) => {
           await mutation.mutateAsync(data);
         }}

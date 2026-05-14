@@ -236,10 +236,15 @@ model Brand {
   identity     Json?
   marketing    Json?
   designTokens Json?
-  strategy     Json?    // { targetLocation, ageGroup, interests, postingFrequency, festivalPosts, offerPosts, preferredTypes, contentLanguage }
+  strategy     Json?    // { targetLocation, ageGroup, interests, postingFrequency, festivalPosts, offerPosts, preferredTypes, contentLanguage, ctaPreference }
   competitors  Json?    // [{ name, website, strengths, weaknesses }]
-  contactInfo  Json?    // { personName, phoneNumber, email }
-  socialAccess Json?    // { metaBusinessManagerId, adAccountId }
+  contactInfo  Json?    // { personName, phoneNumber, email, officeAddress }
+  socialAccess Json?    // { metaBusinessManagerId, adAccountId, instagramHandle, facebookPage, linkedinPage, youtubeChannel, twitterHandle }
+  
+  designPreferences Json? // { preferredStyle, referenceLinks, imageStyle, animationRequirement }
+  approvalWorkflow  Json? // { reviewerName, finalApproverName, processSteps, approvalTiming, revisionLimit }
+  campaignDetails   Json? // { marketingGoal, monthlyBudget, duration, targetLeads, adPlatforms }
+  analyticsConfig   Json? // { monthlyReport, kpiExpectations, leadTracking, engagementTracking }
   
   healthScore  Int      @default(0)
   version      Int      @default(1)

@@ -59,11 +59,12 @@ const GROUPS = [
     ]
   },
   {
-    id: 'governance',
-    label: 'Governance',
+    id: 'execution',
+    label: 'Execution & Workflow',
     sections: [
-      { id: 'rules', label: 'Brand Rules', icon: ShieldCheck },
-      { id: 'compliance', label: 'Compliance', icon: ShieldCheck },
+      { id: 'design-prefs', label: 'Design Preferences', icon: Palette },
+      { id: 'rules', label: 'Approval Workflow', icon: ShieldCheck },
+      { id: 'compliance', label: 'Compliance Rules', icon: ShieldCheck },
     ]
   },
   {
@@ -71,7 +72,7 @@ const GROUPS = [
     label: 'Assets & DAM',
     sections: [
       { id: 'logos', label: 'Logo Library', icon: Globe },
-      { id: 'documents', label: 'Documents', icon:Globe },
+      { id: 'documents', label: 'Documents', icon: Globe },
       { id: 'media', label: 'Media Library', icon: Globe },
     ]
   },
@@ -79,7 +80,8 @@ const GROUPS = [
     id: 'operations',
     label: 'Operations',
     sections: [
-      { id: 'social', label: 'Social Accounts', icon: Globe },
+      { id: 'social', label: 'Social Media', icon: Globe },
+      { id: 'campaigns', label: 'Campaign Defaults', icon: Settings },
       { id: 'automation', label: 'Automation', icon: Settings },
     ]
   },
@@ -88,7 +90,8 @@ const GROUPS = [
     label: 'Analytics',
     sections: [
       { id: 'health', label: 'Brand Health', icon: ShieldCheck },
-      { id: 'performance', label: 'Performance', icon: ShieldCheck },
+      { id: 'performance', label: 'Performance ROI', icon: ShieldCheck },
+      { id: 'analytics', label: 'Reporting Config', icon: Settings },
     ]
   }
 ];

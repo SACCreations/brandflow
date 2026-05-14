@@ -108,6 +108,23 @@ export default function ProjectDetailPage() {
     enabled: !!projectId,
   });
 
+  const createCampaignMutation = useMutation({
+    mutationFn: async (briefId: string) => {
+      const res = await apiClient.post(`/campaigns/from-brief/${briefId}`);
+      return res.data.data as { id: string };
+    },
+    onSuccess: (campaign) => {
+      window.location.href = `/campaigns/${campaign.id}`;
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Unable to create campaign',
+        description: error?.response?.data?.message || 'Approve the brief first, then try again.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex h-[420px] items-center justify-center">
@@ -133,22 +150,6 @@ export default function ProjectDetailPage() {
   const brandCreated = searchParams.get('brandCreated') === '1';
   const briefSaved = searchParams.get('briefSaved') === '1';
 
-  const createCampaignMutation = useMutation({
-    mutationFn: async (briefId: string) => {
-      const res = await apiClient.post(`/campaigns/from-brief/${briefId}`);
-      return res.data.data as { id: string };
-    },
-    onSuccess: (campaign) => {
-      window.location.href = `/campaigns/${campaign.id}`;
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Unable to create campaign',
-        description: error?.response?.data?.message || 'Approve the brief first, then try again.',
-        variant: 'destructive',
-      });
-    },
-  });
 
   return (
     <div className="space-y-8">

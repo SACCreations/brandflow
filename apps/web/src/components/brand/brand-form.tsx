@@ -62,6 +62,8 @@ interface BrandFormProps {
   isLoading?: boolean;
   onDataChange: (data: any) => void;
   lastSaved?: Date | null;
+  wizardMode?: boolean;
+  activeStepId?: string;
 }
 
 const sanitizeInitialData = (data: any) => {
@@ -85,7 +87,14 @@ const sanitizeInitialData = (data: any) => {
   // Ensure default structures exist
   return {
     ...cleaned,
+    slug: (cleaned.slug || cleaned.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
     status: cleaned.status || 'published',
+    description: cleaned.description || '',
+    industry: cleaned.industry || '',
+    website: cleaned.website || '',
+    differentiators: cleaned.differentiators || '',
+    positioning: cleaned.positioning || '',
+    audience: cleaned.audience || '',
     tone: Array.isArray(cleaned.tone) ? cleaned.tone : [],
     visualRules: {
       ...cleaned.visualRules,
@@ -95,7 +104,7 @@ const sanitizeInitialData = (data: any) => {
       headingFont: cleaned.visualRules?.headingFont || 'Inter',
       bodyFont: cleaned.visualRules?.bodyFont || 'Inter',
       fontFamily: cleaned.visualRules?.fontFamily || 'Inter',
-      logoUrls: Array.isArray(cleaned.visualRules?.logoUrls) ? cleaned.visualRules.logoUrls : []
+      logoUrls: Array.isArray(cleaned.visualRules?.logoUrls) ? cleaned.visualRules.logoUrls.filter(Boolean) : []
     },
     designTokens: {
       ...cleaned.designTokens,
@@ -108,6 +117,10 @@ const sanitizeInitialData = (data: any) => {
       documents: Array.isArray(cleaned.assets?.documents) ? cleaned.assets.documents : []
     },
     identity: {
+      mission: cleaned.mission || '',
+      vision: cleaned.vision || '',
+      promise: cleaned.promise || '',
+      personality: cleaned.personality || '',
       values: Array.isArray(cleaned.identity?.values) ? cleaned.identity.values : []
     },
     governance: {
@@ -124,22 +137,55 @@ const sanitizeInitialData = (data: any) => {
       festivalPosts: !!cleaned.strategy?.festivalPosts,
       offerPosts: !!cleaned.strategy?.offerPosts,
       contentLanguage: cleaned.strategy?.contentLanguage || 'english',
-      preferredTypes: Array.isArray(cleaned.strategy?.preferredTypes) ? cleaned.strategy.preferredTypes : ['Poster', 'Reel']
+      preferredTypes: Array.isArray(cleaned.strategy?.preferredTypes) ? cleaned.strategy.preferredTypes : ['Poster', 'Reel'],
+      ctaPreference: cleaned.strategy?.ctaPreference || 'Call Now'
+    },
+    designPreferences: {
+      preferredStyle: cleaned.designPreferences?.preferredStyle || 'Modern',
+      referenceLinks: Array.isArray(cleaned.designPreferences?.referenceLinks) ? cleaned.designPreferences.referenceLinks : [],
+      imageStyle: cleaned.designPreferences?.imageStyle || 'Minimal',
+      animationRequirement: !!cleaned.designPreferences?.animationRequirement
+    },
+    approvalWorkflow: {
+      reviewerName: cleaned.approvalWorkflow?.reviewerName || '',
+      finalApproverName: cleaned.approvalWorkflow?.finalApproverName || '',
+      processSteps: Array.isArray(cleaned.approvalWorkflow?.processSteps) ? cleaned.approvalWorkflow.processSteps : [],
+      approvalTiming: cleaned.approvalWorkflow?.approvalTiming || '',
+      revisionLimit: cleaned.approvalWorkflow?.revisionLimit || 3
+    },
+    campaignDetails: {
+      marketingGoal: cleaned.campaignDetails?.marketingGoal || 'Brand Awareness',
+      monthlyBudget: cleaned.campaignDetails?.monthlyBudget || 0,
+      duration: cleaned.campaignDetails?.duration || '',
+      targetLeads: cleaned.campaignDetails?.targetLeads || 0,
+      adPlatforms: Array.isArray(cleaned.campaignDetails?.adPlatforms) ? cleaned.campaignDetails.adPlatforms : []
+    },
+    analyticsConfig: {
+      monthlyReport: cleaned.analyticsConfig?.monthlyReport ?? true,
+      kpiExpectations: cleaned.analyticsConfig?.kpiExpectations || '',
+      leadTracking: !!cleaned.analyticsConfig?.leadTracking,
+      engagementTracking: cleaned.analyticsConfig?.engagementTracking ?? true
     },
     competitors: Array.isArray(cleaned.competitors) ? cleaned.competitors : [],
     contactInfo: {
       personName: cleaned.contactInfo?.personName || '',
       phoneNumber: cleaned.contactInfo?.phoneNumber || '',
-      email: cleaned.contactInfo?.email || ''
+      email: cleaned.contactInfo?.email || '',
+      officeAddress: cleaned.contactInfo?.officeAddress || ''
     },
     socialAccess: {
       metaBusinessManagerId: cleaned.socialAccess?.metaBusinessManagerId || '',
-      adAccountId: cleaned.socialAccess?.adAccountId || ''
+      adAccountId: cleaned.socialAccess?.adAccountId || '',
+      instagramHandle: cleaned.socialAccess?.instagramHandle || '',
+      facebookPage: cleaned.socialAccess?.facebookPage || '',
+      linkedinPage: cleaned.socialAccess?.linkedinPage || '',
+      youtubeChannel: cleaned.socialAccess?.youtubeChannel || '',
+      twitterHandle: cleaned.socialAccess?.twitterHandle || ''
     }
   };
 };
 
-export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, lastSaved }: BrandFormProps) {
+export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, lastSaved, wizardMode, activeStepId }: BrandFormProps) {
   const { toast } = useToast();
   const form = useForm<any>({
     resolver: zodResolver(createBrandSchema),
@@ -191,8 +237,24 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
     register('strategy.offerPosts');
     register('strategy.contentLanguage');
     register('strategy.preferredTypes');
+    register('strategy.ctaPreference');
+    register('designPreferences.preferredStyle');
+    register('designPreferences.referenceLinks');
+    register('designPreferences.imageStyle');
+    register('designPreferences.animationRequirement');
+    register('approvalWorkflow.processSteps');
+    register('campaignDetails.marketingGoal');
+    register('campaignDetails.adPlatforms');
+    register('analyticsConfig.monthlyReport');
+    register('analyticsConfig.leadTracking');
+    register('analyticsConfig.engagementTracking');
     register('socialAccess.metaBusinessManagerId');
     register('socialAccess.adAccountId');
+    register('socialAccess.instagramHandle');
+    register('socialAccess.facebookPage');
+    register('socialAccess.linkedinPage');
+    register('socialAccess.youtubeChannel');
+    register('socialAccess.twitterHandle');
     register('competitors');
   }, [register]);
 
@@ -216,6 +278,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSubmit, onSubmit]);
 
+
   const addToArray = (path: string, value: string) => {
     const current = watch(path) || [];
     if (value && !current.includes(value)) {
@@ -232,10 +295,28 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
   const [newValue, setNewValue] = React.useState('');
   const [newBanned, setNewBanned] = React.useState('');
 
+  const isSectionVisible = (sectionId: string) => {
+    if (!wizardMode || !activeStepId) return true;
+    
+    const mapping: Record<string, string[]> = {
+      basics: ['basics'],
+      visuals: ['visuals', 'typography', 'colors', 'logos', 'documents'],
+      voice: ['voice', 'knowledge'],
+      strategy: ['audience', 'competitors', 'content-strategy'],
+      'design-prefs': ['design-prefs'],
+      rules: ['rules', 'compliance', 'approval'],
+      social: ['social', 'campaigns', 'automation'],
+      finish: ['health', 'performance', 'analytics']
+    };
+
+    return mapping[activeStepId]?.includes(sectionId) ?? false;
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-12 pb-32">
+    <form onSubmit={handleSubmit(onSubmit)} className={cn("space-y-12", !wizardMode && "pb-32")}>
       {/* 1. Brand Basics */}
-      <section id="basics" className="space-y-6 scroll-mt-24">
+      {isSectionVisible('basics') && (
+        <section id="basics" className="space-y-6 scroll-mt-24">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600">
             <Building2 className="w-5 h-5" />
@@ -259,8 +340,22 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
             </div>
           </div>
           
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Tagline</label>
+          <div className="space-y-2 group relative">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Tagline</label>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 text-[9px] font-black uppercase tracking-widest text-brand-600 hover:bg-brand-50 rounded-lg group-hover:opacity-100 opacity-0 transition-opacity"
+                onClick={() => {
+                  toast({ title: 'AI Copilot', description: 'Generating creative taglines based on your brand description...' });
+                  setValue('tagline', 'The Future of Intelligent Branding');
+                }}
+              >
+                <Sparkles className="w-3 h-3 mr-1" /> Generate with AI
+              </Button>
+            </div>
             <Input {...register('tagline')} placeholder="The future of branding..." className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
           </div>
 
@@ -275,8 +370,22 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Description</label>
+          <div className="space-y-2 group relative">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Description</label>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 text-[9px] font-black uppercase tracking-widest text-brand-600 hover:bg-brand-50 rounded-lg group-hover:opacity-100 opacity-0 transition-opacity"
+                onClick={() => {
+                  toast({ title: 'AI Copilot', description: 'Expanding your brand mission into a compelling description...' });
+                  setValue('description', 'An industry-leading platform focused on bridging the gap between artificial intelligence and human creativity.');
+                }}
+              >
+                <Sparkles className="w-3 h-3 mr-1" /> Expand with AI
+              </Button>
+            </div>
             <Textarea 
               {...register('description')} 
               placeholder="Tell us about your brand..." 
@@ -300,11 +409,17 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                    <Input {...register('contactInfo.email')} placeholder="contact@brand.com" className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
                 </div>
              </div>
+             <div className="space-y-1.5 mt-4">
+                <label className="text-[9px] font-bold text-gray-500 ml-1">Office Address</label>
+                <Input {...register('contactInfo.officeAddress')} placeholder="123 Business St, Suite 400..." className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+             </div>
           </div>
         </Card>
       </section>
+      )}
 
-      <section id="visuals" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('visuals') && (
+        <section id="visuals" className="space-y-8 scroll-mt-24">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">02</div>
@@ -438,9 +553,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </Card>
       </section>
+      )}
 
       {/* 3. Typography */}
-      <section id="typography" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('typography') && (
+        <section id="typography" className="space-y-8 scroll-mt-24">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">03</div>
@@ -464,9 +581,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           onScaleChange={(val) => setValue('visualRules.typographyScales', val, { shouldDirty: true })}
         />
       </section>
+      )}
 
       {/* 4. Colors */}
-      <section id="colors" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('colors') && (
+        <section id="colors" className="space-y-8 scroll-mt-24">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">04</div>
@@ -482,9 +601,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           onChange={(val) => setValue('visualRules.colorTokens', val, { shouldDirty: true })}
         />
       </section>
+      )}
 
       {/* 5. Brand Voice & Tone */}
-      <section id="voice" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('voice') && (
+        <section id="voice" className="space-y-8 scroll-mt-24">
          <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">05</div>
@@ -544,9 +665,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            </div>
         </Card>
       </section>
+      )}
 
       {/* 6. Audience */}
-      <section id="audience" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('audience') && (
+        <section id="audience" className="space-y-8 scroll-mt-24">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">06</div>
@@ -582,9 +705,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            </div>
         </Card>
       </section>
+      )}
 
       {/* 7. Competitors */}
-      <section id="competitors" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('competitors') && (
+        <section id="competitors" className="space-y-8 scroll-mt-24">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">07</div>
@@ -688,9 +813,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            </div>
         </Card>
       </section>
+      )}
 
       {/* 7.5 Content Strategy */}
-      <section id="content-strategy" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('content-strategy') && (
+        <section id="content-strategy" className="space-y-8 scroll-mt-24">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">08</div>
@@ -793,9 +920,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            </div>
         </Card>
       </section>
+      )}
 
       {/* 8. Knowledge Base */}
-      <section id="knowledge" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('knowledge') && (
+        <section id="knowledge" className="space-y-8 scroll-mt-24">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">08</div>
@@ -822,9 +951,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            </div>
         </Card>
       </section>
+      )}
 
       {/* 9. Brand Rules (Governance) */}
-      <section id="rules" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('rules') && (
+        <section id="rules" className="space-y-8 scroll-mt-24">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">09</div>
@@ -838,9 +969,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           onChange={(val) => setValue('governance.rules', val, { shouldDirty: true })}
         />
       </section>
+      )}
 
       {/* 10. Compliance */}
-      <section id="compliance" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('compliance') && (
+        <section id="compliance" className="space-y-8 scroll-mt-24">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">10</div>
@@ -857,9 +990,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           />
         </Card>
       </section>
+      )}
 
       {/* 11. Logo Library */}
-      <section id="logos" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('logos') && (
+        <section id="logos" className="space-y-8 scroll-mt-24">
          <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">11</div>
@@ -889,9 +1024,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            </div>
         </Card>
       </section>
+      )}
 
       {/* 12. Documents */}
-      <section id="documents" className="space-y-8 scroll-mt-24">
+      {isSectionVisible('documents') && (
+        <section id="documents" className="space-y-8 scroll-mt-24">
          <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">12</div>
@@ -948,43 +1085,397 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           )}
         </Card>
       </section>
+      )}
 
-      {/* 13. Social Accounts */}
+      {/* 9. Design Preferences */}
+      {isSectionVisible('design-prefs') && (
+      <section id="design-prefs" className="space-y-8 scroll-mt-24">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">09</div>
+            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Design Preferences</h2>
+          </div>
+          <p className="text-gray-500 font-medium px-10">Set the visual direction for AI-generated creatives.</p>
+        </div>
+
+        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-6 bg-white dark:bg-gray-900 rounded-3xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Preferred Design Style</label>
+               <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { name: 'Minimal', emoji: '⚪', desc: 'Clean & Simple' },
+                    { name: 'Corporate', emoji: '🏢', desc: 'Trust & Power' },
+                    { name: '3D', emoji: '📦', desc: 'Modern depth' },
+                    { name: 'Modern', emoji: '✨', desc: 'Trendy & Fresh' },
+                    { name: 'Playful', emoji: '🎈', desc: 'Fun & Friendly' },
+                    { name: 'Luxury', emoji: '💎', desc: 'High-end feel' }
+                  ].map(style => (
+                    <button
+                      key={style.name}
+                      type="button"
+                      onClick={() => setValue('designPreferences.preferredStyle', style.name, { shouldDirty: true })}
+                      className={cn(
+                        "p-4 rounded-2xl border text-left transition-all group",
+                        values.designPreferences?.preferredStyle === style.name
+                          ? "bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/20"
+                          : "bg-gray-50 dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700 hover:border-brand-200"
+                      )}
+                    >
+                      <div className="text-xl mb-1">{style.emoji}</div>
+                      <div className="text-[10px] font-black uppercase tracking-tight">{style.name}</div>
+                      <div className={cn("text-[8px] font-medium opacity-60", values.designPreferences?.preferredStyle === style.name ? "text-white" : "text-gray-400")}>{style.desc}</div>
+                    </button>
+                  ))}
+               </div>
+            </div>
+
+            <div className="space-y-6">
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Image Style</label>
+                  <Select 
+                    value={values.designPreferences?.imageStyle} 
+                    onValueChange={(val) => setValue('designPreferences.imageStyle', val, { shouldDirty: true })}
+                  >
+                    <SelectTrigger className="h-12 bg-gray-50/50 border-gray-100 rounded-xl">
+                      <SelectValue placeholder="Select image style" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Minimal">Minimal & Clean</SelectItem>
+                      <SelectItem value="Corporate">Corporate & Professional</SelectItem>
+                      <SelectItem value="3D">3D Rendered</SelectItem>
+                      <SelectItem value="Modern">Modern & Vibrant</SelectItem>
+                    </SelectContent>
+                  </Select>
+               </div>
+
+               <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+                  <div className="space-y-0.5">
+                    <label className="text-xs font-bold text-gray-900 dark:text-white">Motion Graphics</label>
+                    <p className="text-[10px] text-gray-500">Enable animation/video requirements.</p>
+                  </div>
+                  <Switch 
+                    checked={values.designPreferences?.animationRequirement} 
+                    onCheckedChange={(checked) => setValue('designPreferences.animationRequirement', checked, { shouldDirty: true })} 
+                  />
+               </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-6 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Reference Design Links</label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                className="h-8 rounded-xl font-bold"
+                onClick={() => {
+                  const current = values.designPreferences?.referenceLinks || [];
+                  setValue('designPreferences.referenceLinks', [...current, '']);
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" /> Add Link
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {values.designPreferences?.referenceLinks?.map((link: string, idx: number) => (
+                <div key={idx} className="flex gap-2">
+                  <Input 
+                    placeholder="https://behance.net/..." 
+                    value={link}
+                    onChange={(e) => {
+                      const newLinks = [...values.designPreferences.referenceLinks];
+                      newLinks[idx] = e.target.value;
+                      setValue('designPreferences.referenceLinks', newLinks);
+                    }}
+                    className="h-10 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-red-500 hover:bg-red-50"
+                    onClick={() => {
+                      const newLinks = values.designPreferences.referenceLinks.filter((_: any, i: number) => i !== idx);
+                      setValue('designPreferences.referenceLinks', newLinks);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      </section>
+      )}
+
+      {/* 10. Approval Workflow */}
+      {isSectionVisible('approval') && (
+      <section id="rules" className="space-y-8 scroll-mt-24">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">10</div>
+            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Approval Workflow</h2>
+          </div>
+          <p className="text-gray-500 font-medium px-10">Define the review and sign-off process.</p>
+        </div>
+
+        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Content Reviewer</label>
+              <Input {...register('approvalWorkflow.reviewerName')} placeholder="e.g. Marketing Manager" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Final Approver</label>
+              <Input {...register('approvalWorkflow.finalApproverName')} placeholder="e.g. Business Owner / CEO" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Approval Timing</label>
+              <Input {...register('approvalWorkflow.approvalTiming')} placeholder="e.g. Within 24 hours of posting" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Revision Limit (per post)</label>
+              <Input type="number" {...register('approvalWorkflow.revisionLimit', { valueAsNumber: true })} className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-4">
+             <div className="flex items-center justify-between">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Approval Process Steps</label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 rounded-xl font-bold"
+                  onClick={() => {
+                    const current = values.approvalWorkflow?.processSteps || [];
+                    setValue('approvalWorkflow.processSteps', [...current, '']);
+                  }}
+                >
+                  <PlusCircle className="w-4 h-4 mr-2" /> Add Step
+                </Button>
+             </div>
+             <div className="space-y-3">
+                {values.approvalWorkflow?.processSteps?.map((step: string, idx: number) => (
+                  <div key={idx} className="flex items-center gap-3 bg-gray-50/50 dark:bg-gray-800/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800">
+                    <div className="w-6 h-6 rounded-lg bg-brand-500 text-white flex items-center justify-center text-[10px] font-bold">{idx + 1}</div>
+                    <Input 
+                      placeholder={`Step ${idx + 1} description...`} 
+                      value={step}
+                      onChange={(e) => {
+                        const newSteps = [...values.approvalWorkflow.processSteps];
+                        newSteps[idx] = e.target.value;
+                        setValue('approvalWorkflow.processSteps', newSteps);
+                      }}
+                      className="border-none bg-transparent h-8 text-sm focus-visible:ring-0"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-gray-400 hover:text-red-500"
+                      onClick={() => {
+                        const newSteps = values.approvalWorkflow.processSteps.filter((_: any, i: number) => i !== idx);
+                        setValue('approvalWorkflow.processSteps', newSteps);
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+             </div>
+          </div>
+        </Card>
+      </section>
+      )}
+
+      {/* 11. Campaign Details */}
+      {isSectionVisible('campaigns') && (
+      <section id="campaigns" className="space-y-8 scroll-mt-24">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">11</div>
+            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Campaign Defaults</h2>
+          </div>
+          <p className="text-gray-500 font-medium px-10">Standard parameters for your marketing efforts.</p>
+        </div>
+
+        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Marketing Goal</label>
+                <Select 
+                  value={values.campaignDetails?.marketingGoal} 
+                  onValueChange={(val) => setValue('campaignDetails.marketingGoal', val, { shouldDirty: true })}
+                >
+                  <SelectTrigger className="h-12 bg-gray-50/50 border-gray-100 rounded-xl">
+                    <SelectValue placeholder="Select primary goal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Brand Awareness">Brand Awareness</SelectItem>
+                    <SelectItem value="Leads">Lead Generation</SelectItem>
+                    <SelectItem value="Sales">Sales & Conversions</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Monthly Budget (USD)</label>
+                <Input type="number" {...register('campaignDetails.monthlyBudget', { valueAsNumber: true })} className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+              </div>
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Campaign Duration</label>
+                <Input {...register('campaignDetails.duration')} placeholder="e.g. 3 Months, On-going" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Target Leads / Reach (Monthly)</label>
+                <Input type="number" {...register('campaignDetails.targetLeads', { valueAsNumber: true })} className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+              </div>
+           </div>
+
+           <div className="space-y-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Ad Platforms</label>
+              <div className="flex flex-wrap gap-2">
+                {['Meta Ads', 'Google Ads', 'LinkedIn Ads', 'Twitter Ads', 'TikTok Ads'].map(platform => (
+                  <button
+                    key={platform}
+                    type="button"
+                    onClick={() => {
+                      const current = values.campaignDetails?.adPlatforms || [];
+                      if (current.includes(platform)) {
+                        setValue('campaignDetails.adPlatforms', current.filter((p: string) => p !== platform));
+                      } else {
+                        setValue('campaignDetails.adPlatforms', [...current, platform]);
+                      }
+                    }}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                      values.campaignDetails?.adPlatforms?.includes(platform)
+                        ? "bg-gray-900 text-white border-gray-900 shadow-lg"
+                        : "bg-gray-50 dark:bg-gray-800 text-gray-500 border-gray-100 dark:border-gray-700 hover:border-brand-200"
+                    )}
+                  >
+                    {platform}
+                  </button>
+                ))}
+              </div>
+           </div>
+        </Card>
+      </section>
+      )}
+
+      {/* 12. Analytics Config */}
+      {isSectionVisible('analytics') && (
+      <section id="analytics" className="space-y-8 scroll-mt-24">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">12</div>
+            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Analytics & Reporting</h2>
+          </div>
+          <p className="text-gray-500 font-medium px-10">Configure how we track and report success.</p>
+        </div>
+
+        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div className="space-y-6">
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+                  <div className="space-y-0.5">
+                    <label className="text-xs font-bold text-gray-900 dark:text-white">Monthly Reports</label>
+                    <p className="text-[10px] text-gray-500">Auto-generate monthly performance PDF.</p>
+                  </div>
+                  <Switch 
+                    checked={values.analyticsConfig?.monthlyReport} 
+                    onCheckedChange={(checked) => setValue('analyticsConfig.monthlyReport', checked, { shouldDirty: true })} 
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+                  <div className="space-y-0.5">
+                    <label className="text-xs font-bold text-gray-900 dark:text-white">Lead Tracking</label>
+                    <p className="text-[10px] text-gray-500">Track form submissions and conversions.</p>
+                  </div>
+                  <Switch 
+                    checked={values.analyticsConfig?.leadTracking} 
+                    onCheckedChange={(checked) => setValue('analyticsConfig.leadTracking', checked, { shouldDirty: true })} 
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+                  <div className="space-y-0.5">
+                    <label className="text-xs font-bold text-gray-900 dark:text-white">Engagement Tracking</label>
+                    <p className="text-[10px] text-gray-500">Track likes, shares, and comments.</p>
+                  </div>
+                  <Switch 
+                    checked={values.analyticsConfig?.engagementTracking} 
+                    onCheckedChange={(checked) => setValue('analyticsConfig.engagementTracking', checked, { shouldDirty: true })} 
+                  />
+                </div>
+             </div>
+
+             <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">KPI Expectations</label>
+                <Textarea 
+                  {...register('analyticsConfig.kpiExpectations')} 
+                  placeholder="e.g. 20% increase in engagement, 50 new leads per month..." 
+                  className="min-h-[160px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
+                />
+             </div>
+          </div>
+        </Card>
+      </section>
+      )}
+
+      {/* 13. Social Connect */}
+      {isSectionVisible('social') && (
       <section id="social" className="space-y-8 scroll-mt-24">
          <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">13</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Social Connect</h2>
+            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Social Media Details</h2>
           </div>
-          <p className="text-gray-500 font-medium px-10">Link accounts for AI-automated publishing.</p>
+          <p className="text-gray-500 font-medium px-10">Connect accounts and provide handles for tagging.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {['LinkedIn', 'Instagram', 'Twitter / X', 'Facebook', 'YouTube'].map(plat => (
-                <div key={plat} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 transition-all hover:border-brand-200 group">
-                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center shadow-sm">
-                         <Globe className="w-5 h-5 text-gray-400 group-hover:text-brand-500 transition-colors" />
+              {[
+                { name: 'LinkedIn', handleField: 'socialAccess.linkedinPage', placeholder: 'LinkedIn Page URL' },
+                { name: 'Instagram', handleField: 'socialAccess.instagramHandle', placeholder: '@username' },
+                { name: 'Twitter / X', handleField: 'socialAccess.twitterHandle', placeholder: '@username' },
+                { name: 'Facebook', handleField: 'socialAccess.facebookPage', placeholder: 'Facebook Page URL' },
+                { name: 'YouTube', handleField: 'socialAccess.youtubeChannel', placeholder: 'Channel URL' },
+              ].map(plat => (
+                <div key={plat.name} className="flex flex-col gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 transition-all hover:border-brand-200 group">
+                   <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center shadow-sm">
+                            <Globe className="w-5 h-5 text-gray-400 group-hover:text-brand-500 transition-colors" />
+                         </div>
+                         <span className="text-xs font-black uppercase tracking-tight text-gray-900 dark:text-white">{plat.name}</span>
                       </div>
-                      <span className="text-xs font-black uppercase tracking-tight text-gray-900 dark:text-white">{plat}</span>
+                      <Button 
+                         type="button" 
+                         variant="outline" 
+                         size="sm" 
+                         className="rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-brand-600 hover:text-white transition-all"
+                         onClick={async () => {
+                           toast({ title: 'OAuth Flow', description: `Initializing ${plat.name} connection...` });
+                         }}
+                      >
+                       Connect
+                      </Button>
                    </div>
-                   <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm" 
-                      className="rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-brand-600 hover:text-white transition-all"
-                      onClick={async () => {
-                        try {
-                          await apiClient.post('/brands/connect-social', { platform: plat });
-                          toast({ title: 'Connected', description: `Successfully linked ${plat} account.` });
-                        } catch (err) {
-                          toast({ title: 'Connection Failed', description: 'Could not connect account.', variant: 'destructive' });
-                        }
-                      }}
-                   >
-                    Connect
-                   </Button>
+                   <Input 
+                      {...register(plat.handleField as any)} 
+                      placeholder={plat.placeholder} 
+                      className="h-9 text-[10px] bg-white dark:bg-gray-950 border-gray-100 rounded-xl" 
+                   />
                 </div>
               ))}
            </div>
@@ -1007,8 +1498,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            </div>
         </Card>
       </section>
+      )}
+
 
       {/* 14. Brand Health */}
+      {isSectionVisible('health') && (
       <section id="health" className="space-y-8 scroll-mt-24">
          <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -1034,8 +1528,10 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-brand-500/5 blur-3xl rounded-full" />
         </Card>
       </section>
+      )}
 
       {/* 11.5 Media Library */}
+      {isSectionVisible('media') && (
       <section id="media" className="space-y-8 scroll-mt-24">
          <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -1051,8 +1547,10 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            </div>
         </Card>
       </section>
+      )}
 
       {/* 13.5 Automation */}
+      {isSectionVisible('automation') && (
       <section id="automation" className="space-y-8 scroll-mt-24">
          <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -1076,8 +1574,10 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            </div>
         </Card>
       </section>
+      )}
 
       {/* 14.5 Performance */}
+      {isSectionVisible('performance') && (
       <section id="performance" className="space-y-8 scroll-mt-24">
          <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -1093,66 +1593,69 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            </div>
         </Card>
       </section>
+      )}
 
       {/* Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 px-6 py-4 lg:pl-64 xl:pr-96 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] print:hidden">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Live Sync</span>
-            </div>
-            
-            {lastSaved && (
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 leading-none mb-0.5">Auto-saved</span>
-                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400">{lastSaved.toLocaleTimeString()}</span>
+      {!wizardMode && (
+        <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 px-6 py-4 lg:pl-64 xl:pr-96 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] print:hidden">
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Live Sync</span>
               </div>
-            )}
-
-            {Object.keys(errors).length > 0 && (
-              <Badge variant="destructive" className="bg-red-50 text-red-700 border-red-100 uppercase font-black text-[9px] px-2 py-0.5 animate-bounce">
-                {Object.keys(errors).length} Errors
-              </Badge>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              type="button" 
-              onClick={() => {
-                toast({ title: 'Exporting Guidelines', description: 'Generating PDF document...' });
-                window.print();
-              }} 
-              className="hidden sm:flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-all rounded-xl h-11"
-            >
-              <Globe className="w-4 h-4" />
-              Export PDF
-            </Button>
-            
-            <div className="h-8 w-px bg-gray-100 dark:bg-gray-800 hidden sm:block" />
-            
-            <Button 
-              className="bg-brand-600 hover:bg-brand-700 h-12 px-10 font-black text-sm uppercase tracking-tight rounded-xl shadow-xl shadow-brand-500/20 active:scale-95 transition-all" 
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Sparkles className="w-4 h-4 mr-2 animate-spin" />
-                  Publishing...
-                </>
-              ) : (
-                <>
-                  Publish Brand Identity
-                  <Sparkles className="w-4 h-4 ml-2" />
-                </>
+              
+              {lastSaved && (
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 leading-none mb-0.5">Auto-saved</span>
+                  <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400">{lastSaved.toLocaleTimeString()}</span>
+                </div>
               )}
-            </Button>
+
+              {Object.keys(errors).length > 0 && (
+                <Badge variant="destructive" className="bg-red-50 text-red-700 border-red-100 uppercase font-black text-[9px] px-2 py-0.5 animate-bounce">
+                  {Object.keys(errors).length} Errors
+                </Badge>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                type="button" 
+                onClick={() => {
+                  toast({ title: 'Exporting Guidelines', description: 'Generating PDF document...' });
+                  window.print();
+                }} 
+                className="hidden sm:flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-all rounded-xl h-11"
+              >
+                <Globe className="w-4 h-4" />
+                Export PDF
+              </Button>
+              
+              <div className="h-8 w-px bg-gray-100 dark:bg-gray-800 hidden sm:block" />
+              
+              <Button 
+                className="bg-brand-600 hover:bg-brand-700 h-12 px-10 font-black text-sm uppercase tracking-tight rounded-xl shadow-xl shadow-brand-500/20 active:scale-95 transition-all" 
+                type="submit"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2 animate-spin" />
+                    Publishing...
+                  </>
+                ) : (
+                  <>
+                    Publish Brand Identity
+                    <Sparkles className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </form>
   );
 }
