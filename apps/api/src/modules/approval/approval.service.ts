@@ -4,11 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { prisma } from '@brandflow/db';
-import { APPROVAL_STATUSES, type ApprovalStatus, type ReviewType } from '@brandflow/shared';
+import { PrismaService } from '../../common/database/prisma.service';
 
 @Injectable()
 export class ApprovalService {
+  constructor(private readonly prisma: PrismaService) {}
   /**
    * Retrieves the pending approval queue for a specific business/user.
    */
@@ -17,7 +17,7 @@ export class ApprovalService {
       ? (status as ApprovalStatus)
       : 'pending';
 
-    return prisma.approval.findMany({
+    return this.prisma.client.approval.findMany({
       where: { 
         businessId,
         status: normalizedStatus,
@@ -50,7 +50,7 @@ export class ApprovalService {
    * Initiates an approval request for a piece of content.
    */
   async requestApproval(businessId: string, contentId: string, reviewType: ReviewType = 'internal') {
-    const content = await prisma.content.findFirst({
+    const content = await this.prisma.client.content.findFirst({
       where: { id: contentId, businessId },
       include: {
         approvals: {
@@ -69,7 +69,7 @@ export class ApprovalService {
       throw new ConflictException('This content already has a pending approval request.');
     }
 
-    return prisma.$transaction(async (tx) => {
+    return this.prisma.client.$transaction(async (tx) => {
       await tx.content.update({
         where: { id: contentId },
         data: { status: 'in_review' },
@@ -97,7 +97,7 @@ export class ApprovalService {
     note?: string,
     reason?: string,
   ) {
-    const approval = await prisma.approval.findFirst({
+    const approval = await this.prisma.client.approval.findFirst({
       where: { id, businessId },
       include: {
         content: { select: { id: true } },
@@ -111,8 +111,8 @@ export class ApprovalService {
 
     const contentStatus = status === 'approved' ? 'approved' : 'revision_requested';
 
-    const [updatedApproval] = await prisma.$transaction([
-      prisma.approval.update({
+    const [updatedApproval] = await this.prisma.client.$transaction([
+      this.prisma.client.approval.update({
         where: { id },
         data: {
           status,
@@ -121,7 +121,7 @@ export class ApprovalService {
           decidedAt: new Date(),
         },
       }),
-      prisma.content.update({
+      this.prisma.client.content.update({
         where: { id: approval.contentId },
         data: { 
           status: contentStatus,

@@ -1,19 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { randomBytes } from 'crypto';
-import { prisma } from '@brandflow/db';
+import { PrismaService } from '../../common/database/prisma.service';
+import { AuditService } from '../business/audit.service';
 import type { CreateBrandDto, UpdateBrandDto } from '@brandflow/shared';
 
 @Injectable()
 export class BrandService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditService: AuditService,
+  ) {}
   async findAll(businessId: string) {
-    return prisma.brand.findMany({
+    return this.prisma.client.brand.findMany({
       where: { businessId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async findById(id: string, businessId: string) {
-    const brand = await prisma.brand.findFirst({ where: { id, businessId, deletedAt: null } });
+    const brand = await this.prisma.client.brand.findFirst({ where: { id, businessId, deletedAt: null } });
     if (!brand) throw new NotFoundException('Brand not found');
     return brand;
   }
@@ -66,7 +69,7 @@ export class BrandService {
 
   async create(businessId: string, dto: CreateBrandDto) {
     const healthScore = this.calculateHealthScore(dto);
-    const brand = await prisma.brand.create({ data: { ...dto, businessId, healthScore } as any });
+    const brand = await this.prisma.client.brand.create({ data: { ...dto, businessId, healthScore } as any });
     await this.logActivity(businessId, 'brand.created', brand.id, null, brand);
     return brand;
   }
@@ -79,7 +82,7 @@ export class BrandService {
     const { ...updateDto } = dto;
     Object.keys(updateDto).forEach(key => (updateDto as any)[key] === null && delete (updateDto as any)[key]);
 
-    const after = await prisma.brand.update({
+    const after = await this.prisma.client.brand.update({
       where: { id },
       data: { ...updateDto, healthScore, version: { increment: 1 } } as any,
     });
@@ -89,7 +92,7 @@ export class BrandService {
 
   async delete(id: string, businessId: string) {
     const before = await this.findById(id, businessId);
-    const after = await prisma.brand.update({
+    const after = await this.prisma.client.brand.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
@@ -98,7 +101,7 @@ export class BrandService {
   }
 
   async restore(id: string, businessId: string) {
-    const after = await prisma.brand.update({
+    const after = await this.prisma.client.brand.update({
       where: { id, businessId },
       data: { deletedAt: undefined }, // Use undefined instead of null if schema allows
     });
@@ -107,25 +110,18 @@ export class BrandService {
   }
 
   private async logActivity(businessId: string, action: string, entityId: string, before: any, after: any) {
-    try {
-      await prisma.auditLog.create({
-        data: {
-          businessId,
-          action,
-          entityType: 'brand',
-          entityId,
-          before: before || undefined,
-          after: after || undefined,
-          hash: randomBytes(32).toString('hex'), // Placeholder for real cryptographic hash
-        },
-      });
-    } catch (error) {
-      console.error('Failed to create audit log:', error);
-    }
+    await this.auditService.log({
+      businessId,
+      action,
+      entityType: 'brand',
+      entityId,
+      before,
+      after,
+    });
   }
 
   async getBrandContext(id: string, businessId: string) {
-    const brand = await prisma.brand.findFirst({
+    const brand = await this.prisma.client.brand.findFirst({
       where: { id, businessId },
       include: {
         knowledgeSources: {
@@ -141,7 +137,7 @@ export class BrandService {
   }
 
   async connectSocial(businessId: string, platform: string) {
-    return prisma.socialAccount.create({
+    return this.prisma.client.socialAccount.create({
       data: {
         businessId,
         platform,

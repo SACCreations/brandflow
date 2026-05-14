@@ -9,8 +9,11 @@ import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { initSentry } from './common/observability/sentry.init';
+import { SentryFilter } from './common/filters/sentry.filter';
 
 async function bootstrap() {
+  initSentry();
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug'],
   });
@@ -44,7 +47,7 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalFilters(new SentryFilter(), new GlobalExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor(), new TransformInterceptor());
 
   // ─── API Prefix ──────────────────────────────────────────────

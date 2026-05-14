@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   Sparkles
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { cn, Badge, useToast } from '@brandflow/ui';
 import Link from 'next/link';
 import { BrandForm } from './brand-form';
@@ -32,26 +33,34 @@ interface BrandStudioProps {
 
 const GROUPS = [
   {
-    id: 'foundation',
-    label: 'Foundation',
+    id: 'basics',
+    label: '01. Brand Foundation',
     sections: [
-      { id: 'basics', label: 'Brand Basics', icon: Building2 },
-      { id: 'visuals', label: 'Visual Identity', icon: Palette },
+      { id: 'basics', label: 'Company Basics', icon: Building2 },
+    ]
+  },
+  {
+    id: 'visuals',
+    label: '02. Visual Identity',
+    sections: [
+      { id: 'visuals', label: 'Logo & Identity', icon: Globe },
+      { id: 'logos', label: 'Logo Library', icon: Globe },
+      { id: 'documents', label: 'Documents', icon: Globe },
       { id: 'typography', label: 'Typography', icon: Layout },
       { id: 'colors', label: 'Color System', icon: Palette },
     ]
   },
   {
-    id: 'intelligence',
-    label: 'Intelligence',
+    id: 'voice',
+    label: '03. Intelligence & Voice',
     sections: [
-      { id: 'voice', label: 'Brand Voice', icon: MessageSquare },
+      { id: 'voice', label: 'Tone & Voice', icon: MessageSquare },
       { id: 'knowledge', label: 'Knowledge Base', icon: Globe },
     ]
   },
   {
     id: 'strategy',
-    label: 'Market Strategy',
+    label: '04. Market Strategy',
     sections: [
       { id: 'audience', label: 'Audience Deep-Dive', icon: Users },
       { id: 'competitors', label: 'Competitors', icon: Users },
@@ -59,35 +68,33 @@ const GROUPS = [
     ]
   },
   {
-    id: 'execution',
-    label: 'Execution & Workflow',
+    id: 'design-prefs',
+    label: '05. Brand Expression',
     sections: [
       { id: 'design-prefs', label: 'Design Preferences', icon: Palette },
+    ]
+  },
+  {
+    id: 'rules',
+    label: '06. Governance',
+    sections: [
       { id: 'rules', label: 'Approval Workflow', icon: ShieldCheck },
       { id: 'compliance', label: 'Compliance Rules', icon: ShieldCheck },
     ]
   },
   {
-    id: 'assets',
-    label: 'Assets & DAM',
-    sections: [
-      { id: 'logos', label: 'Logo Library', icon: Globe },
-      { id: 'documents', label: 'Documents', icon: Globe },
-      { id: 'media', label: 'Media Library', icon: Globe },
-    ]
-  },
-  {
-    id: 'operations',
-    label: 'Operations',
+    id: 'social',
+    label: '07. Social Presence',
     sections: [
       { id: 'social', label: 'Social Media', icon: Globe },
+      { id: 'media', label: 'Media Library', icon: Globe },
       { id: 'campaigns', label: 'Campaign Defaults', icon: Settings },
       { id: 'automation', label: 'Automation', icon: Settings },
     ]
   },
   {
     id: 'analytics',
-    label: 'Analytics',
+    label: '08. Health & Growth',
     sections: [
       { id: 'health', label: 'Brand Health', icon: ShieldCheck },
       { id: 'performance', label: 'Performance ROI', icon: ShieldCheck },
@@ -164,48 +171,62 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
   return (
     <div className="fixed inset-0 z-50 flex bg-white dark:bg-gray-950 overflow-hidden text-gray-900 dark:text-gray-100 print:relative print:overflow-visible">
       {/* 1. Left Navigation Sidebar (Fixed) */}
-      <aside className="w-64 border-r border-gray-100 dark:border-gray-800 hidden lg:flex flex-col fixed h-screen bg-white dark:bg-gray-950 z-20 print:hidden">
-        <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
+      <aside className="w-64 border-r border-gray-100 dark:border-gray-800 hidden lg:flex flex-col fixed h-screen bg-white/50 dark:bg-gray-950/50 backdrop-blur-xl z-20 print:hidden">
+        <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 bg-white dark:bg-gray-950">
           <Link href="/intelligence/brands">
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all border border-gray-100 dark:border-gray-800 active:scale-95 shadow-sm">
-              <ChevronLeft className="w-4 h-4 text-gray-400" />
+            <button className="p-2 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-xl transition-all border border-gray-100 dark:border-gray-800 active:scale-95 shadow-sm group">
+              <ChevronLeft className="w-4 h-4 text-gray-400 group-hover:text-brand-600" />
             </button>
           </Link>
           <div className="flex flex-col overflow-hidden">
             <h1 className="font-black text-sm uppercase tracking-tighter truncate text-gray-900 dark:text-white leading-tight">{title}</h1>
-            <div className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-1">
-              <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-              Live Studio
+            <div className="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-widest flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
+              Identity Studio
             </div>
           </div>
         </div>
         
         <nav className="flex-1 p-4 space-y-8 overflow-y-auto custom-scrollbar">
-          {GROUPS.map((group) => (
-            <div key={group.id} className="space-y-2">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] px-3 mb-2">{group.label}</p>
+          {GROUPS.map((group, groupIdx) => (
+            <div key={group.id} className="space-y-3">
+              <div className="flex items-center justify-between px-3 mb-1">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{group.label}</p>
+              </div>
               <div className="space-y-1">
-                {group.sections.map((section) => {
+                {group.sections.map((section, sectionIdx) => {
                   const Icon = section.icon;
+                  const isActive = activeSection === section.id;
+                  // Calculate absolute step number across all groups
+                  const absoluteStep = GROUPS.slice(0, groupIdx).reduce((acc, g) => acc + g.sections.length, 0) + sectionIdx + 1;
+                  
                   return (
                     <button
                       key={section.id}
                       type="button"
                       onClick={() => scrollToSection(section.id)}
                       className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all group",
-                        activeSection === section.id 
-                          ? "bg-brand-50 text-brand-700 shadow-sm shadow-brand-100 dark:bg-brand-900/20 dark:text-brand-300 dark:shadow-none" 
-                          : "text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-gray-100"
+                        "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-tight transition-all group",
+                        isActive 
+                          ? "bg-gray-900 text-white shadow-xl shadow-gray-900/20 dark:bg-white dark:text-gray-900" 
+                          : "text-gray-500 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100"
                       )}
                     >
                       <div className={cn(
-                        "p-1.5 rounded-lg transition-all duration-300",
-                        activeSection === section.id ? "bg-white dark:bg-gray-800 shadow-sm scale-110" : "bg-gray-100 dark:bg-gray-800 group-hover:scale-105"
+                        "w-6 h-6 rounded-lg flex items-center justify-center text-[10px] transition-all duration-300",
+                        isActive ? "bg-white/10 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-400"
                       )}>
-                        <Icon className="w-3.5 h-3.5" />
+                        {absoluteStep}
                       </div>
-                      {section.label}
+                      <div className="flex flex-col items-start overflow-hidden">
+                        <span className="truncate">{section.label}</span>
+                      </div>
+                      {isActive && (
+                        <motion.div 
+                          layoutId="active-indicator"
+                          className="ml-auto w-1 h-4 bg-brand-500 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.8)]"
+                        />
+                      )}
                     </button>
                   );
                 })}
@@ -214,42 +235,37 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
           ))}
         </nav>
         
-        <div className="p-6 mt-4">
-          <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Strength</span>
-              <Badge className="bg-brand-500 text-white text-[9px] h-4 px-1.5 font-black uppercase border-none">
-                {Math.round((SECTIONS.indexOf(SECTIONS.find(s => s.id === activeSection)!) + 1) / SECTIONS.length * 100)}%
-              </Badge>
+        <div className="p-6">
+          <div className="p-5 rounded-3xl bg-gray-900 dark:bg-white shadow-2xl space-y-4 overflow-hidden relative group">
+            <div className="relative z-10 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-300 transition-colors">Identity Score</span>
+                <span className="text-xl font-black text-white dark:text-gray-900 tracking-tighter">
+                  {Math.round((SECTIONS.indexOf(SECTIONS.find(s => s.id === activeSection)!) + 1) / SECTIONS.length * 100)}%
+                </span>
+              </div>
+              <div className="h-2 w-full bg-gray-800 dark:bg-gray-200 rounded-full overflow-hidden p-0.5">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(SECTIONS.indexOf(SECTIONS.find(s => s.id === activeSection)!) + 1) / SECTIONS.length * 100}%` }}
+                  className="h-full bg-gradient-to-r from-brand-400 to-brand-600 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                />
+              </div>
+              <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold leading-tight">Optimizing brand robustness for AI generation.</p>
             </div>
-            <div className="h-1.5 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-brand-500 transition-all duration-500" 
-                style={{ width: `${(SECTIONS.indexOf(SECTIONS.find(s => s.id === activeSection)!) + 1) / SECTIONS.length * 100}%` }} 
-              />
-            </div>
-            <p className="text-[9px] text-gray-500 font-medium leading-tight">Complete all sections to unlock full AI potential.</p>
+            {/* Decorative background for strength card */}
+            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-brand-500/10 blur-3xl rounded-full" />
           </div>
         </div>
 
-        <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4">
-          <div className="px-3 space-y-1">
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Persistence</p>
-            <p className="text-[10px] text-gray-500 font-medium">
-              {lastSaved 
-                ? `Saved ${lastSaved.toLocaleTimeString()}` 
-                : initialData?.updatedAt 
-                  ? `Published ${new Date(initialData.updatedAt).toLocaleDateString()}` 
-                  : 'Unsaved Draft'}
-            </p>
-          </div>
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
           <button 
             type="button"
             onClick={() => setOpen(true)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all border border-transparent hover:border-gray-100 dark:hover:border-gray-800"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/20 dark:hover:text-brand-400 transition-all border border-gray-100 dark:border-gray-800 shadow-sm active:scale-95"
           >
-            <Sparkles className="w-3.5 h-3.5 text-brand-500" />
-            Command Palette <span className="ml-auto text-[8px] font-black opacity-50">⌘K</span>
+            <Sparkles className="w-3.5 h-3.5" />
+            Command Palette <span className="ml-auto opacity-30">⌘K</span>
           </button>
         </div>
       </aside>
@@ -265,25 +281,25 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
       {/* 2. Main Content Area (Scrollable) */}
       <main className="flex-1 lg:pl-64 xl:pr-96 h-screen overflow-y-auto scroll-smooth print:pl-0 print:pr-0 print:overflow-visible print:h-auto custom-scrollbar">
         {/* Top Workflow Bar */}
-        <div className="sticky top-0 z-20 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 px-8 py-3 flex items-center justify-between">
+        <div className="sticky top-0 z-20 bg-white/50 dark:bg-gray-950/50 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
+            <div className="flex bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-2xl border border-gray-100/50 dark:border-gray-800/50 shadow-inner">
               <button 
                 type="button"
                 className={cn(
-                  "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2",
-                  "bg-white dark:bg-gray-800 text-brand-600 shadow-sm border border-gray-100 dark:border-gray-700"
+                  "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all flex items-center gap-2",
+                  "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xl shadow-black/5 border border-gray-100 dark:border-gray-700"
                 )}
               >
-                <Layout className="w-3.5 h-3.5" />
+                <Layout className="w-3.5 h-3.5 text-brand-600" />
                 Identity Studio
               </button>
               <button 
                 type="button"
                 onClick={() => toast({ title: 'Content Lab', description: 'Redirecting to generation engine...' })}
                 className={cn(
-                  "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2",
-                  "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all flex items-center gap-2",
+                  "text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                 )}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -291,11 +307,14 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
               </button>
             </div>
             
-            <div className="h-4 w-px bg-gray-100 dark:bg-gray-800" />
+            <div className="h-6 w-px bg-gray-100 dark:bg-gray-800" />
             
-            <div className="flex items-center gap-2">
-              <Badge className="bg-amber-50 text-amber-600 border-amber-100 text-[9px] font-black px-2 h-5">DRAFT</Badge>
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">V2.4.0 • Updated 2h ago</span>
+            <div className="flex items-center gap-3">
+              <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[9px] font-black px-2.5 h-6 rounded-full flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
+                DRAFT MODE
+              </Badge>
+              <span className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-widest hidden sm:block">V2.4.0 • PRODUCTION GRADE</span>
             </div>
           </div>
 
@@ -303,17 +322,17 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
             <button 
               type="button"
               onClick={() => toast({ title: 'Collaboration', description: 'Invite your team members to this brand.' })}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-[10px] font-black uppercase tracking-widest text-gray-500 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-[10px] font-black uppercase tracking-widest text-gray-500 transition-all active:scale-95 shadow-sm"
             >
-              <Users className="w-3.5 h-3.5" />
+              <Users className="w-4 h-4" />
               Collaborators
             </button>
             <button 
               type="button"
               onClick={() => toast({ title: 'Review Requested', description: 'Your brand identity has been sent for approval.' })}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+              className="flex items-center gap-2 px-6 py-2 rounded-xl bg-brand-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-brand-500/20 hover:bg-brand-700 active:scale-95 transition-all"
             >
-              Request Review
+              Request Approval
             </button>
           </div>
         </div>

@@ -30,6 +30,7 @@ export interface GatewayConfig {
   fallbackProvider?: AIProvider;
   requestTimeoutMs?: number;
   maxRetries?: number;
+  onBeforeComplete?: (options: LLMConfig) => Promise<void> | void;
 }
 
 // ─── Prompt Resolution ───────────────────────────────────────────

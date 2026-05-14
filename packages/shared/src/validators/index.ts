@@ -147,7 +147,16 @@ export const createBrandSchema = z.object({
       fontFamily: z.string().max(100).nullish().or(z.literal('')),
       headingFont: z.string().max(100).nullish().or(z.literal('')),
       bodyFont: z.string().max(100).nullish().or(z.literal('')),
-      logoUrls: z.array(z.string().url()).max(10).nullish(),
+      logoUrls: z
+        .array(
+          z.object({
+            url: z.string().max(1000).nullish().or(z.literal('')),
+            type: z.string().max(50).nullish(),
+            name: z.string().max(100).nullish(),
+          })
+        )
+        .max(20)
+        .nullish(),
     })
     .nullish(),
     

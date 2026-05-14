@@ -121,7 +121,7 @@ model Subscription {
   id                   String    @id @default(uuid())
   businessId           String
   plan                 String
-  status               String
+  status               SubscriptionStatus
   stripeCustomerId     String?
   stripeSubscriptionId String?
   currentPeriodEnd     DateTime?
@@ -222,7 +222,7 @@ model Brand {
   website      String?
   foundedYear  Int?
   headquarters String?
-  status       String   @default("published")
+  status       BrandStatus @default(published)
   locales      Json?    // Supported markets, e.g. ["en-US", "fr-FR"]
   defaultLocale String? @default("en-US")
   
@@ -270,7 +270,7 @@ model KnowledgeSource {
   type             String    // PDF, DOCX, URL, API, NOTION, etc.
   sourceUrl        String?
   fileName         String?
-  status           String    @default("pending") // pending, processing, completed, failed, paused
+  status           KnowledgeSourceStatus @default(pending) // pending, processing, completed, failed, paused
   trustLevel       String    @default("high")    // high, medium, low
   syncFrequency    String    @default("manual")  // manual, daily, weekly
   versionCount     Int       @default(1)
@@ -304,7 +304,7 @@ model KnowledgeEntry {
   locale         String?   @default("en-US")
   governance     Json?     // compliance tags, sensitive flags
   version        Int       @default(1)
-  embedding      Bytes?
+  embedding      Unsupported("vector(1536)")?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -351,7 +351,7 @@ model KnowledgeJob {
   id           String    @id @default(uuid())
   businessId   String
   sourceId     String
-  status       String    @default("pending") // pending, processing, completed, failed
+  status       KnowledgeJobStatus @default(pending) // pending, processing, completed, failed
   stage        String    @default("intake")  // intake, extraction, cleaning, classification, indexing
   progress     Int       @default(0)
   error        String?
@@ -427,7 +427,7 @@ model Campaign {
   businessId   String
   name         String
   description  String?  @db.Text
-  status       String   @default("draft")
+  status       CampaignStatus @default(draft)
   healthScore  Int      @default(0)
   startDate    DateTime?
   endDate      DateTime?
@@ -482,7 +482,7 @@ model Content {
   type           String
   locale         String   @default("en-US")
   body           String   @db.Text
-  status         String   @default("draft")
+  status         ContentStatus @default(draft)
   qualityScore   Float?
   promptId       String?
   promptVersion  Int?
@@ -588,7 +588,7 @@ model Approval {
   contentId   String
   reviewerId  String?
   reviewType  String
-  status      String    @default("pending")
+  status      ApprovalStatus @default(pending)
   slaDeadline DateTime?
   note        String?
   reason      String?
@@ -611,7 +611,7 @@ model Schedule {
   timezone        String    @default("UTC")
   type            String    @default("one_time")
   recurringRule   String?
-  status          String    @default("pending")
+  status          ScheduleStatus @default(pending)
   createdAt       DateTime  @default(now())
 
   business        Business      @relation(fields: [businessId], references: [id])
@@ -629,7 +629,7 @@ model PublishJob {
   contentId       String
   socialAccountId String
   scheduleId      String?
-  status          String    @default("pending")
+  status          PublishJobStatus @default(pending)
   failureReason   String?
   failureClass    String?
   retryCount      Int       @default(0)
@@ -678,6 +678,7 @@ model Automation {
   triggerType   String
   triggerConfig Json
   steps         Json
+  status        AutomationStatus @default(inactive)
   isActive      Boolean   @default(false)
   isDryRun      Boolean   @default(false)
   errorPolicy   Json?
@@ -696,7 +697,7 @@ model AutomationRun {
   id           String    @id @default(uuid())
   automationId String
   businessId   String
-  status       String
+  status       KnowledgeJobStatus
   triggerEvent Json?
   stepResults  Json?
   failedAtStep Int?
@@ -759,4 +760,83 @@ model LlmSettings {
   business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@map("llm_settings")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  canceled
+  unpaid
+}
+
+enum BrandStatus {
+  draft
+  published
+  archived
+}
+
+enum KnowledgeSourceStatus {
+  pending
+  processing
+  completed
+  failed
+  paused
+}
+
+enum KnowledgeJobStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum CampaignStatus {
+  draft
+  active
+  paused
+  completed
+  archived
+}
+
+enum ContentStatus {
+  draft
+  in_review
+  approved
+  scheduled
+  published
+  failed
+  archived
+}
+
+enum ApprovalStatus {
+  pending
+  approved
+  rejected
+  changes_requested
+}
+
+enum ScheduleStatus {
+  pending
+  processing
+  completed
+  failed
+  canceled
+}
+
+enum PublishJobStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum AutomationStatus {
+  active
+  inactive
+  draft
 }

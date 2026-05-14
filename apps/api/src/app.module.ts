@@ -27,6 +27,9 @@ import { QualityModule } from './modules/quality/quality.module';
 import { BriefModule } from './modules/brief/brief.module';
 import { CustomerModule } from './modules/customer/customer.module';
 import { ProjectModule } from './modules/project/project.module';
+import { DatabaseModule } from './common/database/database.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { TenantInterceptor } from './common/tenant/tenant.interceptor';
 
 @Module({
   imports: [
@@ -91,6 +94,13 @@ import { ProjectModule } from './modules/project/project.module';
     BriefModule,
     CustomerModule,
     ProjectModule,
+    DatabaseModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TenantInterceptor,
+    },
   ],
 })
 export class AppModule {}

@@ -11,6 +11,8 @@ import type { Prisma, KnowledgeSource, KnowledgeEntry } from '@brandflow/db';
 import { LLMGateway, PromptEngine, QualityControl, CostTracker, type LLMConfig } from '@brandflow/ai';
 import type { GenerateContentDto, UpdateContentDto, BrandContext } from '@brandflow/shared';
 import { LlmSettingsService } from '../llm-settings/llm-settings.service';
+import { PrismaService } from '../../common/database/prisma.service';
+import { BudgetService } from '../llm-settings/budget.service';
 
 @Injectable()
 export class ContentService {
@@ -22,21 +24,29 @@ export class ContentService {
   constructor(
     private readonly config: ConfigService,
     private readonly llmSettingsService: LlmSettingsService,
+    private readonly prisma: PrismaService,
+    private readonly budgetService: BudgetService,
   ) {
     this.gateway = new LLMGateway({
       defaultProvider: config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic',
       fallbackProvider: config.get('llm.fallbackProvider', 'anthropic') as 'anthropic' | 'openai',
       requestTimeoutMs: config.get('llm.requestTimeoutMs', 30000),
+      onBeforeComplete: async (options: LLMConfig) => {
+        const tenantId = (this.prisma.client as any)['tenantId'] || options.businessId;
+        if (tenantId) {
+          await this.budgetService.checkBudget(tenantId);
+        }
+      },
     });
     this.promptEngine = new PromptEngine();
     this.qualityControl = new QualityControl(this.gateway);
     this.costTracker = new CostTracker(async (event) => {
-      await prisma.costEvent.create({ data: event });
+      await this.prisma.client.costEvent.create({ data: event });
     });
   }
 
   async findAll(businessId: string, filters: { brandId?: string; campaignId?: string; status?: string }) {
-    return prisma.content.findMany({
+    return this.prisma.client.content.findMany({
       where: { businessId, ...filters },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -47,7 +57,7 @@ export class ContentService {
   }
 
   async findById(id: string, businessId: string) {
-    const content = await prisma.content.findFirst({
+    const content = await this.prisma.client.content.findFirst({
       where: { id, businessId },
       include: {
         brand: true,
@@ -85,7 +95,7 @@ export class ContentService {
 
   async generate(businessId: string, userId: string, dto: GenerateContentDto) {
     // 1. Check token budget
-    const subscription = await prisma.subscription.findFirst({
+    const subscription = await this.prisma.client.subscription.findFirst({
       where: { businessId, status: 'active' },
     });
     if (!subscription) {
@@ -94,7 +104,7 @@ export class ContentService {
 
     const periodStart = new Date();
     periodStart.setDate(1);
-    const usedThisPeriod = await prisma.costEvent.aggregate({
+    const usedThisPeriod = await this.prisma.client.costEvent.aggregate({
       where: {
         businessId,
         createdAt: { gte: periodStart },
@@ -120,7 +130,7 @@ export class ContentService {
     const effectiveCampaignId = dto.campaignId ?? briefContext?.campaignId ?? undefined;
 
     // 2. Resolve brand context
-    const brand = await prisma.brand.findFirst({
+    const brand = await this.prisma.client.brand.findFirst({
       where: { id: effectiveBrandId, businessId },
       include: {
         knowledgeSources: {
@@ -145,7 +155,7 @@ export class ContentService {
     };
 
     // 3. Resolve prompt
-    const promptRecord = await prisma.prompt.findFirst({
+    const promptRecord = await this.prisma.client.prompt.findFirst({
       where: {
         module: 'social',
         isActive: true,
@@ -213,7 +223,7 @@ export class ContentService {
     });
 
     // 7. Persist content
-    const content = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const content = await this.prisma.client.$transaction(async (tx: Prisma.TransactionClient) => {
       const created = await tx.content.create({
         data: {
           businessId,
@@ -267,12 +277,12 @@ export class ContentService {
       throw new BadRequestException(`Cannot edit content in ${content.status} status`);
     }
 
-    const latestVersion = await prisma.contentVersion.findFirst({
+    const latestVersion = await this.prisma.client.contentVersion.findFirst({
       where: { contentId: id },
       orderBy: { version: 'desc' },
     });
 
-    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    return this.prisma.client.$transaction(async (tx: Prisma.TransactionClient) => {
       const updated = await tx.content.update({
         where: { id },
         data: { body: dto.body, status: 'draft' },
@@ -293,7 +303,7 @@ export class ContentService {
 
   async archive(id: string, businessId: string) {
     await this.findById(id, businessId);
-    return prisma.content.update({ where: { id }, data: { status: 'archived' } });
+    return this.prisma.client.content.update({ where: { id }, data: { status: 'archived' } });
   }
 
   private getDefaultPromptTemplate(platform: string): string {
@@ -315,7 +325,7 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
     businessId: string,
     requestedCampaignId?: string | null,
   ) {
-    const brief = await prisma.brief.findFirst({
+    const brief = await this.prisma.client.brief.findFirst({
       where: { id: briefId, businessId },
       select: {
         id: true,
@@ -406,7 +416,7 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
   }
 
   private async assertCampaignOwnership(businessId: string, campaignId: string) {
-    const campaign = await prisma.campaign.findFirst({
+    const campaign = await this.prisma.client.campaign.findFirst({
       where: { id: campaignId, businessId },
       select: { id: true },
     });

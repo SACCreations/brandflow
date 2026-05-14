@@ -317,13 +317,13 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 1. Brand Basics */}
       {isSectionVisible('basics') && (
         <section id="basics" className="space-y-6 scroll-mt-24">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600">
-            <Building2 className="w-5 h-5" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Brand Basics</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Core identity and business details.</p>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">01</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Brand Foundation</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Company identity & core business details</p>
+            </div>
           </div>
         </div>
         
@@ -420,12 +420,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
 
       {isSectionVisible('visuals') && (
         <section id="visuals" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">02</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Visual Identity</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">02</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Visual Identity</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Production-grade logo management & assets</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Production-grade logo management and visual consistency rules.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
@@ -558,12 +560,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 3. Typography */}
       {isSectionVisible('typography') && (
         <section id="typography" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">03</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Typography System</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">03</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Typography System</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Global font scales & primary typefaces</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Configure brand fonts and typography scales.</p>
         </div>
 
         <TypographyGovernance 
@@ -586,12 +590,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 4. Colors */}
       {isSectionVisible('colors') && (
         <section id="colors" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">04</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Color System</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">04</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Color Governance</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Enterprise tokens with accessibility validation</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Enterprise design tokens with WCAG accessibility validation.</p>
         </div>
 
         <ColorGovernance 
@@ -606,12 +612,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 5. Brand Voice & Tone */}
       {isSectionVisible('voice') && (
         <section id="voice" className="space-y-8 scroll-mt-24">
-         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">05</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Brand Voice</h2>
+         <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">05</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Voice & Intelligence</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Linguistic DNA & brand personality rules</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Define how the brand speaks and communicates.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
@@ -670,12 +678,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 6. Audience */}
       {isSectionVisible('audience') && (
         <section id="audience" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">06</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Target Audience</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">06</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Target Audience</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Demographics, psychographics & market reach</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Who are you speaking to?</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-6 bg-white dark:bg-gray-900 rounded-3xl">
@@ -710,12 +720,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 7. Competitors */}
       {isSectionVisible('competitors') && (
         <section id="competitors" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">07</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Competitors</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">07</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Market Intelligence</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Competitor benchmarking & differentiators</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Market positioning and differentiation.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-6 bg-white dark:bg-gray-900 rounded-3xl">
@@ -818,12 +830,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 7.5 Content Strategy */}
       {isSectionVisible('content-strategy') && (
         <section id="content-strategy" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">08</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Content Strategy</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">08</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Content Strategy</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Scheduling, formats & delivery preferences</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Define delivery and scheduling preferences.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
@@ -925,12 +939,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 8. Knowledge Base */}
       {isSectionVisible('knowledge') && (
         <section id="knowledge" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">08</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Knowledge Base</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">09</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Knowledge Ingestion</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Training AI on deep brand expertise</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Train AI on your deep brand knowledge.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl text-center py-12">
@@ -974,12 +990,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 10. Compliance */}
       {isSectionVisible('compliance') && (
         <section id="compliance" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">10</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Legal & Compliance</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">10</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Legal & Compliance</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Disclaimers & regulatory guardrails</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Disclaimers and legal requirements.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl">
@@ -995,12 +1013,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 11. Logo Library */}
       {isSectionVisible('logos') && (
         <section id="logos" className="space-y-8 scroll-mt-24">
-         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">11</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Asset Catalog</h2>
+         <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">11</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Asset Catalog</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Quick access to all visual identity files</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Quick access to all visual identity files.</p>
         </div>
         
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl">
@@ -1029,12 +1049,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 12. Documents */}
       {isSectionVisible('documents') && (
         <section id="documents" className="space-y-8 scroll-mt-24">
-         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">12</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Guidelines & Docs</h2>
+         <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">12</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Guidelines & Docs</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Internal brand strategy & design guidelines</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Internal brand strategy and design guidelines.</p>
         </div>
 
         <Card className="p-6 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
@@ -1090,12 +1112,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 9. Design Preferences */}
       {isSectionVisible('design-prefs') && (
       <section id="design-prefs" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">09</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Design Preferences</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">09</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Design Preferences</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Visual direction for AI-generated creatives</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Set the visual direction for AI-generated creatives.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-6 bg-white dark:bg-gray-900 rounded-3xl">
@@ -1214,12 +1238,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 10. Approval Workflow */}
       {isSectionVisible('approval') && (
       <section id="rules" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">10</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Approval Workflow</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">10</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Approval Workflow</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Review cycles & stakeholder sign-off process</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Define the review and sign-off process.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
@@ -1298,12 +1324,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 11. Campaign Details */}
       {isSectionVisible('campaigns') && (
       <section id="campaigns" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">11</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Campaign Defaults</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">11</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Campaign Defaults</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Standard parameters for marketing execution</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Standard parameters for your marketing efforts.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
@@ -1375,12 +1403,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 12. Analytics Config */}
       {isSectionVisible('analytics') && (
       <section id="analytics" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">12</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Analytics & Reporting</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">12</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Analytics & Reporting</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">KPI tracking & automated performance insights</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Configure how we track and report success.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
@@ -1434,12 +1464,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 13. Social Connect */}
       {isSectionVisible('social') && (
       <section id="social" className="space-y-8 scroll-mt-24">
-         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">13</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Social Media Details</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">13</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Social Presence</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Account connectivity & handle management</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Connect accounts and provide handles for tagging.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl">
@@ -1504,12 +1536,14 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       {/* 14. Brand Health */}
       {isSectionVisible('health') && (
       <section id="health" className="space-y-8 scroll-mt-24">
-         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 text-white flex items-center justify-center font-bold text-xs">14</div>
-            <h2 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">Brand Health</h2>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">14</div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Brand Health</h2>
+              <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Identity robustness & governance compliance</p>
+            </div>
           </div>
-          <p className="text-gray-500 font-medium px-10">Analytics and governance compliance score.</p>
         </div>
 
         <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl overflow-hidden relative">

@@ -3,6 +3,7 @@ import type { GatewayConfig, LLMProvider, ProviderRequest, ProviderResponse, LLM
 import { AnthropicProvider } from './providers/anthropic';
 import { FallbackProvider } from './providers/fallback';
 import { OpenAIProvider } from './providers/openai';
+import { PIISanitizer } from './sanitizer';
 
 export class LLMGateway {
   private providers: Map<string, LLMProvider>;
@@ -14,6 +15,7 @@ export class LLMGateway {
       fallbackProvider: config.fallbackProvider ?? 'fallback',
       requestTimeoutMs: config.requestTimeoutMs ?? 30_000,
       maxRetries: config.maxRetries ?? 2,
+      onBeforeComplete: config.onBeforeComplete ?? (() => {}),
     };
 
     // Initialize providers from environment
@@ -37,12 +39,24 @@ export class LLMGateway {
     userPrompt: string,
     options: LLMConfig = {},
   ): Promise<{ response: ProviderResponse; requestId: string; provider: string }> {
+    // ─── PII Sanitization (Optional) ─────────────────────────────
+    let finalUserPrompt = userPrompt;
+    if (options.sanitizePII) {
+      const { text } = PIISanitizer.sanitize(userPrompt);
+      finalUserPrompt = text;
+    }
+
+    // ─── Pre-flight check (e.g. Budget/Quota) ─────────────────────
+    if (this.config.onBeforeComplete) {
+      await this.config.onBeforeComplete(options);
+    }
+
     const requestId = uuidv4();
     const preferredProvider = options.provider ?? this.config.defaultProvider;
 
     const request: ProviderRequest = {
       systemPrompt,
-      userPrompt,
+      userPrompt: finalUserPrompt,
       maxTokens: options.maxTokens,
       temperature: options.temperature,
       model: options.model,

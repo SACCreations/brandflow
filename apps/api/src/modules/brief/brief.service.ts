@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { prisma } from '@brandflow/db';
+import { PrismaService } from '../../common/database/prisma.service';
 import type { Prisma } from '@brandflow/db';
 import { LLMGateway } from '@brandflow/ai';
 import type {
@@ -13,11 +13,13 @@ import type {
   UpdateBriefDto,
 } from '@brandflow/shared';
 
+import { PrismaService } from '../../common/database/prisma.service';
+
 @Injectable()
 export class BriefService {
   private readonly ai: LLMGateway;
 
-  constructor() {
+  constructor(private readonly prisma: PrismaService) {
     this.ai = new LLMGateway({ defaultProvider: 'openai' });
   }
 
@@ -33,7 +35,7 @@ export class BriefService {
       await this.assertCampaignOwnership(businessId, filters.campaignId);
     }
 
-    return prisma.brief.findMany({
+    return this.prisma.client.brief.findMany({
       where: {
         businessId,
         ...(filters.campaignId ? { campaignId: filters.campaignId } : {}),
@@ -52,7 +54,7 @@ export class BriefService {
   }
 
   async findById(id: string, businessId: string) {
-    const brief = await prisma.brief.findFirst({
+    const brief = await this.prisma.client.brief.findFirst({
       where: { id, businessId },
       include: { campaign: { select: { id: true, name: true } } },
     });
@@ -63,7 +65,7 @@ export class BriefService {
   async findLatestForProject(projectId: string, businessId: string) {
     await this.assertProjectOwnership(businessId, projectId);
 
-    return prisma.brief.findFirst({
+    return this.prisma.client.brief.findFirst({
       where: {
         businessId,
         metadata: {
@@ -79,7 +81,7 @@ export class BriefService {
   async create(businessId: string, dto: CreateBriefDto) {
     const payload = await this.prepareCreatePayload(businessId, dto);
 
-    return prisma.brief.create({
+    return this.prisma.client.brief.create({
       data: payload,
       include: { campaign: { select: { id: true, name: true } } },
     });
@@ -89,7 +91,7 @@ export class BriefService {
     const existing = await this.findById(id, businessId);
     const payload = await this.prepareUpdatePayload(businessId, existing, dto);
 
-    return prisma.brief.update({
+    return this.prisma.client.brief.update({
       where: { id },
       data: payload,
       include: { campaign: { select: { id: true, name: true } } },
@@ -155,7 +157,7 @@ export class BriefService {
     const isComplete = missing.length === 0;
 
     if (brief.isComplete !== isComplete) {
-      await prisma.brief.update({
+      await this.prisma.client.brief.update({
         where: { id },
         data: { isComplete },
       });
@@ -259,7 +261,7 @@ export class BriefService {
     let projectCustomerId = parsed.customerId ?? undefined;
 
     if (parsed.projectId) {
-      const project = await prisma.project.findFirst({
+      const project = await this.prisma.client.project.findFirst({
         where: { id: parsed.projectId, businessId },
         select: {
           id: true,
@@ -338,7 +340,7 @@ export class BriefService {
   }
 
   private async assertProjectOwnership(businessId: string, projectId: string) {
-    const project = await prisma.project.findFirst({
+    const project = await this.prisma.client.project.findFirst({
       where: { id: projectId, businessId },
       select: { id: true },
     });
@@ -349,7 +351,7 @@ export class BriefService {
   }
 
   private async assertCampaignOwnership(businessId: string, campaignId: string) {
-    const campaign = await prisma.campaign.findFirst({
+    const campaign = await this.prisma.client.campaign.findFirst({
       where: { id: campaignId, businessId },
       select: { id: true },
     });
@@ -360,7 +362,7 @@ export class BriefService {
   }
 
   private async assertCustomerOwnership(businessId: string, customerId: string) {
-    const customer = await prisma.customer.findFirst({
+    const customer = await this.prisma.client.customer.findFirst({
       where: { id: customerId, businessId },
       select: { id: true },
     });
@@ -371,7 +373,7 @@ export class BriefService {
   }
 
   private async assertBrandOwnership(businessId: string, brandId: string) {
-    const brand = await prisma.brand.findFirst({
+    const brand = await this.prisma.client.brand.findFirst({
       where: { id: brandId, businessId },
       select: { id: true },
     });

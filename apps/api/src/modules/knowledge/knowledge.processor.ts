@@ -5,6 +5,8 @@ import { prisma } from '@brandflow/db';
 import type { Prisma } from '@brandflow/db';
 import { QUEUES } from '@brandflow/shared';
 import { LLMGateway } from '@brandflow/ai';
+import { PrismaService } from '../../common/database/prisma.service';
+import * as Sentry from '@sentry/node';
 
 interface IngestionJobData {
   sourceId: string;
@@ -27,7 +29,7 @@ export class KnowledgeProcessor extends WorkerHost {
   private readonly logger = new Logger(KnowledgeProcessor.name);
   private readonly aiGateway: LLMGateway;
 
-  constructor() {
+  constructor(private readonly prisma: PrismaService) {
     super();
     // In production, this would be injected via a service
     this.aiGateway = new LLMGateway({
@@ -40,7 +42,7 @@ export class KnowledgeProcessor extends WorkerHost {
     this.logger.log(`[INGESTION] Starting source ${sourceId} (${type})`);
 
     // Create tracking job
-    const knowledgeJob = await prisma.knowledgeJob.create({
+    const knowledgeJob = await this.prisma.client.knowledgeJob.create({
       data: {
         businessId,
         sourceId,
@@ -50,7 +52,7 @@ export class KnowledgeProcessor extends WorkerHost {
       },
     });
 
-    await prisma.knowledgeSource.update({
+    await this.prisma.client.knowledgeSource.update({
       where: { id: sourceId },
       data: { status: 'processing' },
     });
@@ -70,14 +72,18 @@ export class KnowledgeProcessor extends WorkerHost {
 
       // 4. CLASSIFICATION
       await this.updateJob(knowledgeJob.id, IngestionStage.CLASSIFICATION, 70);
-      const atoms = await this.runClassification(cleanedText, businessId);
+      const atoms = await Sentry.startSpan({ name: 'Knowledge Ingestion: Classification', op: 'ingestion.classification' }, async () => {
+        return await this.runClassification(cleanedText, businessId);
+      });
 
       // 5. INDEXING
       await this.updateJob(knowledgeJob.id, IngestionStage.INDEXING, 90);
-      await this.runIndexing(sourceId, businessId, atoms);
+      await Sentry.startSpan({ name: 'Knowledge Ingestion: Indexing', op: 'ingestion.index' }, async () => {
+        await this.runIndexing(sourceId, businessId, atoms);
+      });
 
       // COMPLETE
-      await prisma.knowledgeJob.update({
+      await this.prisma.client.knowledgeJob.update({
         where: { id: knowledgeJob.id },
         data: {
           status: 'completed',
@@ -86,7 +92,7 @@ export class KnowledgeProcessor extends WorkerHost {
         },
       });
 
-      await prisma.knowledgeSource.update({
+      await this.prisma.client.knowledgeSource.update({
         where: { id: sourceId },
         data: { status: 'completed', lastIngested: new Date() },
       });
@@ -96,12 +102,12 @@ export class KnowledgeProcessor extends WorkerHost {
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.error(`[INGESTION] Failed for ${sourceId}:`, errorMessage);
 
-      await prisma.knowledgeJob.update({
+      await this.prisma.client.knowledgeJob.update({
         where: { id: knowledgeJob.id },
         data: { status: 'failed', error: errorMessage },
       });
 
-      await prisma.knowledgeSource.update({
+      await this.prisma.client.knowledgeSource.update({
         where: { id: sourceId },
         data: { status: 'failed' },
       });
@@ -111,7 +117,7 @@ export class KnowledgeProcessor extends WorkerHost {
   }
 
   private async updateJob(jobId: string, stage: IngestionStage, progress: number) {
-    await prisma.knowledgeJob.update({
+    await this.prisma.client.knowledgeJob.update({
       where: { id: jobId },
       data: { stage, progress },
     });
@@ -174,7 +180,7 @@ export class KnowledgeProcessor extends WorkerHost {
   private async runIndexing(sourceId: string, businessId: string, atoms: any[]) {
     this.logger.debug(`Stage: Indexing`);
 
-    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    await this.prisma.client.$transaction(async (tx: Prisma.TransactionClient) => {
       // Clear old entries if re-syncing? (Optional based on business logic)
       // For now, we just add new ones.
 

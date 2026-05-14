@@ -1,22 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
-import { prisma } from '@brandflow/db';
+import { PrismaService } from '../../common/database/prisma.service';
 import type { CreateKnowledgeSourceDto } from '@brandflow/shared';
 import { QUEUES } from '@brandflow/shared';
+
+import { PrismaService } from '../../common/database/prisma.service';
 
 @Injectable()
 export class KnowledgeService {
   constructor(
     @InjectQueue(QUEUES.KNOWLEDGE_INGESTION) private readonly ingestionQueue: Queue,
+    private readonly prisma: PrismaService,
   ) {}
 
   async getDashboardStats(businessId: string) {
     const [totalSources, totalEntries, pendingReviews, recentJobs] = await Promise.all([
-      prisma.knowledgeSource.count({ where: { businessId } }),
-      prisma.knowledgeEntry.count({ where: { businessId } }),
-      prisma.knowledgeReview.count({ where: { businessId, status: 'pending' } }),
-      prisma.knowledgeJob.findMany({
+      this.prisma.client.knowledgeSource.count({ where: { businessId } }),
+      this.prisma.client.knowledgeEntry.count({ where: { businessId } }),
+      this.prisma.client.knowledgeReview.count({ where: { businessId, status: 'pending' } }),
+      this.prisma.client.knowledgeJob.findMany({
         where: { businessId },
         orderBy: { createdAt: 'desc' },
         take: 5,
@@ -24,13 +27,13 @@ export class KnowledgeService {
       }),
     ]);
 
-    const sourcesByStatus = await prisma.knowledgeSource.groupBy({
+    const sourcesByStatus = await this.prisma.client.knowledgeSource.groupBy({
       by: ['status'],
       where: { businessId },
       _count: true,
     });
 
-    const averageConfidence = await prisma.knowledgeEntry.aggregate({
+    const averageConfidence = await this.prisma.client.knowledgeEntry.aggregate({
       where: { businessId },
       _avg: { confidence: true },
     });
@@ -47,7 +50,7 @@ export class KnowledgeService {
   }
 
   async findSources(businessId: string, brandId?: string) {
-    return prisma.knowledgeSource.findMany({
+    return this.prisma.client.knowledgeSource.findMany({
       where: { businessId, ...(brandId ? { brandId } : {}) },
       include: { 
         _count: { select: { entries: true } },
@@ -58,7 +61,7 @@ export class KnowledgeService {
   }
 
   async findSourceById(id: string, businessId: string) {
-    const source = await prisma.knowledgeSource.findFirst({
+    const source = await this.prisma.client.knowledgeSource.findFirst({
       where: { id, businessId },
       include: {
         entries: { take: 50, orderBy: { confidence: 'desc' } },
@@ -71,12 +74,12 @@ export class KnowledgeService {
   }
 
   async findEntries(businessId: string, sourceId: string) {
-    const source = await prisma.knowledgeSource.findFirst({
+    const source = await this.prisma.client.knowledgeSource.findFirst({
       where: { id: sourceId, businessId },
     });
     if (!source) throw new NotFoundException('Knowledge source not found');
 
-    return prisma.knowledgeEntry.findMany({
+    return this.prisma.client.knowledgeEntry.findMany({
       where: { sourceId },
       orderBy: { confidence: 'desc' },
     });
@@ -85,7 +88,7 @@ export class KnowledgeService {
   async createSource(businessId: string, dto: any) {
     // Check for existing source with same URL for this business
     if (dto.sourceUrl && dto.sourceUrl !== 'manual-input') {
-      const existing = await prisma.knowledgeSource.findFirst({
+      const existing = await this.prisma.client.knowledgeSource.findFirst({
         where: { businessId, sourceUrl: dto.sourceUrl }
       });
       
@@ -93,7 +96,7 @@ export class KnowledgeService {
         // If it exists, we could either throw an error or return the existing source
         // Let's re-trigger ingestion if it's failed, otherwise throw
         if (existing.status === 'failed') {
-          await prisma.knowledgeSource.update({
+          await this.prisma.client.knowledgeSource.update({
             where: { id: existing.id },
             data: { status: 'pending' }
           });
@@ -104,7 +107,7 @@ export class KnowledgeService {
       }
     }
 
-    const source = await prisma.knowledgeSource.create({
+    const source = await this.prisma.client.knowledgeSource.create({
       data: {
         businessId,
         brandId: dto.brandId,
@@ -136,19 +139,19 @@ export class KnowledgeService {
   }
 
   async deleteSource(id: string, businessId: string) {
-    const source = await prisma.knowledgeSource.findFirst({ where: { id, businessId } });
+    const source = await this.prisma.client.knowledgeSource.findFirst({ where: { id, businessId } });
     if (!source) throw new NotFoundException('Knowledge source not found');
 
-    await prisma.knowledgeSource.delete({ where: { id } });
+    await this.prisma.client.knowledgeSource.delete({ where: { id } });
   }
 
   async updateEntryReview(entryId: string, businessId: string, status: string, note?: string) {
-    const entry = await prisma.knowledgeEntry.findFirst({
+    const entry = await this.prisma.client.knowledgeEntry.findFirst({
       where: { id: entryId, businessId },
     });
     if (!entry) throw new NotFoundException('Knowledge entry not found');
 
-    return prisma.knowledgeReview.create({
+    return this.prisma.client.knowledgeReview.create({
       data: {
         businessId,
         entryId,
@@ -160,12 +163,12 @@ export class KnowledgeService {
   }
 
   async markEntryStale(entryId: string, businessId: string) {
-    const entry = await prisma.knowledgeEntry.findFirst({
+    const entry = await this.prisma.client.knowledgeEntry.findFirst({
       where: { id: entryId, businessId },
     });
     if (!entry) throw new NotFoundException('Knowledge entry not found');
 
-    return prisma.knowledgeEntry.update({
+    return this.prisma.client.knowledgeEntry.update({
       where: { id: entryId },
       data: { isStale: true, staleAt: new Date() },
     });

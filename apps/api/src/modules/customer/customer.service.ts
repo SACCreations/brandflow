@@ -1,14 +1,18 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { prisma } from '@brandflow/db';
+import { PrismaService } from '../../common/database/prisma.service';
 import type { Prisma } from '@brandflow/db';
 import type { CreateCustomerDto, UpdateCustomerDto } from '@brandflow/shared';
 
+import { PrismaService } from '../../common/database/prisma.service';
+
 @Injectable()
 export class CustomerService {
+  constructor(private readonly prisma: PrismaService) {}
+
   async findAll(businessId: string, filters: { status?: string; search?: string } = {}) {
     const search = this.normalizeOptionalText(filters.search);
 
-    return prisma.customer.findMany({
+    return this.prisma.client.customer.findMany({
       where: {
         businessId,
         ...(filters.status ? { status: filters.status } : {}),
@@ -30,7 +34,7 @@ export class CustomerService {
   }
 
   async findOne(id: string, businessId: string) {
-    const customer = await prisma.customer.findFirst({
+    const customer = await this.prisma.client.customer.findFirst({
       where: { id, businessId },
       include: {
         _count: { select: { projects: true } },
@@ -65,7 +69,7 @@ export class CustomerService {
     };
     await this.ensureUniqueEmail(businessId, payload.email ?? null);
 
-    return prisma.customer.create({
+    return this.prisma.client.customer.create({
       data: payload,
       include: {
         _count: { select: { projects: true } },
@@ -88,7 +92,7 @@ export class CustomerService {
     };
     await this.ensureUniqueEmail(businessId, normalizedEmail ?? null, id);
 
-    return prisma.customer.update({
+    return this.prisma.client.customer.update({
       where: { id },
       data: payload,
       include: {
@@ -103,7 +107,7 @@ export class CustomerService {
       throw new ConflictException('Cannot delete a client that still has linked projects. Reassign or remove the projects first.');
     }
 
-    return prisma.customer.delete({
+    return this.prisma.client.customer.delete({
       where: { id },
     });
   }
@@ -111,7 +115,7 @@ export class CustomerService {
   private async ensureUniqueEmail(businessId: string, email?: string | null, excludeId?: string) {
     if (!email) return;
 
-    const existing = await prisma.customer.findFirst({
+    const existing = await this.prisma.client.customer.findFirst({
       where: {
         businessId,
         email,

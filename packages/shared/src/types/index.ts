@@ -86,6 +86,8 @@ export interface LLMConfig {
   maxTokens?: number;
   apiKey?: string;
   jsonMode?: boolean;
+  businessId?: string;
+  sanitizePII?: boolean;
 }
 
 // ─── AI Generation Request ────────────────────────────────────────

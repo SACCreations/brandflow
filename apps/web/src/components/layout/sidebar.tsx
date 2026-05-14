@@ -55,6 +55,7 @@ const NAV = [
       { label: 'Billing', href: '/settings/billing', icon: '＄' },
       { label: 'Team', href: '/settings/team', icon: '👥' },
       { label: 'Clients', href: '/settings/clients', icon: '💼' },
+      { label: 'Compliance', href: '/settings/compliance', icon: '🛡️' },
     ],
   },
 ];
