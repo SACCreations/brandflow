@@ -48,4 +48,14 @@ export class AnalyticsController {
   getRecommendations(@CurrentUser() user: JwtPayload) {
     return this.analyticsService.getAiRecommendations(user.businessId);
   }
+  
+  @Get('costs')
+  @ApiOperation({ summary: 'Get AI cost analysis' })
+  getCosts(
+    @CurrentUser() user: JwtPayload,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.analyticsService.getCostAnalysis(user.businessId, from, to);
+  }
 }

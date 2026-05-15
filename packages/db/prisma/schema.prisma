@@ -486,6 +486,7 @@ model Content {
   qualityScore   Float?
   promptId       String?
   promptVersion  Int?
+  metadata       Json?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -697,7 +698,7 @@ model AutomationRun {
   id           String    @id @default(uuid())
   automationId String
   businessId   String
-  status       KnowledgeJobStatus
+  status       AutomationRunStatus
   triggerEvent Json?
   stepResults  Json?
   failedAtStep Int?
@@ -806,6 +807,7 @@ enum CampaignStatus {
 enum ContentStatus {
   draft
   in_review
+  revision_requested
   approved
   scheduled
   published
@@ -817,13 +819,13 @@ enum ApprovalStatus {
   pending
   approved
   rejected
-  changes_requested
+  revision_requested
 }
 
 enum ScheduleStatus {
   pending
   processing
-  completed
+  published
   failed
   canceled
 }
@@ -831,12 +833,21 @@ enum ScheduleStatus {
 enum PublishJobStatus {
   pending
   processing
-  completed
+  published
   failed
+  retrying
+  dead_letter
+  canceled
 }
 
 enum AutomationStatus {
   active
   inactive
   draft
+}
+enum AutomationRunStatus {
+  running
+  completed
+  failed
+  paused
 }

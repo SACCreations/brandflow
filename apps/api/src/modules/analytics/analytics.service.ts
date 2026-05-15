@@ -121,4 +121,46 @@ export class AnalyticsService {
       }
     ];
   }
+
+  async getCostAnalysis(businessId: string, from?: string, to?: string) {
+    const where: any = { businessId };
+    if (from || to) {
+      where.createdAt = {
+        ...(from ? { gte: new Date(from) } : {}),
+        ...(to ? { lte: new Date(to) } : {}),
+      };
+    }
+
+    const [totalCost, byModule, byModel, dailyTrend] = await Promise.all([
+      prisma.costEvent.aggregate({
+        where,
+        _sum: { costCents: true, inputTokens: true, outputTokens: true },
+      }),
+      prisma.costEvent.groupBy({
+        by: ['module'],
+        where,
+        _sum: { costCents: true },
+      }),
+      prisma.costEvent.groupBy({
+        by: ['model'],
+        where,
+        _sum: { costCents: true },
+      }),
+      prisma.$queryRawUnsafe(
+        `SELECT date_trunc('day', "createdAt") as day, CAST(SUM("costCents") AS INTEGER) as cost
+         FROM cost_events
+         WHERE "businessId" = $1
+         GROUP BY day
+         ORDER BY day ASC`,
+        businessId,
+      )
+    ]);
+
+    return {
+      total: totalCost._sum,
+      byModule,
+      byModel,
+      dailyTrend,
+    };
+  }
 }

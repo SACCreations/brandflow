@@ -8,5 +8,7 @@ export { AnthropicProvider } from './providers/anthropic';
 export { FallbackProvider } from './providers/fallback';
 import * as encryption from './utils/encryption.utils';
 export { encryption };
+export { TextSplitter } from './utils/chunking';
+export { VectorService } from './vector-service';
 export type { LLMConfig, ProviderResponse, ProviderRequest, GatewayConfig } from './types';
 export type * from './types';

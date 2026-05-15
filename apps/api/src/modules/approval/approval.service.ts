@@ -110,6 +110,25 @@ export class ApprovalService {
       throw new ConflictException('This approval has already been decided.');
     }
 
+    // Enterprise Safety: Check for high-severity brand violations before approval
+    if (status === 'approved') {
+      const latestCheck = await this.prisma.client.qualityCheck.findFirst({
+        where: { contentId: approval.contentId },
+        orderBy: { checkedAt: 'desc' },
+      });
+
+      if (latestCheck && !latestCheck.passed) {
+        const violations = (latestCheck.violations as any[]) || [];
+        const hasHighSeverity = violations.some((v: any) => v.severity === 'high');
+        
+        if (hasHighSeverity) {
+          throw new BadRequestException(
+            'Cannot approve content with high-severity brand violations. Please request revisions.',
+          );
+        }
+      }
+    }
+
     const contentStatus = status === 'approved' ? 'approved' : 'revision_requested';
 
     const [updatedApproval] = await this.prisma.client.$transaction([

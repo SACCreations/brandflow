@@ -126,7 +126,7 @@ export class SchedulerService {
     return prisma.$transaction(async (tx) => {
       const updated = await tx.schedule.update({
         where: { id },
-        data: { status: 'cancelled' },
+        data: { status: 'canceled' },
       });
 
       if (schedule.contentId) {

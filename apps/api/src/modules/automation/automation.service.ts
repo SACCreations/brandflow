@@ -62,7 +62,7 @@ export class AutomationService {
     if (!automation.isActive) throw new NotFoundException('Automation is inactive');
 
     const run = await prisma.automationRun.create({
-      data: { automationId: id, businessId, status: 'queued', triggerEvent: payload as unknown as Prisma.InputJsonValue },
+      data: { automationId: id, businessId, status: 'running', triggerEvent: payload as unknown as Prisma.InputJsonValue },
     });
 
     await this.automationQueue.add(

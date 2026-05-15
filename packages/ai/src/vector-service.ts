@@ -29,4 +29,31 @@ export class VectorService {
   formatForPostgres(embedding: number[]): string {
     return `[${embedding.join(',')}]`;
   }
+
+  /**
+   * Performs a vector similarity search to find the most relevant context.
+   * Note: This requires a Prisma instance to run raw SQL.
+   */
+  async findRelevantContext(
+    prisma: any,
+    businessId: string,
+    query: string,
+    limit: number = 5,
+  ): Promise<string[]> {
+    const embedding = await this.generateEmbedding(query);
+    const vectorString = this.formatForPostgres(embedding);
+
+    const results = await prisma.$queryRawUnsafe(
+      `SELECT content, "sourceId", 1 - (embedding <=> $1::vector) as similarity
+       FROM knowledge_entries
+       WHERE "businessId" = $2 AND embedding IS NOT NULL
+       ORDER BY similarity DESC
+       LIMIT $3`,
+      vectorString,
+      businessId,
+      limit,
+    );
+
+    return results as any[];
+  }
 }

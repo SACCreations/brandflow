@@ -29,6 +29,9 @@ import {
   Bar, 
   Cell 
 } from 'recharts';
+import { CostAnalysisDashboard } from '@/components/analytics/cost-dashboard';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
 
 export default function AnalyticsDashboard() {
   const data = [
@@ -65,12 +68,12 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
-      {/* ROI Summary */}
-      <div className="grid gap-6 md:grid-cols-4">
-        <RoiStat title="Total Reach" value="124.5K" change="+12%" up icon={<Users className="h-5 w-5 text-blue-500" />} />
-        <RoiStat title="Avg. Engagement" value="5.2%" change="+0.8%" up icon={<Target className="h-5 w-5 text-emerald-500" />} />
-        <RoiStat title="Generation Cost" value="$142.50" change="-4%" up={false} icon={<DollarSign className="h-5 w-5 text-amber-500" />} />
-        <RoiStat title="Attributed ROI" value="$12,400" change="+24%" up icon={<Zap className="h-5 w-5 text-brand-500" />} />
+      <div className="rounded-3xl bg-brand-50/30 p-8 dark:bg-brand-500/5">
+        <h2 className="text-xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-3">
+          <DollarSign className="h-6 w-6 text-emerald-500" />
+          AI Spend & Compute Efficiency
+        </h2>
+        <CostAnalysisDashboard />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-12">

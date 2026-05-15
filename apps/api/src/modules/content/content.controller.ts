@@ -11,10 +11,13 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { ContentService } from './content.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { Permissions } from '../../common/decorators/permissions.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
@@ -27,12 +30,13 @@ import {
 
 @ApiTags('content')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('content')
 export class ContentController {
   constructor(private readonly contentService: ContentService) {}
 
   @Get()
+  @Permissions('content:read')
   @ApiOperation({ summary: 'List content items' })
   findAll(
     @CurrentUser() user: JwtPayload,
@@ -44,6 +48,7 @@ export class ContentController {
   }
 
   @Get(':id')
+  @Permissions('content:read')
   @ApiOperation({ summary: 'Get content item with versions and approvals' })
   findById(
     @Param('id', ParseUUIDPipe) id: string,
@@ -53,6 +58,7 @@ export class ContentController {
   }
 
   @Post('generate')
+  @Permissions('content:create')
   @ApiOperation({ summary: 'Generate new content using AI' })
   generate(
     @CurrentUser() user: JwtPayload,
@@ -62,6 +68,7 @@ export class ContentController {
   }
 
   @Patch(':id')
+  @Permissions('content:edit')
   @ApiOperation({ summary: 'Edit content body (creates new version)' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -72,6 +79,7 @@ export class ContentController {
   }
 
   @Delete(':id')
+  @Permissions('content:delete')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Archive a content item' })
   archive(

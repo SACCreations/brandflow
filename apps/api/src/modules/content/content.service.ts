@@ -8,7 +8,7 @@ import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { prisma } from '@brandflow/db';
 import type { Prisma, KnowledgeSource, KnowledgeEntry } from '@brandflow/db';
-import { LLMGateway, PromptEngine, QualityControl, CostTracker, type LLMConfig } from '@brandflow/ai';
+import { LLMGateway, PromptEngine, QualityControl, CostTracker, VectorService, type LLMConfig } from '@brandflow/ai';
 import type { GenerateContentDto, UpdateContentDto, BrandContext } from '@brandflow/shared';
 import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 import { PrismaService } from '../../common/database/prisma.service';
@@ -20,6 +20,7 @@ export class ContentService {
   private readonly promptEngine: PromptEngine;
   private readonly qualityControl: QualityControl;
   private readonly costTracker: CostTracker;
+  private readonly vectorService: VectorService;
 
   constructor(
     private readonly config: ConfigService,
@@ -43,11 +44,12 @@ export class ContentService {
     this.costTracker = new CostTracker(async (event) => {
       await this.prisma.client.costEvent.create({ data: event });
     });
+    this.vectorService = new VectorService();
   }
 
   async findAll(businessId: string, filters: { brandId?: string; campaignId?: string; status?: string }) {
     return this.prisma.client.content.findMany({
-      where: { businessId, ...filters },
+      where: { businessId, ...filters } as any,
       orderBy: { createdAt: 'desc' },
       include: {
         brand: { select: { id: true, name: true } },
@@ -132,16 +134,16 @@ export class ContentService {
     // 2. Resolve brand context
     const brand = await this.prisma.client.brand.findFirst({
       where: { id: effectiveBrandId, businessId },
-      include: {
-        knowledgeSources: {
-          where: { status: 'completed' },
-          include: {
-            entries: { where: { isStale: false }, take: 10, orderBy: { confidence: 'desc' } },
-          },
-        },
-      },
     });
     if (!brand) throw new NotFoundException('Brand not found');
+
+    // Perform semantic retrieval for relevant facts
+    const relevantFacts = await this.vectorService.findRelevantContext(
+      this.prisma.client,
+      businessId,
+      dto.topic,
+      10 // Top 10 facts
+    );
 
     const brandContext: BrandContext = {
       name: brand.name,
@@ -149,9 +151,7 @@ export class ContentService {
       audience: brand.audience,
       tone: brand.tone as string[] | null,
       governance: brand.governance as BrandContext['governance'],
-      knowledgeEntries: brand.knowledgeSources
-        .flatMap((s: KnowledgeSource & { entries: KnowledgeEntry[] }) => s.entries)
-        .map((e: KnowledgeEntry) => e.content),
+      knowledgeEntries: relevantFacts.map((f: any) => f.content),
     };
 
     // 3. Resolve prompt
@@ -237,6 +237,10 @@ export class ContentService {
           qualityScore: qualityResult.confidenceScore,
           promptId: promptRecord?.id,
           promptVersion: promptRecord?.version,
+          metadata: {
+            sourceIds: relevantFacts.map((f: any) => f.sourceId).filter(Boolean),
+            requestId,
+          } as any,
         },
       });
 

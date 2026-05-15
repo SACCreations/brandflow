@@ -4,7 +4,7 @@ import { Logger, Injectable } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
 import type { Prisma } from '@brandflow/db';
 import { QUEUES } from '@brandflow/shared';
-import { LLMGateway } from '@brandflow/ai';
+import { LLMGateway, TextSplitter, VectorService } from '@brandflow/ai';
 import { PrismaService } from '../../common/database/prisma.service';
 import * as Sentry from '@sentry/node';
 
@@ -28,13 +28,14 @@ enum IngestionStage {
 export class KnowledgeProcessor extends WorkerHost {
   private readonly logger = new Logger(KnowledgeProcessor.name);
   private readonly aiGateway: LLMGateway;
+  private readonly vectorService: VectorService;
+  private readonly splitter: TextSplitter;
 
   constructor(private readonly prisma: PrismaService) {
     super();
-    // In production, this would be injected via a service
-    this.aiGateway = new LLMGateway({
-      defaultProvider: 'openai',
-    });
+    this.aiGateway = new LLMGateway({ defaultProvider: 'openai' });
+    this.vectorService = new VectorService();
+    this.splitter = new TextSplitter(1000, 200);
   }
 
   async process(job: Job<IngestionJobData>): Promise<void> {
@@ -148,8 +149,8 @@ export class KnowledgeProcessor extends WorkerHost {
   private async runClassification(text: string, businessId: string): Promise<any[]> {
     this.logger.debug(`Stage: Classification`);
     
-    // Split into chunks (simple for now, in production use semantic chunking)
-    const chunks = text.match(/[^.!?]+[.!?]+/g)?.slice(0, 50) ?? [text];
+    // Use improved semantic chunking
+    const chunks = this.splitter.split(text);
 
     // AI Classification
     const prompt = `
@@ -170,33 +171,41 @@ export class KnowledgeProcessor extends WorkerHost {
       );
 
       const atoms = JSON.parse(response.content);
-      return Array.isArray(atoms) ? atoms : chunks.map(c => ({ type: 'fact', content: c, confidence: 0.8 }));
+      return Array.isArray(atoms) ? atoms : chunks.map((c: string) => ({ type: 'fact', content: c, confidence: 0.8 }));
     } catch (err) {
       this.logger.warn(`AI Classification failed, falling back to basic parsing: ${err}`);
-      return chunks.map(c => ({ type: 'fact', content: c, confidence: 0.5 }));
+      return chunks.map((c: string) => ({ type: 'fact', content: c, confidence: 0.5 }));
     }
   }
 
   private async runIndexing(sourceId: string, businessId: string, atoms: any[]) {
     this.logger.debug(`Stage: Indexing`);
 
-    await this.prisma.client.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Clear old entries if re-syncing? (Optional based on business logic)
-      // For now, we just add new ones.
+    for (const atom of atoms) {
+      const embedding = await this.vectorService.generateEmbedding(atom.content);
+      const vectorString = this.vectorService.formatForPostgres(embedding);
 
-      for (const atom of atoms) {
-        await tx.knowledgeEntry.create({
-          data: {
-            businessId,
-            sourceId,
-            classification: atom.type,
-            content: atom.content,
-            confidence: atom.confidence ?? 0.8,
-            version: 1,
-            // embedding: ... (Generate with AI Gateway in next iteration)
-          },
-        });
+      // Prisma doesn't natively support vector types in 'create', so we use raw SQL
+      // or a combination of create and then update with raw SQL.
+      // To maintain reliability, we create the entry first.
+      const entry = await this.prisma.client.knowledgeEntry.create({
+        data: {
+          businessId,
+          sourceId,
+          classification: atom.type,
+          content: atom.content,
+          confidence: atom.confidence ?? 0.8,
+          version: 1,
+        },
+      });
+
+      if (embedding.length > 0) {
+        await this.prisma.client.$executeRawUnsafe(
+          `UPDATE knowledge_entries SET embedding = $1::vector WHERE id = $2`,
+          vectorString,
+          entry.id,
+        );
       }
-    });
+    }
   }
 }
