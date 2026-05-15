@@ -41,8 +41,8 @@ export class PublishService {
           businessId,
           contentId,
           socialAccountId: account.id,
+          tailoredBody,
           status: 'pending',
-          // In a real app, we might store the tailored body in a separate ContentVersion or Metadata
         }
       });
 
@@ -52,7 +52,7 @@ export class PublishService {
     return jobs;
   }
 
-  async publishContent(contentId: string, socialAccountId: string, businessId: string) {
+  async publishContent(contentId: string, socialAccountId: string, businessId: string, tailoredBody?: string) {
     const [content, account] = await Promise.all([
       prisma.content.findFirst({
         where: { id: contentId, businessId },
@@ -75,9 +75,11 @@ export class PublishService {
       throw new BadRequestException('LinkedIn token expired. Reconnect the account before publishing.');
     }
 
+    const finalBody = tailoredBody || content.body;
+
     switch (account.platform) {
       case 'linkedin': {
-        return this.publishLinkedInPost(content.body, account, businessId);
+        return this.publishLinkedInPost(finalBody, account, businessId);
       }
       default:
         throw new BadRequestException(`Platform ${account.platform} is not supported for direct publishing yet.`);
@@ -161,6 +163,18 @@ export class PublishService {
     const externalPostId = response.headers.get('x-restli-id')
       || (typeof payload === 'object' && payload && 'id' in payload ? String((payload as { id?: unknown }).id) : null)
       || `linkedin:${account.externalId}:${Date.now()}`;
+
+    // Log the publication
+    await prisma.auditLog.create({
+      data: {
+        businessId,
+        action: 'publish',
+        entityType: 'content',
+        entityId: contentId,
+        after: { platform: 'linkedin', externalPostId },
+        hash: `pub-${crypto.randomUUID()}`, // Simple hash for now
+      }
+    });
 
     return { externalPostId };
   }

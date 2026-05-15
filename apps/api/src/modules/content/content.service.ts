@@ -263,6 +263,15 @@ export class ContentService {
         },
       });
 
+      await this.auditService.log({
+        businessId,
+        userId,
+        action: 'generate',
+        entityType: 'content',
+        entityId: created.id,
+        after: { platform: dto.platform, type: dto.type, briefId: dto.briefId },
+      });
+
       return created;
     });
 

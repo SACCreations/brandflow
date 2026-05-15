@@ -179,33 +179,30 @@ export class KnowledgeProcessor extends WorkerHost {
   }
 
   private async runIndexing(sourceId: string, businessId: string, atoms: any[]) {
-    this.logger.debug(`Stage: Indexing`);
+    this.logger.debug(`Stage: Indexing ${atoms.length} atoms`);
 
-    for (const atom of atoms) {
-      const embedding = await this.vectorService.generateEmbedding(atom.content);
-      const vectorString = this.vectorService.formatForPostgres(embedding);
-
-      // Prisma doesn't natively support vector types in 'create', so we use raw SQL
-      // or a combination of create and then update with raw SQL.
-      // To maintain reliability, we create the entry first.
-      const entry = await this.prisma.client.knowledgeEntry.create({
-        data: {
+    // 1. Generate all embeddings in parallel (or chunks if too many)
+    const indexedAtoms = await Promise.all(
+      atoms.map(async (atom) => {
+        const embedding = await this.vectorService.generateEmbedding(atom.content);
+        return {
           businessId,
           sourceId,
           classification: atom.type,
           content: atom.content,
           confidence: atom.confidence ?? 0.8,
           version: 1,
-        },
-      });
+          embedding: this.vectorService.formatForStorage(embedding),
+        };
+      })
+    );
 
-      if (embedding.length > 0) {
-        await this.prisma.client.$executeRawUnsafe(
-          `UPDATE knowledge_entries SET embedding = $1::vector WHERE id = $2`,
-          vectorString,
-          entry.id,
-        );
-      }
-    }
+    // 2. Batch insert into database
+    // Note: createMany is supported on Postgres and is much faster
+    await this.prisma.client.knowledgeEntry.createMany({
+      data: indexedAtoms,
+    });
+
+    this.logger.debug(`Successfully batch indexed ${atoms.length} atoms`);
   }
 }

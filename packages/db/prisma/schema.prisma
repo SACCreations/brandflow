@@ -304,7 +304,7 @@ model KnowledgeEntry {
   locale         String?   @default("en-US")
   governance     Json?     // compliance tags, sensitive flags
   version        Int       @default(1)
-  embedding      Unsupported("vector(1536)")?
+  embedding      Json?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -630,6 +630,7 @@ model PublishJob {
   contentId       String
   socialAccountId String
   scheduleId      String?
+  tailoredBody    String?   @db.Text
   status          PublishJobStatus @default(pending)
   failureReason   String?
   failureClass    String?
@@ -638,6 +639,7 @@ model PublishJob {
   nextRetryAt     DateTime?
   publishedAt     DateTime?
   externalPostId  String?
+  metadata        Json?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

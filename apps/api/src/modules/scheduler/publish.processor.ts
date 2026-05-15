@@ -27,16 +27,28 @@ export class PublishProcessor extends WorkerHost {
     const schedule = await prisma.schedule.findFirst({ where: { id: scheduleId, businessId } });
     if (!schedule) throw new NotFoundException(`Schedule ${scheduleId} not found`);
 
-    const publishJob = await prisma.publishJob.create({
-      data: {
-        businessId,
-        contentId,
-        socialAccountId: schedule.socialAccountId,
-        scheduleId,
-        status: 'processing',
-        retryCount: job.attemptsMade,
-      },
+    // Check if there is already a PublishJob for this schedule (created during tailoring)
+    let publishJob = await prisma.publishJob.findFirst({
+      where: { scheduleId, businessId, contentId }
     });
+
+    if (publishJob) {
+      publishJob = await prisma.publishJob.update({
+        where: { id: publishJob.id },
+        data: { status: 'processing', retryCount: job.attemptsMade },
+      });
+    } else {
+      publishJob = await prisma.publishJob.create({
+        data: {
+          businessId,
+          contentId,
+          socialAccountId: schedule.socialAccountId,
+          scheduleId,
+          status: 'processing',
+          retryCount: job.attemptsMade,
+        },
+      });
+    }
 
     try {
       this.logger.log(`Publishing content ${contentId} for schedule ${scheduleId}`);
@@ -44,6 +56,7 @@ export class PublishProcessor extends WorkerHost {
         contentId,
         schedule.socialAccountId,
         businessId,
+        publishJob.tailoredBody ?? undefined,
       );
 
       await prisma.$transaction([
