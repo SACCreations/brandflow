@@ -12,7 +12,6 @@ import type {
   UpdateCampaignDto,
 } from '@brandflow/shared';
 
-import { PrismaService } from '../../common/database/prisma.service';
 
 @Injectable()
 export class CampaignService {

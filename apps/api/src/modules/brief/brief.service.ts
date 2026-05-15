@@ -13,7 +13,6 @@ import type {
   UpdateBriefDto,
 } from '@brandflow/shared';
 
-import { PrismaService } from '../../common/database/prisma.service';
 
 @Injectable()
 export class BriefService {

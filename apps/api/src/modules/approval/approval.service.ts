@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../common/database/prisma.service';
+import { APPROVAL_STATUSES, ApprovalStatus, ReviewType } from '@brandflow/shared';
 
 @Injectable()
 export class ApprovalService {

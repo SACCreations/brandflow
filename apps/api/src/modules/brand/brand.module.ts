@@ -4,9 +4,10 @@ import { BrandService } from './brand.service';
 import { BrandAnalyserController } from './brand-analyser.controller';
 import { BrandAnalyserService } from './brand-analyser.service';
 import { LlmSettingsModule } from '../llm-settings/llm-settings.module';
+import { BusinessModule } from '../business/business.module';
 
 @Module({
-  imports: [LlmSettingsModule],
+  imports: [LlmSettingsModule, BusinessModule],
   controllers: [BrandController, BrandAnalyserController],
   providers: [BrandService, BrandAnalyserService],
   exports: [BrandService, BrandAnalyserService],

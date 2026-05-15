@@ -3,7 +3,6 @@ import { PrismaService } from '../../common/database/prisma.service';
 import type { Prisma } from '@brandflow/db';
 import type { CreateCustomerDto, UpdateCustomerDto } from '@brandflow/shared';
 
-import { PrismaService } from '../../common/database/prisma.service';
 
 @Injectable()
 export class CustomerService {

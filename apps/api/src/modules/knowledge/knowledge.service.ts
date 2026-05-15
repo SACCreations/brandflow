@@ -5,7 +5,6 @@ import { PrismaService } from '../../common/database/prisma.service';
 import type { CreateKnowledgeSourceDto } from '@brandflow/shared';
 import { QUEUES } from '@brandflow/shared';
 
-import { PrismaService } from '../../common/database/prisma.service';
 
 @Injectable()
 export class KnowledgeService {
