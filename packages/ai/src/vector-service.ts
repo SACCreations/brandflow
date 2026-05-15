@@ -62,7 +62,7 @@ export class VectorService {
     });
 
     return scored
-      .sort((a, b) => b.similarity - a.similarity)
+      .sort((a: any, b: any) => (b.similarity ?? 0) - (a.similarity ?? 0))
       .slice(0, limit);
   }
 
@@ -70,11 +70,15 @@ export class VectorService {
     let dotProduct = 0;
     let mag1 = 0;
     let mag2 = 0;
-    for (let i = 0; i < v1.length; i++) {
-      dotProduct += v1[i] * v2[i];
-      mag1 += v1[i] * v1[i];
-      mag2 += v2[i] * v2[i];
+    const len = Math.min(v1.length, v2.length);
+    for (let i = 0; i < len; i++) {
+      const val1 = v1[i] ?? 0;
+      const val2 = v2[i] ?? 0;
+      dotProduct += val1 * val2;
+      mag1 += val1 * val1;
+      mag2 += val2 * val2;
     }
+    if (mag1 === 0 || mag2 === 0) return 0;
     return dotProduct / (Math.sqrt(mag1) * Math.sqrt(mag2));
   }
 }

@@ -6,6 +6,8 @@ import type { Prisma } from '@brandflow/db';
 import { QUEUES } from '@brandflow/shared';
 import { LLMGateway, TextSplitter, VectorService } from '@brandflow/ai';
 import { PrismaService } from '../../common/database/prisma.service';
+const pdf = require('pdf-parse');
+const mammoth = require('mammoth');
 import * as Sentry from '@sentry/node';
 
 interface IngestionJobData {
@@ -134,9 +136,19 @@ export class KnowledgeProcessor extends WorkerHost {
     return text ?? '';
   }
 
-  private async runExtraction(type: string, rawData: any): Promise<string> {
-    this.logger.debug(`Stage: Extraction`);
-    // In production, use pdf-parse, mammoth, cheerio, etc.
+  private async runExtraction(type: string, rawData: any, contentType?: string): Promise<string> {
+    this.logger.debug(`Stage: Extraction (${contentType})`);
+    
+    if (contentType === 'application/pdf') {
+      const data = await pdf(rawData);
+      return data.text;
+    }
+    
+    if (contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const data = await mammoth.extractRawText({ buffer: rawData });
+      return data.value;
+    }
+
     return typeof rawData === 'string' ? rawData : 'Extracted content';
   }
 

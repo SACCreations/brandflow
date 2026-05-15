@@ -79,7 +79,7 @@ export class PublishService {
 
     switch (account.platform) {
       case 'linkedin': {
-        return this.publishLinkedInPost(finalBody, account, businessId);
+        return this.publishLinkedInPost(finalBody, account, businessId, contentId);
       }
       default:
         throw new BadRequestException(`Platform ${account.platform} is not supported for direct publishing yet.`);
@@ -123,6 +123,7 @@ export class PublishService {
       platform: string;
     },
     businessId: string,
+    contentId: string,
   ) {
     const { accessToken } = await this.socialService.getDecryptedTokens(account.id, businessId);
     const authorType = account.accountType === 'organization' ? 'organization' : 'person';
@@ -172,7 +173,7 @@ export class PublishService {
         entityType: 'content',
         entityId: contentId,
         after: { platform: 'linkedin', externalPostId },
-        hash: `pub-${crypto.randomUUID()}`, // Simple hash for now
+        hash: `pub-${require('crypto').randomUUID()}`, // Simple hash for now
       }
     });
 

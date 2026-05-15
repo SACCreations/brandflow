@@ -28,6 +28,7 @@ import { BriefModule } from './modules/brief/brief.module';
 import { CustomerModule } from './modules/customer/customer.module';
 import { ProjectModule } from './modules/project/project.module';
 import { DatabaseModule } from './common/database/database.module';
+import { RedisModule } from './common/redis/redis.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TenantInterceptor } from './common/tenant/tenant.interceptor';
 
@@ -95,6 +96,7 @@ import { TenantInterceptor } from './common/tenant/tenant.interceptor';
     CustomerModule,
     ProjectModule,
     DatabaseModule,
+    RedisModule,
   ],
   providers: [
     {

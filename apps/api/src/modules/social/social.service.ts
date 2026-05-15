@@ -14,6 +14,7 @@ const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
 const TAG_LENGTH = 16;
 const LINKEDIN_DEFAULT_SCOPES = ['openid', 'profile', 'email', 'w_member_social'] as const;
+const META_DEFAULT_SCOPES = ['instagram_basic', 'instagram_content_publish', 'pages_show_list', 'pages_read_engagement'] as const;
 
 interface LinkedInOAuthState {
   businessId: string;
@@ -34,6 +35,12 @@ interface LinkedInUserInfo {
   sub?: string;
   name?: string;
   email?: string;
+}
+
+interface MetaTokenResponse {
+  access_token?: string;
+  expires_in?: number;
+  token_type?: string;
 }
 
 @Injectable()
@@ -240,6 +247,28 @@ export class SocialService {
     };
   }
 
+  async createMetaAuthUrl(businessId: string, returnTo?: string) {
+    const clientId = process.env['META_CLIENT_ID'];
+    const callbackUrl = process.env['META_CALLBACK_URL'] || `${this.config.get<string>('app.url')}/social/meta/callback`;
+    
+    if (!clientId) throw new BadRequestException('Meta OAuth not configured.');
+
+    const safeReturnTo = this.sanitizeReturnTo(returnTo);
+    const state = await this.jwtService.signAsync({ businessId, returnTo: safeReturnTo, nonce: crypto.randomUUID() }, { expiresIn: '10m' });
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: callbackUrl,
+      state,
+      scope: META_DEFAULT_SCOPES.join(','),
+      response_type: 'code',
+    });
+
+    return {
+      authUrl: `https://www.facebook.com/v20.0/dialog/oauth?${params.toString()}`,
+    };
+  }
+
   async handleLinkedInCallback({
     code,
     state,
@@ -389,5 +418,54 @@ export class SocialService {
     }
 
     return payload;
+  }
+
+  async handleMetaCallback({ code, state, error, res }: { code?: string; state?: string; error?: string; res: Response }) {
+    let oauthState: any = null;
+    try {
+      oauthState = state ? await this.jwtService.verifyAsync(state) : null;
+    } catch {
+      return res.redirect(this.buildSocialRedirect('/publish/social', 'error', 'Invalid Meta state.'));
+    }
+
+    const returnTo = this.sanitizeReturnTo(oauthState?.returnTo);
+    if (error || !code) {
+      return res.redirect(this.buildSocialRedirect(returnTo, 'error', 'Meta authentication failed.'));
+    }
+
+    try {
+      const { clientId, clientSecret, callbackUrl } = this.getMetaConfig();
+      const tokenRes = await fetch(`https://graph.facebook.com/v20.0/oauth/access_token?client_id=${clientId}&redirect_uri=${callbackUrl}&client_secret=${clientSecret}&code=${code}`);
+      const tokens = await tokenRes.json() as MetaTokenResponse;
+
+      if (!tokens.access_token) throw new Error('No access token returned from Meta.');
+
+      // Fetch IG accounts linked to the user's pages
+      const pagesRes = await fetch(`https://graph.facebook.com/v20.0/me/accounts?access_token=${tokens.access_token}`);
+      const pages = await pagesRes.json() as any;
+
+      // For simplicity, we'll connect the first page/IG account found
+      // In a real app, you'd show a UI to pick which Page/IG account to connect
+      if (!pages.data?.[0]) throw new Error('No Facebook Pages found.');
+
+      const account = await this.upsert(oauthState.businessId, 'instagram', {
+        name: pages.data[0].name,
+        externalId: pages.data[0].id,
+        accessToken: tokens.access_token,
+        tokenExpiresAt: tokens.expires_in ? new Date(Date.now() + tokens.expires_in * 1000) : undefined,
+      });
+
+      return res.redirect(this.buildSocialRedirect(returnTo, 'connected', undefined, account.id));
+    } catch (err) {
+      return res.redirect(this.buildSocialRedirect(returnTo, 'error', err instanceof Error ? err.message : 'Meta connection failed.'));
+    }
+  }
+
+  private getMetaConfig() {
+    const clientId = process.env['META_CLIENT_ID'];
+    const clientSecret = process.env['META_CLIENT_SECRET'];
+    const callbackUrl = process.env['META_CALLBACK_URL'] || `${this.config.get<string>('app.url')}/social/meta/callback`;
+    if (!clientId || !clientSecret) throw new BadRequestException('Meta OAuth is not configured.');
+    return { clientId, clientSecret, callbackUrl };
   }
 }

@@ -13,6 +13,7 @@ import type { GenerateContentDto, UpdateContentDto, BrandContext } from '@brandf
 import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 import { PrismaService } from '../../common/database/prisma.service';
 import { BudgetService } from '../llm-settings/budget.service';
+import { AuditService } from '../business/audit.service';
 
 @Injectable()
 export class ContentService {
@@ -27,6 +28,7 @@ export class ContentService {
     private readonly llmSettingsService: LlmSettingsService,
     private readonly prisma: PrismaService,
     private readonly budgetService: BudgetService,
+    private readonly auditService: AuditService,
   ) {
     this.gateway = new LLMGateway({
       defaultProvider: config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic',
@@ -43,6 +45,8 @@ export class ContentService {
     this.qualityControl = new QualityControl(this.gateway);
     this.costTracker = new CostTracker(async (event) => {
       await this.prisma.client.costEvent.create({ data: event });
+      const totalTokens = (event.inputTokens || 0) + (event.outputTokens || 0);
+      await this.budgetService.incrementUsage(event.businessId, totalTokens).catch(() => {});
     });
     this.vectorService = new VectorService();
   }
