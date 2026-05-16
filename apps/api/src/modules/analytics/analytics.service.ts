@@ -75,27 +75,44 @@ export class AnalyticsService {
    * Attributes success back to the "Brain" atoms.
    */
   async getIntelligenceImpact(businessId: string) {
-    const metrics = await prisma.performanceMetric.findMany({
-      where: { businessId },
-      select: { sourceAttribution: true, engagement: true, reach: true }
-    });
+    const [metrics, sources] = await Promise.all([
+      prisma.performanceMetric.findMany({
+        where: { businessId },
+        select: { sourceAttribution: true, engagement: true, reach: true, roiCents: true }
+      }),
+      prisma.knowledgeSource.findMany({
+        where: { businessId },
+        select: { id: true, name: true, type: true }
+      })
+    ]);
 
-    const impactMap: Record<string, { engagement: number; reach: number; count: number }> = {};
+    const sourceMap = new Map(sources.map(s => [s.id, s]));
+    const impactMap: Record<string, { name: string; type: string; engagement: number; reach: number; roiCents: number; count: number }> = {};
 
     metrics.forEach(m => {
       const attribution = (m.sourceAttribution as any) || {};
       Object.keys(attribution).forEach(sourceId => {
         const weight = attribution[sourceId];
+        const source = sourceMap.get(sourceId);
+        
         if (!impactMap[sourceId]) {
-          impactMap[sourceId] = { engagement: 0, reach: 0, count: 0 };
+          impactMap[sourceId] = { 
+            name: source?.name || 'Unknown Source', 
+            type: source?.type || 'unknown',
+            engagement: 0, 
+            reach: 0, 
+            roiCents: 0,
+            count: 0 
+          };
         }
-        impactMap[sourceId].engagement += m.engagement * weight;
-        impactMap[sourceId].reach += m.reach * weight;
+        impactMap[sourceId].engagement += (m.engagement || 0) * weight;
+        impactMap[sourceId].reach += (m.reach || 0) * weight;
+        impactMap[sourceId].roiCents += (m.roiCents || 0) * weight;
         impactMap[sourceId].count += 1;
       });
     });
 
-    return impactMap;
+    return Object.values(impactMap).sort((a, b) => b.engagement - a.engagement);
   }
 
   /**

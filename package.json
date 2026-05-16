@@ -9,6 +9,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
+    "api": "turbo run dev --filter=@brandflow/api",
+    "web": "turbo run dev --filter=@brandflow/web",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",

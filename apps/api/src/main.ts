@@ -16,6 +16,7 @@ async function bootstrap() {
   initSentry();
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug'],
+    rawBody: true,
   });
 
   const config = app.get(ConfigService);

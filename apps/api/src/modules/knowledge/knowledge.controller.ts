@@ -96,4 +96,19 @@ export class KnowledgeController {
   ) {
     return this.knowledgeService.markEntryStale(id, user.businessId);
   }
+
+  @Get('jobs')
+  @ApiOperation({ summary: 'List knowledge ingestion jobs' })
+  findJobs(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.findJobs(user.businessId);
+  }
+
+  @Post('jobs/:id/retry')
+  @ApiOperation({ summary: 'Retry a failed ingestion job' })
+  retryJob(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.knowledgeService.retryJob(id, user.businessId);
+  }
 }

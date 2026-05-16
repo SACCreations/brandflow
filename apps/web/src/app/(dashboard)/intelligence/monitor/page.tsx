@@ -14,17 +14,36 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-export default function ProcessingMonitorPage() {
-  const activeJobs = [
-    { id: 'JOB-9421', source: 'Q4_Strategy.pdf', stage: 'Classification', progress: 70, startTime: '2m ago', speed: '45 entries/sec' },
-    { id: 'JOB-9422', source: 'processdrive.com/blog', stage: 'Extraction', progress: 45, startTime: '10s ago', speed: '120 pages/sec' },
-  ];
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
+import { useToast } from '@brandflow/ui';
+import { formatDistanceToNow } from 'date-fns';
 
-  const historicalJobs = [
-    { id: 'JOB-9420', source: 'pricing.html', status: 'completed', duration: '45s', entries: 24, timestamp: '1h ago' },
-    { id: 'JOB-9419', source: 'Support_Logs.csv', status: 'failed', duration: '12s', entries: 0, timestamp: '2h ago', error: 'Parser Error: Invalid Encoding' },
-    { id: 'JOB-9418', source: 'Brand_Guidelines.pdf', status: 'completed', duration: '2m 15s', entries: 156, timestamp: '5h ago' },
-  ];
+export default function ProcessingMonitorPage() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: jobs = [], isLoading } = useQuery({
+    queryKey: ['knowledge-jobs'],
+    queryFn: async () => {
+      const res = await apiClient.get('/knowledge/jobs');
+      return res.data as any[];
+    },
+    refetchInterval: 5000,
+  });
+
+  const retryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.post(`/knowledge/jobs/${id}/retry`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledge-jobs'] });
+      toast({ title: 'Job re-queued', description: 'The ingestion process has been restarted.' });
+    },
+  });
+
+  const activeJobs = jobs.filter(j => j.status === 'processing' || j.status === 'pending');
+  const historicalJobs = jobs.filter(j => j.status === 'completed' || j.status === 'failed');
 
   return (
     <div className="space-y-8 animate-in fade-in zoom-in-95 duration-700">
@@ -64,14 +83,14 @@ export default function ProcessingMonitorPage() {
             <div key={job.id} className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono font-bold text-gray-400">{job.id}</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">{job.source}</span>
+                  <span className="text-xs font-mono font-bold text-gray-400">{job.id.slice(0, 8)}</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">{job.source.name || job.source.type}</span>
                   <ArrowRight className="h-3 w-3 text-gray-300" />
                   <span className="inline-flex items-center gap-1 rounded-md bg-brand-50 px-2 py-0.5 text-[10px] font-bold text-brand-700 dark:bg-brand-500/10 dark:text-brand-400 uppercase tracking-tighter">
                     <Layers className="h-3 w-3" /> {job.stage}
                   </span>
                 </div>
-                <span className="text-xs font-medium text-gray-500">{job.speed} • {job.startTime}</span>
+                <span className="text-xs font-medium text-gray-500">{job.status === 'processing' ? 'Processing' : 'Queued'} • {formatDistanceToNow(new Date(job.createdAt), { addSuffix: true })}</span>
               </div>
               <div className="relative h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
                 <div 
@@ -116,9 +135,9 @@ export default function ProcessingMonitorPage() {
             <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {historicalJobs.map((job) => (
                 <tr key={job.id} className="text-sm transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
-                  <td className="px-4 py-4 font-mono text-xs text-gray-400">{job.id}</td>
+                  <td className="px-4 py-4 font-mono text-xs text-gray-400">{job.id.slice(0, 8)}</td>
                   <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
-                    {job.source}
+                    {job.source.name || job.source.type}
                     {job.error && <p className="mt-1 text-[10px] text-red-500 font-normal">{job.error}</p>}
                   </td>
                   <td className="px-4 py-4">
@@ -129,10 +148,23 @@ export default function ProcessingMonitorPage() {
                       {job.status}
                     </span>
                   </td>
-                  <td className="px-4 py-4 text-gray-500">{job.duration}</td>
-                  <td className="px-4 py-4 text-gray-900 dark:text-white font-medium">{job.entries}</td>
-                  <td className="px-4 py-4 text-gray-400 text-xs flex items-center gap-1.5">
-                    <Clock className="h-3 w-3" /> {job.timestamp}
+                  <td className="px-4 py-4 text-gray-500">
+                    {job.completedAt ? formatDistanceToNow(new Date(job.createdAt), { addSuffix: false }) : '—'}
+                  </td>
+                  <td className="px-4 py-4 text-gray-900 dark:text-white font-medium">—</td>
+                  <td className="px-4 py-4 text-gray-400 text-xs flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3 w-3" /> {formatDistanceToNow(new Date(job.createdAt), { addSuffix: true })}
+                    </div>
+                    {job.status === 'failed' && (
+                      <button 
+                        onClick={() => retryMutation.mutate(job.id)}
+                        disabled={retryMutation.isPending}
+                        className="text-brand-600 hover:text-brand-700 font-bold uppercase text-[10px] tracking-widest"
+                      >
+                        Retry
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

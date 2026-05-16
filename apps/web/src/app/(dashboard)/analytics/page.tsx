@@ -34,22 +34,49 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 
 export default function AnalyticsDashboard() {
-  const data = [
-    { name: 'Mon', engagement: 400, reach: 2400 },
-    { name: 'Tue', engagement: 300, reach: 1398 },
-    { name: 'Wed', engagement: 200, reach: 9800 },
-    { name: 'Thu', engagement: 278, reach: 3908 },
-    { name: 'Fri', engagement: 189, reach: 4800 },
-    { name: 'Sat', engagement: 239, reach: 3800 },
-    { name: 'Sun', engagement: 349, reach: 4300 },
+  const { data: performanceData, isLoading: isPerfLoading } = useQuery({
+    queryKey: ['analytics', 'performance'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ data: any[] }>('/analytics/performance');
+      return res.data.data;
+    },
+  });
+
+  const { data: impactData, isLoading: isImpactLoading } = useQuery({
+    queryKey: ['analytics', 'impact'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ data: any[] }>('/analytics/intelligence-impact');
+      return res.data.data;
+    },
+  });
+
+  const { data: recommendations, isLoading: isRecLoading } = useQuery({
+    queryKey: ['analytics', 'recommendations'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ data: any[] }>('/analytics/recommendations');
+      return res.data.data;
+    },
+  });
+
+  const chartData = performanceData?.map(m => ({
+    name: new Date(m.collectedAt).toLocaleDateString('en-US', { weekday: 'short' }),
+    engagement: m.engagement,
+    reach: m.reach
+  })).reverse() || [
+    { name: 'Mon', engagement: 0, reach: 0 },
+    { name: 'Tue', engagement: 0, reach: 0 },
+    { name: 'Wed', engagement: 0, reach: 0 },
+    { name: 'Thu', engagement: 0, reach: 0 },
+    { name: 'Fri', engagement: 0, reach: 0 },
+    { name: 'Sat', engagement: 0, reach: 0 },
+    { name: 'Sun', engagement: 0, reach: 0 },
   ];
 
-  const impactData = [
-    { name: 'Sales Deck V4', engagement: 450, color: '#6366f1' },
-    { name: 'Website Crawl', engagement: 300, color: '#10b981' },
-    { name: 'Whitepaper 2024', engagement: 250, color: '#f59e0b' },
-    { name: 'Case Study: Acme', engagement: 150, color: '#ef4444' },
-  ];
+  const impactSummary = impactData?.slice(0, 4).map((item, i) => ({
+    name: item.name,
+    engagement: Math.round(item.engagement),
+    color: ['#6366f1', '#10b981', '#f59e0b', '#ef4444'][i % 4]
+  })) || [];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
@@ -89,7 +116,7 @@ export default function AnalyticsDashboard() {
           </div>
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data}>
+              <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorEng" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
@@ -116,20 +143,28 @@ export default function AnalyticsDashboard() {
             Impact Attribution
           </h3>
           <div className="flex-1 space-y-6">
-            {impactData.map((item, i) => (
-              <div key={i} className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-gray-700 dark:text-gray-300">{item.name}</span>
-                  <span className="text-gray-400">{item.engagement} pts</span>
+            {isImpactLoading ? (
+               Array.from({ length: 4 }).map((_, i) => (
+                 <div key={i} className="h-10 w-full animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+               ))
+            ) : impactSummary.length > 0 ? (
+              impactSummary.map((item, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-gray-700 dark:text-gray-300">{item.name}</span>
+                    <span className="text-gray-400">{item.engagement} pts</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                    <div 
+                      className="h-full transition-all duration-1000" 
+                      style={{ width: `${Math.min(100, (item.engagement / 500) * 100)}%`, backgroundColor: item.color }}
+                    />
+                  </div>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-                  <div 
-                    className="h-full transition-all duration-1000" 
-                    style={{ width: `${(item.engagement / 500) * 100}%`, backgroundColor: item.color }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-xs text-gray-500">No impact data attributed yet.</p>
+            )}
           </div>
           <div className="mt-8 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
             <p className="text-[11px] text-gray-500 leading-relaxed">
@@ -159,10 +194,23 @@ export default function AnalyticsDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
-                  <KnowledgeRow name="Sales Deck V4" usage={42} sentiment="Positive" impact={92} roi="$4,200" color="bg-brand-500" />
-                  <KnowledgeRow name="Product Roadmap 2024" usage={28} sentiment="Neutral" impact={76} roi="$2,850" color="bg-emerald-500" />
-                  <KnowledgeRow name="Website Crawl (main)" usage={115} sentiment="Positive" impact={64} roi="$1,920" color="bg-blue-500" />
-                  <KnowledgeRow name="Technical Whitepaper" usage={12} sentiment="Complex" impact={42} roi="$980" color="bg-amber-500" />
+                  {isImpactLoading ? (
+                    <tr><td colSpan={5} className="p-8 text-center animate-pulse">Loading matrix...</td></tr>
+                  ) : impactData?.length ? (
+                    impactData.map((item, i) => (
+                      <KnowledgeRow 
+                        key={i} 
+                        name={item.name} 
+                        usage={item.count} 
+                        sentiment={item.type} 
+                        impact={Math.round(Math.min(100, item.engagement / 10))} 
+                        roi={`$${((item.roiCents || 0) / 100).toFixed(0)}`} 
+                        color={['bg-brand-500', 'bg-emerald-500', 'bg-blue-500', 'bg-amber-500'][i % 4]} 
+                      />
+                    ))
+                  ) : (
+                    <tr><td colSpan={5} className="p-8 text-center text-gray-500">No knowledge impact recorded yet.</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -177,18 +225,21 @@ export default function AnalyticsDashboard() {
               Strategic Learning Loop
             </h3>
             <div className="grid gap-6 md:grid-cols-2">
-              <RecommendationCard 
-                topic="Product Scalability"
-                recommendation="Double down on technical content. Your audience in 'EMEA' is clicking 2x more on posts with 'Infrastructure' keywords."
-                confidence={92}
-                impact="High"
-              />
-              <RecommendationCard 
-                topic="Early Adopter Pricing"
-                recommendation="The 'Founder' segment is showing high conversion but low awareness. Switch to 'Social Proof' brief templates for next week."
-                confidence={85}
-                impact="Medium"
-              />
+              {isRecLoading ? (
+                [1, 2].map(i => <div key={i} className="h-40 animate-pulse rounded-2xl bg-white dark:bg-gray-800" />)
+              ) : recommendations?.length ? (
+                recommendations.map((rec, i) => (
+                  <RecommendationCard 
+                    key={i}
+                    topic={rec.topic}
+                    recommendation={rec.recommendation}
+                    confidence={Math.round(rec.confidence * 100)}
+                    impact={rec.impact}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No strategic recommendations available yet.</p>
+              )}
             </div>
           </div>
         </div>

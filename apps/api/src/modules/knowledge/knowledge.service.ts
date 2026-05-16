@@ -172,4 +172,43 @@ export class KnowledgeService {
       data: { isStale: true, staleAt: new Date() },
     });
   }
+
+  async findJobs(businessId: string) {
+    return this.prisma.client.knowledgeJob.findMany({
+      where: { businessId },
+      include: { source: { select: { name: true, type: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+  }
+
+  async retryJob(jobId: string, businessId: string) {
+    const job = await this.prisma.client.knowledgeJob.findFirst({
+      where: { id: jobId, businessId },
+      include: { source: true },
+    });
+
+    if (!job) throw new NotFoundException('Job not found');
+
+    // Update job status to pending
+    await this.prisma.client.knowledgeJob.update({
+      where: { id: jobId },
+      data: { status: 'pending', startedAt: null, completedAt: null, progress: 0, error: null },
+    });
+
+    // Re-queue ingestion job
+    await this.ingestionQueue.add(
+      'ingest',
+      { 
+        sourceId: job.sourceId, 
+        businessId, 
+        type: job.source.type, 
+        sourceUrl: job.source.sourceUrl, 
+        metadata: job.source.metadata 
+      },
+      { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
+    );
+
+    return { status: 're-queued' };
+  }
 }
