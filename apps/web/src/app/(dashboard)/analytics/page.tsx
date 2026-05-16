@@ -37,7 +37,7 @@ export default function AnalyticsDashboard() {
   const { data: performanceData, isLoading: isPerfLoading } = useQuery({
     queryKey: ['analytics', 'performance'],
     queryFn: async () => {
-      const res = await apiClient.get<{ data: any[] }>('/analytics/performance');
+      const res = await apiClient.get<any[]>('/analytics/performance');
       return res.data;
     },
   });
@@ -45,7 +45,7 @@ export default function AnalyticsDashboard() {
   const { data: impactData, isLoading: isImpactLoading } = useQuery({
     queryKey: ['analytics', 'impact'],
     queryFn: async () => {
-      const res = await apiClient.get<{ data: any[] }>('/analytics/intelligence-impact');
+      const res = await apiClient.get<any[]>('/analytics/intelligence-impact');
       return res.data;
     },
   });
@@ -53,7 +53,7 @@ export default function AnalyticsDashboard() {
   const { data: recommendations, isLoading: isRecLoading } = useQuery({
     queryKey: ['analytics', 'recommendations'],
     queryFn: async () => {
-      const res = await apiClient.get<{ data: any[] }>('/analytics/recommendations');
+      const res = await apiClient.get<any[]>('/analytics/recommendations');
       return res.data;
     },
   });

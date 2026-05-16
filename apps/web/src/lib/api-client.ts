@@ -75,7 +75,7 @@ apiClient.interceptors.response.use(
         return apiClient(original);
       } catch (refreshError) {
         drainQueue(null, refreshError);
-        useAuthStore.getState().logout();
+        useAuthStore.getState().logout({ redirect: false });
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

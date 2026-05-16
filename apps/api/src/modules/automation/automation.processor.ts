@@ -79,7 +79,7 @@ export class AutomationProcessor extends WorkerHost {
           }
         });
 
-      case 'run_quality_check':
+      case 'run_quality_check': {
         this.logger.log(`Executing quality check for content ${context.contentId}`);
         const content = await prisma.content.findUnique({ where: { id: context.contentId } });
         if (!content) throw new Error('Content not found for quality check');
@@ -90,8 +90,9 @@ export class AutomationProcessor extends WorkerHost {
           businessId,
           content.brandId || step.params.brandId,
         );
+      }
 
-      case 'publish_to_social':
+      case 'publish_to_social': {
         this.logger.log(`Executing social publish for business ${businessId}`);
         
         // Enterprise Safety: Ensure content is approved before publishing
@@ -112,8 +113,9 @@ export class AutomationProcessor extends WorkerHost {
           automationRunId: runId,
           correlationId: `auto-${runId}`,
         });
+      }
 
-      case 'webhook':
+      case 'webhook': {
         this.logger.log(`Executing webhook: ${step.params.url}`);
         const response = await fetch(step.params.url, {
           method: 'POST',
@@ -132,6 +134,7 @@ export class AutomationProcessor extends WorkerHost {
           throw new Error(`Webhook failed: ${response.status} ${response.statusText}`);
         }
         return { status: response.status, statusText: response.statusText };
+      }
 
       default:
         throw new Error(`Unknown step type: ${step.type}`);

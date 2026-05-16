@@ -8,7 +8,7 @@ import {
   CreditCard, 
   ArrowUpRight, 
   BarChart3,
-  Infinity,
+  Infinity as InfinityIcon,
   Loader2
 } from 'lucide-react';
 

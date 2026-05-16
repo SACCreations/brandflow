@@ -24,7 +24,7 @@ export class BudgetService {
 
     // Try to get from Redis first
     const cacheKey = `budget:${businessId}:used`;
-    let usedTokensString = await this.redis.get(cacheKey);
+    const usedTokensString = await this.redis.get(cacheKey);
     let usedTokens: number;
 
     if (usedTokensString === null) {

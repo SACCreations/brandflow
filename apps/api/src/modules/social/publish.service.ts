@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { prisma } from '@brandflow/db';
 import { LLMGateway } from '@brandflow/ai';
 import { SocialService } from './social.service';
@@ -169,7 +170,7 @@ export class PublishService {
         entityType: 'content',
         entityId: contentId,
         after: { platform: 'linkedin', externalPostId },
-        hash: `pub-${require('crypto').randomUUID()}`, // Simple hash for now
+        hash: `pub-${crypto.randomUUID()}`, // Simple hash for now
       }
     });
 

@@ -31,7 +31,10 @@ function hasSessionCookie() {
 
   return document.cookie
     .split(';')
-    .some((cookie) => cookie.trim().startsWith('bf-session='));
+    .some((cookie) => {
+      const [name, value] = cookie.trim().split('=');
+      return name === 'bf-session' && value === '1';
+    });
 }
 
 function SessionBootstrap() {
@@ -68,8 +71,15 @@ function SessionBootstrap() {
     let cancelled = false;
 
     const bootstrap = async () => {
+      if (typeof window !== 'undefined' && sessionStorage.getItem('bf-bootstrap-attempted')) {
+        return;
+      }
+
       setSessionRefreshing(true);
       setAttempted(true);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('bf-bootstrap-attempted', 'true');
+      }
 
       try {
         let activeToken = accessToken;
@@ -105,8 +115,12 @@ function SessionBootstrap() {
             slug: profile.business.slug,
           },
         );
-      } catch (err) {
-        console.error('[AUTH BOOTSTRAP] Refresh failed:', err);
+      } catch (err: any) {
+        // Silently handle 401s during bootstrap as they just mean the session is dead/expired
+        if (err?.response?.status !== 401) {
+          console.error('[AUTH BOOTSTRAP] Session restoration failed:', err);
+        }
+        
         if (!cancelled) {
           clearAuth();
         }
