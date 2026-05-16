@@ -31,6 +31,7 @@ import { BillingModule } from './modules/billing/billing.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { DatabaseModule } from './common/database/database.module';
 import { RedisModule } from './common/redis/redis.module';
+import { ObservabilityModule } from './common/observability/observability.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TenantInterceptor } from './common/tenant/tenant.interceptor';
 
@@ -101,6 +102,7 @@ import { TenantInterceptor } from './common/tenant/tenant.interceptor';
     NotificationsModule,
     DatabaseModule,
     RedisModule,
+    ObservabilityModule,
   ],
   providers: [
     {

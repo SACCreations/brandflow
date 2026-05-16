@@ -52,4 +52,10 @@ export class SchedulerController {
   cancel(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: JwtPayload) {
     return this.schedulerService.cancel(id, user.businessId);
   }
+
+  @Get('jobs')
+  @ApiOperation({ summary: 'List publishing jobs status' })
+  findJobs(@CurrentUser() user: JwtPayload) {
+    return this.schedulerService.findPublishJobs(user.businessId);
+  }
 }

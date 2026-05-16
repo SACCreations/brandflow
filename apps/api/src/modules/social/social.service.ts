@@ -6,6 +6,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { prisma } from '@brandflow/db';
+import { RedisService } from '../../common/redis/redis.service';
 import * as crypto from 'node:crypto';
 import type { Response } from 'express';
 import type { ConnectSocialAccountDto } from '@brandflow/shared';
@@ -50,6 +51,7 @@ export class SocialService {
   constructor(
     private readonly config: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly redis: RedisService,
   ) {
     const key = config.get<string>('app.encryptionKey');
     if (!key || key.length < 32) {
@@ -418,6 +420,65 @@ export class SocialService {
     }
 
     return payload;
+  }
+
+  async refreshLinkedInToken(accountId: string, businessId: string): Promise<void> {
+    // ─── Distributed Lock: Prevent concurrent refreshes for the same account ───
+    const lockKey = `lock:refresh:token:${accountId}`;
+    const isLocked = await this.redis.get(lockKey);
+    if (isLocked) {
+      this.logger.warn(`Token refresh already in progress for account ${accountId}. Waiting...`);
+      // Wait for the other process to finish (simple poll for up to 5 seconds)
+      for (let i = 0; i < 10; i++) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        if (!(await this.redis.get(lockKey))) break;
+      }
+      return;
+    }
+
+    await this.redis.set(lockKey, 'locked', 30); // 30s lock
+
+    try {
+      const account = await prisma.socialAccount.findFirst({ where: { id: accountId, businessId } });
+      if (!account || !account.refreshToken) throw new BadRequestException('Account not found or no refresh token available.');
+
+      const { refreshToken } = await this.getDecryptedTokens(accountId, businessId);
+      if (!refreshToken) throw new BadRequestException('Refresh token is null.');
+
+      const { clientId, clientSecret } = this.getLinkedInConfig();
+      const body = new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+        client_id: clientId,
+        client_secret: clientSecret,
+      });
+
+      const response = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+        signal: AbortSignal.timeout(15_000),
+      });
+
+      const payload = await response.json() as LinkedInTokenResponse;
+
+      if (!response.ok) {
+        throw new BadRequestException(payload.error_description || payload.error || 'LinkedIn token refresh failed.');
+      }
+
+      await this.upsert(businessId, 'linkedin', {
+        name: account.name,
+        externalId: account.externalId,
+        accountType: account.accountType,
+        accessToken: payload.access_token!,
+        refreshToken: payload.refresh_token || refreshToken, // Use existing if not rotated
+        tokenExpiresAt: payload.expires_in
+          ? new Date(Date.now() + payload.expires_in * 1000)
+          : undefined,
+      });
+    } finally {
+      await this.redis.del(lockKey);
+    }
   }
 
   async handleMetaCallback({ code, state, error, res }: { code?: string; state?: string; error?: string; res: Response }) {

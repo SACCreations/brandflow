@@ -71,10 +71,6 @@ export class PublishService {
       throw new NotFoundException('Social account not found');
     }
 
-    if (account.tokenExpiresAt && account.tokenExpiresAt.getTime() <= Date.now()) {
-      throw new BadRequestException('LinkedIn token expired. Reconnect the account before publishing.');
-    }
-
     const finalBody = tailoredBody || content.body;
 
     switch (account.platform) {
