@@ -531,4 +531,45 @@ export class SocialService {
     if (!clientId || !clientSecret) throw new BadRequestException('Meta OAuth is not configured.');
     return { clientId, clientSecret, callbackUrl };
   }
+
+  /**
+   * Fetches recent posts from LinkedIn to use as knowledge sources.
+   */
+  async fetchLinkedInPosts(accountId: string, businessId: string, limit = 10) {
+    const { accessToken } = await this.getDecryptedTokens(accountId, businessId);
+    const account = await prisma.socialAccount.findUnique({ where: { id: accountId } });
+    if (!account) throw new NotFoundException('Account not found');
+
+    // Note: The specific URN type (person vs organization) depends on accountType
+    const authorUrn = account.accountType === 'organization' 
+      ? `urn:li:organization:${account.externalId}` 
+      : `urn:li:person:${account.externalId}`;
+
+    const params = new URLSearchParams({
+      author: authorUrn,
+      count: limit.toString(),
+      q: 'author',
+    });
+
+    const response = await fetch(`https://api.linkedin.com/v2/ugcPosts?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'X-Restli-Protocol-Version': '2.0.0',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json() as any;
+      this.logger.error(`Failed to fetch LinkedIn posts: ${JSON.stringify(error)}`);
+      return []; // Graceful failure for ingestion
+    }
+
+    const payload = await response.json() as any;
+    return (payload.elements || []).map((post: any) => ({
+      externalId: post.id,
+      body: post.specificContent?.['com.linkedin.ugc.ShareContent']?.shareCommentary?.text || '',
+      createdAt: new Date(post.firstPublishedAt),
+    }));
+  }
 }

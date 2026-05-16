@@ -120,21 +120,42 @@ export class KnowledgeService {
       },
     });
 
-    // Queue ingestion job
-    await this.ingestionQueue.add(
-      'ingest',
-      { 
-        sourceId: source.id, 
-        businessId, 
-        type: dto.type, 
-        sourceUrl: dto.sourceUrl, 
-        config: dto.config,
-        text: dto.text 
-      },
-      { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
-    );
+    await this.triggerIngestion(source.id, businessId, dto.text);
 
     return source;
+  }
+
+  async triggerIngestion(sourceId: string, businessId: string, text?: string) {
+    const source = await this.prisma.client.knowledgeSource.findFirst({
+      where: { id: sourceId, businessId },
+    });
+    
+    if (!source) throw new NotFoundException('Source not found');
+
+    // Mark existing entries as stale if re-ingesting
+    await this.prisma.client.knowledgeEntry.updateMany({
+      where: { sourceId, isStale: false },
+      data: { isStale: true, staleAt: new Date() }
+    });
+
+    const job = await this.prisma.client.knowledgeJob.create({
+      data: {
+        sourceId,
+        businessId,
+        status: 'pending',
+      },
+    });
+
+    await this.ingestionQueue.add('process-knowledge', {
+      sourceId,
+      businessId,
+      jobId: job.id,
+      type: source.type,
+      sourceUrl: source.sourceUrl ?? undefined,
+      text,
+    });
+
+    return job;
   }
 
   async deleteSource(id: string, businessId: string) {
@@ -178,6 +199,23 @@ export class KnowledgeService {
       where: { businessId },
       include: { source: { select: { name: true, type: true } } },
       orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+  }
+
+  async getReviewQueue(businessId: string) {
+    return this.prisma.client.knowledgeEntry.findMany({
+      where: {
+        businessId,
+        reviews: {
+          none: { status: { in: ['approved', 'rejected'] } }
+        }
+      },
+      include: {
+        source: { select: { name: true, type: true, sourceUrl: true } },
+        reviews: { orderBy: { createdAt: 'desc' }, take: 1 }
+      },
+      orderBy: { confidence: 'asc' },
       take: 50,
     });
   }

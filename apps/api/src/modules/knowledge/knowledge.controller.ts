@@ -103,6 +103,12 @@ export class KnowledgeController {
     return this.knowledgeService.findJobs(user.businessId);
   }
 
+  @Get('review-queue')
+  @ApiOperation({ summary: 'Get the knowledge review queue' })
+  getReviewQueue(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.getReviewQueue(user.businessId);
+  }
+
   @Post('jobs/:id/retry')
   @ApiOperation({ summary: 'Retry a failed ingestion job' })
   retryJob(

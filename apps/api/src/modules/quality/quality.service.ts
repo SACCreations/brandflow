@@ -1,17 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
-import { QualityControl, LLMGateway } from '@brandflow/ai';
+import { QualityControl, LLMGateway, VectorService } from '@brandflow/ai';
 import type { QualityCheckResult, BrandContext } from '@brandflow/shared';
 
 @Injectable()
 export class QualityService {
   private readonly logger = new Logger(QualityService.name);
   private readonly qc: QualityControl;
+  private readonly vector: VectorService;
 
   constructor() {
-    // In production, the gateway should be injected or configured per business
     const gateway = new LLMGateway({ defaultProvider: 'openai' });
     this.qc = new QualityControl(gateway);
+    this.vector = new VectorService();
   }
 
   /**
@@ -40,15 +41,15 @@ export class QualityService {
 
     if (!brand) throw new Error('Brand not found for quality check');
 
-    // 2. Fetch Relevant Knowledge Facts (Vector Search simulation)
-    const entries = await prisma.knowledgeEntry.findMany({
-      where: { businessId, source: { brandId } },
-      take: 15,
-      orderBy: { confidence: 'desc' },
-      select: { id: true, content: true },
-    });
+    // 2. Fetch Relevant Knowledge Facts via Semantic Search
+    const relevantEntries = await this.vector.findRelevantContext(
+      prisma,
+      businessId,
+      body,
+      10 // Take top 10 relevant facts
+    );
 
-    const facts = entries.map((e) => ({ id: e.id, content: e.content }));
+    const facts = relevantEntries.map((e) => ({ id: e.id, content: e.content }));
 
     // 3. Run Validation Pipeline
     const brandContext: BrandContext = {
@@ -105,16 +106,33 @@ export class QualityService {
         });
       }
 
-      // 5. Human Review Routing Logic
-      if (!result.passed || result.overallGrade === 'C' || result.overallGrade === 'D') {
+      // 5. Human Review Routing Logic (Enterprise Grade)
+      const needsReview = 
+        !result.passed || 
+        result.overallGrade === 'C' || 
+        result.overallGrade === 'D' || 
+        (result.factualScore ?? 0) < 0.8 || 
+        (result.complianceScore ?? 0) < 0.8 ||
+        (result.safetyScore ?? 0) < 0.95;
+
+      if (needsReview) {
+        const priority = 
+          result.overallGrade === 'F' || (result.safetyScore ?? 0) < 0.9 ? 'critical' : 
+          result.overallGrade === 'D' || (result.factualScore ?? 0) < 0.6 ? 'high' : 'medium';
+
+        let reason = `Automated QC Grade: ${result.overallGrade}.`;
+        if ((result.factualScore ?? 0) < 0.8) reason += ' Potential hallucination detected.';
+        if ((result.complianceScore ?? 0) < 0.8) reason += ' Brand compliance risk.';
+        if ((result.safetyScore ?? 0) < 0.95) reason += ' Content safety warning.';
+
         await tx.reviewTask.create({
           data: {
             businessId,
             contentId,
             qualityCheckId: qcRecord.id,
             status: 'pending',
-            priority: result.overallGrade === 'F' ? 'critical' : 'medium',
-            reason: `Automated QC Grade: ${result.overallGrade}. Violations found: ${result.violations.length}`,
+            priority,
+            reason,
           },
         });
       }

@@ -180,4 +180,66 @@ export class AnalyticsService {
       dailyTrend,
     };
   }
+
+  async getReliabilityMetrics(businessId: string) {
+    const [totalJobs, failedJobs, successJobs] = await Promise.all([
+      prisma.publishJob.count({ where: { businessId } }),
+      prisma.publishJob.count({ where: { businessId, status: 'dead_letter' } }),
+      prisma.publishJob.count({ where: { businessId, status: 'published' } }),
+    ]);
+
+    const successRate = totalJobs > 0 ? (successJobs / totalJobs) * 100 : 100;
+    
+    const accountHealth = await prisma.socialAccount.findMany({
+      where: { businessId },
+      select: { id: true, platform: true, name: true, tokenExpiresAt: true }
+    });
+
+    const healthyAccounts = accountHealth.filter(a => !a.tokenExpiresAt || a.tokenExpiresAt > new Date());
+    
+    return {
+      successRate,
+      totalJobs,
+      failedJobs,
+      accountHealth: {
+        total: accountHealth.length,
+        healthy: healthyAccounts.length,
+        percentage: accountHealth.length > 0 ? (healthyAccounts.length / accountHealth.length) * 100 : 100
+      }
+    };
+  }
+
+  async getSlaCompliance(businessId: string) {
+    // SLA: Posts published within 5 minutes of scheduled time
+    const publishedJobs = await prisma.publishJob.findMany({
+      where: { 
+        businessId, 
+        status: 'published',
+        publishedAt: { not: null },
+        scheduleId: { not: null }
+      },
+      include: { schedule: true },
+      take: 100,
+      orderBy: { publishedAt: 'desc' }
+    });
+
+    const slaResults = publishedJobs.map(job => {
+      const scheduled = job.schedule!.scheduledAt.getTime();
+      const actual = job.publishedAt!.getTime();
+      const delayMinutes = (actual - scheduled) / (1000 * 60);
+      return {
+        jobId: job.id,
+        delayMinutes,
+        compliant: delayMinutes <= 5 // 5 minute SLA window
+      };
+    });
+
+    const compliantCount = slaResults.filter(r => r.compliant).length;
+    
+    return {
+      slaComplianceRate: slaResults.length > 0 ? (compliantCount / slaResults.length) * 100 : 100,
+      averageDelayMinutes: slaResults.length > 0 ? slaResults.reduce((acc, r) => acc + r.delayMinutes, 0) / slaResults.length : 0,
+      recentJobs: slaResults
+    };
+  }
 }

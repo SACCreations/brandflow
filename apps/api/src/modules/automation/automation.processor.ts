@@ -4,13 +4,19 @@ import { Logger } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
 import { QUEUES } from '@brandflow/shared';
 import { PublishService } from '../social/publish.service';
+import { ResilientPublishService } from '../social/resilient-publish.service';
+import { QualityService } from '../quality/quality.service';
 import fetch from 'node-fetch';
 
 @Processor(QUEUES.AUTOMATION_EXECUTION)
 export class AutomationProcessor extends WorkerHost {
   private readonly logger = new Logger(AutomationProcessor.name);
 
-  constructor(private readonly publishService: PublishService) {
+  constructor(
+    private readonly publishService: PublishService,
+    private readonly resilientPublishService: ResilientPublishService,
+    private readonly qualityService: QualityService,
+  ) {
     super();
   }
 
@@ -27,7 +33,7 @@ export class AutomationProcessor extends WorkerHost {
           continue;
         }
 
-        const result = await this.executeStep(step, context, businessId);
+        const result = await this.executeStep(step, context, businessId, runId);
         stepResults.push({ step: step.type, result });
       }
 
@@ -53,7 +59,7 @@ export class AutomationProcessor extends WorkerHost {
     }
   }
 
-  private async executeStep(step: any, context: any, businessId: string) {
+  private async executeStep(step: any, context: any, businessId: string, runId: string) {
     switch (step.type) {
       case 'update_status':
         return prisma.content.update({
@@ -73,13 +79,39 @@ export class AutomationProcessor extends WorkerHost {
           }
         });
 
+      case 'run_quality_check':
+        this.logger.log(`Executing quality check for content ${context.contentId}`);
+        const content = await prisma.content.findUnique({ where: { id: context.contentId } });
+        if (!content) throw new Error('Content not found for quality check');
+        
+        return this.qualityService.runCheck(
+          context.contentId,
+          content.body,
+          businessId,
+          content.brandId || step.params.brandId,
+        );
+
       case 'publish_to_social':
         this.logger.log(`Executing social publish for business ${businessId}`);
-        return this.publishService.publishContent(
-          context.contentId,
-          step.params.socialAccountId,
-          businessId
-        );
+        
+        // Enterprise Safety: Ensure content is approved before publishing
+        const contentToPublish = await prisma.content.findUnique({ 
+          where: { id: context.contentId },
+          select: { status: true }
+        });
+
+        if (contentToPublish?.status !== 'approved' && contentToPublish?.status !== 'published') {
+          this.logger.warn(`Publish blocked: Content ${context.contentId} is in ${contentToPublish?.status} status (Needs approval/QC)`);
+          throw new Error(`Content must be approved before publication. Current status: ${contentToPublish?.status}`);
+        }
+
+        return this.resilientPublishService.execute({
+          businessId,
+          contentId: context.contentId,
+          socialAccountId: step.params.socialAccountId,
+          automationRunId: runId,
+          correlationId: `auto-${runId}`,
+        });
 
       case 'webhook':
         this.logger.log(`Executing webhook: ${step.params.url}`);

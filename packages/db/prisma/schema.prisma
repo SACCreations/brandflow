@@ -1,11 +1,13 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider          = "postgresql"
   url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("DATABASE_SHADOW_URL")
+  extensions        = [vector]
 }
 
 model Business {
@@ -284,7 +286,8 @@ model KnowledgeEntry {
   locale            String?                 @default("en-US")
   governance        Json?
   version           Int                     @default(1)
-  embedding         Json?
+  contentHash       String?
+  embedding         Unsupported("vector(1536)")?
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
   citations         KnowledgeCitation[]
@@ -432,6 +435,9 @@ model ReviewTask {
   assignedToId   String?
   reason         String?
   deadline       DateTime?
+  resolvedAt     DateTime?
+  resolvedById   String?
+  resolutionNotes String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   business       Business      @relation(fields: [businessId], references: [id])

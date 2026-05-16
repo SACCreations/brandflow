@@ -9,6 +9,9 @@ import { PrismaService } from '../../common/database/prisma.service';
 const pdf = require('pdf-parse');
 const mammoth = require('mammoth');
 import * as Sentry from '@sentry/node';
+import * as crypto from 'crypto';
+import { WebConnector } from './connectors/web.connector';
+import { KnowledgeAtom, KnowledgeEntryClassification } from '@brandflow/shared';
 
 interface IngestionJobData {
   sourceId: string;
@@ -32,12 +35,14 @@ export class KnowledgeProcessor extends WorkerHost {
   private readonly aiGateway: LLMGateway;
   private readonly vectorService: VectorService;
   private readonly splitter: TextSplitter;
+  private readonly webConnector: WebConnector;
 
   constructor(private readonly prisma: PrismaService) {
     super();
     this.aiGateway = new LLMGateway({ defaultProvider: 'openai' });
     this.vectorService = new VectorService();
     this.splitter = new TextSplitter(1000, 200);
+    this.webConnector = new WebConnector();
   }
 
   async process(job: Job<IngestionJobData>): Promise<void> {
@@ -129,9 +134,7 @@ export class KnowledgeProcessor extends WorkerHost {
   private async runIntake(type: string, sourceUrl?: string, text?: string): Promise<any> {
     this.logger.debug(`Stage: Intake (${type})`);
     if (type === 'url' && sourceUrl) {
-      const res = await fetch(sourceUrl);
-      if (!res.ok) throw new Error(`Failed to fetch URL: ${res.statusText}`);
-      return res.text();
+      return await this.webConnector.crawl(sourceUrl);
     }
     return text ?? '';
   }
@@ -158,18 +161,28 @@ export class KnowledgeProcessor extends WorkerHost {
     return text.replace(/\s+/g, ' ').trim();
   }
 
-  private async runClassification(text: string, businessId: string): Promise<any[]> {
+  private async runClassification(text: string, businessId: string): Promise<KnowledgeAtom[]> {
     this.logger.debug(`Stage: Classification`);
     
-    // Use improved semantic chunking
+    // Use improved semantic chunking (Structural + Recursive)
     const chunks = this.splitter.split(text);
 
-    // AI Classification
+    // Identity Atom Extraction
     const prompt = `
-      You are an expert knowledge engineer. Analyze the following text chunks and classify each as one of:
-      [product, feature, faq, claim, pricing, testimonial, audience, objective].
+      You are an expert Brand Intelligence Engineer. Your task is to extract "Identity Atoms" from the provided text.
+      An Identity Atom is an atomic, independent fact about a brand, product, audience, or guideline.
       
-      Return a JSON array of objects: { "type": "...", "content": "...", "confidence": 0.95 }
+      Classify each atom as one of:
+      [product, feature, faq, claim, pricing, testimonial, audience, objective, guideline, legal, fact].
+      
+      Guidelines:
+      - Each atom should be self-contained (carry enough context to be understood on its own).
+      - If a chunk contains multiple facts, split them into multiple atoms.
+      - Assign a confidence score (0.0 - 1.0) based on how explicit the fact is.
+      - Do NOT hallucinate. If no clear facts are present, return an empty list.
+      
+      Return ONLY a JSON array of objects: 
+      { "type": "KnowledgeEntryClassification", "content": "string", "confidence": number }
       
       Text to analyze:
       ${chunks.join('\n---\n')}
@@ -177,44 +190,69 @@ export class KnowledgeProcessor extends WorkerHost {
 
     try {
       const { response } = await this.aiGateway.complete(
-        "You classify knowledge into atomic facts for a Brand Operating System.",
+        "You are a Brand Knowledge Extractor. You only output valid JSON arrays.",
         prompt,
-        { model: 'gpt-4o-mini' }
+        { model: 'gpt-4o-mini', jsonMode: true }
       );
 
       const atoms = JSON.parse(response.content);
-      return Array.isArray(atoms) ? atoms : chunks.map((c: string) => ({ type: 'fact', content: c, confidence: 0.8 }));
+      return Array.isArray(atoms) ? atoms : chunks.map((c: string) => ({ 
+        type: 'fact' as KnowledgeEntryClassification, 
+        content: c, 
+        confidence: 0.8 
+      }));
     } catch (err) {
-      this.logger.warn(`AI Classification failed, falling back to basic parsing: ${err}`);
-      return chunks.map((c: string) => ({ type: 'fact', content: c, confidence: 0.5 }));
+      this.logger.warn(`AI Classification failed, falling back to basic chunks: ${err}`);
+      return chunks.map((c: string) => ({ 
+        type: 'fact' as KnowledgeEntryClassification, 
+        content: c, 
+        confidence: 0.5 
+      }));
     }
   }
 
-  private async runIndexing(sourceId: string, businessId: string, atoms: any[]) {
+  private async runIndexing(sourceId: string, businessId: string, atoms: KnowledgeAtom[]) {
     this.logger.debug(`Stage: Indexing ${atoms.length} atoms`);
 
-    // 1. Generate all embeddings in parallel (or chunks if too many)
-    const indexedAtoms = await Promise.all(
-      atoms.map(async (atom) => {
-        const embedding = await this.vectorService.generateEmbedding(atom.content);
-        return {
-          businessId,
-          sourceId,
-          classification: atom.type,
-          content: atom.content,
-          confidence: atom.confidence ?? 0.8,
-          version: 1,
-          embedding: this.vectorService.formatForStorage(embedding),
-        };
-      })
-    );
+    const indexedAtoms: any[] = [];
 
-    // 2. Batch insert into database
-    // Note: createMany is supported on Postgres and is much faster
-    await this.prisma.client.knowledgeEntry.createMany({
-      data: indexedAtoms,
-    });
+    for (const atom of atoms) {
+      const contentHash = crypto.createHash('md5').update(atom.content).digest('hex');
 
-    this.logger.debug(`Successfully batch indexed ${atoms.length} atoms`);
+      // Check for existing atom with same hash for this business
+      const existing = await this.prisma.client.knowledgeEntry.findFirst({
+        where: { businessId, contentHash },
+      });
+
+      if (existing) {
+        this.logger.debug(`Skipping duplicate atom: ${contentHash}`);
+        continue;
+      }
+
+      const embedding = await this.vectorService.generateEmbedding(atom.content);
+      indexedAtoms.push({
+        businessId,
+        sourceId,
+        classification: atom.type,
+        content: atom.content,
+        contentHash,
+        confidence: atom.confidence ?? 0.8,
+        version: 1,
+        metadata: {
+          extractionDate: new Date().toISOString(),
+          sourceType: 'automated',
+          ...atom.metadata
+        } as any,
+        embedding: this.vectorService.formatForStorage(embedding),
+      });
+    }
+
+    if (indexedAtoms.length > 0) {
+      await this.prisma.client.knowledgeEntry.createMany({
+        data: indexedAtoms,
+      });
+    }
+
+    this.logger.debug(`Successfully indexed ${indexedAtoms.length} new atoms`);
   }
 }

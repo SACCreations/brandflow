@@ -40,30 +40,25 @@ export class VectorService {
     limit: number = 5,
   ): Promise<any[]> {
     const embedding = await this.generateEmbedding(query);
-    
-    // Without pgvector, we can't do efficient similarity in SQL easily.
-    // For now, we'll pull the last 20 entries and do similarity in JS,
-    // or just return the most recent entries as a placeholder.
-    // REAL SOLUTION: Enable pgvector and use the <=> operator.
-    
-    const results = await prisma.knowledgeEntry.findMany({
-      where: { businessId, embedding: { not: null } },
-      orderBy: { createdAt: 'desc' },
-      take: limit * 4,
-    });
+    const vectorString = `[${embedding.join(',')}]`;
 
-    if (results.length === 0) return [];
+    // Use pgvector's cosine distance operator <=>
+    // We order by distance ascending (closest first)
+    // similarity = 1 - distance
+    const results = await prisma.$queryRawUnsafe(`
+      SELECT 
+        id, 
+        content, 
+        metadata, 
+        classification,
+        1 - (embedding <=> '${vectorString}'::vector) as similarity
+      FROM "knowledge_entries"
+      WHERE "businessId" = '${businessId}'
+      ORDER BY embedding <=> '${vectorString}'::vector
+      LIMIT ${limit}
+    `);
 
-    // Simple JS cosine similarity
-    const scored = results.map((entry: any) => {
-      const entryEmbedding = entry.embedding as number[];
-      const score = this.cosineSimilarity(embedding, entryEmbedding);
-      return { ...entry, similarity: score };
-    });
-
-    return scored
-      .sort((a: any, b: any) => (b.similarity ?? 0) - (a.similarity ?? 0))
-      .slice(0, limit);
+    return results as any[];
   }
 
   private cosineSimilarity(v1: number[], v2: number[]): number {

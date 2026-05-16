@@ -74,18 +74,39 @@ export class QualityControl {
   }
 
   private async evalCompliance(content: string, brand: BrandContext) {
-    const systemPrompt = `You are a Brand Compliance Auditor for ${brand.name}.
-Your task is to evaluate if the content matches the brand tone: ${brand.tone?.join(', ') || 'N/A'}.
-Also check for mandatory disclosures or required phrases: ${brand.governance?.requiredPhrases?.join(', ') || 'None'}.
+    const toneDescription = Array.isArray(brand.tone) ? brand.tone.join(', ') : JSON.stringify(brand.tone);
+    
+    const systemPrompt = `You are a Senior Brand Auditor for "${brand.name}".
+Evaluate the provided content for strict adherence to brand guidelines.
 
-Respond in JSON:
-{"score": 0.0-1.0, "violations": [{"type": "tone_mismatch"|"compliance_risk", "severity": "low"|"medium"|"high", "detail": "string", "suggestion": "string"}]}`;
+BRAND TONE: ${toneDescription}
+BRAND POSITIONING: ${brand.positioning || 'N/A'}
+REQUIRED DISCLOSURES: ${brand.governance?.requiredPhrases?.join(', ') || 'None'}
+
+CRITERIA:
+1. Tone Consistency: Does the voice match the brand dimensions exactly?
+2. Positioning Alignment: Does it reflect the brand's core positioning?
+3. Mandatory Compliance: Are all required disclosures present?
+
+Respond in JSON format:
+{
+  "score": 0.0-1.0,
+  "violations": [
+    {
+      "type": "tone_mismatch" | "compliance_risk" | "positioning_error",
+      "severity": "low" | "medium" | "high",
+      "detail": "Detailed explanation of the issue",
+      "suggestion": "Specific instruction on how to fix it"
+    }
+  ]
+}`;
 
     try {
       const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0.1 });
       const parsed = JSON.parse(response.content);
       return { score: parsed.score ?? 1.0, violations: parsed.violations ?? [] };
-    } catch {
+    } catch (err: any) {
+      console.error(`Compliance evaluation failed: ${err.message}`);
       return { score: 1.0, violations: [] };
     }
   }
@@ -97,12 +118,36 @@ Respond in JSON:
   ) {
     if (facts.length === 0) return { score: 1.0, violations: [], citations: [] };
 
-    const systemPrompt = `You are a Fact-Checking Agent. Cross-reference the content against these brand facts:
-${facts.map((f, i) => `[ID:${f.id}] ${f.content}`).join('\n')}
+    const systemPrompt = `You are an expert Fact-Checker. Cross-reference the content against the following Brand Knowledge Base:
 
-Identify hallucinations or errors. Map claims to source IDs for citations.
-Respond in JSON:
-{"score": 0.0-1.0, "violations": [...], "citations": [{"entryId": "string", "claimSnippet": "string", "matchScore": 0.0-1.0}]}`;
+KNOWLEDGE BASE:
+${facts.map((f) => `[Fact ID: ${f.id}] ${f.content}`).join('\n')}
+
+INSTRUCTIONS:
+1. Identify all factual claims in the content.
+2. For each claim, check if it is supported, contradicted, or not mentioned in the Knowledge Base.
+3. Mark any claims not supported as "hallucinations".
+4. Provide citations for supported claims.
+
+Respond in JSON format:
+{
+  "score": 0.0-1.0,
+  "violations": [
+    {
+      "type": "hallucination" | "factual_error",
+      "severity": "high" | "medium",
+      "detail": "Explanation of the error",
+      "suggestion": "The correct fact from the source"
+    }
+  ],
+  "citations": [
+    {
+      "entryId": "Fact ID string",
+      "claimSnippet": "The text from the content being cited",
+      "matchScore": 0.0-1.0
+    }
+  ]
+}`;
 
     try {
       const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0 });
@@ -112,7 +157,8 @@ Respond in JSON:
         violations: parsed.violations ?? [], 
         citations: parsed.citations ?? [] 
       };
-    } catch {
+    } catch (err: any) {
+      console.error(`Factuality evaluation failed: ${err.message}`);
       return { score: 1.0, violations: [], citations: [] };
     }
   }

@@ -285,3 +285,50 @@ export interface AnalyticsEventPayload {
   meta?: Record<string, unknown>;
   payload?: Record<string, unknown>;
 }
+
+// ─── Knowledge Hub ────────────────────────────────────────────────
+export type KnowledgeEntryClassification =
+  | 'product'
+  | 'feature'
+  | 'faq'
+  | 'claim'
+  | 'pricing'
+  | 'testimonial'
+  | 'audience'
+  | 'objective'
+  | 'guideline'
+  | 'legal'
+  | 'fact';
+
+export interface KnowledgeEntryMetadata {
+  sourceUrl?: string;
+  sourceType: string;
+  author?: string;
+  extractionDate: string;
+  version: number;
+  tags?: string[];
+  governance?: {
+    approvedBy?: string;
+    approvedAt?: string;
+    reviewCycle?: 'monthly' | 'quarterly' | 'annual';
+  };
+  structuralInfo?: {
+    headerPath?: string[];
+    indexInSource?: number;
+  };
+}
+
+export interface KnowledgeAtom {
+  type: KnowledgeEntryClassification;
+  content: string;
+  confidence: number;
+  metadata?: Partial<KnowledgeEntryMetadata>;
+}
+
+export interface KnowledgeIngestionJob {
+  sourceId: string;
+  businessId: string;
+  type: 'url' | 'file' | 'text' | 'social' | 'campaign';
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  error?: string;
+}
