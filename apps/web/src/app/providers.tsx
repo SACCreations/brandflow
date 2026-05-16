@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { AuthTokens } from '@brandflow/shared';
 
@@ -38,6 +39,7 @@ function hasSessionCookie() {
 }
 
 function SessionBootstrap() {
+  const router = useRouter();
   const accessToken = useAuthStore((state) => state.accessToken);
   const user = useAuthStore((state) => state.user);
   const business = useAuthStore((state) => state.business);
@@ -48,56 +50,49 @@ function SessionBootstrap() {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const setSessionRefreshing = useAuthStore((state) => state.setSessionRefreshing);
 
+  const isFirstRun = useRef(true);
+
   useEffect(() => {
-    if (!hasHydrated || isRefreshingSession || attempted) {
+    // Only run the bootstrap logic once on mount
+    if (!isFirstRun.current || !hasHydrated) {
       return;
     }
-
-    const hasSession = hasSessionCookie();
-
-    if (!hasSession) {
-      if (!accessToken && (user || business)) {
-        clearAuth();
-      }
-      setAttempted(true);
-      return;
-    }
-
-    if (accessToken && user && business) {
-      setAttempted(true);
-      return;
-    }
-
-    let cancelled = false;
+    
+    isFirstRun.current = false;
 
     const bootstrap = async () => {
-      if (typeof window !== 'undefined' && sessionStorage.getItem('bf-bootstrap-attempted')) {
+      const hasSession = hasSessionCookie();
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : 'unknown';
+      console.log('[AUTH BOOTSTRAP] Starting. hasSession:', hasSession, 'path:', currentPath);
+
+      if (!hasSession) {
+        if (!accessToken && (user || business)) {
+          clearAuth();
+        }
+        setAttempted(true);
         return;
       }
 
       setSessionRefreshing(true);
       setAttempted(true);
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('bf-bootstrap-attempted', 'true');
-      }
 
       try {
         let activeToken = accessToken;
 
         if (!activeToken) {
+          console.log('[AUTH BOOTSTRAP] No access token, attempting refresh...');
           const refreshResponse = await apiClient.post<AuthTokens>('/auth/refresh', {});
           activeToken = refreshResponse.data.accessToken;
+          console.log('[AUTH BOOTSTRAP] Refresh successful.');
         }
 
+        console.log('[AUTH BOOTSTRAP] Fetching profile...');
         const profileResponse = await apiClient.get<SessionProfileResponse>('/auth/me', {
           headers: activeToken ? { Authorization: `Bearer ${activeToken}` } : undefined,
         });
 
-        if (cancelled || !activeToken) {
-          return;
-        }
-
         const profile = profileResponse.data;
+        console.log('[AUTH BOOTSTRAP] Profile fetched, updating store.');
 
         setAuth(
           {
@@ -116,27 +111,26 @@ function SessionBootstrap() {
           },
         );
       } catch (err: any) {
-        // Silently handle 401s during bootstrap as they just mean the session is dead/expired
-        if (err?.response?.status !== 401) {
-          console.error('[AUTH BOOTSTRAP] Session restoration failed:', err);
+        console.error('[AUTH BOOTSTRAP] Error:', err.message || err);
+        
+        const path = typeof window !== 'undefined' ? window.location.pathname : '';
+        const isPublic = ['/login', '/register', '/'].includes(path);
+        
+        if (!isPublic) {
+          console.log('[AUTH BOOTSTRAP] Redirecting to login. Current path:', path);
+          window.location.href = '/login'; // Use direct location for maximum reliability
+        } else {
+          console.log('[AUTH BOOTSTRAP] Already on public path:', path);
         }
         
-        if (!cancelled) {
-          clearAuth();
-        }
+        clearAuth();
       } finally {
-        if (!cancelled) {
-          setSessionRefreshing(false);
-        }
+        setSessionRefreshing(false);
       }
     };
 
     void bootstrap();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [accessToken, business, clearAuth, hasHydrated, isRefreshingSession, setAuth, setSessionRefreshing, user, attempted]);
+  }, [hasHydrated]); // Minimized dependencies to prevent re-runs
 
 
   return null;
