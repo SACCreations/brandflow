@@ -34,7 +34,7 @@ export default function DashboardPage() {
     queryKey: ['dashboard-summary'],
     queryFn: async () => {
       const res = await apiClient.get<{ data: DashboardSummaryResponse }>('/business/dashboard');
-      return res.data.data;
+      return res.data;
     },
     staleTime: 60_000,
   });

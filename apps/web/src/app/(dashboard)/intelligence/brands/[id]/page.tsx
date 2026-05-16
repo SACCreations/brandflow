@@ -19,7 +19,7 @@ export default function BrandEditPage() {
     queryKey: ['brand', id],
     queryFn: async () => {
       const res = await apiClient.get(`/brands/${id}`);
-      return res.data.data;
+      return res.data;
     },
     enabled: !!id,
   });

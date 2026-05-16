@@ -65,7 +65,9 @@ export type {
   GenerationResponse,
   QualityCheckResult,
   QualityViolation,
+  KnowledgeCitation,
   BrandContext,
   CostEventPayload,
   LLMConfig,
 } from '@brandflow/shared';
+

@@ -40,7 +40,7 @@ export class SocialCronService {
       try {
         await this.socialService.refreshLinkedInToken(account.id, account.businessId);
         this.logger.log(`Successfully refreshed token for ${account.platform} account: ${account.name} (${account.id})`);
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error(`Failed to proactively refresh token for account ${account.id}: ${error.message}`);
         
         // Emit alert event for manual intervention if refresh fails

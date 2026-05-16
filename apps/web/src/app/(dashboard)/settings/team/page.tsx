@@ -48,7 +48,7 @@ export default function TeamSettingsPage() {
     queryKey: ['team-members'],
     queryFn: async () => {
       const res = await apiClient.get('/business/members');
-      return res.data.data as Member[];
+      return res.data as Member[];
     },
   });
 

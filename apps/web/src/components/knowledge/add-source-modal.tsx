@@ -57,7 +57,7 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
     queryKey: ['brands'],
     queryFn: async () => {
       const response = await apiClient.get<{ data: BrandOption[] }>('/brands');
-      return response.data.data;
+      return response.data;
     },
     enabled: isOpen,
     staleTime: 60_000,

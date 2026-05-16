@@ -38,7 +38,7 @@ export default function AnalyticsDashboard() {
     queryKey: ['analytics', 'performance'],
     queryFn: async () => {
       const res = await apiClient.get<{ data: any[] }>('/analytics/performance');
-      return res.data.data;
+      return res.data;
     },
   });
 
@@ -46,7 +46,7 @@ export default function AnalyticsDashboard() {
     queryKey: ['analytics', 'impact'],
     queryFn: async () => {
       const res = await apiClient.get<{ data: any[] }>('/analytics/intelligence-impact');
-      return res.data.data;
+      return res.data;
     },
   });
 
@@ -54,7 +54,7 @@ export default function AnalyticsDashboard() {
     queryKey: ['analytics', 'recommendations'],
     queryFn: async () => {
       const res = await apiClient.get<{ data: any[] }>('/analytics/recommendations');
-      return res.data.data;
+      return res.data;
     },
   });
 

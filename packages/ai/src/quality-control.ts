@@ -1,36 +1,55 @@
-import type { BrandContext, QualityCheckResult, QualityViolation } from './types';
+import type { BrandContext, QualityCheckResult, QualityViolation, KnowledgeCitation } from './types';
 import { LLMGateway } from './gateway';
 
 export class QualityControl {
   constructor(private readonly gateway: LLMGateway) {}
 
   /**
-   * Run brand compliance and basic fact-check on generated content.
+   * Run comprehensive multi-layered quality control pipeline.
    */
   async check(
     content: string,
     brand: BrandContext,
-    knowledgeFacts: string[] = [],
+    knowledgeFacts: { id: string; content: string }[] = [],
   ): Promise<QualityCheckResult> {
     const violations: QualityViolation[] = [];
+    const citations: KnowledgeCitation[] = [];
 
-    // 1. Rule-based checks (fast, no LLM call needed)
+    // Phase 1: Rule-based Compliance
     this.checkBannedPhrases(content, brand, violations);
-    this.checkTone(content, brand, violations);
 
-    // 2. LLM-based fact-check (if knowledge facts available)
-    if (knowledgeFacts.length > 0) {
-      const llmViolations = await this.llmFactCheck(content, brand, knowledgeFacts);
-      violations.push(...llmViolations);
-    }
+    // Phase 2: AI-driven Evaluation Layers
+    const [complianceResult, factCheckResult, safetyResult] = await Promise.all([
+      this.evalCompliance(content, brand),
+      this.evalFactuality(content, brand, knowledgeFacts),
+      this.evalSafety(content),
+    ]);
 
-    const highSeverityCount = violations.filter((v) => v.severity === 'high').length;
-    const mediumSeverityCount = violations.filter((v) => v.severity === 'medium').length;
+    violations.push(...complianceResult.violations);
+    violations.push(...factCheckResult.violations);
+    violations.push(...safetyResult.violations);
+    citations.push(...factCheckResult.citations);
 
-    const passed = highSeverityCount === 0 && mediumSeverityCount <= 1;
-    const confidenceScore = Math.max(0, 1 - (highSeverityCount * 0.4 + mediumSeverityCount * 0.1));
+    // Phase 3: Scoring & Grading
+    const complianceScore = complianceResult.score;
+    const factualScore = factCheckResult.score;
+    const safetyScore = safetyResult.score;
 
-    return { passed, confidenceScore, violations };
+    // Weighted aggregation
+    const confidenceScore = (complianceScore * 0.4) + (factualScore * 0.5) + (safetyScore * 0.1);
+    const overallGrade = this.calculateGrade(confidenceScore, violations);
+    const passed = overallGrade !== 'F' && !violations.some(v => v.severity === 'critical');
+
+    return {
+      passed,
+      confidenceScore,
+      overallGrade,
+      complianceScore,
+      factualScore,
+      safetyScore,
+      violations,
+      citations,
+    };
   }
 
   private checkBannedPhrases(
@@ -47,63 +66,77 @@ export class QualityControl {
         violations.push({
           type: 'banned_phrase',
           severity: 'high',
-          detail: `Contains banned phrase: "${phrase}"`,
+          detail: `Contains restricted brand phrase: "${phrase}"`,
           position: idx,
         });
       }
     }
   }
 
-  private checkTone(
-    content: string,
-    brand: BrandContext,
-    violations: QualityViolation[],
-  ): void {
-    const requiredTones = brand.tone ?? [];
-    if (requiredTones.length === 0) return;
+  private async evalCompliance(content: string, brand: BrandContext) {
+    const systemPrompt = `You are a Brand Compliance Auditor for ${brand.name}.
+Your task is to evaluate if the content matches the brand tone: ${brand.tone?.join(', ') || 'N/A'}.
+Also check for mandatory disclosures or required phrases: ${brand.governance?.requiredPhrases?.join(', ') || 'None'}.
 
-    // Simple heuristic: check for informal markers when brand expects professional tone
-    if (requiredTones.includes('professional')) {
-      const informalMarkers = /\b(gonna|wanna|gotta|kinda|sorta|ya|ur|lol|omg)\b/gi;
-      if (informalMarkers.test(content)) {
-        violations.push({
-          type: 'tone_mismatch',
-          severity: 'medium',
-          detail: 'Content contains informal language inconsistent with professional brand tone',
-        });
-      }
-    }
-  }
-
-  private async llmFactCheck(
-    content: string,
-    brand: BrandContext,
-    facts: string[],
-  ): Promise<QualityViolation[]> {
-    const systemPrompt = `You are a fact-checking assistant for ${brand.name}.
-Your job is to identify factual inaccuracies and potential hallucinations in marketing content.
-
-Known facts about the brand:
-${facts.slice(0, 5).map((f, i) => `${i + 1}. ${f}`).join('\n')}
-
-Respond ONLY with valid JSON matching this schema:
-{"violations": [{"type": "factual_error"|"hallucination", "severity": "low"|"medium"|"high", "detail": "string"}]}
-If no violations found, respond: {"violations": []}`;
-
-    const userPrompt = `Check this content for factual errors:\n\n${content}`;
+Respond in JSON:
+{"score": 0.0-1.0, "violations": [{"type": "tone_mismatch"|"compliance_risk", "severity": "low"|"medium"|"high", "detail": "string", "suggestion": "string"}]}`;
 
     try {
-      const { response } = await this.gateway.complete(systemPrompt, userPrompt, {
-        maxTokens: 512,
-        temperature: 0.1,
-      });
-
-      // Safely parse JSON response
-      const parsed = JSON.parse(response.content) as { violations: QualityViolation[] };
-      return parsed.violations ?? [];
+      const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0.1 });
+      const parsed = JSON.parse(response.content);
+      return { score: parsed.score ?? 1.0, violations: parsed.violations ?? [] };
     } catch {
-      // Non-critical: if LLM fact-check fails, skip it
-      return [];
+      return { score: 1.0, violations: [] };
     }
   }
+
+  private async evalFactuality(
+    content: string,
+    brand: BrandContext,
+    facts: { id: string; content: string }[],
+  ) {
+    if (facts.length === 0) return { score: 1.0, violations: [], citations: [] };
+
+    const systemPrompt = `You are a Fact-Checking Agent. Cross-reference the content against these brand facts:
+${facts.map((f, i) => `[ID:${f.id}] ${f.content}`).join('\n')}
+
+Identify hallucinations or errors. Map claims to source IDs for citations.
+Respond in JSON:
+{"score": 0.0-1.0, "violations": [...], "citations": [{"entryId": "string", "claimSnippet": "string", "matchScore": 0.0-1.0}]}`;
+
+    try {
+      const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0 });
+      const parsed = JSON.parse(response.content);
+      return { 
+        score: parsed.score ?? 1.0, 
+        violations: parsed.violations ?? [], 
+        citations: parsed.citations ?? [] 
+      };
+    } catch {
+      return { score: 1.0, violations: [], citations: [] };
+    }
+  }
+
+  private async evalSafety(content: string) {
+    const systemPrompt = `Analyze content for safety: hate speech, harassment, NSFW, or extreme bias.
+Respond in JSON: {"score": 0.0-1.0, "violations": [{"type": "unsafe_content", "severity": "critical", "detail": "string"}]}`;
+
+    try {
+      const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0 });
+      const parsed = JSON.parse(response.content);
+      return { score: parsed.score ?? 1.0, violations: parsed.violations ?? [] };
+    } catch {
+      return { score: 1.0, violations: [] };
+    }
+  }
+
+  private calculateGrade(score: number, violations: QualityViolation[]): 'A' | 'B' | 'C' | 'D' | 'F' {
+    if (violations.some(v => v.severity === 'critical')) return 'F';
+    if (score >= 0.9) return 'A';
+    if (score >= 0.8) return 'B';
+    if (score >= 0.6) return 'C';
+    if (score >= 0.4) return 'D';
+    return 'F';
+  }
 }
+

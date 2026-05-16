@@ -12,9 +12,9 @@ export class BillingService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {
-    const secretKey = this.config.get<string>('stripe.secretKey');
-    this.stripe = new Stripe(secretKey || '', {
-      apiVersion: '2024-11-20.acacia',
+    const secretKey = this.config.get<string>('stripe.secretKey') || 'sk_test_dummy';
+    this.stripe = new Stripe(secretKey, {
+      apiVersion: '2025-02-24.acacia',
     });
   }
 
@@ -51,7 +51,7 @@ export class BillingService {
           : null,
         usage: await this.getUsageStats(businessId),
       };
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error(`Failed to fetch Stripe subscription for ${businessId}:`, err);
       return {
         plan: business.plan,
@@ -92,7 +92,7 @@ export class BillingService {
 
     if (!customerId) {
       const customer = await this.stripe.customers.create({
-        email: business.ownerId, // In real app, join with User for email
+        email: business.ownerId || '', // In real app, join with User for email
         metadata: { businessId },
       });
       customerId = customer.id;

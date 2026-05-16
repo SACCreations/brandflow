@@ -26,7 +26,17 @@ function drainQueue(token: string | null, err: unknown = null) {
 }
 
 apiClient.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // Automatically unwrap standard API envelope
+    if (res.data && typeof res.data === 'object' && 'data' in res.data && 'success' in res.data) {
+      return {
+        ...res,
+        data: res.data.data,
+
+      };
+    }
+    return res;
+  },
   async (error: import('axios').AxiosError) => {
     const original = error.config as import('axios').InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -54,10 +64,13 @@ apiClient.interceptors.response.use(
 
       try {
         // refreshToken is sent automatically as httpOnly cookie
-        const res = await apiClient.post<{ data: { accessToken: string; refreshToken: string; expiresIn: number } }>('/auth/refresh', {});
-        const newToken = res.data.data.accessToken;
+        // The interceptor above will unwrap this to { accessToken, refreshToken, expiresIn }
+        const res = await apiClient.post<{ accessToken: string; refreshToken: string; expiresIn: number }>('/auth/refresh', {});
+        const newToken = res.data.accessToken;
+        
         useAuthStore.getState().updateToken(newToken);
         drainQueue(newToken);
+        
         original.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(original);
       } catch (refreshError) {
@@ -72,3 +85,4 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+

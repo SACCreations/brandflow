@@ -8,8 +8,10 @@ import {
   CreditCard, 
   ArrowUpRight, 
   BarChart3,
-  Infinity
+  Infinity,
+  Loader2
 } from 'lucide-react';
+
 import { cn } from '@brandflow/ui';
 
 import { useQuery, useMutation } from '@tanstack/react-query';

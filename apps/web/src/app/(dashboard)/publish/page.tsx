@@ -71,7 +71,7 @@ export default function PublishQueuePage() {
     queryKey: ['publish-queue'],
     queryFn: async () => {
       const res = await apiClient.get('/schedules');
-      return res.data.data as ScheduleItem[];
+      return res.data as ScheduleItem[];
     },
   });
 
@@ -79,7 +79,7 @@ export default function PublishQueuePage() {
     queryKey: ['social-accounts'],
     queryFn: async () => {
       const res = await apiClient.get('/social/accounts');
-      return res.data.data as SocialAccount[];
+      return res.data as SocialAccount[];
     },
   });
 

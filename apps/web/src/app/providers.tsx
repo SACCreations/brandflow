@@ -40,12 +40,13 @@ function SessionBootstrap() {
   const business = useAuthStore((state) => state.business);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isRefreshingSession = useAuthStore((state) => state.isRefreshingSession);
+  const [attempted, setAttempted] = useState(false);
   const setAuth = useAuthStore((state) => state.setAuth);
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const setSessionRefreshing = useAuthStore((state) => state.setSessionRefreshing);
 
   useEffect(() => {
-    if (!hasHydrated || isRefreshingSession) {
+    if (!hasHydrated || isRefreshingSession || attempted) {
       return;
     }
 
@@ -55,10 +56,12 @@ function SessionBootstrap() {
       if (!accessToken && (user || business)) {
         clearAuth();
       }
+      setAttempted(true);
       return;
     }
 
     if (accessToken && user && business) {
+      setAttempted(true);
       return;
     }
 
@@ -66,16 +69,17 @@ function SessionBootstrap() {
 
     const bootstrap = async () => {
       setSessionRefreshing(true);
+      setAttempted(true);
 
       try {
         let activeToken = accessToken;
 
         if (!activeToken) {
-          const refreshResponse = await apiClient.post<{ data: AuthTokens }>('/auth/refresh', {});
-          activeToken = refreshResponse.data.data.accessToken;
+          const refreshResponse = await apiClient.post<AuthTokens>('/auth/refresh', {});
+          activeToken = refreshResponse.data.accessToken;
         }
 
-        const profileResponse = await apiClient.get<{ data: SessionProfileResponse }>('/auth/me', {
+        const profileResponse = await apiClient.get<SessionProfileResponse>('/auth/me', {
           headers: activeToken ? { Authorization: `Bearer ${activeToken}` } : undefined,
         });
 
@@ -83,7 +87,8 @@ function SessionBootstrap() {
           return;
         }
 
-        const profile = profileResponse.data.data;
+        const profile = profileResponse.data;
+
         setAuth(
           {
             id: profile.user.id,
@@ -100,7 +105,8 @@ function SessionBootstrap() {
             slug: profile.business.slug,
           },
         );
-      } catch {
+      } catch (err) {
+        console.error('[AUTH BOOTSTRAP] Refresh failed:', err);
         if (!cancelled) {
           clearAuth();
         }
@@ -116,7 +122,8 @@ function SessionBootstrap() {
     return () => {
       cancelled = true;
     };
-  }, [accessToken, business, clearAuth, hasHydrated, isRefreshingSession, setAuth, setSessionRefreshing, user]);
+  }, [accessToken, business, clearAuth, hasHydrated, isRefreshingSession, setAuth, setSessionRefreshing, user, attempted]);
+
 
   return null;
 }

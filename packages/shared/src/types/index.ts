@@ -65,17 +65,47 @@ export interface ApiError {
 
 // ─── Quality Check Result ─────────────────────────────────────────
 export interface QualityViolation {
-  type: 'banned_phrase' | 'tone_mismatch' | 'factual_error' | 'hallucination' | 'cta_missing';
-  severity: 'low' | 'medium' | 'high';
+  id?: string;
+  type:
+    | 'banned_phrase'
+    | 'tone_mismatch'
+    | 'factual_error'
+    | 'hallucination'
+    | 'cta_missing'
+    | 'unsafe_content'
+    | 'compliance_risk';
+  severity: 'low' | 'medium' | 'high' | 'critical';
   detail: string;
+  suggestion?: string;
   position?: number;
+  location?: {
+    start: number;
+    end: number;
+    snippet: string;
+  };
+}
+
+export interface KnowledgeCitation {
+  id?: string;
+  entryId: string;
+  claimSnippet: string;
+  matchScore: number;
+  sourceName?: string;
 }
 
 export interface QualityCheckResult {
   passed: boolean;
-  confidenceScore: number;
+  confidenceScore: number; // 0.0 to 1.0
+  overallGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  
+  complianceScore?: number;
+  factualScore?: number;
+  safetyScore?: number;
+  
   violations: QualityViolation[];
+  citations?: KnowledgeCitation[];
 }
+
 
 // ─── AI Providers (handled in constants) ──────────────────────────
 

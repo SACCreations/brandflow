@@ -66,7 +66,7 @@ export default function ContentGeneratorPage() {
     queryKey: ['content-brief-context', briefId],
     queryFn: async () => {
       const res = await apiClient.get(`/briefs/${briefId}`);
-      return res.data.data as BriefContext;
+      return res.data as BriefContext;
     },
     enabled: !!briefId,
   });
@@ -78,7 +78,7 @@ export default function ContentGeneratorPage() {
     queryKey: ['content-campaign-context', resolvedCampaignId],
     queryFn: async () => {
       const res = await apiClient.get(`/campaigns/${resolvedCampaignId}`);
-      return res.data.data as CampaignContext;
+      return res.data as CampaignContext;
     },
     enabled: !!resolvedCampaignId,
   });
@@ -87,7 +87,7 @@ export default function ContentGeneratorPage() {
     queryKey: ['content-brand-context', resolvedBrandId],
     queryFn: async () => {
       const res = await apiClient.get(`/brands/${resolvedBrandId}`);
-      return res.data.data as BrandContext;
+      return res.data as BrandContext;
     },
     enabled: !!resolvedBrandId,
   });
@@ -116,7 +116,7 @@ export default function ContentGeneratorPage() {
         tone: formData.tone.trim() || null,
       });
 
-      return res.data.data as { content: { id: string } };
+      return res.data as { content: { id: string } };
     },
     onSuccess: (result) => {
       toast({

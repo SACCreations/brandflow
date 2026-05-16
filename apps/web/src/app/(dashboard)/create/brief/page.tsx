@@ -112,7 +112,7 @@ export default function BriefBuilderPage() {
     queryKey: ['brief-project-context', projectId],
     queryFn: async () => {
       const response = await apiClient.get(`/projects/${projectId}`);
-      return response.data.data as ProjectContext;
+      return response.data as ProjectContext;
     },
     enabled: !!projectId,
   });
@@ -121,7 +121,7 @@ export default function BriefBuilderPage() {
     queryKey: ['brief-record', briefId],
     queryFn: async () => {
       const response = await apiClient.get(`/briefs/${briefId}`);
-      return response.data.data as BriefRecord;
+      return response.data as BriefRecord;
     },
     enabled: !!briefId,
   });
@@ -132,7 +132,7 @@ export default function BriefBuilderPage() {
     queryKey: ['brief-linked-brand', linkedBrandId],
     queryFn: async () => {
       const response = await apiClient.get(`/brands/${linkedBrandId}`);
-      return response.data.data as BrandContext;
+      return response.data as BrandContext;
     },
     enabled: !!linkedBrandId,
   });
@@ -188,11 +188,11 @@ export default function BriefBuilderPage() {
 
       if (briefId) {
         const response = await apiClient.patch(`/briefs/${briefId}`, payload);
-        return response.data.data as BriefRecord;
+        return response.data as BriefRecord;
       }
 
       const response = await apiClient.post('/briefs', payload);
-      return response.data.data as BriefRecord;
+      return response.data as BriefRecord;
     },
     onSuccess: () => {
       toast({

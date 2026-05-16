@@ -25,7 +25,7 @@ export class MetricsService {
           payload: { value, ...metadata },
         },
       });
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error(`Failed to record metric ${key}: ${err.message}`);
     }
   }

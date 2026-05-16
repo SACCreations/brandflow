@@ -114,8 +114,10 @@ export class ApprovalService {
     if (status === 'approved') {
       const latestCheck = await this.prisma.client.qualityCheck.findFirst({
         where: { contentId: approval.contentId },
+        include: { violations: true },
         orderBy: { checkedAt: 'desc' },
       });
+
 
       if (latestCheck && !latestCheck.passed) {
         const violations = (latestCheck.violations as any[]) || [];

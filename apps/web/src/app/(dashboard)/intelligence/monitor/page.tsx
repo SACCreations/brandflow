@@ -106,7 +106,7 @@ export default function ProcessingMonitorPage() {
           <HistoryTableSection 
             title="Ingestion History" 
             jobs={historicalIngestion} 
-            onRetry={(id) => retryIngestion.mutate(id)}
+            onRetry={(id: string) => retryIngestion.mutate(id)}
             retryLoading={retryIngestion.isPending}
           />
         </TabsContent>
@@ -117,7 +117,7 @@ export default function ProcessingMonitorPage() {
             title="Publishing History" 
             jobs={historicalPublish} 
             type="publish"
-            onRetry={(id) => retryPublish.mutate(id)}
+            onRetry={(id: string) => retryPublish.mutate(id)}
             retryLoading={retryPublish.isPending}
           />
         </TabsContent>

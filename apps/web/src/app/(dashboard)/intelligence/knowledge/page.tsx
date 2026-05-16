@@ -46,7 +46,7 @@ export default function KnowledgeDashboard() {
     queryKey: ['knowledge-stats'],
     queryFn: async () => {
       const response = await apiClient.get<{ data: KnowledgeStatsResponse }>('/knowledge/stats');
-      return response.data.data;
+      return response.data;
     },
     staleTime: 30_000,
   });

@@ -43,9 +43,9 @@ export class AuthController {
     res.cookie('refreshToken', result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/api/v1/auth',
+      path: '/',
     });
 
     return result;
@@ -64,9 +64,9 @@ export class AuthController {
     res.cookie('refreshToken', result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/api/v1/auth',
+      path: '/',
     });
 
     return result;
@@ -78,14 +78,30 @@ export class AuthController {
   async refresh(
     @Body(new ZodValidationPipe(refreshTokenSchema)) dto: RefreshTokenDto,
     @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
   ) {
     // Accept token from body or cookie
     const token = dto.refreshToken?.trim() || (req.cookies as Record<string, string>)?.['refreshToken'];
+
+
     if (!token) {
       throw new UnauthorizedException('Refresh token required');
     }
-    return this.authService.refresh(token);
+
+    const result = await this.authService.refresh(token);
+
+    // Set rotated refresh token as httpOnly cookie
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env['NODE_ENV'] === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+    });
+
+    return result;
   }
+
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
@@ -98,7 +114,7 @@ export class AuthController {
   ) {
     const token = (req.cookies as Record<string, string>)?.['refreshToken'] ?? '';
     await this.authService.logout(token);
-    res.clearCookie('refreshToken', { path: '/api/v1/auth' });
+    res.clearCookie('refreshToken', { path: '/' });
   }
 
   @Get('me')

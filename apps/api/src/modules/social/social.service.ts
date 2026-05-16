@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -46,6 +47,7 @@ interface MetaTokenResponse {
 
 @Injectable()
 export class SocialService {
+  private readonly logger = new Logger(SocialService.name);
   private readonly encKey: Buffer;
 
   constructor(

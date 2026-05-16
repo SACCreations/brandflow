@@ -106,7 +106,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
     queryKey: ['content-editor', id],
     queryFn: async () => {
       const res = await apiClient.get(`/content/${id}`);
-      return res.data.data as ContentDetail;
+      return res.data as ContentDetail;
     },
   });
 
@@ -120,7 +120,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
     queryKey: ['social-accounts'],
     queryFn: async () => {
       const res = await apiClient.get('/social/accounts');
-      return res.data.data as SocialAccount[];
+      return res.data as SocialAccount[];
     },
   });
 
@@ -136,7 +136,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
   const saveMutation = useMutation({
     mutationFn: async () => {
       const res = await apiClient.patch(`/content/${id}`, { body: content });
-      return res.data.data as ContentDetail;
+      return res.data as ContentDetail;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content-editor', id] });
@@ -160,7 +160,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
         contentId: id,
         reviewType: 'internal',
       });
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content-editor', id] });
@@ -188,7 +188,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
         scheduledAt: new Date(scheduleAt).toISOString(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content-editor', id] });

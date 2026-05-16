@@ -6,12 +6,16 @@ import { LlmSettingsModule } from '../llm-settings/llm-settings.module';
 import { BusinessModule } from '../business/business.module';
 import { QUEUES } from '@brandflow/shared';
 
+import { QualityModule } from '../quality/quality.module';
+
 @Module({
   imports: [
     BullModule.registerQueue({ name: QUEUES.AI_GENERATION }),
     LlmSettingsModule,
     BusinessModule,
+    QualityModule,
   ],
+
   controllers: [ContentController],
   providers: [ContentService],
   exports: [ContentService],

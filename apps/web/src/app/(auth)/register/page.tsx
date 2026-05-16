@@ -24,8 +24,9 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterDto) => {
     try {
-      const res = await apiClient.post<{ data: AuthResponse }>('/auth/register', data);
-      const { user, tokens, business } = res.data.data;
+      const res = await apiClient.post<AuthResponse>('/auth/register', data);
+      const { user, tokens, business } = res.data;
+
       setAuth(
         { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, avatarUrl: user.avatarUrl, mfaEnabled: user.mfaEnabled },
         tokens.accessToken,

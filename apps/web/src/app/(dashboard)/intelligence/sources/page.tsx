@@ -40,7 +40,7 @@ export default function SourcesPage() {
     queryKey: ['knowledge-sources'],
     queryFn: async () => {
       const res = await apiClient.get('/knowledge/sources');
-      return res.data.data;
+      return res.data;
     },
   });
 

@@ -13,8 +13,8 @@ export class BillingWebhookController {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {
-    this.stripe = new Stripe(this.config.get<string>('stripe.secretKey') || '', {
-      apiVersion: '2024-11-20.acacia',
+    this.stripe = new Stripe(this.config.get<string>('stripe.secretKey') || 'sk_test_dummy', {
+      apiVersion: '2025-02-24.acacia',
     });
   }
 
@@ -29,11 +29,11 @@ export class BillingWebhookController {
 
     try {
       event = this.stripe.webhooks.constructEvent(
-        request.rawBody,
+        request.rawBody!,
         signature,
         this.config.get<string>('stripe.webhookSecret') || '',
       );
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error(`Webhook signature verification failed: ${err.message}`);
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
@@ -56,7 +56,7 @@ export class BillingWebhookController {
   }
 
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-    const businessId = session.metadata?.businessId;
+    const businessId = session.metadata?.['businessId'];
     const subscriptionId = session.subscription as string;
 
     if (!businessId || !subscriptionId) {
@@ -70,7 +70,7 @@ export class BillingWebhookController {
       where: { id: businessId },
       data: {
         stripeSubscriptionId: subscriptionId,
-        plan: this.mapPriceToPlan(subscription.items.data[0].price.id),
+        plan: this.mapPriceToPlan(subscription.items.data[0]?.price.id || ''),
         status: 'active',
       },
     });
@@ -79,7 +79,7 @@ export class BillingWebhookController {
   }
 
   private async handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-    const businessId = subscription.metadata?.businessId;
+    const businessId = subscription.metadata?.['businessId'];
 
     if (!businessId) {
       // Find business by customer ID if metadata is missing
@@ -109,7 +109,7 @@ export class BillingWebhookController {
     await this.prisma.client.business.update({
       where: { id: businessId },
       data: {
-        plan: this.mapPriceToPlan(subscription.items.data[0].price.id),
+        plan: this.mapPriceToPlan(subscription.items.data[0]?.price.id || ''),
         status: statusMap[subscription.status] || 'unknown',
       },
     });

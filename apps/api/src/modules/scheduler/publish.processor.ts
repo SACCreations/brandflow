@@ -115,7 +115,7 @@ export class PublishProcessor extends WorkerHost {
         try {
           await this.socialService.refreshLinkedInToken(schedule.socialAccountId, businessId);
           this.logger.log(`Token refreshed for schedule ${scheduleId}. Job will retry automatically.`);
-        } catch (refreshError) {
+        } catch (refreshError: any) {
           this.logger.error(`Autonomous token refresh failed for schedule ${scheduleId}: ${refreshError.message}`);
         }
       }

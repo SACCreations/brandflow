@@ -21,7 +21,8 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
   const port = config.get<number>('app.port', 4000);
-  const corsOrigins = config.get<string>('app.corsOrigins', 'http://localhost:3002');
+  const corsOrigins = config.get<string>('app.corsOrigins', 'http://localhost:3000,http://localhost:3002');
+
 
   // ─── Security ────────────────────────────────────────────────
   app.use(

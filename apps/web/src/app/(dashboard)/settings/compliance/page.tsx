@@ -44,7 +44,7 @@ export default function CompliancePage() {
     queryKey: ['audit-logs'],
     queryFn: async () => {
       const res = await apiClient.get('/business/audit-logs');
-      return res.data.data as AuditLog[];
+      return res.data as AuditLog[];
     },
   });
 

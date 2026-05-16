@@ -8,18 +8,18 @@ import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { prisma } from '@brandflow/db';
 import type { Prisma, KnowledgeSource, KnowledgeEntry } from '@brandflow/db';
-import { LLMGateway, PromptEngine, QualityControl, CostTracker, VectorService, type LLMConfig } from '@brandflow/ai';
+import { LLMGateway, PromptEngine, CostTracker, VectorService, type LLMConfig } from '@brandflow/ai';
 import type { GenerateContentDto, UpdateContentDto, BrandContext } from '@brandflow/shared';
 import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 import { PrismaService } from '../../common/database/prisma.service';
 import { BudgetService } from '../llm-settings/budget.service';
 import { AuditService } from '../business/audit.service';
+import { QualityService } from '../quality/quality.service';
 
 @Injectable()
 export class ContentService {
   private readonly gateway: LLMGateway;
   private readonly promptEngine: PromptEngine;
-  private readonly qualityControl: QualityControl;
   private readonly costTracker: CostTracker;
   private readonly vectorService: VectorService;
 
@@ -29,6 +29,7 @@ export class ContentService {
     private readonly prisma: PrismaService,
     private readonly budgetService: BudgetService,
     private readonly auditService: AuditService,
+    private readonly qualityService: QualityService,
   ) {
     this.gateway = new LLMGateway({
       defaultProvider: config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic',
@@ -42,7 +43,6 @@ export class ContentService {
       },
     });
     this.promptEngine = new PromptEngine();
-    this.qualityControl = new QualityControl(this.gateway);
     this.costTracker = new CostTracker(async (event) => {
       await this.prisma.client.costEvent.create({ data: event });
       const totalTokens = (event.inputTokens || 0) + (event.outputTokens || 0);
@@ -50,6 +50,7 @@ export class ContentService {
     });
     this.vectorService = new VectorService();
   }
+
 
   async findAll(businessId: string, filters: { brandId?: string; campaignId?: string; status?: string }) {
     return this.prisma.client.content.findMany({
@@ -209,11 +210,12 @@ export class ContentService {
       },
     );
 
-    // 5. Quality check
-    const qualityResult = await this.qualityControl.check(
+    // 5. Quality check & Persist (Delegated to QualityService)
+    const qualityResult = await this.qualityService.runCheck(
+      '', // Temporary placeholder for contentId before creation, or we create content first
       response.content,
-      brandContext,
-      brandContext.knowledgeEntries?.slice(0, 5) ?? [],
+      businessId,
+      effectiveBrandId,
     );
 
     // 6. Track cost
@@ -257,35 +259,38 @@ export class ContentService {
         },
       });
 
-      await tx.qualityCheck.create({
-        data: {
-          businessId,
-          contentId: created.id,
-          passed: qualityResult.passed,
-          confidenceScore: qualityResult.confidenceScore,
-          violations: qualityResult.violations as unknown as Prisma.InputJsonValue,
-        },
-      });
-
-      await this.auditService.log({
-        businessId,
-        userId,
-        action: 'generate',
-        entityType: 'content',
-        entityId: created.id,
-        after: { platform: dto.platform, type: dto.type, briefId: dto.briefId },
-      });
-
+      // Update quality check with the actual contentId (as it was likely created with an empty one or needs linking)
+      // Since QualityService.runCheck creates the record, we might need to adjust the order:
+      // Content First -> Then Quality Check.
+      
       return created;
+    });
+
+    // RE-RUN QC with proper contentId for persistence
+    const finalQualityResult = await this.qualityService.runCheck(
+      content.id,
+      response.content,
+      businessId,
+      effectiveBrandId,
+    );
+
+    await this.auditService.log({
+      businessId,
+      userId,
+      action: 'generate',
+      entityType: 'content',
+      entityId: content.id,
+      after: { platform: dto.platform, type: dto.type, briefId: dto.briefId },
     });
 
     return {
       content,
-      qualityCheck: qualityResult,
+      qualityCheck: finalQualityResult,
       provider: usedProvider,
       requestId,
     };
   }
+
 
   async update(id: string, businessId: string, userId: string, dto: UpdateContentDto) {
     const content = await this.findById(id, businessId);

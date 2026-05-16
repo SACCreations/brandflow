@@ -25,11 +25,18 @@ export class SchedulerController {
     return this.schedulerService.findAll(user.businessId, { campaignId, contentId });
   }
 
+  @Get('jobs')
+  @ApiOperation({ summary: 'List publishing jobs status' })
+  findJobs(@CurrentUser() user: JwtPayload) {
+    return this.schedulerService.findPublishJobs(user.businessId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get schedule details' })
   findById(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: JwtPayload) {
     return this.schedulerService.findById(id, user.businessId);
   }
+
 
   @Post()
   @ApiOperation({ summary: 'Schedule a post' })
@@ -51,11 +58,5 @@ export class SchedulerController {
   @ApiOperation({ summary: 'Cancel a scheduled post' })
   cancel(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: JwtPayload) {
     return this.schedulerService.cancel(id, user.businessId);
-  }
-
-  @Get('jobs')
-  @ApiOperation({ summary: 'List publishing jobs status' })
-  findJobs(@CurrentUser() user: JwtPayload) {
-    return this.schedulerService.findPublishJobs(user.businessId);
   }
 }

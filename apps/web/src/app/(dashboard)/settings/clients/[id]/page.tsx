@@ -61,7 +61,7 @@ export default function ClientDetailPage() {
     queryKey: ['client-detail', clientId],
     queryFn: async () => {
       const res = await apiClient.get(`/customers/${clientId}`);
-      return res.data.data as ClientDetail;
+      return res.data as ClientDetail;
     },
     enabled: !!clientId,
   });
@@ -72,7 +72,7 @@ export default function ClientDetailPage() {
     queryKey: ['client-linked-brand', linkedBrandId],
     queryFn: async () => {
       const res = await apiClient.get(`/brands/${linkedBrandId}`);
-      return res.data.data as BrandSummary;
+      return res.data as BrandSummary;
     },
     enabled: !!linkedBrandId,
   });

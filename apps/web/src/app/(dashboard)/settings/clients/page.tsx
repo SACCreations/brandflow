@@ -57,7 +57,7 @@ export default function ClientsSettingsPage() {
           status: statusFilter === 'all' ? undefined : statusFilter,
         },
       });
-      return res.data.data as Client[];
+      return res.data as Client[];
     },
   });
 

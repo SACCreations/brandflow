@@ -64,7 +64,7 @@ export default function CampaignsPage() {
       const res = await apiClient.get('/campaigns', {
         params: { includeArchived: activeTab === 'archived' }
       });
-      return res.data.data as Campaign[];
+      return res.data as Campaign[];
     },
   });
 
@@ -77,7 +77,7 @@ export default function CampaignsPage() {
         endDate: data.endDate ? new Date(data.endDate).toISOString() : null,
       };
       const res = await apiClient.post('/campaigns', payload);
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
@@ -105,7 +105,7 @@ export default function CampaignsPage() {
   const archiveMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await apiClient.post(`/campaigns/${id}/archive`);
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
@@ -117,7 +117,7 @@ export default function CampaignsPage() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await apiClient.post(`/campaigns/${id}/delete`);
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
@@ -129,7 +129,7 @@ export default function CampaignsPage() {
   const cloneMutation = useMutation({
     mutationFn: async ({ id, name }: { id: string, name: string }) => {
       const res = await apiClient.post(`/campaigns/${id}/clone`, { name });
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });

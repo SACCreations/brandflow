@@ -23,11 +23,15 @@ import {
   cn
 } from '@brandflow/ui';
 
+import { QualityAnalysis } from '../quality/quality-analysis';
+
 interface LivePreviewProps {
   data: any;
+  qualityCheck?: QualityCheckResult | null;
+  isLoadingQuality?: boolean;
 }
 
-export function LivePreview({ data }: LivePreviewProps) {
+export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePreviewProps) {
   const [device, setDevice] = React.useState<'mobile' | 'desktop'>('desktop');
   
   const primaryColor = data.visualRules?.primaryColor || '#6366f1';
@@ -75,7 +79,6 @@ export function LivePreview({ data }: LivePreviewProps) {
           </TabsList>
 
           <TabsContent value="web" className="w-full mt-0 focus-visible:ring-0">
-            {/* ... Web content ... */}
             <div className={cn(
               "bg-white dark:bg-gray-950 shadow-2xl rounded-2xl border border-gray-200 dark:border-gray-800 transition-all duration-500 overflow-hidden mx-auto",
               device === 'mobile' ? "w-[320px] min-h-[560px]" : "w-full max-w-[600px] min-h-[400px]"
@@ -219,32 +222,13 @@ export function LivePreview({ data }: LivePreviewProps) {
         </Tabs>
       </div>
 
-      <div className="p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30 space-y-4">
-        <div className="flex items-center justify-between">
-           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">AI Identity Analysis</h3>
-           <Badge className="bg-brand-500/10 text-brand-600 border-none text-[8px] font-black">STABLE</Badge>
-        </div>
-        <div className="space-y-3">
-           <div className="flex gap-3 p-3 rounded-xl bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 shadow-sm group hover:border-brand-200 transition-all">
-              <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 h-fit">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase text-gray-900 dark:text-white">Contrast Compliance</p>
-                <p className="text-[10px] text-gray-500 font-medium leading-tight">Primary Indigo on White meets AAA standards (7.4:1).</p>
-              </div>
-           </div>
-           <div className="flex gap-3 p-3 rounded-xl bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 shadow-sm group hover:border-brand-200 transition-all">
-              <div className="p-2 rounded-lg bg-brand-50 dark:bg-brand-900/20 text-brand-600 h-fit">
-                <Sparkles className="w-3.5 h-3.5" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase text-gray-900 dark:text-white">Tone Consistency</p>
-                <p className="text-[10px] text-gray-500 font-medium leading-tight">Your positioning matches the "Professional & Bold" tone markers.</p>
-              </div>
-           </div>
-        </div>
+
+      <div className="p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30">
+        <QualityAnalysis checkResult={qualityCheck || null} isLoading={isLoadingQuality} />
       </div>
+
+      {/* Font loaders for preview */}
+
 
       {/* Font loaders for preview */}
       {headingFont && (

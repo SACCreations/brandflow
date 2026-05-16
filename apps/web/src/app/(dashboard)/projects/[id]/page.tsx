@@ -75,7 +75,7 @@ export default function ProjectDetailPage() {
     queryKey: ['project-detail', projectId],
     queryFn: async () => {
       const res = await apiClient.get(`/projects/${projectId}`);
-      return res.data.data as ProjectDetail;
+      return res.data as ProjectDetail;
     },
     enabled: !!projectId,
   });
@@ -86,7 +86,7 @@ export default function ProjectDetailPage() {
     queryKey: ['project-linked-brand', linkedBrandId],
     queryFn: async () => {
       const res = await apiClient.get(`/brands/${linkedBrandId}`);
-      return res.data.data as BrandSummary;
+      return res.data as BrandSummary;
     },
     enabled: !!linkedBrandId,
   });
@@ -96,7 +96,7 @@ export default function ProjectDetailPage() {
     queryFn: async () => {
       try {
         const res = await apiClient.get(`/briefs/project/${projectId}/latest`);
-        return (res.data.data ?? null) as BriefSummary | null;
+        return (res.data ?? null) as BriefSummary | null;
       } catch (error: any) {
         if (error?.response?.status === 404) {
           return null;
@@ -111,7 +111,7 @@ export default function ProjectDetailPage() {
   const createCampaignMutation = useMutation({
     mutationFn: async (briefId: string) => {
       const res = await apiClient.post(`/campaigns/from-brief/${briefId}`);
-      return res.data.data as { id: string };
+      return res.data as { id: string };
     },
     onSuccess: (campaign) => {
       window.location.href = `/campaigns/${campaign.id}`;

@@ -67,7 +67,7 @@ export default function BrandsPage() {
     queryKey: ['brands'],
     queryFn: async () => {
       const res = await apiClient.get('/brands');
-      return res.data.data;
+      return res.data;
     },
   });
 

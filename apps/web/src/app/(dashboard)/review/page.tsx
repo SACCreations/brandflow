@@ -68,7 +68,7 @@ export default function ReviewQueuePage() {
     queryKey: ['approvals', activeTab],
     queryFn: async () => {
       const res = await apiClient.get('/approvals/queue', { params: { status: activeTab } });
-      return res.data.data as Approval[];
+      return res.data as Approval[];
     },
   });
 
@@ -80,7 +80,7 @@ export default function ReviewQueuePage() {
   const decideMutation = useMutation({
     mutationFn: async ({ id, status, note }: { id: string, status: string, note?: string }) => {
       const res = await apiClient.post(`/approvals/${id}/decide`, { status, note });
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['approvals'] });
@@ -93,7 +93,7 @@ export default function ReviewQueuePage() {
   const bulkApproveMutation = useMutation({
     mutationFn: async (ids: string[]) => {
       const res = await apiClient.post('/approvals/bulk-approve', { ids });
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['approvals'] });

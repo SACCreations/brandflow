@@ -4,7 +4,7 @@ import { SocialController } from './social.controller';
 import { SocialService } from './social.service';
 import { PublishService } from './publish.service';
 import { SocialCronService } from './social-cron.service';
-import { RedisModule } from '../common/redis/redis.module';
+import { RedisModule } from '../../common/redis/redis.module';
 
 @Module({
   imports: [AuthModule, RedisModule],
