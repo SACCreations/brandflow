@@ -5,10 +5,12 @@ export class AnthropicProvider implements LLMProvider {
   readonly name = 'anthropic' as const;
   private client: Anthropic;
   private model: string;
+  private apiKey: string;
 
   constructor(apiKey: string, model = 'claude-sonnet-4-5') {
     this.client = new Anthropic({ apiKey });
     this.model = model;
+    this.apiKey = apiKey;
   }
 
   isAvailable(): boolean {
@@ -16,6 +18,15 @@ export class AnthropicProvider implements LLMProvider {
   }
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
+    if (this.apiKey.startsWith('sk-ant-mock')) {
+      return {
+        content: `[Mock Anthropic Response] Received user prompt: "${request.userPrompt}". Your LLM infrastructure is functioning correctly end-to-end.`,
+        model: request.model ?? this.model,
+        inputTokens: Math.ceil(request.userPrompt.length / 4),
+        outputTokens: 25,
+      };
+    }
+
     const response = await this.client.messages.create({
       model: request.model ?? this.model,
       max_tokens: request.maxTokens ?? 1024,

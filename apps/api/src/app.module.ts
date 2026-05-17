@@ -29,6 +29,7 @@ import { CustomerModule } from './modules/customer/customer.module';
 import { ProjectModule } from './modules/project/project.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ChatModule } from './modules/chat/chat.module';
 import { DatabaseModule } from './common/database/database.module';
 import { RedisModule } from './common/redis/redis.module';
 import { ObservabilityModule } from './common/observability/observability.module';
@@ -100,6 +101,7 @@ import { TenantInterceptor } from './common/tenant/tenant.interceptor';
     ProjectModule,
     BillingModule,
     NotificationsModule,
+    ChatModule,
     DatabaseModule,
     RedisModule,
     ObservabilityModule,

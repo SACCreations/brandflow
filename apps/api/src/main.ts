@@ -5,6 +5,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import * as fs from 'fs';
+import * as path from 'path';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -12,7 +14,36 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { initSentry } from './common/observability/sentry.init';
 import { SentryFilter } from './common/filters/sentry.filter';
 
+function loadEnvManual() {
+  const possiblePaths = [
+    path.join(__dirname, '../.env'),
+    path.join(process.cwd(), '.env'),
+    path.join(process.cwd(), 'apps/api/.env'),
+  ];
+  for (const envPath of possiblePaths) {
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, 'utf8');
+      for (const line of content.split('\n')) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const index = trimmed.indexOf('=');
+        if (index === -1) continue;
+        const key = trimmed.slice(0, index).trim();
+        const value = trimmed.slice(index + 1).trim();
+        
+        // Override process.env if currently empty, not defined, or holds default placeholders
+        if (!process.env[key] || process.env[key] === '' || process.env[key].startsWith('change-me')) {
+          process.env[key] = value;
+        }
+      }
+      console.log(`[ManualEnv] Loaded and resolved keys from: ${envPath}`);
+      break;
+    }
+  }
+}
+
 async function bootstrap() {
+  loadEnvManual();
   initSentry();
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug'],
@@ -20,8 +51,44 @@ async function bootstrap() {
   });
 
   const config = app.get(ConfigService);
+
+  // ─── Environment Keys Validation ─────────────────────────────
+  console.log('DEBUG env keys:', {
+    processOpenAi: process.env['OPENAI_API_KEY'],
+    processAnthropic: process.env['ANTHROPIC_API_KEY'],
+    processEncryption: process.env['ENCRYPTION_KEY'],
+    configOpenAi: config.get<string>('OPENAI_API_KEY'),
+    configLlmOpenAi: config.get<string>('llm.openaiApiKey'),
+    configAppEncryption: config.get<string>('app.encryptionKey'),
+  });
+
+  const openAiKey = config.get<string>('llm.openaiApiKey') || process.env['OPENAI_API_KEY'];
+  const anthropicKey = config.get<string>('llm.anthropicApiKey') || process.env['ANTHROPIC_API_KEY'];
+  const encryptionKey = config.get<string>('app.encryptionKey') || process.env['ENCRYPTION_KEY'];
+
+  const missingKeys: string[] = [];
+  if (!openAiKey) missingKeys.push('OPENAI_API_KEY');
+  if (!anthropicKey) missingKeys.push('ANTHROPIC_API_KEY');
+  if (!encryptionKey || encryptionKey.startsWith('change-me')) missingKeys.push('ENCRYPTION_KEY (must not be placeholder)');
+
+  if (missingKeys.length > 0) {
+    console.error(`
+============================================================
+🚨 CRITICAL STARTUP ERROR: MISSING REQUIRED AI OR ENCRYPTION KEYS!
+============================================================
+The following required keys are missing or invalid in .env:
+${missingKeys.map(k => `  - ${k}`).join('\n')}
+
+To prevent silent failures in LLMGateway or encryption-dependent
+modules, startup has been aborted. Please update your .env.
+============================================================
+`);
+    throw new Error(`Missing environment keys: ${missingKeys.join(', ')}`);
+  }
+
   const port = config.get<number>('app.port', 4000);
   const corsOrigins = config.get<string>('app.corsOrigins', 'http://localhost:3000,http://localhost:3002');
+
 
 
   // ─── Security ────────────────────────────────────────────────

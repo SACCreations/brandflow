@@ -852,3 +852,20 @@ enum AutomationRunStatus {
   failed
   paused
 }
+
+model AIRequestLog {
+  id           String   @id @default(uuid())
+  requestId    String
+  businessId   String?
+  provider     String
+  model        String
+  latency      Int
+  inputTokens  Int
+  outputTokens Int
+  success      Boolean
+  errorMessage String?
+  createdAt    DateTime @default(now())
+
+  @@map("ai_request_logs")
+}
+

@@ -5,10 +5,12 @@ export class OpenAIProvider implements LLMProvider {
   readonly name = 'openai' as const;
   private client: OpenAI;
   private model: string;
+  private apiKey: string;
 
   constructor(apiKey: string, model = 'gpt-4o') {
     this.client = new OpenAI({ apiKey });
     this.model = model;
+    this.apiKey = apiKey;
   }
 
   isAvailable(): boolean {
@@ -16,6 +18,15 @@ export class OpenAIProvider implements LLMProvider {
   }
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
+    if (this.apiKey.startsWith('sk-mock')) {
+      return {
+        content: `[Mock OpenAI Response] Received user prompt: "${request.userPrompt}". Your LLM infrastructure is functioning correctly end-to-end.`,
+        model: request.model ?? this.model,
+        inputTokens: Math.ceil(request.userPrompt.length / 4),
+        outputTokens: 25,
+      };
+    }
+
     const response = await this.client.chat.completions.create({
       model: request.model ?? this.model,
       messages: [

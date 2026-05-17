@@ -45,7 +45,10 @@ const NAV = [
   },
   {
     group: 'Insights',
-    items: [{ label: 'Analytics', href: '/analytics', icon: '◉' }],
+    items: [
+      { label: 'Analytics', href: '/analytics', icon: '◉' },
+      { label: 'AI Diagnostics', href: '/ai-test', icon: '✦' },
+    ],
   },
   {
     group: 'Settings',
