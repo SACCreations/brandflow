@@ -222,7 +222,7 @@ export const PERMISSIONS = [
 export type Permission = (typeof PERMISSIONS)[number];
 
 // ─── AI Providers ─────────────────────────────────────────────────
-export const AI_PROVIDERS = ['openai', 'anthropic', 'fallback'] as const;
+export const AI_PROVIDERS = ['openai', 'anthropic', 'google', 'fallback'] as const;
 export type AIProvider = (typeof AI_PROVIDERS)[number];
 
 // ─── Asset Types ─────────────────────────────────────────────────
@@ -252,6 +252,7 @@ export const QUEUES = {
   PUBLISH: 'publish',
   KNOWLEDGE_INGESTION: 'knowledge-ingestion',
   AI_GENERATION: 'ai-generation',
+  IMAGE_GENERATION: 'image-generation',
   ANALYTICS_COLLECTION: 'analytics-collection',
   NOTIFICATIONS: 'notifications',
   AUTOMATION: 'automation',

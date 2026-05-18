@@ -13,3 +13,7 @@ export { TextSplitter } from './utils/chunking';
 export { VectorService } from './vector-service';
 export type { LLMConfig, ProviderResponse, ProviderRequest, GatewayConfig } from './types';
 export type * from './types';
+export { ImageGateway } from './image-gateway';
+export { OpenAIImageProvider } from './providers/openai-image';
+export { StabilityImageProvider } from './providers/stability-image';
+export type * from './image-types';

@@ -41,8 +41,8 @@ export class ContentController {
   suggestTopics(
     @Query('brandId') brandId: string,
     @Query('category') category: string,
-    @Query('campaignId') campaignId?: string,
     @CurrentUser() user: JwtPayload,
+    @Query('campaignId') campaignId?: string,
   ) {
     return this.contentService.suggestTopics(user.businessId, brandId, category, campaignId);
   }

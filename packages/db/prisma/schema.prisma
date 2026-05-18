@@ -11,20 +11,20 @@ datasource db {
 }
 
 model Business {
-  id                   String              @id @default(uuid())
+  id                   String               @id @default(uuid())
   name                 String
-  slug                 String              @unique
+  slug                 String               @unique
   parentId             String?
   whiteLabel           Json?
-  healthScore          Int                 @default(0)
-  defaultLocale        String              @default("en-US")
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
+  healthScore          Int                  @default(0)
+  defaultLocale        String               @default("en-US")
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
   ownerId              String?
-  plan                 String              @default("free")
+  plan                 String               @default("free")
   stripeCustomerId     String?
   stripeSubscriptionId String?
-  status               String              @default("active")
+  status               String               @default("active")
   trialEndsAt          DateTime?
   analyticsEvents      AnalyticsEvent[]
   approvals            Approval[]
@@ -34,11 +34,14 @@ model Business {
   automations          Automation[]
   brands               Brand[]
   briefs               Brief[]
-  parent               Business?           @relation("AgencyChildren", fields: [parentId], references: [id])
-  children             Business[]          @relation("AgencyChildren")
+  parent               Business?            @relation("AgencyChildren", fields: [parentId], references: [id])
+  children             Business[]           @relation("AgencyChildren")
   campaigns            Campaign[]
   contents             Content[]
   costEvents           CostEvent[]
+  creativeApprovals    CreativeApproval[]
+  generatedImages      GeneratedImage[]
+  imageGenerationJobs  ImageGenerationJob[]
   customers            Customer[]
   knowledgeSources     KnowledgeSource[]
   llmSettings          LlmSettings?
@@ -200,46 +203,48 @@ model CostEvent {
 }
 
 model Brand {
-  id                String            @id @default(uuid())
-  businessId        String
-  name              String
-  slug              String?
-  tagline           String?
-  description       String?
-  industry          String?
-  website           String?
-  foundedYear       Int?
-  headquarters      String?
-  status            BrandStatus       @default(published)
-  locales           Json?
-  defaultLocale     String?           @default("en-US")
-  positioning       String?
-  audience          String?
-  differentiators   String?
-  tone              Json?
-  visualRules       Json?
-  governance        Json?
-  identity          Json?
-  marketing         Json?
-  designTokens      Json?
-  strategy          Json?
-  competitors       Json?
-  contactInfo       Json?
-  socialAccess      Json?
-  designPreferences Json?
-  approvalWorkflow  Json?
-  campaignDetails   Json?
-  analyticsConfig   Json?
-  healthScore       Int               @default(0)
-  version           Int               @default(1)
-  archivedAt        DateTime?
-  deletedAt         DateTime?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  assets            Asset[]
-  business          Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  contents          Content[]
-  knowledgeSources  KnowledgeSource[]
+  id                  String               @id @default(uuid())
+  businessId          String
+  name                String
+  slug                String?
+  tagline             String?
+  description         String?
+  industry            String?
+  website             String?
+  foundedYear         Int?
+  headquarters        String?
+  status              BrandStatus          @default(published)
+  locales             Json?
+  defaultLocale       String?              @default("en-US")
+  positioning         String?
+  audience            String?
+  differentiators     String?
+  tone                Json?
+  visualRules         Json?
+  governance          Json?
+  identity            Json?
+  marketing           Json?
+  designTokens        Json?
+  strategy            Json?
+  competitors         Json?
+  contactInfo         Json?
+  socialAccess        Json?
+  designPreferences   Json?
+  approvalWorkflow    Json?
+  campaignDetails     Json?
+  analyticsConfig     Json?
+  healthScore         Int                  @default(0)
+  version             Int                  @default(1)
+  archivedAt          DateTime?
+  deletedAt           DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  assets              Asset[]
+  business            Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  contents            Content[]
+  generatedImages     GeneratedImage[]
+  imageGenerationJobs ImageGenerationJob[]
+  knowledgeSources    KnowledgeSource[]
 
   @@unique([businessId, slug])
   @@map("brands")
@@ -274,26 +279,26 @@ model KnowledgeSource {
 }
 
 model KnowledgeEntry {
-  id                String                  @id @default(uuid())
+  id                String                       @id @default(uuid())
   businessId        String
   sourceId          String
   classification    String?
   content           String
-  confidence        Float                   @default(1.0)
-  isStale           Boolean                 @default(false)
+  confidence        Float                        @default(1.0)
+  isStale           Boolean                      @default(false)
   staleAt           DateTime?
   metadata          Json?
-  locale            String?                 @default("en-US")
+  locale            String?                      @default("en-US")
   governance        Json?
-  version           Int                     @default(1)
+  version           Int                          @default(1)
   contentHash       String?
   embedding         Unsupported("vector(1536)")?
-  createdAt         DateTime                @default(now())
-  updatedAt         DateTime                @updatedAt
+  createdAt         DateTime                     @default(now())
+  updatedAt         DateTime                     @updatedAt
   citations         KnowledgeCitation[]
-  source            KnowledgeSource         @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  relationshipsFrom KnowledgeRelationship[] @relation("FromEntry")
-  relationshipsTo   KnowledgeRelationship[] @relation("ToEntry")
+  source            KnowledgeSource              @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  relationshipsFrom KnowledgeRelationship[]      @relation("FromEntry")
+  relationshipsTo   KnowledgeRelationship[]      @relation("ToEntry")
   reviews           KnowledgeReview[]
 
   @@map("knowledge_entries")
@@ -426,23 +431,23 @@ model KnowledgeCitation {
 }
 
 model ReviewTask {
-  id             String        @id @default(uuid())
-  businessId     String
-  contentId      String
-  qualityCheckId String?
-  status         String        @default("pending")
-  priority       String        @default("medium")
-  assignedToId   String?
-  reason         String?
-  deadline       DateTime?
-  resolvedAt     DateTime?
-  resolvedById   String?
+  id              String        @id @default(uuid())
+  businessId      String
+  contentId       String
+  qualityCheckId  String?
+  status          String        @default("pending")
+  priority        String        @default("medium")
+  assignedToId    String?
+  reason          String?
+  deadline        DateTime?
+  resolvedAt      DateTime?
+  resolvedById    String?
   resolutionNotes String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  business       Business      @relation(fields: [businessId], references: [id])
-  content        Content       @relation(fields: [contentId], references: [id])
-  qualityCheck   QualityCheck? @relation(fields: [qualityCheckId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  business        Business      @relation(fields: [businessId], references: [id])
+  content         Content       @relation(fields: [contentId], references: [id])
+  qualityCheck    QualityCheck? @relation(fields: [qualityCheckId], references: [id])
 
   @@map("review_tasks")
 }
@@ -539,22 +544,24 @@ model ContentVersion {
 }
 
 model Asset {
-  id         String    @id @default(uuid())
-  businessId String
-  campaignId String?
-  type       String
-  fileName   String
-  mimeType   String
-  s3Key      String
-  cdnUrl     String?
-  tags       Json?
-  metadata   Json?
-  version    Int       @default(1)
-  brandId    String?
-  createdAt  DateTime  @default(now())
-  brand      Brand?    @relation(fields: [brandId], references: [id])
-  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  campaign   Campaign? @relation(fields: [campaignId], references: [id])
+  id             String          @id @default(uuid())
+  businessId     String
+  campaignId     String?
+  type           String
+  fileName       String
+  mimeType       String
+  s3Key          String
+  cdnUrl         String?
+  tags           Json?
+  metadata       Json?
+  version        Int             @default(1)
+  brandId        String?
+  createdAt      DateTime        @default(now())
+  brand          Brand?          @relation(fields: [brandId], references: [id])
+  business       Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  campaign       Campaign?       @relation(fields: [campaignId], references: [id])
+  generatedImage GeneratedImage?
+  imageVariant   ImageVariant?
 
   @@map("assets")
 }
@@ -869,3 +876,164 @@ model AIRequestLog {
   @@map("ai_request_logs")
 }
 
+// --- Image Generation Job Models ---
+
+model ImageGenerationJob {
+  id           String    @id @default(uuid())
+  businessId   String
+  brandId      String
+  campaignId   String?
+  contentId    String? // Optional linkage to source content
+  status       JobStatus @default(PENDING)
+  category     String // e.g. "SMO_POSTER", "WEBSITE_HERO"
+  settings     Json // Dimensions, style overrides, quality settings
+  rawPrompt    String
+  systemPrompt String? // Prompt sent to the prompt builder
+  finalPrompt  String? // Enhanced prompt generated by LLM
+  error        String? // Error message if failed
+  progress     Int       @default(0) // Percentage progress (0-100)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  business Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  brand    Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  images   GeneratedImage[]
+
+  @@index([businessId, status])
+  @@map("image_generation_jobs")
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model GeneratedImage {
+  id          String   @id @default(uuid())
+  jobId       String?
+  businessId  String
+  brandId     String
+  campaignId  String?
+  assetId     String   @unique // Maps directly to core Asset model
+  width       Int
+  height      Int
+  aspectRatio String // e.g., "1:1", "16:9"
+  promptUsed  String
+  metadata    Json? // Quality, provider used, costs, etc.
+  version     Int      @default(1)
+  isFavorite  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  business  Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  brand     Brand               @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  job       ImageGenerationJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  asset     Asset               @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  variants  ImageVariant[]
+  edits     ImageEdit[]
+  approvals CreativeApproval[]
+
+  @@index([businessId])
+  @@map("generated_images")
+}
+
+model ImageVariant {
+  id            String   @id @default(uuid())
+  parentImageId String
+  businessId    String
+  assetId       String   @unique
+  variantType   String // e.g. "aspect_ratio_resize", "text_translation"
+  width         Int
+  height        Int
+  createdAt     DateTime @default(now())
+
+  parentImage GeneratedImage @relation(fields: [parentImageId], references: [id], onDelete: Cascade)
+  asset       Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@map("image_variants")
+}
+
+model ImageTemplate {
+  id           String   @id @default(uuid())
+  businessId   String? // Global templates if null
+  brandId      String? // Brand-specific template if set
+  name         String
+  category     String // e.g., "SMO_POSTER"
+  dimensions   Json // { width, height }
+  canvasLayers Json // JSON representation of editor layers
+  previewUrl   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("image_templates")
+}
+
+model ImageEdit {
+  id             String   @id @default(uuid())
+  imageId        String
+  businessId     String
+  userId         String
+  layersSnapshot Json // Fully serialized layer representations
+  historyIndex   Int // For undo/redo positioning
+  createdAt      DateTime @default(now())
+
+  image GeneratedImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@map("image_edits")
+}
+
+model CreativeApproval {
+  id              String         @id @default(uuid())
+  businessId      String
+  imageId         String
+  status          ApprovalStatus @default(pending)
+  currentStage    ApprovalStage  @default(CREATIVE_REVIEW)
+  slaDeadline     DateTime?
+  revisionHistory Json? // Array of previous state change logs
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  business Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  image    GeneratedImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  comments ImageComment[]
+
+  @@map("creative_approvals")
+}
+
+enum ApprovalStage {
+  CREATIVE_REVIEW
+  BRAND_REVIEW
+  CLIENT_REVIEW
+  LEGAL_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model ImageComment {
+  id         String   @id @default(uuid())
+  approvalId String
+  userId     String
+  body       String
+  annotation Json? // Coords: { x, y, width, height, page }
+  createdAt  DateTime @default(now())
+
+  approval CreativeApproval @relation(fields: [approvalId], references: [id], onDelete: Cascade)
+
+  @@map("image_comments")
+}
+
+model AIImageLog {
+  id           String   @id @default(uuid())
+  businessId   String
+  provider     String // e.g. "stability", "openai"
+  model        String // e.g. "dall-e-3", "stable-diffusion-3"
+  latencyMs    Int
+  costCents    Float
+  status       String // "SUCCESS" | "FAILED"
+  errorMessage String?
+  createdAt    DateTime @default(now())
+
+  @@map("ai_image_logs")
+}
