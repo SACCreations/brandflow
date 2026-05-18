@@ -15,6 +15,9 @@ import { PrismaService } from '../../common/database/prisma.service';
 import { BudgetService } from '../llm-settings/budget.service';
 import { AuditService } from '../business/audit.service';
 import { QualityService } from '../quality/quality.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { QUEUES } from '@brandflow/shared';
 
 @Injectable()
 export class ContentService {
@@ -30,6 +33,7 @@ export class ContentService {
     private readonly budgetService: BudgetService,
     private readonly auditService: AuditService,
     private readonly qualityService: QualityService,
+    @InjectQueue(QUEUES.AI_GENERATION) private readonly aiGenerationQueue: Queue,
   ) {
     this.gateway = new LLMGateway({
       defaultProvider: config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic',
@@ -101,6 +105,30 @@ export class ContentService {
   }
 
   async generate(businessId: string, userId: string, dto: GenerateContentDto) {
+    // Check if background queue execution is needed
+    const topicsList = dto.topics && dto.topics.length > 0 ? dto.topics : (dto.topic ? [dto.topic] : []);
+    const totalCount = topicsList.length * (dto.count || 1);
+
+    if (totalCount > 3 || (dto.topics && dto.topics.length > 1)) {
+      const job = await this.aiGenerationQueue.add(
+        'generate-batch',
+        { businessId, userId, dto },
+        { attempts: 3, backoff: 5000 }
+      );
+
+      return {
+        jobId: job.id,
+        status: 'queued',
+        progress: 0,
+        async: true,
+      } as any;
+    }
+
+    const effectiveTopic = topicsList[0] || dto.topic;
+    if (!effectiveTopic) {
+      throw new BadRequestException('A topic is required to generate content.');
+    }
+
     // 1. Check token budget
     const subscription = await this.prisma.client.subscription.findFirst({
       where: { businessId, status: 'active' },
@@ -146,7 +174,7 @@ export class ContentService {
     const relevantFacts = await this.vectorService.findRelevantContext(
       this.prisma.client,
       businessId,
-      dto.topic,
+      effectiveTopic,
       10 // Top 10 facts
     );
 
@@ -170,7 +198,7 @@ export class ContentService {
     });
 
     const promptTemplate = promptRecord?.template ?? this.getDefaultPromptTemplate(dto.platform);
-    const sanitizedTopic = this.promptEngine.sanitizeInput(dto.topic);
+    const sanitizedTopic = this.promptEngine.sanitizeInput(effectiveTopic);
 
     const systemPrompt = this.promptEngine.buildSystemPrompt(
       {
@@ -470,5 +498,77 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
   private normalizeOptionalText(value: string | null | undefined) {
     const normalized = value?.trim();
     return normalized ? normalized : undefined;
+  }
+
+  async getJobStatus(jobId: string, businessId: string) {
+    const job = await this.aiGenerationQueue.getJob(jobId);
+    if (!job) {
+      throw new NotFoundException(`Job ${jobId} not found`);
+    }
+
+    if (job.data.businessId !== businessId) {
+      throw new ForbiddenException('Access denied to this job');
+    }
+
+    const state = await job.getState();
+    const progress = job.progress;
+    const result = job.returnvalue;
+
+    return {
+      id: job.id,
+      status: state,
+      progress,
+      result,
+    };
+  }
+
+  async suggestTopics(businessId: string, brandId: string, category: string, campaignId?: string) {
+    const brand = await this.prisma.client.brand.findFirst({
+      where: { id: brandId, businessId },
+    });
+    if (!brand) throw new NotFoundException('Brand not found');
+
+    const brandName = brand.name;
+    const tone = Array.isArray(brand.tone) ? brand.tone.join(', ') : 'professional';
+    const industry = brand.industry || 'marketing';
+
+    const systemPrompt = `You are a Senior Content strategist for the brand "${brandName}" in the "${industry}" industry.
+Generate exactly 5 creative, highly relevant marketing and content topic ideas for the category "${category}".
+Tone: ${tone}.
+Respond in strict JSON format matching:
+{
+  "topics": [
+    { "id": "1", "name": "Topic title", "tag": "Trend" }
+  ]
+}`;
+
+    try {
+      const llmSettings = await this.llmSettingsService.getSettings(businessId);
+      const decryptedApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId);
+
+      const { response } = await this.gateway.complete(
+        systemPrompt,
+        `Generate 5 topic suggestions for Category: ${category}`,
+        {
+          provider: (llmSettings.provider as any) ?? 'openai',
+          model: llmSettings.model ?? undefined,
+          temperature: 0.8,
+          apiKey: decryptedApiKey ?? undefined,
+        }
+      );
+
+      const parsed = JSON.parse(response.content);
+      return parsed;
+    } catch (err: any) {
+      return {
+        topics: [
+          { id: '1', name: `${brandName} Premium Launch`, tag: 'Product Launch' },
+          { id: '2', name: `Summer Special Combo Discount`, tag: 'Offer' },
+          { id: '3', name: `Why Customers Choose ${brandName}`, tag: 'Brand Awareness' },
+          { id: '4', name: `Top 5 Tips for ${industry} in 2026`, tag: 'Educational' },
+          { id: '5', name: `Our Customer Testimonials & Success Stories`, tag: 'Social Proof' },
+        ],
+      };
+    }
   }
 }

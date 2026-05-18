@@ -35,6 +35,28 @@ import {
 export class ContentController {
   constructor(private readonly contentService: ContentService) {}
 
+  @Get('topics/suggest')
+  @Permissions('content:read')
+  @ApiOperation({ summary: 'Get AI recommended topic ideas' })
+  suggestTopics(
+    @Query('brandId') brandId: string,
+    @Query('category') category: string,
+    @Query('campaignId') campaignId?: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.contentService.suggestTopics(user.businessId, brandId, category, campaignId);
+  }
+
+  @Get('jobs/:id')
+  @Permissions('content:read')
+  @ApiOperation({ summary: 'Get background generation job status' })
+  async getJobStatus(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.contentService.getJobStatus(id, user.businessId);
+  }
+
   @Get()
   @Permissions('content:read')
   @ApiOperation({ summary: 'List content items' })

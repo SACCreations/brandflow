@@ -291,18 +291,28 @@ export const generateContentSchema = z.object({
   brandId: z.string().uuid().nullish(),
   briefId: z.string().uuid().nullish(),
   campaignId: z.string().uuid().nullish(),
-  platform: z.enum(['linkedin', 'instagram', 'facebook', 'twitter', 'tiktok']),
-  type: z.enum(['post', 'caption', 'ad_copy', 'blog_snippet', 'hook', 'cta', 'email', 'article']),
-  topic: z.string().min(1).max(1000),
+  platform: z.string().min(1),
+  type: z.string().min(1),
+  topic: z.string().min(1).max(1000).nullish(),
+  topics: z.array(z.string().min(1)).nullish(),
+  category: z.string().nullish(),
+  count: z.coerce.number().int().min(1).max(100).default(1).nullish(),
   additionalContext: z.string().max(2000).nullish(),
   tone: z.string().max(100).nullish(),
   temperature: z.number().min(0).max(2).nullish(),
   maxTokens: z.number().int().min(1).max(32000).nullish(),
+  language: z.string().nullish(),
+  cta: z.string().nullish(),
+  creativity: z.number().min(0).max(2).nullish(),
+  seoOptimized: z.boolean().nullish(),
+  complianceStrictness: z.enum(['low', 'medium', 'high']).nullish(),
+  approvalRequired: z.boolean().nullish(),
 }).refine((value) => Boolean(value.brandId || value.briefId), {
   message: 'Either brandId or briefId is required',
   path: ['brandId'],
 });
 export type GenerateContentDto = z.infer<typeof generateContentSchema>;
+
 
 export const updateContentSchema = z.object({
   body: z.string().min(1).max(50_000),
