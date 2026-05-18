@@ -113,6 +113,9 @@ function SessionBootstrap() {
       } catch (err: any) {
         console.error('[AUTH BOOTSTRAP] Error:', err.message || err);
         
+        // Atomically clear authentication states and delete cookies synchronously BEFORE redirecting
+        clearAuth();
+        
         const path = typeof window !== 'undefined' ? window.location.pathname : '';
         const isPublic = ['/login', '/register', '/'].includes(path);
         
@@ -122,8 +125,6 @@ function SessionBootstrap() {
         } else {
           console.log('[AUTH BOOTSTRAP] Already on public path:', path);
         }
-        
-        clearAuth();
       } finally {
         setSessionRefreshing(false);
       }

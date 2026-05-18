@@ -2,6 +2,7 @@
 
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { Button, Card, useToast } from '@brandflow/ui';
@@ -96,11 +97,24 @@ interface SocialAccount {
 
 export default function ContentEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [content, setContent] = useState('');
   const [scheduleAt, setScheduleAt] = useState('');
   const [selectedSocialAccountId, setSelectedSocialAccountId] = useState('');
+
+  // Safeguard: Redirect if the dynamic ID parameter is invalid or resolves as string literal 'undefined'
+  useEffect(() => {
+    if (id === 'undefined') {
+      toast({
+        title: 'Invalid content ID',
+        description: 'You are being redirected back to the content creation workspace.',
+        variant: 'destructive',
+      });
+      router.push('/create/content');
+    }
+  }, [id, router, toast]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['content-editor', id],
@@ -108,6 +122,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
       const res = await apiClient.get(`/content/${id}`);
       return res.data as ContentDetail;
     },
+    enabled: !!id && id !== 'undefined',
   });
 
   useEffect(() => {

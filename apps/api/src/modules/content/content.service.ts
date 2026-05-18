@@ -220,14 +220,6 @@ export class ContentService {
       },
     );
 
-    // 5. Quality check & Persist (Delegated to QualityService)
-    const qualityResult = await this.qualityService.runCheck(
-      '', // Temporary placeholder for contentId before creation, or we create content first
-      response.content,
-      businessId,
-      effectiveBrandId,
-    );
-
     // 6. Track cost
     await this.costTracker.track({
       businessId,
@@ -238,7 +230,7 @@ export class ContentService {
       requestId,
     });
 
-    // 7. Persist content
+    // 7. Persist content first
     const content = await this.prisma.client.$transaction(async (tx: Prisma.TransactionClient) => {
       const created = await tx.content.create({
         data: {
@@ -250,7 +242,7 @@ export class ContentService {
           type: dto.type,
           body: response.content,
           status: 'draft',
-          qualityScore: qualityResult.confidenceScore,
+          qualityScore: 0,
           promptId: promptRecord?.id,
           promptVersion: promptRecord?.version,
           metadata: {
@@ -268,15 +260,11 @@ export class ContentService {
           editedBy: userId,
         },
       });
-
-      // Update quality check with the actual contentId (as it was likely created with an empty one or needs linking)
-      // Since QualityService.runCheck creates the record, we might need to adjust the order:
-      // Content First -> Then Quality Check.
       
       return created;
     });
 
-    // RE-RUN QC with proper contentId for persistence
+    // 8. Run QC with proper contentId for persistence
     const finalQualityResult = await this.qualityService.runCheck(
       content.id,
       response.content,
