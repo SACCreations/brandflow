@@ -18,6 +18,8 @@ import { QualityService } from '../quality/quality.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { QUEUES } from '@brandflow/shared';
+import { BillingService } from '../billing/billing.service';
+
 
 @Injectable()
 export class ContentService {
@@ -34,6 +36,7 @@ export class ContentService {
     private readonly auditService: AuditService,
     private readonly qualityService: QualityService,
     @InjectQueue(QUEUES.AI_GENERATION) private readonly aiGenerationQueue: Queue,
+    private readonly billingService: BillingService,
   ) {
     this.gateway = new LLMGateway({
       defaultProvider: config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic',
@@ -129,29 +132,8 @@ export class ContentService {
       throw new BadRequestException('A topic is required to generate content.');
     }
 
-    // 1. Check token budget
-    const subscription = await this.prisma.client.subscription.findFirst({
-      where: { businessId, status: 'active' },
-    });
-    if (!subscription) {
-      throw new ForbiddenException('No active subscription found');
-    }
-
-    const periodStart = new Date();
-    periodStart.setDate(1);
-    const usedThisPeriod = await this.prisma.client.costEvent.aggregate({
-      where: {
-        businessId,
-        createdAt: { gte: periodStart },
-        module: 'generation',
-      },
-      _sum: { outputTokens: true, inputTokens: true },
-    });
-
-    const totalTokensUsed = (usedThisPeriod._sum.inputTokens ?? 0) + (usedThisPeriod._sum.outputTokens ?? 0);
-    if (totalTokensUsed >= subscription.tokenBudget) {
-      throw new ForbiddenException('Token budget exhausted for this billing period');
-    }
+    // Enforce dynamic, plan-based entitlement and token budget limits
+    await this.billingService.checkTokenLimit(businessId, 1000);
 
     const briefContext = dto.briefId
       ? await this.resolveBriefContext(dto.briefId, businessId, dto.campaignId)

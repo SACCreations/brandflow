@@ -5,6 +5,7 @@ import { ContentService } from './content.service';
 import { ContentQueueProcessor } from './content-queue.processor';
 import { LlmSettingsModule } from '../llm-settings/llm-settings.module';
 import { BusinessModule } from '../business/business.module';
+import { BillingModule } from '../billing/billing.module';
 import { QUEUES } from '@brandflow/shared';
 
 import { QualityModule } from '../quality/quality.module';
@@ -15,6 +16,7 @@ import { QualityModule } from '../quality/quality.module';
     LlmSettingsModule,
     BusinessModule,
     QualityModule,
+    BillingModule,
   ],
 
   controllers: [ContentController],

@@ -21,7 +21,6 @@ export class SocialCronService {
     const soon = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const expiringAccounts = await prisma.socialAccount.findMany({
       where: {
-        platform: 'linkedin',
         tokenExpiresAt: {
           lte: soon,
           gt: new Date(), // Only refresh non-expired ones proactively
@@ -38,7 +37,7 @@ export class SocialCronService {
 
     for (const account of expiringAccounts) {
       try {
-        await this.socialService.refreshLinkedInToken(account.id, account.businessId);
+        await this.socialService.refreshToken(account.id, account.businessId);
         this.logger.log(`Successfully refreshed token for ${account.platform} account: ${account.name} (${account.id})`);
       } catch (error: any) {
         this.logger.error(`Failed to proactively refresh token for account ${account.id}: ${error.message}`);

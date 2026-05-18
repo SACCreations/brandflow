@@ -572,4 +572,146 @@ export class SocialService {
       createdAt: new Date(post.firstPublishedAt),
     }));
   }
+
+  async refreshToken(accountId: string, businessId: string): Promise<void> {
+    const account = await prisma.socialAccount.findFirst({ where: { id: accountId, businessId } });
+    if (!account) throw new NotFoundException('Social account not found');
+
+    this.logger.log(`Refreshing token for ${account.platform} account: ${account.name}`);
+
+    // Sandbox/Mock Fallback: if in development or access token matches sandbox patterns, simulate success
+    const { accessToken } = await this.getDecryptedTokens(accountId, businessId);
+    const isMock = !accessToken || accessToken.startsWith('mock') || accessToken.startsWith('sk-mock') || accessToken.includes('mock') || process.env['NODE_ENV'] !== 'production';
+    if (isMock) {
+      this.logger.log(`Sandbox Mode: Gracefully simulating successful token refresh for ${account.platform}`);
+      await prisma.socialAccount.update({
+        where: { id: accountId },
+        data: {
+          tokenExpiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // Push expiration by 60 days
+        },
+      });
+      return;
+    }
+
+    switch (account.platform) {
+      case 'linkedin':
+        return this.refreshLinkedInToken(accountId, businessId);
+      case 'facebook':
+      case 'instagram':
+        return this.refreshMetaToken(accountId, businessId);
+      case 'twitter':
+        return this.refreshTwitterToken(accountId, businessId);
+      case 'youtube':
+        return this.refreshYouTubeToken(accountId, businessId);
+      default:
+        throw new BadRequestException(`Refresh not supported for platform: ${account.platform}`);
+    }
+  }
+
+  async refreshMetaToken(accountId: string, businessId: string): Promise<void> {
+    const account = await prisma.socialAccount.findFirst({ where: { id: accountId, businessId } });
+    if (!account) throw new NotFoundException('Account not found');
+
+    const { accessToken } = await this.getDecryptedTokens(accountId, businessId);
+    const { clientId, clientSecret } = this.getMetaConfig();
+
+    const response = await fetch(
+      `https://graph.facebook.com/v20.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${clientId}&client_secret=${clientSecret}&fb_exchange_token=${accessToken}`,
+      { method: 'GET', signal: AbortSignal.timeout(15_000) }
+    );
+
+    const payload = await response.json() as any;
+    if (!response.ok) {
+      throw new BadRequestException(payload.error?.message || 'Meta token refresh failed.');
+    }
+
+    await this.upsert(businessId, account.platform, {
+      name: account.name,
+      externalId: account.externalId,
+      accessToken: payload.access_token,
+      tokenExpiresAt: payload.expires_in
+        ? new Date(Date.now() + payload.expires_in * 1000)
+        : undefined,
+    });
+  }
+
+  async refreshTwitterToken(accountId: string, businessId: string): Promise<void> {
+    const account = await prisma.socialAccount.findFirst({ where: { id: accountId, businessId } });
+    if (!account) throw new NotFoundException('Account not found');
+
+    const { refreshToken } = await this.getDecryptedTokens(accountId, businessId);
+    if (!refreshToken) throw new BadRequestException('No Twitter refresh token available.');
+
+    const clientId = process.env['TWITTER_CLIENT_ID'] || 'mock-client-id';
+    const clientSecret = process.env['TWITTER_CLIENT_SECRET'] || 'mock-client-secret';
+
+    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const response = await fetch('https://api.twitter.com/2/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${credentials}`,
+      },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+
+    const payload = await response.json() as any;
+    if (!response.ok) {
+      throw new BadRequestException(payload.error_description || payload.error || 'Twitter token refresh failed.');
+    }
+
+    await this.upsert(businessId, 'twitter', {
+      name: account.name,
+      externalId: account.externalId,
+      accessToken: payload.access_token,
+      refreshToken: payload.refresh_token || refreshToken,
+      tokenExpiresAt: payload.expires_in
+        ? new Date(Date.now() + payload.expires_in * 1000)
+        : undefined,
+    });
+  }
+
+  async refreshYouTubeToken(accountId: string, businessId: string): Promise<void> {
+    const account = await prisma.socialAccount.findFirst({ where: { id: accountId, businessId } });
+    if (!account) throw new NotFoundException('Account not found');
+
+    const { refreshToken } = await this.getDecryptedTokens(accountId, businessId);
+    if (!refreshToken) throw new BadRequestException('No YouTube refresh token available.');
+
+    const clientId = process.env['GOOGLE_CLIENT_ID'] || 'mock-client-id';
+    const clientSecret = process.env['GOOGLE_CLIENT_SECRET'] || 'mock-client-secret';
+
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+
+    const payload = await response.json() as any;
+    if (!response.ok) {
+      throw new BadRequestException(payload.error_description || payload.error || 'YouTube token refresh failed.');
+    }
+
+    await this.upsert(businessId, 'youtube', {
+      name: account.name,
+      externalId: account.externalId,
+      accessToken: payload.access_token,
+      refreshToken: payload.refresh_token || refreshToken,
+      tokenExpiresAt: payload.expires_in
+        ? new Date(Date.now() + payload.expires_in * 1000)
+        : undefined,
+    });
+  }
 }

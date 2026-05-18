@@ -1,13 +1,11 @@
-import { AsyncLocalStorage } from 'async_hooks';
+import { tenantStorage } from '@brandflow/db';
 
 export class TenantContext {
-  private static readonly storage = new AsyncLocalStorage<string>();
-
   static run<T>(tenantId: string, callback: () => T): T {
-    return this.storage.run(tenantId, callback);
+    return tenantStorage.run(tenantId, callback);
   }
 
   static getTenantId(): string | undefined {
-    return this.storage.getStore();
+    return tenantStorage.getStore();
   }
 }

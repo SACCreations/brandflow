@@ -1,7 +1,36 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../common/database/prisma.service';
 import Stripe from 'stripe';
+
+
+export interface PlanEntitlements {
+  tokenLimit: number;
+  brandLimit: number;
+  seatLimit: number;
+  features: string[];
+}
+
+export const PLAN_ENTITLEMENTS: Record<string, PlanEntitlements> = {
+  free: {
+    tokenLimit: 5000, // 5,000 token credits
+    brandLimit: 1,
+    seatLimit: 1,
+    features: ['basic_content'],
+  },
+  growth: {
+    tokenLimit: 100000, // 100,000 token credits
+    brandLimit: 5,
+    seatLimit: 5,
+    features: ['basic_content', 'image_generation', 'analytics', 'social_publishing'],
+  },
+  enterprise: {
+    tokenLimit: 1000000, // 1,000,000 token credits
+    brandLimit: 100,
+    seatLimit: 100,
+    features: ['basic_content', 'image_generation', 'analytics', 'social_publishing', 'custom_gateway', 'advanced_brand_hub'],
+  },
+};
 
 @Injectable()
 export class BillingService {
@@ -61,7 +90,40 @@ export class BillingService {
     }
   }
 
+  async checkEntitlement(businessId: string, feature: string): Promise<boolean> {
+    const business = await this.prisma.client.business.findUnique({
+      where: { id: businessId },
+      select: { plan: true },
+    });
+    const planName = (business?.plan || 'free').toLowerCase();
+    const entitlements = PLAN_ENTITLEMENTS[planName] ?? PLAN_ENTITLEMENTS['free']!;
+    return entitlements.features.includes(feature);
+  }
+
+  async checkBrandLimit(businessId: string): Promise<void> {
+    const stats = await this.getUsageStats(businessId);
+    if (stats.brandsUsed >= stats.brandLimit) {
+      throw new BadRequestException(`Brand limit reached. Your plan allows up to ${stats.brandLimit} brands.`);
+    }
+  }
+
+  async checkTokenLimit(businessId: string, estimatedCostCents: number): Promise<void> {
+    const stats = await this.getUsageStats(businessId);
+    const estimatedTokens = Math.ceil(estimatedCostCents / 10);
+    if (stats.tokensUsed + estimatedTokens > stats.tokenLimit) {
+      throw new BadRequestException(`Token budget exceeded. Your plan limit is ${stats.tokenLimit} tokens.`);
+    }
+  }
+
   private async getUsageStats(businessId: string) {
+    const business = await this.prisma.client.business.findUnique({
+      where: { id: businessId },
+      select: { plan: true },
+    });
+
+    const planName = (business?.plan || 'free').toLowerCase();
+    const entitlements = PLAN_ENTITLEMENTS[planName] ?? PLAN_ENTITLEMENTS['free']!;
+
     const [tokenCount, brandCount] = await Promise.all([
       this.prisma.client.costEvent.aggregate({
         where: { 
@@ -74,10 +136,12 @@ export class BillingService {
     ]);
 
     return {
-      tokensUsed: Math.ceil((tokenCount._sum.costCents || 0) / 10), // Example conversion
-      tokenLimit: 100, // Should be based on plan
+      tokensUsed: Math.ceil((tokenCount._sum.costCents || 0) / 10),
+      tokenLimit: entitlements.tokenLimit,
       brandsUsed: brandCount,
-      brandLimit: 1, // Should be based on plan
+      brandLimit: entitlements.brandLimit,
+      seatLimit: entitlements.seatLimit,
+      features: entitlements.features,
     };
   }
 

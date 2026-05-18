@@ -7,6 +7,8 @@ import { PublishService } from '../social/publish.service';
 import { ResilientPublishService } from '../social/resilient-publish.service';
 import { QualityService } from '../quality/quality.service';
 import fetch from 'node-fetch';
+import { validateWebhookUrl } from '../../common/security/ssrf-protection';
+
 
 @Processor(QUEUES.AUTOMATION_EXECUTION)
 export class AutomationProcessor extends WorkerHost {
@@ -117,6 +119,9 @@ export class AutomationProcessor extends WorkerHost {
 
       case 'webhook': {
         this.logger.log(`Executing webhook: ${step.params.url}`);
+        // Enforce Server-Side Request Forgery (SSRF) Protection
+        await validateWebhookUrl(step.params.url);
+        
         const response = await fetch(step.params.url, {
           method: 'POST',
           headers: {
