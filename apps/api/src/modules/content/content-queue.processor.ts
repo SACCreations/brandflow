@@ -36,6 +36,7 @@ export class ContentQueueProcessor extends WorkerHost {
             ...dto,
             topic, // Current topic in the loop
             count: 1, // Single generation inside the loop
+            topics: undefined, // Clear out the multiple topics array to prevent recursive queue loops!
           };
 
           // Map advanced settings to the generation payload
