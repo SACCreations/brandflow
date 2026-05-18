@@ -35,7 +35,7 @@ interface ChatTestResponse {
 
 export default function AiTestPage() {
   const [message, setMessage] = useState('Hello AI, please confirm your status and name the LLM provider you are currently running on.');
-  const [provider, setProvider] = useState<'openai' | 'anthropic'>('openai');
+  const [provider, setProvider] = useState<'openai' | 'anthropic' | 'google'>('openai');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ChatTestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,12 +47,12 @@ export default function AiTestPage() {
     setResult(null);
 
     try {
-      // Endpoint is wrapped in transforming interceptor on backend, response is in data.data
-      const res = await apiClient.post<{ data: ChatTestResponse }>('/chat/test', {
+      // Endpoint is wrapped in transforming interceptor on backend, response is unwrapped by Axios interceptor to res.data
+      const res = await apiClient.post<ChatTestResponse>('/chat/test', {
         message,
         provider,
       });
-      setResult(res.data.data);
+      setResult(res.data);
     } catch (err: any) {
       console.error('Chat test request failed:', err);
       const errMsg = err?.response?.data?.message || err?.message || 'Unknown infrastructure error occurred';
@@ -103,11 +103,11 @@ export default function AiTestPage() {
               {/* PROVIDER SELECTOR */}
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Preferred Provider</label>
-                <div className="mt-2 grid grid-cols-2 gap-3">
+                <div className="mt-2 grid grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => setProvider('openai')}
-                    className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${
+                    className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                       provider === 'openai'
                         ? 'border-indigo-600 bg-indigo-50/40 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-950/20 dark:text-indigo-400'
                         : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
@@ -119,7 +119,7 @@ export default function AiTestPage() {
                   <button
                     type="button"
                     onClick={() => setProvider('anthropic')}
-                    className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${
+                    className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                       provider === 'anthropic'
                         ? 'border-purple-600 bg-purple-50/40 text-purple-700 dark:border-purple-500 dark:bg-purple-950/20 dark:text-purple-400'
                         : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
@@ -127,6 +127,18 @@ export default function AiTestPage() {
                   >
                     <span className={`h-2.5 w-2.5 rounded-full ${provider === 'anthropic' ? 'bg-purple-600 dark:bg-purple-400' : 'bg-gray-300'}`} />
                     Anthropic (claude-3)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProvider('google')}
+                    className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
+                      provider === 'google'
+                        ? 'border-emerald-600 bg-emerald-50/40 text-emerald-700 dark:border-emerald-500 dark:bg-emerald-950/20 dark:text-emerald-400'
+                        : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
+                    }`}
+                  >
+                    <span className={`h-2.5 w-2.5 rounded-full ${provider === 'google' ? 'bg-emerald-600 dark:bg-emerald-400' : 'bg-gray-300'}`} />
+                    Google (gemini-2)
                   </button>
                 </div>
               </div>
@@ -261,7 +273,13 @@ export default function AiTestPage() {
                       <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800/40">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Used Provider</span>
                         <div className="mt-1 flex items-center gap-1.5">
-                          <span className={`h-2.5 w-2.5 rounded-full ${result.provider === 'openai' ? 'bg-indigo-600' : 'bg-purple-600'}`} />
+                          <span className={`h-2.5 w-2.5 rounded-full ${
+                            result.provider === 'openai' 
+                              ? 'bg-indigo-600' 
+                              : result.provider === 'anthropic' 
+                                ? 'bg-purple-600' 
+                                : 'bg-emerald-500'
+                          }`} />
                           <span className="text-sm font-bold text-gray-950 dark:text-white capitalize">{result.provider}</span>
                         </div>
                       </div>

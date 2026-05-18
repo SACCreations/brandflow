@@ -3,6 +3,7 @@ import type { GatewayConfig, LLMProvider, ProviderRequest, ProviderResponse, LLM
 import { AnthropicProvider } from './providers/anthropic';
 import { FallbackProvider } from './providers/fallback';
 import { OpenAIProvider } from './providers/openai';
+import { GoogleProvider } from './providers/google';
 import { PIISanitizer } from './sanitizer';
 
 export class LLMGateway {
@@ -29,6 +30,11 @@ export class LLMGateway {
     const anthropicKey = process.env['ANTHROPIC_API_KEY'];
     if (anthropicKey) {
       this.providers.set('anthropic', new AnthropicProvider(anthropicKey));
+    }
+
+    const googleKey = process.env['GOOGLE_API_KEY'] || 'sk-mock-google-key';
+    if (googleKey) {
+      this.providers.set('google', new GoogleProvider(googleKey));
     }
 
     this.providers.set('fallback', new FallbackProvider());
@@ -109,6 +115,8 @@ export class LLMGateway {
         return new OpenAIProvider(apiKey, model);
       case 'anthropic':
         return new AnthropicProvider(apiKey, model);
+      case 'google':
+        return new GoogleProvider(apiKey, model);
       default:
         return null;
     }

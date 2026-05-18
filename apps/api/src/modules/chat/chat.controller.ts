@@ -18,7 +18,7 @@ export class TestChatDto {
 
   @IsString()
   @IsNotEmpty()
-  @IsIn(['openai', 'anthropic'])
+  @IsIn(['openai', 'anthropic', 'google'])
   provider!: string;
 }
 

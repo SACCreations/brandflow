@@ -5,6 +5,7 @@ export { CostTracker } from './cost-tracker';
 export { RateLimiter } from './rate-limiter';
 export { OpenAIProvider } from './providers/openai';
 export { AnthropicProvider } from './providers/anthropic';
+export { GoogleProvider } from './providers/google';
 export { FallbackProvider } from './providers/fallback';
 import * as encryption from './utils/encryption.utils';
 export { encryption };
