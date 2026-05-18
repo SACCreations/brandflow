@@ -24,6 +24,7 @@ import {
 } from '@brandflow/ui';
 
 import { QualityAnalysis } from '../quality/quality-analysis';
+import type { QualityCheckResult } from '@brandflow/shared';
 
 interface LivePreviewProps {
   data: any;

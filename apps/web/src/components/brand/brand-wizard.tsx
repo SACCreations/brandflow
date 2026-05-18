@@ -42,7 +42,7 @@ export function BrandWizard({ onSubmit, isLoading, title }: BrandWizardProps) {
   const [formData, setFormData] = React.useState<any>({});
   const { toast } = useToast();
 
-  const currentStep = STEPS[currentStepIdx];
+  const currentStep = (STEPS[currentStepIdx] || STEPS[0]) as typeof STEPS[number];
   const progress = ((currentStepIdx + 1) / STEPS.length) * 100;
 
   const handleNext = () => {

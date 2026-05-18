@@ -24,6 +24,7 @@ const NAV = [
     group: 'Create',
     items: [
       { label: 'Content', href: '/create/content', icon: '✦' },
+      { label: 'AI Image Generator', href: '/create/image', icon: '🎨' },
       { label: 'Campaigns', href: '/campaigns', icon: '◎' },
       { label: 'Projects', href: '/projects', icon: '⧉' },
     ],

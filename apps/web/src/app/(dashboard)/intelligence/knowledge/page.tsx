@@ -42,10 +42,10 @@ interface KnowledgeStatsResponse {
 
 export default function KnowledgeDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery<KnowledgeStatsResponse>({
     queryKey: ['knowledge-stats'],
     queryFn: async () => {
-      const response = await apiClient.get<{ data: KnowledgeStatsResponse }>('/knowledge/stats');
+      const response = await apiClient.get<KnowledgeStatsResponse>('/knowledge/stats');
       return response.data;
     },
     staleTime: 30_000,
@@ -61,7 +61,7 @@ export default function KnowledgeDashboard() {
 
   const recentActivity = data?.recentJobs ?? [];
   const statusMix = Object.entries(data?.sourcesByStatus ?? {});
-  const totalStatusCount = statusMix.reduce((sum, [, count]) => sum + count, 0);
+  const totalStatusCount = statusMix.reduce((sum, [, count]) => sum + (count as number), 0);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -151,7 +151,7 @@ export default function KnowledgeDashboard() {
             </div>
           ) : recentActivity.length > 0 ? (
             <div className="space-y-4">
-              {recentActivity.map((activity) => (
+              {recentActivity.map((activity: any) => (
               <div key={activity.id} className="flex items-center justify-between rounded-xl border border-gray-50 bg-gray-50/50 p-4 dark:border-gray-800/50 dark:bg-gray-800/30">
                 <div className="flex items-center gap-4">
                   <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
@@ -198,7 +198,7 @@ export default function KnowledgeDashboard() {
                 <ProgressItem
                   key={status}
                   label={status.replace(/_/g, ' ')}
-                  percentage={totalStatusCount > 0 ? Math.round((count / totalStatusCount) * 100) : 0}
+                  percentage={totalStatusCount > 0 ? Math.round(((count as number) / totalStatusCount) * 100) : 0}
                   color={STATUS_COLORS[index % STATUS_COLORS.length]}
                 />
               ))

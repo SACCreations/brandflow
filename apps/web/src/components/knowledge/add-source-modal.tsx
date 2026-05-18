@@ -53,10 +53,10 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
   const [success, setSuccess] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: brands = [], isLoading: isBrandsLoading } = useQuery({
+  const { data: brands = [], isLoading: isBrandsLoading } = useQuery<BrandOption[]>({
     queryKey: ['brands'],
     queryFn: async () => {
-      const response = await apiClient.get<{ data: BrandOption[] }>('/brands');
+      const response = await apiClient.get<BrandOption[]>('/brands');
       return response.data;
     },
     enabled: isOpen,
