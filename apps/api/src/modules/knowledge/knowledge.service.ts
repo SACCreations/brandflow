@@ -4,6 +4,8 @@ import type { Queue } from 'bullmq';
 import { PrismaService } from '../../common/database/prisma.service';
 import type { CreateKnowledgeSourceDto } from '@brandflow/shared';
 import { QUEUES } from '@brandflow/shared';
+import { IngestionService } from './ingestion.service';
+
 
 
 @Injectable()
@@ -11,7 +13,9 @@ export class KnowledgeService {
   constructor(
     @InjectQueue(QUEUES.KNOWLEDGE_INGESTION) private readonly ingestionQueue: Queue,
     private readonly prisma: PrismaService,
+    private readonly ingestionService: IngestionService,
   ) {}
+
 
   async getDashboardStats(businessId: string) {
     const [totalSources, totalEntries, pendingReviews, recentJobs] = await Promise.all([
@@ -152,34 +156,17 @@ export class KnowledgeService {
     const source = await this.prisma.client.knowledgeSource.findFirst({
       where: { id: sourceId, businessId },
     });
-    
     if (!source) throw new NotFoundException('Source not found');
 
-    // Mark existing entries as stale if re-ingesting
+    // Mark existing entries as stale
     await this.prisma.client.knowledgeEntry.updateMany({
       where: { sourceId, isStale: false },
-      data: { isStale: true, staleAt: new Date() }
+      data: { isStale: true, staleAt: new Date() },
     });
 
-    const job = await this.prisma.client.knowledgeJob.create({
-      data: {
-        sourceId,
-        businessId,
-        status: 'pending',
-      },
-    });
-
-    await this.ingestionQueue.add('process-knowledge', {
-      sourceId,
-      businessId,
-      jobId: job.id,
-      type: source.type,
-      sourceUrl: source.sourceUrl ?? undefined,
-      text,
-    });
-
-    return job;
+    return this.ingestionService.enqueue(sourceId, businessId, text);
   }
+
 
   async deleteSource(id: string, businessId: string) {
     const source = await this.prisma.client.knowledgeSource.findFirst({ where: { id, businessId } });
@@ -248,28 +235,28 @@ export class KnowledgeService {
       where: { id: jobId, businessId },
       include: { source: true },
     });
-
     if (!job) throw new NotFoundException('Job not found');
 
-    // Update job status to pending
     await this.prisma.client.knowledgeJob.update({
       where: { id: jobId },
       data: { status: 'pending', startedAt: null, completedAt: null, progress: 0, error: null },
     });
 
-    // Re-queue ingestion job
-    await this.ingestionQueue.add(
-      'ingest',
-      { 
-        sourceId: job.sourceId, 
-        businessId, 
-        type: job.source.type, 
-        sourceUrl: job.source.sourceUrl, 
-        metadata: job.source.metadata 
-      },
-      { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
-    );
+    return this.ingestionService.enqueue(job.sourceId, businessId);
+  }
 
-    return { status: 're-queued' };
+  // -----------------------------------------------------------------------
+  // Ingestion monitoring helpers
+  // -----------------------------------------------------------------------
+  async getIngestionLogs(sourceId: string, businessId: string) {
+    return this.ingestionService.getLogs(sourceId, businessId);
+  }
+
+  async getFailedRecords(businessId: string) {
+    return this.ingestionService.getFailedRecords(businessId);
+  }
+
+  async getSyncHistory(sourceId: string, businessId: string) {
+    return this.ingestionService.getSyncHistory(sourceId, businessId);
   }
 }

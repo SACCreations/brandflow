@@ -272,11 +272,99 @@ model KnowledgeSource {
   audits           KnowledgeAudit[]
   entries          KnowledgeEntry[]
   jobs             KnowledgeJob[]
+  chunks           KnowledgeChunk[]
+  ingestionLogs    KnowledgeIngestionLog[]
+  syncHistory      KnowledgeSyncHistory[]
+  failedRecords    KnowledgeFailedRecord[]
   brand            Brand                 @relation(fields: [brandId], references: [id], onDelete: Cascade)
   business         Business              @relation(fields: [businessId], references: [id])
 
   @@map("knowledge_sources")
 }
+
+// ---------- Ingestion Models ----------
+model KnowledgeChunk {
+  id          String   @id @default(uuid())
+  sourceId    String
+  source      KnowledgeSource @relation(fields: [sourceId], references: [id])
+  order       Int
+  text        String
+  tokenCount  Int
+  embedding   KnowledgeEmbedding?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("knowledge_chunks")
+}
+
+model KnowledgeEmbedding {
+  id        String   @id @default(uuid())
+  chunkId   String   @unique
+  chunk     KnowledgeChunk @relation(fields: [chunkId], references: [id])
+  vector    Json
+  createdAt DateTime @default(now())
+
+  @@map("knowledge_embeddings")
+}
+
+model KnowledgeIngestionLog {
+  id        String   @id @default(uuid())
+  sourceId  String
+  source    KnowledgeSource @relation(fields: [sourceId], references: [id])
+  level     LogLevel @default(INFO)
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("knowledge_ingestion_logs")
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+}
+
+model KnowledgeSyncHistory {
+  id        String   @id @default(uuid())
+  sourceId  String
+  source    KnowledgeSource @relation(fields: [sourceId], references: [id])
+  syncedAt  DateTime @default(now())
+  details   String?
+
+  @@map("knowledge_sync_history")
+}
+
+model KnowledgeFailedRecord {
+  id        String   @id @default(uuid())
+  sourceId  String
+  source    KnowledgeSource @relation(fields: [sourceId], references: [id])
+  error     String
+  failedAt  DateTime @default(now())
+
+  @@map("knowledge_failed_records")
+}
+
+model IntegrationCredential {
+  id          String   @id @default(uuid())
+  provider    IntegrationProvider
+  accessToken String
+  refreshToken String?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("integration_credentials")
+}
+
+enum IntegrationProvider {
+  NOTION
+  GOOGLE_DRIVE
+  CONFLUENCE
+  SHAREPOINT
+  ONEDRIVE
+}
+
 
 model KnowledgeEntry {
   id                String                       @id @default(uuid())

@@ -20,7 +20,9 @@ import {
 } from 'lucide-react';
 import AddSourceModal from '@/components/knowledge/add-source-modal';
 import KnowledgeExplorer from '@/components/knowledge/knowledge-explorer';
+import LiveIngestionMonitor from '@/components/knowledge/live-ingestion-monitor';
 import { apiClient } from '@/lib/api-client';
+
 
 interface KnowledgeStatsResponse {
   totalSources: number;
@@ -146,54 +148,9 @@ export default function KnowledgeDashboard() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Recent Ingestion Activity */}
-        <div className="lg:col-span-2 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-          <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Live Ingestion Activity</h3>
-            <button className="text-sm font-medium text-brand-600 hover:underline">View Monitor</button>
-          </div>
-          {isError ? (
-            <div className="rounded-xl border border-red-100 bg-red-50/80 p-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-500/10 dark:text-red-300">
-              Unable to load live ingestion activity right now.
-            </div>
-          ) : recentActivity.length > 0 ? (
-            <div className="space-y-4">
-              {recentActivity.map((activity: any) => (
-              <div key={activity.id} className="flex items-center justify-between rounded-xl border border-gray-50 bg-gray-50/50 p-4 dark:border-gray-800/50 dark:bg-gray-800/30">
-                <div className="flex items-center gap-4">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                    activity.status === 'completed' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10' :
-                    activity.status === 'processing' ? 'bg-blue-100 text-blue-600 dark:bg-blue-500/10' :
-                    'bg-red-100 text-red-600 dark:bg-red-500/10'
-                  }`}>
-                    {activity.status === 'completed' ? <CheckCircle2 className="h-5 w-5" /> :
-                     activity.status === 'processing' ? <Activity className="h-5 w-5 animate-pulse" /> :
-                     <AlertCircle className="h-5 w-5" />}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{activity.source?.name || 'Untitled source'}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                      {activity.source?.type || activity.stage} • {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    activity.status === 'completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
-                    activity.status === 'processing' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
-                    'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'
-                  }`}>
-                    {activity.status}
-                  </span>
-                </div>
-              </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-gray-200 p-8 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
-              No ingestion jobs yet. Add a knowledge source to start populating your brand brain.
-            </div>
-          )}
+        {/* Live Ingestion Monitor */}
+        <div className="lg:col-span-2">
+          <LiveIngestionMonitor />
         </div>
 
         {/* Knowledge Distribution */}

@@ -3,6 +3,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { KnowledgeController } from './knowledge.controller';
 import { KnowledgeService } from './knowledge.service';
 import { KnowledgeProcessor } from './knowledge.processor';
+import { IngestionService } from './ingestion.service';
 import { MemoryService } from './memory.service';
 import { FreshnessService } from './freshness.service';
 import { QUEUES } from '@brandflow/shared';
@@ -12,7 +13,13 @@ import { QUEUES } from '@brandflow/shared';
     BullModule.registerQueue({ name: QUEUES.KNOWLEDGE_INGESTION }),
   ],
   controllers: [KnowledgeController],
-  providers: [KnowledgeService, KnowledgeProcessor, MemoryService, FreshnessService],
-  exports: [KnowledgeService, MemoryService],
+  providers: [
+    KnowledgeService,
+    IngestionService,
+    KnowledgeProcessor,
+    MemoryService,
+    FreshnessService,
+  ],
+  exports: [KnowledgeService, IngestionService, MemoryService],
 })
 export class KnowledgeModule {}

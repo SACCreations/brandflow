@@ -32,18 +32,36 @@ interface SourceFormSharedProps {
   setBrandId: (brandId: string) => void;
 }
 
-function inferFileSourceType(fileName: string) {
-  const extension = fileName.split('.').pop()?.toLowerCase();
-
-  if (extension === 'pdf') {
-    return 'pdf';
+function inferFileSourceType(fileName: string): string {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'pdf':  return 'pdf';
+    case 'doc':
+    case 'docx': return 'docx';
+    case 'xls':
+    case 'xlsx': return 'xlsx';
+    case 'csv':  return 'csv';
+    case 'ppt':
+    case 'pptx': return 'pptx';
+    case 'txt':  return 'txt';
+    default:     return 'text';
   }
+}
 
-  if (extension === 'doc' || extension === 'docx') {
-    return 'docx';
-  }
-
-  return 'text';
+function inferFileMimeType(fileName: string): string {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  const map: Record<string, string> = {
+    pdf: 'application/pdf',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    doc:  'application/msword',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    xls:  'application/vnd.ms-excel',
+    csv:  'text/csv',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    ppt:  'application/vnd.ms-powerpoint',
+    txt:  'text/plain',
+  };
+  return map[ext ?? ''] ?? 'application/octet-stream';
 }
 
 export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
@@ -123,7 +141,7 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
                   <SourceOption 
                     icon={<Upload className="h-6 w-6 text-brand-500" />}
                     title="File Upload"
-                    description="Upload PDF, DOCX, or CSV documents directly."
+                    description="Upload PDF, DOCX, XLSX, CSV, PPTX, or TXT documents."
                     onClick={() => { setSelectedType('file'); setStep(2); }}
                   />
                   <SourceOption 
@@ -332,11 +350,7 @@ function FileSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, s
           metadata: {
             fileName: firstFile.name,
             fileSize: firstFile.size,
-            mimeType: firstFile.type || 'application/octet-stream',
-          },
-          config: {
-            fileName: firstFile.name,
-            uploadPending: false,
+            mimeType: inferFileMimeType(firstFile.name) || firstFile.type || 'application/octet-stream',
           },
         });
 
@@ -370,8 +384,10 @@ function FileSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, s
         ref={fileInputRef} 
         onChange={handleFileChange} 
         className="hidden" 
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt"
         multiple 
       />
+
 
       <div className="mt-8 space-y-4">
         <BrandSelector brandId={brandId} brands={brands} isBrandsLoading={isBrandsLoading} setBrandId={setBrandId} />
@@ -388,8 +404,9 @@ function FileSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, s
           {files.length > 0 ? `${files.length} file(s) selected` : 'Click to upload or drag and drop'}
         </p>
         <p className="mt-1 text-xs text-gray-500">
-          {files.length > 0 ? files.map(f => f.name).join(', ') : 'PDF, DOCX, CSV up to 50MB'}
+          {files.length > 0 ? files.map(f => f.name).join(', ') : 'PDF, DOCX, XLSX, CSV, PPTX, TXT — up to 50MB each'}
         </p>
+
       </div>
 
       {error && (

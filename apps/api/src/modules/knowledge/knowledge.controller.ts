@@ -128,4 +128,28 @@ export class KnowledgeController {
   ) {
     return this.knowledgeService.retryJob(id, user.businessId);
   }
+
+  @Get('sources/:id/logs')
+  @ApiOperation({ summary: 'Get ingestion logs for a source' })
+  getIngestionLogs(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.knowledgeService.getIngestionLogs(id, user.businessId);
+  }
+
+  @Get('sources/:id/sync-history')
+  @ApiOperation({ summary: 'Get sync history for a source' })
+  getSyncHistory(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.knowledgeService.getSyncHistory(id, user.businessId);
+  }
+
+  @Get('failed-records')
+  @ApiOperation({ summary: 'Get all failed ingestion records for the business' })
+  getFailedRecords(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.getFailedRecords(user.businessId);
+  }
 }

@@ -9,139 +9,167 @@ const dnsLookup = promisify(dns.lookup);
 export class WebConnector {
   private readonly logger = new Logger(WebConnector.name);
 
+  // -------------------------------------------------------------------------
+  // SSRF guard: returns true if the IP is private/reserved
+  // -------------------------------------------------------------------------
   private isPrivateIp(ip: string): boolean {
-    const ipv4Pattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-    const match = ip.match(ipv4Pattern);
+    const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+    const match = ip.match(ipv4);
     if (match) {
-      const parts = match.slice(1).map(Number);
-      const octet1 = parts[0] ?? 0;
-      const octet2 = parts[1] ?? 0;
-      const octet3 = parts[2] ?? 0;
-      const octet4 = parts[3] ?? 0;
-
-      if (octet1 === 127) return true; // Loopback
-      if (octet1 === 10) return true;  // Class A Private
-      if (octet1 === 172 && octet2 >= 16 && octet2 <= 31) return true; // Class B Private
-      if (octet1 === 192 && octet2 === 168) return true; // Class C Private
-      if (octet1 === 169 && octet2 === 254) return true; // Link-Local (AWS metadata)
+      const [o1, o2] = match.slice(1).map(Number);
+      if (o1 === 127) return true;                          // loopback
+      if (o1 === 10) return true;                           // Class A private
+      if (o1 === 172 && o2 !== undefined && o2 >= 16 && o2 <= 31) return true; // Class B private
+      if (o1 === 192 && o2 === 168) return true;           // Class C private
+      if (o1 === 169 && o2 === 254) return true;           // link-local / AWS metadata
       if (ip === '0.0.0.0' || ip === '255.255.255.255') return true;
     }
-    
-    // IPv6 checks (loopback, unspecified, link-local, unique local)
-    if (ip === '::1' || ip === '::' || ip.startsWith('fe80:') || ip.startsWith('fc00:') || ip.startsWith('fd00:')) {
+    // IPv6 loopback / link-local / unique-local
+    if (ip === '::1' || ip === '::' || ip.startsWith('fe80:') ||
+        ip.startsWith('fc00:') || ip.startsWith('fd00:')) {
       return true;
     }
     return false;
   }
 
-  async crawl(url: string, depth: number = 0): Promise<string> {
-    this.logger.log(`Crawling URL: ${url} (depth: ${depth})`);
-    
-    let targetUrl = url.trim();
+  // -------------------------------------------------------------------------
+  // Validate URL safety (SSRF protection)
+  // -------------------------------------------------------------------------
+  private async validateUrl(rawUrl: string): Promise<string> {
+    // Ensure protocol
+    let targetUrl = rawUrl.trim();
     if (!/^https?:\/\//i.test(targetUrl)) {
       targetUrl = 'https://' + targetUrl;
     }
 
+    let parsed: URL;
     try {
-      const parsedUrl = new URL(targetUrl);
-      url = targetUrl;
-      
-      // Enforce protocol checks (allow only HTTP and HTTPS)
-      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-        throw new BadRequestException(`Rejected crawling of non-HTTP protocol: ${parsedUrl.protocol}`);
-      }
+      parsed = new URL(targetUrl);
+    } catch {
+      throw new BadRequestException(`Invalid URL: ${rawUrl}`);
+    }
 
-      // DNS lookup to fetch underlying IP address
-      const lookupResult = await dnsLookup(parsedUrl.hostname);
-      const resolvedIp = lookupResult.address;
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new BadRequestException(`Non-HTTP protocol rejected: ${parsed.protocol}`);
+    }
 
-      if (this.isPrivateIp(resolvedIp)) {
-        this.logger.warn(`SSRF Block: URL ${url} resolved to private/loopback IP: ${resolvedIp}`);
-        throw new BadRequestException(`Crawling of private, loopback, or reserved IP addresses is strictly blocked.`);
+    try {
+      const { address } = await dnsLookup(parsed.hostname);
+      if (this.isPrivateIp(address)) {
+        this.logger.warn(`SSRF block: ${targetUrl} → ${address}`);
+        throw new BadRequestException('Crawling of private/reserved IP addresses is blocked.');
       }
     } catch (e: any) {
       if (e instanceof BadRequestException) throw e;
-      this.logger.error(`SSRF Validation failed for URL ${url}: ${e.message}`);
-      throw new BadRequestException(`Failed to validate URL safety: ${e.message}`);
+      this.logger.error(`DNS lookup failed for ${parsed.hostname}: ${e.message}`);
+      throw new BadRequestException(`Cannot resolve host: ${parsed.hostname}`);
     }
-    
-    let browser;
-    try {
-      this.logger.log(`Attempting Playwright crawl for URL: ${url}`);
-      browser = await chromium.launch({ headless: true });
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      
-      await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-      
-      // Basic extraction: get title and main content
-      const title = await page.title();
-      
-      // Clean up the page (remove scripts, styles, etc.)
-      await page.evaluate(() => {
-        const toRemove = ['script', 'style', 'nav', 'footer', 'header', 'aside'];
-        toRemove.forEach(tag => {
-          document.querySelectorAll(tag).forEach(el => el.remove());
-        });
-      });
 
-      const bodyText = await page.innerText('body');
-      await browser.close();
-      return `# ${title}\n\nSource: ${url}\n\n${bodyText}`;
-    } catch (err: any) {
-      this.logger.warn(`Playwright crawl failed for ${url}: ${err.message}. Trying fetch/regex fallback scraper.`);
-      if (browser) {
-        try {
-          await browser.close();
-        } catch (_) {}
-      }
+    return targetUrl;
+  }
 
+  // -------------------------------------------------------------------------
+  // Fetch with exponential back-off (3 attempts, jittered)
+  // -------------------------------------------------------------------------
+  private async fetchWithRetry(url: string): Promise<string> {
+    const MAX = 3;
+    let lastErr: Error | undefined;
+
+    for (let attempt = 1; attempt <= MAX; attempt++) {
       try {
-        const response = await fetch(url, {
+        this.logger.log(`fetch attempt ${attempt}/${MAX} → ${url}`);
+        const res = await fetch(url, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+              '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           },
           timeout: 15000,
         });
-
-        if (!response.ok) {
-          throw new Error(`HTTP response status: ${response.status}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.text();
+      } catch (err: any) {
+        lastErr = err;
+        this.logger.warn(`attempt ${attempt} failed: ${err.message}`);
+        if (attempt < MAX) {
+          const delay = Math.pow(2, attempt) * 200 + Math.random() * 100;
+          await new Promise((r) => setTimeout(r, delay));
         }
-
-        const html = await response.text();
-        
-        // Extract title using regex
-        const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-        const title = (titleMatch && titleMatch[1]) ? titleMatch[1].trim() : 'Crawled Content';
-
-        // Strip scripts, styles and navigational elements
-        let cleanedHtml = html
-          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-          .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
-          .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
-          .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
-          .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, '');
-
-        // Remove HTML tags
-        cleanedHtml = cleanedHtml.replace(/<[^>]+>/g, ' ');
-
-        // Decode basic HTML entities
-        cleanedHtml = cleanedHtml
-          .replace(/&nbsp;/g, ' ')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&amp;/g, '&')
-          .replace(/&quot;/g, '"')
-          .replace(/&#39;/g, "'");
-
-        const bodyText = cleanedHtml.replace(/\s+/g, ' ').trim();
-        return `# ${title}\n\nSource: ${url}\n\n${bodyText}`;
-      } catch (fallbackErr: any) {
-        this.logger.error(`Scraping fallback failed for ${url}: ${fallbackErr.message}`);
-        throw new Error(`Failed to crawl or scrape URL: ${fallbackErr.message}`);
       }
+    }
+
+    throw lastErr ?? new Error('All fetch attempts failed');
+  }
+
+  // -------------------------------------------------------------------------
+  // Strip HTML and decode entities → plain text
+  // -------------------------------------------------------------------------
+  private htmlToText(html: string): string {
+    return html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+      .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+      .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
+      .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  // -------------------------------------------------------------------------
+  // Primary crawl entry-point
+  // -------------------------------------------------------------------------
+  async crawl(url: string, depth: number = 0): Promise<string> {
+    this.logger.log(`crawl() started: ${url} (depth=${depth})`);
+
+    // 1. SSRF validation + protocol normalisation
+    const safeUrl = await this.validateUrl(url);
+
+    // 2. Try Playwright first (handles JS-heavy pages)
+    let browser: ReturnType<typeof chromium.launch> extends Promise<infer T> ? T : never;
+    try {
+      this.logger.log(`Playwright: launching for ${safeUrl}`);
+      browser = await chromium.launch({ headless: true });
+      const page = await (await browser.newContext()).newPage();
+      await page.goto(safeUrl, { waitUntil: 'networkidle', timeout: 30000 });
+
+      await page.evaluate(() => {
+        ['script', 'style', 'nav', 'footer', 'header', 'aside'].forEach((tag) => {
+          document.querySelectorAll(tag).forEach((el) => el.remove());
+        });
+      });
+
+      const title = await page.title();
+      const bodyText = await page.innerText('body');
+      await browser.close();
+      this.logger.log(`Playwright: success for ${safeUrl}`);
+      return `# ${title}\n\nSource: ${safeUrl}\n\n${bodyText}`;
+    } catch (playwrightErr: any) {
+      this.logger.warn(`Playwright failed (${playwrightErr.message}), falling back to node-fetch`);
+      try {
+        // @ts-ignore — browser may be undefined if launch itself failed
+        await browser?.close?.();
+      } catch (_) {}
+    }
+
+    // 3. Fallback: node-fetch + HTML → text
+    try {
+      const html = await this.fetchWithRetry(safeUrl);
+      const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+      const title = (titleMatch && titleMatch[1]) ? titleMatch[1].trim() : 'Crawled Content';
+      const bodyText = this.htmlToText(html);
+      this.logger.log(`node-fetch fallback: success for ${safeUrl}`);
+      return `# ${title}\n\nSource: ${safeUrl}\n\n${bodyText}`;
+    } catch (fetchErr: any) {
+      this.logger.error(`Both Playwright and node-fetch failed for ${safeUrl}: ${fetchErr.message}`);
+      throw new Error(`Failed to crawl URL: ${fetchErr.message}`);
     }
   }
 }
-
