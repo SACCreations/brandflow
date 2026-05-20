@@ -84,6 +84,29 @@ export class KnowledgeService {
     });
   }
 
+  async searchEntries(businessId: string, search?: string, classification?: string) {
+    const querySearch = search?.trim();
+    return this.prisma.client.knowledgeEntry.findMany({
+      where: {
+        businessId,
+        ...(classification && classification !== 'all' ? { classification } : {}),
+        ...(querySearch ? {
+          OR: [
+            { content: { contains: querySearch, mode: 'insensitive' } },
+            { classification: { contains: querySearch, mode: 'insensitive' } },
+            { source: { name: { contains: querySearch, mode: 'insensitive' } } },
+          ]
+        } : {}),
+      },
+      include: {
+        source: { select: { name: true, type: true, sourceUrl: true } }
+      },
+      orderBy: { confidence: 'desc' },
+      take: 100,
+    });
+  }
+
+
   async createSource(businessId: string, dto: any) {
     // Check for existing source with same URL for this business
     if (dto.sourceUrl && dto.sourceUrl !== 'manual-input') {

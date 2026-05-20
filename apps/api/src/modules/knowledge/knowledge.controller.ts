@@ -59,6 +59,17 @@ export class KnowledgeController {
     return this.knowledgeService.findEntries(user.businessId, id);
   }
 
+  @Get('entries')
+  @ApiOperation({ summary: 'Search and filter all knowledge entries' })
+  searchEntries(
+    @CurrentUser() user: JwtPayload,
+    @Query('search') search?: string,
+    @Query('classification') classification?: string,
+  ) {
+    return this.knowledgeService.searchEntries(user.businessId, search, classification);
+  }
+
+
   @Post('sources')
   @ApiOperation({ summary: 'Add a knowledge source (triggers ingestion)' })
   createSource(

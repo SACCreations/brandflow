@@ -66,17 +66,24 @@ export class KnowledgeProcessor extends WorkerHost {
     });
 
     try {
+      const source = await this.prisma.client.knowledgeSource.findUnique({
+        where: { id: sourceId },
+      });
+      const metadata = source?.metadata as any;
+      const mimeType = metadata?.mimeType || (type === 'pdf' ? 'application/pdf' : type === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'text/plain');
+
       // 1. INTAKE
       await this.updateJob(knowledgeJob.id, IngestionStage.INTAKE, 10);
       const rawData = await this.runIntake(type, sourceUrl, text);
 
       // 2. EXTRACTION
       await this.updateJob(knowledgeJob.id, IngestionStage.EXTRACTION, 30);
-      const extractedText = await this.runExtraction(type, rawData);
+      const extractedText = await this.runExtraction(type, rawData, mimeType);
 
       // 3. CLEANING
       await this.updateJob(knowledgeJob.id, IngestionStage.CLEANING, 50);
       const cleanedText = await this.runCleaning(extractedText);
+
 
       // 4. CLASSIFICATION
       await this.updateJob(knowledgeJob.id, IngestionStage.CLASSIFICATION, 70);
@@ -136,24 +143,36 @@ export class KnowledgeProcessor extends WorkerHost {
     if (type === 'url' && sourceUrl) {
       return await this.webConnector.crawl(sourceUrl);
     }
+    if (text && (type === 'pdf' || type === 'docx')) {
+      if (text.startsWith('data:') && text.includes('base64,')) {
+        const base64Data = text.split('base64,')[1] || '';
+        return Buffer.from(base64Data, 'base64');
+      }
+      return Buffer.from(text, 'base64');
+    }
     return text ?? '';
   }
 
   private async runExtraction(type: string, rawData: any, contentType?: string): Promise<string> {
     this.logger.debug(`Stage: Extraction (${contentType})`);
     
-    if (contentType === 'application/pdf') {
-      const data = await pdf(rawData);
-      return data.text;
+    if (contentType === 'application/pdf' || type === 'pdf') {
+      if (Buffer.isBuffer(rawData)) {
+        const data = await pdf(rawData);
+        return data.text;
+      }
     }
     
-    if (contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      const data = await mammoth.extractRawText({ buffer: rawData });
-      return data.value;
+    if (contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || type === 'docx') {
+      if (Buffer.isBuffer(rawData)) {
+        const data = await mammoth.extractRawText({ buffer: rawData });
+        return data.value;
+      }
     }
 
     return typeof rawData === 'string' ? rawData : 'Extracted content';
   }
+
 
   private async runCleaning(text: string): Promise<string> {
     this.logger.debug(`Stage: Cleaning`);

@@ -317,31 +317,44 @@ function FileSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, s
     setIsSubmitting(true);
     setError(null);
 
-    try {
-      await apiClient.post('/knowledge/sources', {
-        brandId,
-        name: firstFile.name,
-        type: inferFileSourceType(firstFile.name),
-        sourceUrl: `file://${encodeURIComponent(firstFile.name)}`,
-        trustLevel: 'high',
-        metadata: {
-          fileName: firstFile.name,
-          fileSize: firstFile.size,
-          mimeType: firstFile.type || 'application/octet-stream',
-        },
-        config: {
-          fileName: firstFile.name,
-          uploadPending: true,
-        },
-      });
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const base64Data = e.target?.result as string;
 
-      onSuccess();
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Failed to ingest file');
-    } finally {
+        await apiClient.post('/knowledge/sources', {
+          brandId,
+          name: firstFile.name,
+          type: inferFileSourceType(firstFile.name),
+          sourceUrl: `file://${encodeURIComponent(firstFile.name)}`,
+          text: base64Data,
+          trustLevel: 'high',
+          metadata: {
+            fileName: firstFile.name,
+            fileSize: firstFile.size,
+            mimeType: firstFile.type || 'application/octet-stream',
+          },
+          config: {
+            fileName: firstFile.name,
+            uploadPending: false,
+          },
+        });
+
+        onSuccess();
+      } catch (err: any) {
+        setError(err?.response?.data?.message || err.message || 'Failed to ingest file');
+        setIsSubmitting(false);
+      }
+    };
+
+    reader.onerror = () => {
+      setError('Failed to read file');
       setIsSubmitting(false);
-    }
+    };
+
+    reader.readAsDataURL(firstFile);
   };
+
 
   return (
     <div className="p-8">

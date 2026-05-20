@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import { Logger, BadRequestException } from '@nestjs/common';
 import * as dns from 'dns';
 import { promisify } from 'util';
+import fetch from 'node-fetch';
 
 const dnsLookup = promisify(dns.lookup);
 
@@ -36,8 +37,14 @@ export class WebConnector {
   async crawl(url: string, depth: number = 0): Promise<string> {
     this.logger.log(`Crawling URL: ${url} (depth: ${depth})`);
     
+    let targetUrl = url.trim();
+    if (!/^https?:\/\//i.test(targetUrl)) {
+      targetUrl = 'https://' + targetUrl;
+    }
+
     try {
-      const parsedUrl = new URL(url);
+      const parsedUrl = new URL(targetUrl);
+      url = targetUrl;
       
       // Enforce protocol checks (allow only HTTP and HTTPS)
       if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
@@ -58,11 +65,13 @@ export class WebConnector {
       throw new BadRequestException(`Failed to validate URL safety: ${e.message}`);
     }
     
-    const browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
+    let browser;
     try {
+      this.logger.log(`Attempting Playwright crawl for URL: ${url}`);
+      browser = await chromium.launch({ headless: true });
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      
       await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
       
       // Basic extraction: get title and main content
@@ -77,14 +86,62 @@ export class WebConnector {
       });
 
       const bodyText = await page.innerText('body');
-      
-      // Return as pseudo-markdown
+      await browser.close();
       return `# ${title}\n\nSource: ${url}\n\n${bodyText}`;
     } catch (err: any) {
-      this.logger.error(`Failed to crawl ${url}: ${err.message}`);
-      throw err;
-    } finally {
-      await browser.close();
+      this.logger.warn(`Playwright crawl failed for ${url}: ${err.message}. Trying fetch/regex fallback scraper.`);
+      if (browser) {
+        try {
+          await browser.close();
+        } catch (_) {}
+      }
+
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          },
+          timeout: 15000,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP response status: ${response.status}`);
+        }
+
+        const html = await response.text();
+        
+        // Extract title using regex
+        const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+        const title = (titleMatch && titleMatch[1]) ? titleMatch[1].trim() : 'Crawled Content';
+
+        // Strip scripts, styles and navigational elements
+        let cleanedHtml = html
+          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+          .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+          .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+          .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
+          .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, '');
+
+        // Remove HTML tags
+        cleanedHtml = cleanedHtml.replace(/<[^>]+>/g, ' ');
+
+        // Decode basic HTML entities
+        cleanedHtml = cleanedHtml
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'");
+
+        const bodyText = cleanedHtml.replace(/\s+/g, ' ').trim();
+        return `# ${title}\n\nSource: ${url}\n\n${bodyText}`;
+      } catch (fallbackErr: any) {
+        this.logger.error(`Scraping fallback failed for ${url}: ${fallbackErr.message}`);
+        throw new Error(`Failed to crawl or scrape URL: ${fallbackErr.message}`);
+      }
     }
   }
 }
+

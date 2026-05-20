@@ -409,6 +409,23 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
             )}
           </Card>
 
+          <Card className="p-5 border-indigo-100 bg-indigo-50/10 dark:border-indigo-950/20 dark:bg-indigo-950/5">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-indigo-500" /> Creative Assets
+            </h3>
+            <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">
+              Need a brand-aligned visual banner or post graphic? Create one instantly with AI.
+            </p>
+            <Link 
+              href={`/create/image?brandId=${data.brand.id}${data.campaign ? `&campaignId=${data.campaign.id}` : ''}&prompt=${encodeURIComponent(content.slice(0, 150))}`}
+              className="mt-4 block"
+            >
+              <Button variant="outline" className="w-full gap-2 text-xs font-bold border-indigo-200 hover:bg-indigo-50 text-indigo-600 dark:border-indigo-900 dark:text-indigo-400 dark:hover:bg-indigo-950/30">
+                Create Graphic with AI
+              </Button>
+            </Link>
+          </Card>
+
           <Card className="p-5">
             <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500">Scheduling handoff</h3>
 

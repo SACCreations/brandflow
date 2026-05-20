@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import * as fs from 'fs';
 import * as path from 'path';
+import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -50,7 +51,11 @@ async function bootstrap() {
     rawBody: true,
   });
 
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ limit: '50mb', extended: true }));
+
   const config = app.get(ConfigService);
+
 
   // ─── Environment Keys Validation ─────────────────────────────
   console.log('DEBUG env keys:', {

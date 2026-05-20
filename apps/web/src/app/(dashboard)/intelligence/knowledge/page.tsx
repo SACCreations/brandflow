@@ -19,6 +19,7 @@ import {
   Globe
 } from 'lucide-react';
 import AddSourceModal from '@/components/knowledge/add-source-modal';
+import KnowledgeExplorer from '@/components/knowledge/knowledge-explorer';
 import { apiClient } from '@/lib/api-client';
 
 interface KnowledgeStatsResponse {
@@ -42,6 +43,7 @@ interface KnowledgeStatsResponse {
 
 export default function KnowledgeDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExplorerOpen, setIsExplorerOpen] = useState(false);
   const { data, isLoading, isError } = useQuery<KnowledgeStatsResponse>({
     queryKey: ['knowledge-stats'],
     queryFn: async () => {
@@ -49,7 +51,9 @@ export default function KnowledgeDashboard() {
       return response.data;
     },
     staleTime: 30_000,
+    refetchInterval: 5000,
   });
+
 
   const stats = {
     totalSources: data?.totalSources ?? 0,
@@ -74,7 +78,10 @@ export default function KnowledgeDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800">
+          <button 
+            onClick={() => setIsExplorerOpen(true)}
+            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
             <Search className="h-4 w-4" />
             Explorer
           </button>
@@ -223,6 +230,7 @@ export default function KnowledgeDashboard() {
       </div>
 
       <AddSourceModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <KnowledgeExplorer isOpen={isExplorerOpen} onClose={() => setIsExplorerOpen(false)} />
     </div>
   );
 }

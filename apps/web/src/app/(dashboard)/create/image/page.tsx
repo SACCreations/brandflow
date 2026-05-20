@@ -121,6 +121,7 @@ export default function ImageGeneratorPage() {
 
   const brandIdParam = searchParams.get('brandId');
   const campaignIdParam = searchParams.get('campaignId');
+  const promptParam = searchParams.get('prompt');
 
   // --- STATE ---
   const [selectedBrandId, setSelectedBrandId] = useState<string>('');
@@ -203,7 +204,8 @@ export default function ImageGeneratorPage() {
   useEffect(() => {
     if (brandIdParam) setSelectedBrandId(brandIdParam);
     if (campaignIdParam) setSelectedCampaignId(campaignIdParam);
-  }, [brandIdParam, campaignIdParam]);
+    if (promptParam) setPromptText(promptParam);
+  }, [brandIdParam, campaignIdParam, promptParam]);
 
   useEffect(() => {
     if (!selectedBrandId && brands.length > 0 && brands[0]) {
