@@ -74,8 +74,13 @@ const VISUAL_CATEGORIES = [
   { id: 'FESTIVAL_BANNER', label: 'Festival & Event', desc: 'Themed holiday creatives' },
   { id: 'OFFER_CREATIVE', label: 'Promotional Offer', desc: 'High-contrast ad banners' },
   { id: 'WEBSITE_HERO', label: 'Website Hero', desc: 'Premium desktop headers' },
-  { id: 'STANDEE_DESIGN', label: 'Standee / Offline', desc: 'Tall layout printable assets' },
+  { id: 'PRINTABLE_STANDEE', label: 'Printable Standee', desc: 'Tall layout printable assets' },
+  { id: 'PRINTABLE_BANNER', label: 'Printable Banner', desc: 'Large scale prints' },
+  { id: 'PRINTABLE_FLYER', label: 'Printable Flyer', desc: 'High density structured layouts' },
+  { id: 'PRINTABLE_BROCHURE', label: 'Printable Brochure', desc: 'Multi-fold print layouts' },
   { id: 'AD_CREATIVE', label: 'Ad Banner', desc: 'Conversion marketing designs' },
+  { id: 'SOCIAL_COVER', label: 'Social Media Cover Images', desc: 'Platform specific cover headers' },
+  { id: 'THUMBNAIL', label: 'Thumbnail Images', desc: 'High-contrast video thumbnails' },
 ];
 
 const PRESET_STYLES = [
@@ -88,9 +93,24 @@ const PRESET_STYLES = [
 ];
 
 const ASPECT_RATIOS = [
-  { id: '1:1', label: 'Square (1:1)', desc: '1024x1024 (Instagram Posts)', width: 1024, height: 1024 },
-  { id: '16:9', label: 'Landscape (16:9)', desc: '1024x576 (YouTube, Banners)', width: 1024, height: 576 },
-  { id: '9:16', label: 'Portrait (9:16)', desc: '576x1024 (Reels, TikTok)', width: 576, height: 1024 },
+  { id: '1:1', label: 'Square (1:1)', desc: '1080x1080 (Poster)', width: 1080, height: 1080 },
+  { id: '16:9', label: 'Landscape (16:9)', desc: '1920x1080 (Poster)', width: 1920, height: 1080 },
+  { id: '9:16', label: 'Portrait (9:16)', desc: '1080x1920 (Poster)', width: 1080, height: 1920 },
+  { id: '3:4', label: 'Portrait (3:4)', desc: '1080x1350 (Poster)', width: 1080, height: 1350 },
+  
+  { id: 'facebook_cover', label: 'Facebook Cover', desc: '851x315', width: 851, height: 315 },
+  { id: 'twitter_cover', label: 'Twitter/X Cover', desc: '1500x500', width: 1500, height: 500 },
+  { id: 'pinterest', label: 'Pinterest', desc: '734x413', width: 734, height: 413 },
+  { id: 'linkedin_profile', label: 'LinkedIn Profile Cover', desc: '1584x396', width: 1584, height: 396 },
+  { id: 'linkedin_business', label: 'LinkedIn Business Cover', desc: '1128x191', width: 1128, height: 191 },
+  { id: 'youtube_mini', label: 'YouTube Desktop Mini', desc: '1546x423', width: 1546, height: 423 },
+  { id: 'youtube_tablet', label: 'YouTube Tablet', desc: '1855x423', width: 1855, height: 423 },
+  { id: 'youtube_max', label: 'YouTube Desktop Max', desc: '2560x423', width: 2560, height: 423 },
+  { id: 'youtube_tv', label: 'YouTube TV', desc: '1546x1440', width: 1546, height: 1440 },
+
+  { id: '4:3', label: 'Standard (4:3)', desc: '1024x768', width: 1024, height: 768 },
+  { id: '2.35:1', label: 'Cinematic (2.35:1)', desc: '1920x817', width: 1920, height: 817 },
+  { id: '2:3', label: 'Portrait (2:3)', desc: '1000x1500', width: 1000, height: 1500 },
 ];
 
 export default function ImageGeneratorPage() {
@@ -111,6 +131,14 @@ export default function ImageGeneratorPage() {
   const [selectedProvider, setSelectedProvider] = useState<string>('stability');
   const [selectedQuality, setSelectedQuality] = useState<'standard' | 'hd'>('standard');
   const [promptText, setPromptText] = useState<string>('');
+
+  // Manual dimensions for Custom Aspect Ratio
+  const [isCustomSize, setIsCustomSize] = useState<boolean>(false);
+  const [customWidth, setCustomWidth] = useState<number>(1080);
+  const [customHeight, setCustomHeight] = useState<number>(1080);
+
+  // Content Source
+  const [contentSource, setContentSource] = useState<'manual' | 'approved' | 'library' | 'knowledge' | 'sources'>('manual');
 
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
@@ -187,7 +215,9 @@ export default function ImageGeneratorPage() {
   const generateMutation = useMutation({
     mutationFn: async () => {
       if (!promptText.trim()) throw new Error('Prompt text cannot be empty');
-      const ratio = ASPECT_RATIOS.find((r) => r.id === selectedRatioId) || { id: '1:1', label: 'Square (1:1)', desc: '1024x1024', width: 1024, height: 1024 };
+      const ratio = isCustomSize
+        ? { id: 'custom', width: customWidth, height: customHeight }
+        : ASPECT_RATIOS.find((r) => r.id === selectedRatioId) || ASPECT_RATIOS[0]!;
 
       const res = await apiClient.post('/images/generate', {
         brandId: selectedBrandId,
@@ -222,7 +252,7 @@ export default function ImageGeneratorPage() {
   });
 
   const selectedBrand = brands.find((b) => b.id === selectedBrandId);
-  const selectedRatio = ASPECT_RATIOS.find((r) => r.id === selectedRatioId) || ASPECT_RATIOS[0];
+  const selectedRatio = ASPECT_RATIOS.find((r) => r.id === selectedRatioId) || ASPECT_RATIOS[0]!;
   const generating = generateMutation.isPending || !!activeJobId;
 
   // Find active job detailed progress
@@ -379,27 +409,182 @@ export default function ImageGeneratorPage() {
                   </button>
                 ))}
               </div>
+
+              {/* Custom Size Checkbox */}
+              <div className="mt-4 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="customSizeCheck"
+                  checked={isCustomSize}
+                  onChange={(e) => setIsCustomSize(e.target.checked)}
+                  className="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-indigo-500"
+                />
+                <label htmlFor="customSizeCheck" className="text-xs font-bold text-slate-300">
+                  Use Custom Dimensions
+                </label>
+              </div>
+
+              {/* Custom Size Inputs */}
+              {isCustomSize && (
+                <div className="flex gap-4 items-center">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Width (px)</label>
+                    <input
+                      type="number"
+                      value={customWidth}
+                      onChange={(e) => setCustomWidth(parseInt(e.target.value) || 0)}
+                      className="w-24 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 transition-colors"
+                    />
+                  </div>
+                  <span className="text-slate-500 font-bold mt-5">×</span>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Height (px)</label>
+                    <input
+                      type="number"
+                      value={customHeight}
+                      onChange={(e) => setCustomHeight(parseInt(e.target.value) || 0)}
+                      className="w-24 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
 
-          {/* Step 3: Raw Input Prompt */}
+          {/* Step 3: Generative Directives & Content Source */}
           <Card className="p-6 border-slate-800 bg-slate-900/50 shadow-sm space-y-4">
             <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
               <ImageIcon className="h-5 w-5 text-indigo-400" />
               <h2 className="text-sm font-black uppercase tracking-wider text-slate-200">3. Generative Directives</h2>
             </div>
 
-            <div className="space-y-2">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex justify-between">
-                <span>Core Prompt Instruction *</span>
-                <span className="text-[9px] text-indigo-400 font-bold uppercase">Enhanced by Brand Prompt-Engine</span>
-              </span>
-              <textarea
-                className="w-full min-h-[100px] rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
-                value={promptText}
-                onChange={(e) => setPromptText(e.target.value)}
-                placeholder="E.g. Dynamic capture of organic product, droplets, studio light setup, visual symmetry, clean background placeholder"
-              />
+            {/* Content Source Tabs */}
+            <div className="grid grid-cols-5 gap-1.5 bg-slate-950 border border-slate-800 p-1 rounded-xl mb-4">
+              {[
+                { id: 'manual', label: 'Manual Copy' },
+                { id: 'approved', label: 'Approved Assets' },
+                { id: 'library', label: 'Content Library' },
+                { id: 'knowledge', label: 'Knowledge Hub' },
+                { id: 'sources', label: 'Sources' }
+              ].map(src => (
+                <button
+                  key={src.id}
+                  onClick={() => setContentSource(src.id as any)}
+                  className={`text-[10px] font-black py-2 rounded-lg transition-all uppercase tracking-wider ${
+                    contentSource === src.id 
+                      ? 'bg-slate-800 text-indigo-400 shadow-md border border-slate-700/50' 
+                      : 'text-slate-500 hover:text-slate-300'
+                  }`}
+                >
+                  {src.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              {contentSource === 'manual' && (
+                <div className="space-y-2">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex justify-between">
+                    <span>Core Prompt Instruction *</span>
+                    <span className="text-[9px] text-indigo-400 font-bold uppercase">Enhanced by Brand Prompt-Engine</span>
+                  </span>
+                  <textarea
+                    className="w-full min-h-[100px] rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
+                    value={promptText}
+                    onChange={(e) => setPromptText(e.target.value)}
+                    placeholder="E.g. Dynamic capture of organic product, droplets, studio light setup, visual symmetry, clean background placeholder"
+                  />
+                </div>
+              )}
+
+              {contentSource === 'approved' && (
+                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-4 space-y-3">
+                  <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider block">✓ Found linked approved content</span>
+                  <div className="bg-slate-950 border border-emerald-500/20 p-3 rounded-lg">
+                    <p className="text-slate-300 text-xs font-medium leading-relaxed italic">
+                      "Transform your business with cutting edge AI tools. Try our SaaS workspace today to boost team productivity by 300%."
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setPromptText('Transform your business with cutting edge AI tools. Try our SaaS workspace today to boost team productivity by 300%.');
+                      setContentSource('manual');
+                    }}
+                    className="text-[10px] font-black text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                  >
+                    Select & Edit <ChevronRight className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+
+              {contentSource === 'library' && (
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                  {[
+                    'Product Launch: High fidelity product shot with modern background', 
+                    'Seasonal Promo: Warm autumn colors, cozy aesthetic, typography space', 
+                    'Corporate Testimonial: Professional office environment, clean white space', 
+                    'Webinar Invite: Tech abstract graphics, deep blues and purples'
+                  ].map((t, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setPromptText(t);
+                        setContentSource('manual');
+                      }}
+                      className="border border-slate-850 hover:border-indigo-500/50 bg-slate-950 text-slate-400 hover:text-white rounded-xl p-3 text-left text-[11px] font-bold transition-colors"
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {contentSource === 'knowledge' && (
+                <div className="space-y-2">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Select Knowledge Base Reference</span>
+                  <select
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setPromptText(`Base image on knowledge hub document: ${e.target.value}`);
+                        setContentSource('manual');
+                      }
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Select a document...</option>
+                    <option value="Brand Identity Guidelines 2026">Brand Identity Guidelines 2026</option>
+                    <option value="Product Spec Sheet v2">Product Spec Sheet v2</option>
+                    <option value="Target Audience Persona Cards">Target Audience Persona Cards</option>
+                  </select>
+                </div>
+              )}
+
+              {contentSource === 'sources' && (
+                <div className="space-y-2">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">External Source / Competitor URL</span>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      placeholder="https://example.com/reference-image"
+                      className="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
+                      id="sourceUrlInput"
+                    />
+                    <button 
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-3 rounded-xl text-xs font-bold transition-colors"
+                      onClick={() => {
+                        const val = (document.getElementById('sourceUrlInput') as HTMLInputElement)?.value;
+                        if (val) {
+                          setPromptText(`Recreate style inspired by external source: ${val}`);
+                          setContentSource('manual');
+                        }
+                      }}
+                    >
+                      Use Source
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Advanced Trigger */}

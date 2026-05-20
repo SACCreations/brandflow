@@ -155,6 +155,20 @@ export class LLMGateway {
       });
     }
 
+    // 1.5 Image prompt architect check
+    if (
+      cleanSystem.includes('prompt') ||
+      cleanSystem.includes('image') ||
+      cleanUser.includes('prompt') ||
+      cleanUser.includes('visual rules')
+    ) {
+      const promptClean = userPrompt
+        .replace(/User Prompt:\s*/i, '')
+        .replace(/Brand Design Tokens & Rules:[\s\S]*/i, '')
+        .trim();
+      return `Masterpiece, high-fidelity digital art representing: "${promptClean}". Extremely detailed, professional studio lighting, depth of field, vivid harmonious colors, modern premium composition, optimized for branding guidelines.`;
+    }
+
     // 2. High-fidelity creative social draft
     let topic = 'our latest feature';
     const topicMatch = userPrompt.match(/about:\s*(.+)$/i) || userPrompt.match(/about\s+(.+)$/i);

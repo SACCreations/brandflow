@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
 import { 
   Sparkles, 
   ImageIcon, 
@@ -70,6 +73,19 @@ interface CommentAnnotation {
 }
 
 export default function CreativeBuilderPage() {
+  const searchParams = useSearchParams();
+  const assetId = searchParams.get('assetId');
+
+  const { data: assets } = useQuery({
+    queryKey: ['workspace-assets'],
+    queryFn: async () => {
+      const res = await apiClient.get('/images');
+      return res.data as { id: string; cdnUrl: string; fileName: string; type: string }[];
+    },
+  });
+
+  const activeAsset = assets?.find(a => a.id === assetId);
+
   // --- Content Source Selection (Step 1) ---
   const [contentSource, setContentSource] = useState<'approved' | 'manual' | 'campaign' | 'library'>('manual');
   const [marketingText, setMarketingText] = useState('Boost your business productivity by 250% using our autonomous AI marketing workforce. Try BrandFlow today.');
@@ -160,16 +176,78 @@ export default function CreativeBuilderPage() {
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>('layer-text');
   const [layersHistory, setLayersHistory] = useState<CanvasLayer[][]>([
     [
-      { id: 'layer-bg', type: 'image', name: 'AI Generated Background', x: 0, y: 0, width: 400, height: 400, src: simulatedVariants[0]?.url || '', isLocked: true },
+      { id: 'layer-bg', type: 'image', name: 'AI Generated Background', x: 0, y: 0, width: 800, height: 800, src: simulatedVariants[0]?.url || '', isLocked: true },
       { id: 'layer-logo', type: 'logo', name: 'Brand Logo', x: 24, y: 24, width: 80, height: 28, src: brandLogos[1]?.url || '' },
       { id: 'layer-text', type: 'text', name: 'Headline Text', x: 24, y: 260, width: 352, height: 80, content: 'ACCELERATE YOUR WORKFLOW', fontFamily: 'Outfit', fontSize: 24, fill: '#ffffff' },
       { id: 'layer-cta', type: 'shape', name: 'CTA Banner Box', x: 24, y: 340, width: 120, height: 36, fill: '#6366f1' }
     ]
   ]);
+
+  // Hydrate actual image background once assets load
+  useEffect(() => {
+    if (activeAsset) {
+      setLayersHistory(prev => {
+        const history = [...prev];
+        const lastLayers = history[history.length - 1];
+        if (!lastLayers) return prev;
+        const latestLayers = [...lastLayers];
+        const bgLayerIndex = latestLayers.findIndex(l => l.id === 'layer-bg');
+        if (bgLayerIndex >= 0) {
+          const bgLayer = latestLayers[bgLayerIndex];
+          if (bgLayer) {
+            latestLayers[bgLayerIndex] = { ...bgLayer, src: activeAsset.cdnUrl, name: activeAsset.fileName };
+          }
+        }
+        history[history.length - 1] = latestLayers;
+        return history;
+      });
+    }
+  }, [activeAsset]);
   const [historyPointer, setHistoryPointer] = useState(0);
   const [snappingGuides, setSnappingGuides] = useState(true);
 
   const currentLayers = layersHistory[historyPointer] || [];
+
+  // --- DRAG AND DROP STATE ---
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+  const handlePointerDown = (e: React.PointerEvent, layer: CanvasLayer) => {
+    if (layer.isLocked || layer.id === 'layer-bg') return;
+    e.stopPropagation();
+    setSelectedLayerId(layer.id);
+    setIsDragging(true);
+    setDragStartPos({ x: e.clientX, y: e.clientY });
+    setDragOffset({ x: 0, y: 0 });
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging || !selectedLayerId) return;
+    const dx = e.clientX - dragStartPos.x;
+    const dy = e.clientY - dragStartPos.y;
+    setDragOffset({ x: dx, y: dy });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDragging || !selectedLayerId) return;
+    setIsDragging(false);
+    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    
+    const dx = e.clientX - dragStartPos.x;
+    const dy = e.clientY - dragStartPos.y;
+    
+    // Commit final position to history once
+    updateCurrentLayers(prev => prev.map(l => {
+      if (l.id === selectedLayerId && !l.isLocked) {
+        return { ...l, x: Math.max(0, l.x + dx), y: Math.max(0, l.y + dy) };
+      }
+      return l;
+    }));
+    
+    setDragOffset({ x: 0, y: 0 });
+  };
 
   // Canvas Actions
   const updateCurrentLayers = (updater: (prev: CanvasLayer[]) => CanvasLayer[]) => {
@@ -939,27 +1017,39 @@ export default function CreativeBuilderPage() {
                     }
 
                     if (layer.type === 'logo') {
+                      const isCurrDrag = selectedLayerId === layer.id && isDragging;
+                      const x = isCurrDrag ? Math.max(0, layer.x + dragOffset.x) : layer.x;
+                      const y = isCurrDrag ? Math.max(0, layer.y + dragOffset.y) : layer.y;
                       return (
                         <div
                           key={layer.id}
+                          onPointerDown={(e) => handlePointerDown(e, layer)}
+                          onPointerMove={handlePointerMove}
+                          onPointerUp={handlePointerUp}
                           onClick={(e) => { e.stopPropagation(); setSelectedLayerId(layer.id); }}
-                          style={{ left: `${layer.x}px`, top: `${layer.y}px` }}
-                          className={`absolute z-20 cursor-move transition-transform ${
+                          style={{ left: `${x}px`, top: `${y}px` }}
+                          className={`absolute z-20 cursor-move transition-shadow ${
                             selectedLayerId === layer.id ? 'ring-2 ring-brand-500 p-0.5 bg-slate-950/20' : ''
                           }`}
                         >
-                          <img src={layer.src} alt={layer.name} className="h-8 object-contain filter brightness-125" />
+                          <img src={layer.src} alt={layer.name} className="h-8 object-contain filter brightness-125 pointer-events-none" />
                         </div>
                       );
                     }
 
                     if (layer.type === 'text') {
+                      const isCurrDrag = selectedLayerId === layer.id && isDragging;
+                      const x = isCurrDrag ? Math.max(0, layer.x + dragOffset.x) : layer.x;
+                      const y = isCurrDrag ? Math.max(0, layer.y + dragOffset.y) : layer.y;
                       return (
                         <div
                           key={layer.id}
+                          onPointerDown={(e) => handlePointerDown(e, layer)}
+                          onPointerMove={handlePointerMove}
+                          onPointerUp={handlePointerUp}
                           onClick={(e) => { e.stopPropagation(); setSelectedLayerId(layer.id); }}
-                          style={{ left: `${layer.x}px`, top: `${layer.y}px`, width: `${layer.width}px` }}
-                          className={`absolute z-30 cursor-text p-1 ${
+                          style={{ left: `${x}px`, top: `${y}px`, width: `${layer.width}px` }}
+                          className={`absolute z-30 cursor-move p-1 transition-shadow ${
                             selectedLayerId === layer.id ? 'ring-2 ring-brand-500 bg-slate-950/30 backdrop-blur-[1px]' : ''
                           }`}
                         >
@@ -974,16 +1064,22 @@ export default function CreativeBuilderPage() {
                     }
 
                     if (layer.type === 'shape') {
+                      const isCurrDrag = selectedLayerId === layer.id && isDragging;
+                      const x = isCurrDrag ? Math.max(0, layer.x + dragOffset.x) : layer.x;
+                      const y = isCurrDrag ? Math.max(0, layer.y + dragOffset.y) : layer.y;
                       return (
                         <div
                           key={layer.id}
+                          onPointerDown={(e) => handlePointerDown(e, layer)}
+                          onPointerMove={handlePointerMove}
+                          onPointerUp={handlePointerUp}
                           onClick={(e) => { e.stopPropagation(); setSelectedLayerId(layer.id); }}
-                          style={{ left: `${layer.x}px`, top: `${layer.y}px`, width: `${layer.width}px`, height: `${layer.height}px`, backgroundColor: layer.fill }}
-                          className={`absolute z-10 cursor-move rounded-md ${
+                          style={{ left: `${x}px`, top: `${y}px`, width: `${layer.width}px`, height: `${layer.height}px`, backgroundColor: layer.fill }}
+                          className={`absolute z-10 cursor-move rounded-md transition-shadow ${
                             selectedLayerId === layer.id ? 'ring-2 ring-brand-500' : ''
                           } flex items-center justify-center`}
                         >
-                          <span className="text-[8px] font-black text-white/50 tracking-wider">CTA BANNER BLOCK</span>
+                          <span className="text-[8px] font-black text-white/50 tracking-wider select-none">CTA BANNER BLOCK</span>
                         </div>
                       );
                     }

@@ -81,11 +81,20 @@ export class ImageJobProcessor extends WorkerHost {
         data: { progress: 80 },
       });
 
+      if (!imageResponse || !imageResponse.images || imageResponse.images.length === 0) {
+        throw new Error('Provider failed to return image artifacts from gateway');
+      }
+
       const generatedImageNode = imageResponse.images[0];
-      if (!generatedImageNode) throw new Error('Provider failed to return image artifacts');
+      if (!generatedImageNode) throw new Error('Provider returned empty image node');
 
       const imageUrl = generatedImageNode.url || `data:image/png;base64,${generatedImageNode.base64}`;
       const fileName = `ai_creative_${Date.now()}.png`;
+
+      // More robust asset metadata extraction
+      const providerUsed = imageResponse.provider || settings.provider || 'unknown';
+      const modelUsed = imageResponse.model || 'unknown';
+      const costCentsUsed = typeof imageResponse.costCents === 'number' ? imageResponse.costCents : 0;
 
       const asset = await this.prismaService.client.asset.create({
         data: {
@@ -100,9 +109,9 @@ export class ImageJobProcessor extends WorkerHost {
           metadata: {
             enhancedPrompt,
             rawPrompt,
-            provider: imageResponse.provider,
-            model: imageResponse.model,
-            costCents: imageResponse.costCents,
+            provider: providerUsed,
+            model: modelUsed,
+            costCents: costCentsUsed,
             category,
           },
         },
@@ -120,9 +129,9 @@ export class ImageJobProcessor extends WorkerHost {
           aspectRatio: settings.aspectRatio,
           promptUsed: enhancedPrompt,
           metadata: {
-            costCents: imageResponse.costCents,
-            provider: imageResponse.provider,
-            model: imageResponse.model,
+            costCents: costCentsUsed,
+            provider: providerUsed,
+            model: modelUsed,
             seed: generatedImageNode.seed,
           },
         },
@@ -132,10 +141,10 @@ export class ImageJobProcessor extends WorkerHost {
       await this.prismaService.client.aIImageLog.create({
         data: {
           businessId,
-          provider: imageResponse.provider,
-          model: imageResponse.model,
+          provider: providerUsed,
+          model: modelUsed,
           latencyMs,
-          costCents: imageResponse.costCents,
+          costCents: costCentsUsed,
           status: 'SUCCESS',
         },
       });
