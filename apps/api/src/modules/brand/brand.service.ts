@@ -70,7 +70,15 @@ export class BrandService {
 
   async create(businessId: string, dto: CreateBrandDto) {
     const healthScore = this.calculateHealthScore(dto);
-    const brand = await this.prisma.client.brand.create({ data: { ...dto, businessId, healthScore } as any });
+    const slug = dto.slug?.trim() || dto.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const brand = await this.prisma.client.brand.create({
+      data: {
+        ...dto,
+        slug: slug || null,
+        businessId,
+        healthScore
+      } as any
+    });
     await this.logActivity(businessId, 'brand.created', brand.id, null, brand);
     return brand;
   }
@@ -82,6 +90,14 @@ export class BrandService {
     
     const { ...updateDto } = dto;
     Object.keys(updateDto).forEach(key => (updateDto as any)[key] === null && delete (updateDto as any)[key]);
+
+    if (updateDto.slug !== undefined) {
+      const nameForSlug = updateDto.name || before.name;
+      updateDto.slug = updateDto.slug?.trim() || nameForSlug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      if (!updateDto.slug) {
+        updateDto.slug = null;
+      }
+    }
 
     const after = await this.prisma.client.brand.update({
       where: { id },

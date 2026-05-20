@@ -144,6 +144,7 @@ export class ContentService {
       throw new BadRequestException('A linked brand is required to generate content.');
     }
 
+    try {
     const effectiveCampaignId = dto.campaignId ?? briefContext?.campaignId ?? undefined;
 
     // 2. Resolve brand context
@@ -281,12 +282,18 @@ export class ContentService {
       after: { platform: dto.platform, type: dto.type, briefId: dto.briefId },
     });
 
-    return {
-      content,
-      qualityCheck: finalQualityResult,
-      provider: usedProvider,
-      requestId,
-    };
+      return {
+        content,
+        qualityCheck: finalQualityResult,
+        provider: usedProvider,
+        requestId,
+      };
+    } catch (error: any) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException || error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new BadRequestException(`Generation failed: ${error.message || 'Unknown LLM or system error'}`);
+    }
   }
 
 

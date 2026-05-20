@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  X
 } from 'lucide-react';
 import { cn, Button, Progress, useToast } from '@brandflow/ui';
 import { BrandForm } from './brand-form';
@@ -24,6 +25,7 @@ interface BrandWizardProps {
   onSubmit: (data: any) => Promise<void>;
   isLoading?: boolean;
   title: string;
+  onClose?: () => void;
 }
 
 const STEPS = [
@@ -37,19 +39,38 @@ const STEPS = [
   { id: 'finish', label: 'Analytics & Finish', icon: Sparkles, description: 'Reporting & Review' }
 ];
 
-export function BrandWizard({ onSubmit, isLoading, title }: BrandWizardProps) {
+export function BrandWizard({ onSubmit, isLoading, title, onClose }: BrandWizardProps) {
   const [currentStepIdx, setCurrentStepIdx] = React.useState(0);
+  const [maxVisitedStepIdx, setMaxVisitedStepIdx] = React.useState(0);
   const [formData, setFormData] = React.useState<any>({});
   const { toast } = useToast();
+  
+  const triggerValidationRef = React.useRef<(() => Promise<boolean>) | undefined>(undefined);
 
   const currentStep = (STEPS[currentStepIdx] || STEPS[0]) as typeof STEPS[number];
   const progress = ((currentStepIdx + 1) / STEPS.length) * 100;
 
-  const handleNext = () => {
+  React.useEffect(() => {
+    setMaxVisitedStepIdx(prev => Math.max(prev, currentStepIdx));
+  }, [currentStepIdx]);
+
+  const handleNext = async () => {
+    if (triggerValidationRef.current) {
+      const isValid = await triggerValidationRef.current();
+      if (!isValid) {
+        toast({
+          variant: 'destructive',
+          title: 'Validation Error',
+          description: 'Please complete all required fields correctly before moving to the next step.',
+        });
+        return;
+      }
+    }
+
     if (currentStepIdx < STEPS.length - 1) {
       setCurrentStepIdx(prev => prev + 1);
     } else {
-      onSubmit(formData);
+      await onSubmit(formData);
     }
   };
 
@@ -59,10 +80,42 @@ export function BrandWizard({ onSubmit, isLoading, title }: BrandWizardProps) {
     }
   };
 
+  const handleStepClick = async (idx: number) => {
+    if (idx === currentStepIdx) return;
+
+    if (idx < currentStepIdx) {
+      // Going backward is always allowed
+      setCurrentStepIdx(idx);
+      return;
+    }
+
+    // Moving forward: enforce step-by-step completion
+    if (idx === currentStepIdx + 1) {
+      if (triggerValidationRef.current) {
+        const isValid = await triggerValidationRef.current();
+        if (!isValid) {
+          toast({
+            variant: 'destructive',
+            title: 'Validation Error',
+            description: 'Please complete all required fields correctly before proceeding.',
+          });
+          return;
+        }
+      }
+      setCurrentStepIdx(idx);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Step Locked',
+        description: 'Please proceed step-by-step using the Continue button.',
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50/30 dark:bg-gray-950 flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-gray-50 dark:bg-gray-950 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="h-20 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl sticky top-0 z-50 px-8 flex items-center justify-between">
+      <header className="h-20 border-b border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl sticky top-0 z-50 px-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <motion.div 
             initial={{ scale: 0.8, rotate: -10 }}
@@ -94,67 +147,85 @@ export function BrandWizard({ onSubmit, isLoading, title }: BrandWizardProps) {
           </div>
         </div>
 
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="rounded-xl font-bold text-[10px] uppercase tracking-widest"
-          onClick={() => {
-            toast({ title: 'Draft Saved', description: 'Your progress has been saved locally.' });
-          }}
-        >
-          Save Draft
-        </Button>
+        <div className="flex items-center gap-2">
+          {onClose && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="rounded-xl font-bold text-[10px] uppercase tracking-widest text-gray-500"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+          )}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="rounded-xl font-bold text-[10px] uppercase tracking-widest"
+            onClick={() => {
+              toast({ title: 'Draft Saved', description: 'Your progress has been saved locally.' });
+              if (onClose) onClose();
+            }}
+          >
+            Save & Exit
+          </Button>
+        </div>
       </header>
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar Nav */}
-        <aside className="w-80 border-r border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 hidden lg:block overflow-y-auto custom-scrollbar">
+        <aside className="w-80 flex-shrink-0 border-r border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 hidden lg:block overflow-y-auto custom-scrollbar">
           <div className="space-y-1">
-            {STEPS.map((step, idx) => (
-              <button
-                key={step.id}
-                onClick={() => setCurrentStepIdx(idx)}
-                className={cn(
-                  "w-full flex items-start gap-4 p-4 rounded-2xl transition-all text-left group relative",
-                  currentStepIdx === idx 
-                    ? "bg-brand-50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-800" 
-                    : "hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent"
-                )}
-              >
-                {currentStepIdx === idx && (
-                  <motion.div 
-                    layoutId="active-step-indicator"
-                    className="absolute left-0 top-4 w-1 h-8 bg-brand-600 rounded-r-full"
-                  />
-                )}
-                <div className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
-                  currentStepIdx === idx 
-                    ? "bg-brand-600 text-white shadow-lg shadow-brand-500/20" 
-                    : idx < currentStepIdx 
-                      ? "bg-emerald-500 text-white" 
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                )}>
-                  {idx < currentStepIdx ? <CheckCircle2 className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
-                </div>
-                <div className="flex-1 py-0.5">
-                  <p className={cn(
-                    "text-[10px] font-black uppercase tracking-widest leading-none mb-1",
-                    currentStepIdx === idx ? "text-brand-600" : "text-gray-400"
-                  )}>Step {idx + 1}</p>
-                  <p className={cn(
-                    "text-xs font-bold truncate",
-                    currentStepIdx === idx ? "text-gray-900 dark:text-white" : "text-gray-500"
-                  )}>{step.label}</p>
-                  <p className="text-[9px] text-gray-400 font-medium truncate mt-0.5">{step.description}</p>
-                </div>
-              </button>
-            ))}
+            {STEPS.map((step, idx) => {
+              const isActive = currentStepIdx === idx;
+              const isVisited = idx <= maxVisitedStepIdx;
+              return (
+                <button
+                  key={step.id}
+                  onClick={() => handleStepClick(idx)}
+                  className={cn(
+                    "w-full flex items-start gap-4 p-4 rounded-2xl transition-all text-left group relative",
+                    isActive 
+                      ? "bg-brand-50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-800" 
+                      : "hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent",
+                    !isVisited && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  {isActive && (
+                    <motion.div 
+                      layoutId="active-step-indicator"
+                      className="absolute left-0 top-4 w-1 h-8 bg-brand-600 rounded-r-full"
+                    />
+                  )}
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                    isActive 
+                      ? "bg-brand-600 text-white shadow-lg shadow-brand-500/20" 
+                      : isVisited 
+                        ? "bg-emerald-500 text-white" 
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                  )}>
+                    {isVisited && !isActive ? <CheckCircle2 className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
+                  </div>
+                  <div className="flex-1 py-0.5">
+                    <p className={cn(
+                      "text-[10px] font-black uppercase tracking-widest leading-none mb-1",
+                      isActive ? "text-brand-600" : "text-gray-400"
+                    )}>Step {idx + 1}</p>
+                    <p className={cn(
+                      "text-xs font-bold truncate",
+                      isActive ? "text-gray-900 dark:text-white" : "text-gray-500"
+                    )}>{step.label}</p>
+                    <p className="text-[9px] text-gray-400 font-medium truncate mt-0.5">{step.description}</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </aside>
 
         {/* Main Form Area */}
-        <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-950 px-12 py-16 custom-scrollbar relative">
+        <main className="flex-1 min-w-[500px] overflow-y-auto bg-white dark:bg-gray-950 px-12 py-16 custom-scrollbar relative">
            <div className="max-w-2xl mx-auto">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -171,6 +242,7 @@ export function BrandWizard({ onSubmit, isLoading, title }: BrandWizardProps) {
                       isLoading={isLoading}
                       wizardMode
                       activeStepId={currentStep.id}
+                      triggerValidationRef={triggerValidationRef}
                    />
                 </motion.div>
               </AnimatePresence>
@@ -188,6 +260,7 @@ export function BrandWizard({ onSubmit, isLoading, title }: BrandWizardProps) {
 
                  <Button
                     onClick={handleNext}
+                    disabled={isLoading}
                     className="rounded-xl font-black h-12 px-12 bg-brand-600 hover:bg-brand-700 shadow-xl shadow-brand-500/20 uppercase tracking-tight"
                  >
                     {currentStepIdx === STEPS.length - 1 ? (
@@ -201,7 +274,7 @@ export function BrandWizard({ onSubmit, isLoading, title }: BrandWizardProps) {
         </main>
 
         {/* Preview Panel */}
-        <aside className="w-[480px] hidden xl:block border-l border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30">
+        <aside className="w-[400px] flex-shrink-0 hidden xl:block border-l border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30">
            <LivePreview data={formData} />
         </aside>
       </div>

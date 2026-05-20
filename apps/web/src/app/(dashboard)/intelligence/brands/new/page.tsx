@@ -42,6 +42,7 @@ export default function BrandCreatePage() {
           await mutation.mutateAsync(data);
         }}
         isLoading={mutation.isPending}
+        onClose={() => router.push('/intelligence/brands')}
       />
     </div>
   );

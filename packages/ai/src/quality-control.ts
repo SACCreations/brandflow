@@ -67,7 +67,11 @@ export class QualityControl {
           type: 'banned_phrase',
           severity: 'high',
           detail: `Contains restricted brand phrase: "${phrase}"`,
-          position: idx,
+          location: {
+            start: idx,
+            end: idx + phrase.length,
+            snippet: phrase
+          },
         });
       }
     }
@@ -103,7 +107,8 @@ Respond in JSON format:
 
     try {
       const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0.1 });
-      const parsed = JSON.parse(response.content);
+      const cleanJson = response.content.replace(/```json\n?|\n?```/gi, '').trim();
+      const parsed = JSON.parse(cleanJson);
       return { score: parsed.score ?? 1.0, violations: parsed.violations ?? [] };
     } catch (err: any) {
       console.error(`Compliance evaluation failed: ${err.message}`);
@@ -151,7 +156,8 @@ Respond in JSON format:
 
     try {
       const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0 });
-      const parsed = JSON.parse(response.content);
+      const cleanJson = response.content.replace(/```json\n?|\n?```/gi, '').trim();
+      const parsed = JSON.parse(cleanJson);
       return { 
         score: parsed.score ?? 1.0, 
         violations: parsed.violations ?? [], 
@@ -169,7 +175,8 @@ Respond in JSON: {"score": 0.0-1.0, "violations": [{"type": "unsafe_content", "s
 
     try {
       const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0 });
-      const parsed = JSON.parse(response.content);
+      const cleanJson = response.content.replace(/```json\n?|\n?```/gi, '').trim();
+      const parsed = JSON.parse(cleanJson);
       return { score: parsed.score ?? 1.0, violations: parsed.violations ?? [] };
     } catch {
       return { score: 1.0, violations: [] };

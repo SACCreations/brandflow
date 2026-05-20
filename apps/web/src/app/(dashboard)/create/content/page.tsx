@@ -266,7 +266,7 @@ export default function ContentGeneratorPage() {
         briefId: briefId || null,
         campaignId: selectedCampaignId || null,
         platform: selectedPlatform,
-        type: selectedCategory.toLowerCase().replace(' ', '_'),
+        type: selectedCategory.toLowerCase().replace(/ /g, '_'),
         topics: allTopics,
         count: contentCount,
         additionalContext: customTopic.trim() ? `Focus detail: ${customTopic.trim()}` : null,
@@ -302,7 +302,7 @@ export default function ContentGeneratorPage() {
     onError: (error: any) => {
       toast({
         title: 'Generation failed',
-        description: error?.response?.data?.message || 'Error occurred during generation. Please try again.',
+        description: error?.response?.data?.message || error?.message || 'Error occurred during generation. Please try again.',
         variant: 'destructive',
       });
     },
@@ -671,21 +671,31 @@ export default function ContentGeneratorPage() {
 
               <div className="grid gap-4">
                 {completedContents.map((c, idx) => (
-                  <Card key={idx} className="p-4 border border-emerald-100 bg-emerald-50/10 flex flex-col md:flex-row md:items-center justify-between gap-4 dark:border-emerald-500/20">
+                  <Card key={idx} className={`p-4 border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                    c.status === 'success' 
+                      ? 'border-emerald-100 bg-emerald-50/10 dark:border-emerald-500/20'
+                      : 'border-red-100 bg-red-50/10 dark:border-red-500/20'
+                  }`}>
                     <div className="space-y-1">
                       <div className="text-xs font-bold text-gray-900 dark:text-white line-clamp-1">{c.topic}</div>
-                      <div className="text-[10px] text-gray-400 flex items-center gap-2">
-                        <span>Index: {idx + 1}</span>
-                        <span>•</span>
-                        <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-extrabold uppercase tracking-wider text-[9px] dark:bg-emerald-500/10 dark:text-emerald-400">Draft created</span>
+                      <div className="text-[10px] flex items-center gap-2">
+                        <span className="text-gray-400">Index: {idx + 1}</span>
+                        <span className="text-gray-400">•</span>
+                        {c.status === 'success' ? (
+                          <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-extrabold uppercase tracking-wider text-[9px] dark:bg-emerald-500/10 dark:text-emerald-400">Draft created</span>
+                        ) : (
+                          <span className="text-red-700 bg-red-50 px-1.5 py-0.2 rounded font-extrabold uppercase tracking-wider text-[9px] dark:bg-red-500/10 dark:text-red-400">Failed: {c.error || 'Unknown error'}</span>
+                        )}
                       </div>
                     </div>
 
-                    <Link href={`/create/content/${c.contentId}`}>
-                      <Button variant="outline" className="gap-1.5 text-xs font-bold">
-                        Open in Editor <ExternalLink className="h-3.5 w-3.5" />
-                      </Button>
-                    </Link>
+                    {c.status === 'success' && c.contentId && (
+                      <Link href={`/create/content/${c.contentId}`}>
+                        <Button variant="outline" className="gap-1.5 text-xs font-bold">
+                          Open in Editor <ExternalLink className="h-3.5 w-3.5" />
+                        </Button>
+                      </Link>
+                    )}
                   </Card>
                 ))}
               </div>

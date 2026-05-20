@@ -64,6 +64,7 @@ interface BrandFormProps {
   lastSaved?: Date | null;
   wizardMode?: boolean;
   activeStepId?: string;
+  triggerValidationRef?: React.MutableRefObject<(() => Promise<boolean>) | undefined>;
 }
 
 const sanitizeInitialData = (data: any) => {
@@ -185,8 +186,9 @@ const sanitizeInitialData = (data: any) => {
   };
 };
 
-export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, lastSaved, wizardMode, activeStepId }: BrandFormProps) {
+export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, lastSaved, wizardMode, activeStepId, triggerValidationRef }: BrandFormProps) {
   const { toast } = useToast();
+
   const form = useForm<any>({
     resolver: zodResolver(createBrandSchema),
     defaultValues: sanitizeInitialData(initialData) || {
@@ -265,6 +267,39 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       onDataChange(values);
     }
   }, [values, onDataChange]);
+
+  const getFieldsForStep = (stepId: string): string[] => {
+    switch (stepId) {
+      case 'basics':
+        return ['name', 'slug', 'tagline', 'description', 'industry', 'website', 'contactInfo.personName', 'contactInfo.phoneNumber', 'contactInfo.email', 'contactInfo.officeAddress'];
+      case 'visuals':
+        return ['visualRules.primaryColor', 'visualRules.secondaryColor', 'visualRules.accentColor', 'visualRules.fontFamily', 'visualRules.logoUrls'];
+      case 'voice':
+        return ['tone', 'positioning', 'identity.mission', 'identity.vision', 'identity.promise', 'identity.personality', 'identity.values'];
+      case 'strategy':
+        return ['audience', 'strategy.targetLocation', 'strategy.ageGroup', 'strategy.interests', 'strategy.postingFrequency', 'strategy.contentLanguage', 'strategy.ctaPreference', 'competitors'];
+      case 'design-prefs':
+        return ['designPreferences.preferredStyle', 'designPreferences.imageStyle', 'designPreferences.referenceLinks', 'designPreferences.animationRequirement'];
+      case 'rules':
+        return ['governance.bannedPhrases', 'governance.requiredPhrases', 'governance.requiredDisclaimer', 'approvalWorkflow.reviewerName', 'approvalWorkflow.finalApproverName', 'approvalWorkflow.revisionLimit'];
+      case 'social':
+        return ['socialAccess.metaBusinessManagerId', 'socialAccess.adAccountId', 'socialAccess.instagramHandle', 'socialAccess.facebookPage', 'socialAccess.linkedinPage', 'socialAccess.youtubeChannel', 'socialAccess.twitterHandle', 'campaignDetails.marketingGoal', 'campaignDetails.monthlyBudget', 'campaignDetails.duration', 'campaignDetails.targetLeads', 'campaignDetails.adPlatforms'];
+      case 'finish':
+        return ['analyticsConfig.monthlyReport', 'analyticsConfig.kpiExpectations', 'analyticsConfig.leadTracking', 'analyticsConfig.engagementTracking'];
+      default:
+        return [];
+    }
+  };
+
+  React.useEffect(() => {
+    if (triggerValidationRef) {
+      triggerValidationRef.current = async () => {
+        if (!activeStepId) return true;
+        const fields = getFieldsForStep(activeStepId);
+        return await form.trigger(fields);
+      };
+    }
+  }, [activeStepId, form, triggerValidationRef]);
 
   // Keyboard Shortcuts
   React.useEffect(() => {
