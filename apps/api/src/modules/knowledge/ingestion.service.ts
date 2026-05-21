@@ -305,7 +305,7 @@ ${text.slice(0, 8000)}
         contentHash: hash,
         confidence: atom.confidence ?? 0.8,
         version: 1,
-        embedding,
+        embedding: embedding ? JSON.stringify(embedding) : null,
         metadata: { extractionDate: new Date().toISOString() },
       });
     }

@@ -372,6 +372,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Industry</label>
               <Input {...register('industry')} placeholder="e.g. Technology" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
+              {errors['industry'] && <p className="text-xs text-red-500 font-bold">{errors['industry']?.message as string}</p>}
             </div>
           </div>
           
@@ -392,16 +393,19 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
               </Button>
             </div>
             <Input {...register('tagline')} placeholder="The future of branding..." className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
+            {errors['tagline'] && <p className="text-xs text-red-500 font-bold">{errors['tagline']?.message as string}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Website</label>
               <Input {...register('website')} placeholder="https://acme.com" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
+              {errors['website'] && <p className="text-xs text-red-500 font-bold">{errors['website']?.message as string}</p>}
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Slug</label>
               <Input {...register('slug')} placeholder="acme-corp" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
+              {errors['slug'] && <p className="text-xs text-red-500 font-bold">{errors['slug']?.message as string}</p>}
             </div>
           </div>
 
@@ -426,6 +430,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
               placeholder="Tell us about your brand..." 
               className="min-h-[100px] bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl"
             />
+            {errors['description'] && <p className="text-xs text-red-500 font-bold">{errors['description']?.message as string}</p>}
           </div>
 
           <div className="pt-6 border-t border-gray-100 dark:border-gray-800 space-y-4">
@@ -434,19 +439,23 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                 <div className="space-y-1.5">
                    <label className="text-[9px] font-bold text-gray-500 ml-1">Contact Person</label>
                    <Input {...register('contactInfo.personName')} placeholder="Full Name" className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                   {errors.contactInfo?.personName && <p className="text-xs text-red-500 font-bold">{errors.contactInfo.personName.message as string}</p>}
                 </div>
                 <div className="space-y-1.5">
                    <label className="text-[9px] font-bold text-gray-500 ml-1">Phone</label>
                    <Input {...register('contactInfo.phoneNumber')} placeholder="+1..." className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                   {errors.contactInfo?.phoneNumber && <p className="text-xs text-red-500 font-bold">{errors.contactInfo.phoneNumber.message as string}</p>}
                 </div>
                 <div className="space-y-1.5">
                    <label className="text-[9px] font-bold text-gray-500 ml-1">Email</label>
                    <Input {...register('contactInfo.email')} placeholder="contact@brand.com" className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                   {errors.contactInfo?.email && <p className="text-xs text-red-500 font-bold">{errors.contactInfo.email.message as string}</p>}
                 </div>
              </div>
              <div className="space-y-1.5 mt-4">
                 <label className="text-[9px] font-bold text-gray-500 ml-1">Office Address</label>
                 <Input {...register('contactInfo.officeAddress')} placeholder="123 Business St, Suite 400..." className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                {errors.contactInfo?.officeAddress && <p className="text-xs text-red-500 font-bold">{errors.contactInfo.officeAddress.message as string}</p>}
              </div>
           </div>
         </Card>
