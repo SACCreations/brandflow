@@ -54,7 +54,14 @@ export class WebConnector {
     }
 
     try {
-      const { address } = await dnsLookup(parsed.hostname);
+      const lookupResult = await dnsLookup(parsed.hostname);
+      // Node util.promisify on dns.lookup returns either a string (if old node) or { address, family }
+      const address = typeof lookupResult === 'string' ? lookupResult : (lookupResult as any)?.address;
+      
+      if (!address) {
+        throw new BadRequestException(`Cannot resolve host: ${parsed.hostname}`);
+      }
+
       if (this.isPrivateIp(address)) {
         this.logger.warn(`SSRF block: ${targetUrl} → ${address}`);
         throw new BadRequestException('Crawling of private/reserved IP addresses is blocked.');
@@ -133,11 +140,12 @@ export class WebConnector {
     const safeUrl = await this.validateUrl(url);
 
     // 2. Try Playwright first (handles JS-heavy pages)
-    let browser: ReturnType<typeof chromium.launch> extends Promise<infer T> ? T : never;
+    let browser: any;
     try {
       this.logger.log(`Playwright: launching for ${safeUrl}`);
       browser = await chromium.launch({ headless: true });
-      const page = await (await browser.newContext()).newPage();
+      const context = await browser.newContext();
+      const page = await context.newPage();
       await page.goto(safeUrl, { waitUntil: 'networkidle', timeout: 30000 });
 
       await page.evaluate(() => {
@@ -154,8 +162,7 @@ export class WebConnector {
     } catch (playwrightErr: any) {
       this.logger.warn(`Playwright failed (${playwrightErr.message}), falling back to node-fetch`);
       try {
-        // @ts-ignore — browser may be undefined if launch itself failed
-        await browser?.close?.();
+        if (browser) await browser.close();
       } catch (_) {}
     }
 

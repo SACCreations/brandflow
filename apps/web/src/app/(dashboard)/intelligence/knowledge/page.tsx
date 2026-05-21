@@ -21,6 +21,7 @@ import {
 import AddSourceModal from '@/components/knowledge/add-source-modal';
 import KnowledgeExplorer from '@/components/knowledge/knowledge-explorer';
 import LiveIngestionMonitor from '@/components/knowledge/live-ingestion-monitor';
+import SourcesTable from '@/components/knowledge/sources-table';
 import { apiClient } from '@/lib/api-client';
 
 
@@ -185,6 +186,8 @@ export default function KnowledgeDashboard() {
           </div>
         </div>
       </div>
+
+      <SourcesTable />
 
       <AddSourceModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       <KnowledgeExplorer isOpen={isExplorerOpen} onClose={() => setIsExplorerOpen(false)} />

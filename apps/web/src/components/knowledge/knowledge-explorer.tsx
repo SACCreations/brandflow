@@ -18,14 +18,7 @@ import {
   Check
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription,
-  useToast
-} from '@brandflow/ui';
+// Removed @brandflow/ui Dialog import
 
 interface KnowledgeEntry {
   id: string;
@@ -61,7 +54,11 @@ export default function KnowledgeExplorer({ isOpen, onClose }: { isOpen: boolean
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [classification, setClassification] = useState('all');
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+  // Simple toast fallback since we removed @brandflow/ui useToast
+  const toast = ({ title, description }: { title: string, description: string }) => {
+    console.log(`Toast: ${title} - ${description}`);
+    // You can implement a real toast here or import it separately
+  };
 
   // Debounce search input
   useEffect(() => {
@@ -115,24 +112,35 @@ export default function KnowledgeExplorer({ isOpen, onClose }: { isOpen: boolean
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden bg-slate-900 border-slate-800 text-white rounded-3xl">
-        <DialogHeader className="p-6 pb-4 border-b border-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="relative w-full max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden bg-slate-900 shadow-2xl border border-slate-800 text-white rounded-3xl animate-in zoom-in-95 duration-300">
+        
+        {/* Close Button */}
+        <button 
+          onClick={onClose}
+          className="absolute right-6 top-6 rounded-full p-2 text-slate-400 hover:bg-slate-800 transition-colors z-10"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        <div className="p-6 pb-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-500/10 rounded-xl">
               <Brain className="h-6 w-6 text-indigo-400" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-extrabold text-white flex items-center gap-2">
+              <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
                 Brand Brain Explorer
-              </DialogTitle>
-              <DialogDescription className="text-xs text-slate-400">
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
                 Explore, filter, and audit extracted semantic facts used in content generation.
-              </DialogDescription>
+              </p>
             </div>
           </div>
-        </DialogHeader>
+        </div>
 
         {/* Filter bar */}
         <div className="p-6 pb-2 space-y-4">
@@ -271,7 +279,7 @@ export default function KnowledgeExplorer({ isOpen, onClose }: { isOpen: boolean
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

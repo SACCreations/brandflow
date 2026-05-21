@@ -145,6 +145,8 @@ export class IngestionService {
         data: { status: 'failed' },
       });
 
+      // Avoid re-throwing if we want the queue to just mark it as failed gracefully,
+      // but BullMQ needs the throw to trigger retries.
       throw err;
     }
   }
