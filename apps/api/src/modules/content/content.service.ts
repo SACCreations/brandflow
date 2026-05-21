@@ -340,6 +340,9 @@ Target audience: {{audience}}
 Tone: {{tone}}
 Banned phrases: {{banned_phrases}}
 
+Brand Knowledge Context:
+{{knowledge_entries}}
+
 Platform: ${platform}
 Topic: {{topic}}
 {{additional_context}}
@@ -509,9 +512,24 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
     const tone = Array.isArray(brand.tone) ? brand.tone.join(', ') : 'professional';
     const industry = brand.industry || 'marketing';
 
+    // Retrieve relevant brand context for intelligent topic generation
+    const relevantFacts = await this.vectorService.findRelevantContext(
+      this.prisma.client,
+      businessId,
+      category,
+      10
+    );
+    const knowledgeBlock = relevantFacts.length > 0 
+      ? `Brand Knowledge Context:\n${relevantFacts.map((f: any, i: number) => `${i + 1}. ${f.content}`).join('\n')}`
+      : 'No specific brand knowledge retrieved.';
+
     const systemPrompt = `You are a Senior Content strategist for the brand "${brandName}" in the "${industry}" industry.
 Generate exactly 5 creative, highly relevant marketing and content topic ideas for the category "${category}".
 Tone: ${tone}.
+
+${knowledgeBlock}
+
+Topics must be dynamically tailored to the brand knowledge above. Do not use generic industry topics if specific brand facts are available.
 Respond in strict JSON format matching:
 {
   "topics": [
@@ -534,7 +552,9 @@ Respond in strict JSON format matching:
         }
       );
 
-      const parsed = JSON.parse(response.content);
+      // robust JSON parsing to handle markdown wrappers
+      const cleanJson = response.content.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
       return parsed;
     } catch (err: any) {
       return {

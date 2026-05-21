@@ -7,7 +7,7 @@ datasource db {
   provider          = "postgresql"
   url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("DATABASE_SHADOW_URL")
-  extensions        = []
+  extensions        = [vector]
 }
 
 model Business {
@@ -245,30 +245,32 @@ model Brand {
   generatedImages     GeneratedImage[]
   imageGenerationJobs ImageGenerationJob[]
   knowledgeSources    KnowledgeSource[]
+  analyses            BrandAnalysis[]
+  topics              ContentTopic[]
 
   @@unique([businessId, slug])
   @@map("brands")
 }
 
 model KnowledgeSource {
-  id               String                @id @default(uuid())
+  id               String                  @id @default(uuid())
   businessId       String
   brandId          String
   name             String?
   type             String
   sourceUrl        String?
   fileName         String?
-  status           KnowledgeSourceStatus @default(pending)
-  trustLevel       String                @default("high")
-  syncFrequency    String                @default("manual")
-  versionCount     Int                   @default(1)
-  crawlDepth       Int?                  @default(0)
+  status           KnowledgeSourceStatus   @default(pending)
+  trustLevel       String                  @default("high")
+  syncFrequency    String                  @default("manual")
+  versionCount     Int                     @default(1)
+  crawlDepth       Int?                    @default(0)
   metadata         Json?
-  extractionHealth Float                 @default(1.0)
+  extractionHealth Float                   @default(1.0)
   lastIngested     DateTime?
   ownerId          String?
-  createdAt        DateTime              @default(now())
-  updatedAt        DateTime              @updatedAt
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
   audits           KnowledgeAudit[]
   entries          KnowledgeEntry[]
   jobs             KnowledgeJob[]
@@ -276,44 +278,44 @@ model KnowledgeSource {
   ingestionLogs    KnowledgeIngestionLog[]
   syncHistory      KnowledgeSyncHistory[]
   failedRecords    KnowledgeFailedRecord[]
-  brand            Brand                 @relation(fields: [brandId], references: [id], onDelete: Cascade)
-  business         Business              @relation(fields: [businessId], references: [id])
+  brand            Brand                   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  business         Business                @relation(fields: [businessId], references: [id])
 
   @@map("knowledge_sources")
 }
 
 // ---------- Ingestion Models ----------
 model KnowledgeChunk {
-  id          String   @id @default(uuid())
-  sourceId    String
-  source      KnowledgeSource @relation(fields: [sourceId], references: [id])
-  order       Int
-  text        String
-  tokenCount  Int
-  embedding   KnowledgeEmbedding?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String              @id @default(uuid())
+  sourceId   String
+  source     KnowledgeSource     @relation(fields: [sourceId], references: [id])
+  order      Int
+  text       String
+  tokenCount Int
+  embedding  KnowledgeEmbedding?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
 
   @@map("knowledge_chunks")
 }
 
 model KnowledgeEmbedding {
-  id        String   @id @default(uuid())
-  chunkId   String   @unique
-  chunk     KnowledgeChunk @relation(fields: [chunkId], references: [id])
-  vector    Json
-  createdAt DateTime @default(now())
+  id        String                      @id @default(uuid())
+  chunkId   String                      @unique
+  chunk     KnowledgeChunk              @relation(fields: [chunkId], references: [id])
+  vector    Unsupported("vector(1536)")
+  createdAt DateTime                    @default(now())
 
   @@map("knowledge_embeddings")
 }
 
 model KnowledgeIngestionLog {
-  id        String   @id @default(uuid())
+  id        String          @id @default(uuid())
   sourceId  String
   source    KnowledgeSource @relation(fields: [sourceId], references: [id])
-  level     LogLevel @default(INFO)
+  level     LogLevel        @default(INFO)
   message   String
-  createdAt DateTime @default(now())
+  createdAt DateTime        @default(now())
 
   @@map("knowledge_ingestion_logs")
 }
@@ -326,33 +328,33 @@ enum LogLevel {
 }
 
 model KnowledgeSyncHistory {
-  id        String   @id @default(uuid())
-  sourceId  String
-  source    KnowledgeSource @relation(fields: [sourceId], references: [id])
-  syncedAt  DateTime @default(now())
-  details   String?
+  id       String          @id @default(uuid())
+  sourceId String
+  source   KnowledgeSource @relation(fields: [sourceId], references: [id])
+  syncedAt DateTime        @default(now())
+  details  String?
 
   @@map("knowledge_sync_history")
 }
 
 model KnowledgeFailedRecord {
-  id        String   @id @default(uuid())
-  sourceId  String
-  source    KnowledgeSource @relation(fields: [sourceId], references: [id])
-  error     String
-  failedAt  DateTime @default(now())
+  id       String          @id @default(uuid())
+  sourceId String
+  source   KnowledgeSource @relation(fields: [sourceId], references: [id])
+  error    String
+  failedAt DateTime        @default(now())
 
   @@map("knowledge_failed_records")
 }
 
 model IntegrationCredential {
-  id          String   @id @default(uuid())
-  provider    IntegrationProvider
-  accessToken String
+  id           String              @id @default(uuid())
+  provider     IntegrationProvider
+  accessToken  String
   refreshToken String?
-  expiresAt   DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  expiresAt    DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
 
   @@map("integration_credentials")
 }
@@ -365,28 +367,27 @@ enum IntegrationProvider {
   ONEDRIVE
 }
 
-
 model KnowledgeEntry {
-  id                String                       @id @default(uuid())
+  id                String                  @id @default(uuid())
   businessId        String
   sourceId          String
   classification    String?
   content           String
-  confidence        Float                        @default(1.0)
-  isStale           Boolean                      @default(false)
+  confidence        Float                   @default(1.0)
+  isStale           Boolean                 @default(false)
   staleAt           DateTime?
   metadata          Json?
-  locale            String?                      @default("en-US")
+  locale            String?                 @default("en-US")
   governance        Json?
-  version           Int                          @default(1)
+  version           Int                     @default(1)
   contentHash       String?
   embedding         String?
-  createdAt         DateTime                     @default(now())
-  updatedAt         DateTime                     @updatedAt
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
   citations         KnowledgeCitation[]
-  source            KnowledgeSource              @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  relationshipsFrom KnowledgeRelationship[]      @relation("FromEntry")
-  relationshipsTo   KnowledgeRelationship[]      @relation("ToEntry")
+  source            KnowledgeSource         @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  relationshipsFrom KnowledgeRelationship[] @relation("FromEntry")
+  relationshipsTo   KnowledgeRelationship[] @relation("ToEntry")
   reviews           KnowledgeReview[]
 
   @@map("knowledge_entries")
@@ -602,6 +603,7 @@ model Content {
   qualityScore  Float?
   promptId      String?
   promptVersion Int?
+  topicId       String?
   metadata      Json?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
@@ -611,6 +613,7 @@ model Content {
   brief         Brief?           @relation(fields: [briefId], references: [id])
   business      Business         @relation(fields: [businessId], references: [id])
   campaign      Campaign?        @relation(fields: [campaignId], references: [id])
+  topic         ContentTopic?    @relation(fields: [topicId], references: [id])
   publishJobs   PublishJob[]
   qualityChecks QualityCheck[]
   reviewTasks   ReviewTask[]
@@ -629,6 +632,33 @@ model ContentVersion {
   content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
   @@map("content_versions")
+}
+
+model ContentTopic {
+  id          String    @id @default(uuid())
+  businessId  String
+  brandId     String
+  name        String
+  description String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  brand       Brand     @relation(fields: [brandId], references: [id])
+  contents    Content[]
+
+  @@map("content_topics")
+}
+
+model BrandAnalysis {
+  id           String   @id @default(uuid())
+  businessId   String
+  brandId      String
+  analysisType String
+  result       Json
+  createdAt    DateTime @default(now())
+  brand        Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@map("brand_analyses")
 }
 
 model Asset {

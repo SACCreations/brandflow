@@ -27,7 +27,12 @@ export class PromptEngine {
         .slice(0, 10) // Limit to top 10 for token budget
         .map((e, i) => `${i + 1}. ${e}`)
         .join('\n');
-      template = template.replace('{{knowledge_entries}}', knowledgeBlock);
+        
+      if (template.includes('{{knowledge_entries}}')) {
+        template = template.replace('{{knowledge_entries}}', knowledgeBlock);
+      } else {
+        template += `\n\nBrand Knowledge Context:\n${knowledgeBlock}`;
+      }
     } else {
       template = template.replace('{{knowledge_entries}}', 'No additional knowledge available.');
     }

@@ -2,7 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import type { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { QUEUES } from '@brandflow/shared';
-import { LLMGateway, ImageGateway } from '@brandflow/ai';
+import { LLMGateway, ImageGateway, VectorService } from '@brandflow/ai';
 import { PrismaService } from '../../../common/database/prisma.service';
 
 interface ImageJobData {
@@ -28,11 +28,13 @@ export class ImageJobProcessor extends WorkerHost {
   private readonly logger = new Logger(ImageJobProcessor.name);
   private readonly llm: LLMGateway;
   private readonly imageGateway: ImageGateway;
+  private readonly vectorService: VectorService;
 
   constructor(private readonly prismaService: PrismaService) {
     super();
     this.llm = new LLMGateway({ defaultProvider: 'openai' });
     this.imageGateway = new ImageGateway({ defaultProvider: 'stability' });
+    this.vectorService = new VectorService();
   }
 
   async process(job: Job<ImageJobData>): Promise<void> {
@@ -57,7 +59,7 @@ export class ImageJobProcessor extends WorkerHost {
         data: { progress: 30 },
       });
 
-      const enhancedPrompt = await this.enhancePrompt(rawPrompt, brand.visualRules, category, settings.style);
+      const enhancedPrompt = await this.enhancePrompt(rawPrompt, brand.visualRules, category, settings.style, businessId);
       
       await this.prismaService.client.imageGenerationJob.update({
         where: { id: jobId },
@@ -197,15 +199,35 @@ export class ImageJobProcessor extends WorkerHost {
     prompt: string,
     visualRules: any,
     category: string,
-    styleOverride?: string
+    styleOverride?: string,
+    businessId?: string
   ): Promise<string> {
     const rules = visualRules || {};
     const baseStyle = styleOverride || rules.style || 'modern, professional, visual harmony';
     const colors = rules.colors ? `Respect brand visual palette: ${JSON.stringify(rules.colors)}.` : '';
 
+    let knowledgeBlock = '';
+    if (businessId) {
+      try {
+        const relevantFacts = await this.vectorService.findRelevantContext(
+          this.prismaService.client,
+          businessId,
+          category || prompt,
+          5
+        );
+        if (relevantFacts && relevantFacts.length > 0) {
+          knowledgeBlock = `Brand Context Insights:\n${relevantFacts.map((f: any) => `- ${f.content}`).join('\n')}`;
+        }
+      } catch (err) {
+        this.logger.warn(`Failed to fetch vector context for image generation: ${err}`);
+      }
+    }
+
     const systemPrompt = `You are a high-fidelity Creative Automation Prompt Architect.
 Expand the user prompt into a rich, detailed, concrete description for an AI image generator (Stable Diffusion XL / DALL-E 3).
-Inject concrete styling cues aligned with the selected content category: "${category}".`;
+Inject concrete styling cues aligned with the selected content category: "${category}".
+
+${knowledgeBlock}`;
 
     const userMessage = `User Prompt: ${prompt}
 Brand Design Tokens & Rules: Style = "${baseStyle}"; ${colors}

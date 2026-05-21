@@ -15,7 +15,6 @@ const NAV = [
     items: [
       { label: 'Brands', href: '/intelligence/brands', icon: '◈' },
       { label: 'Knowledge Hub', href: '/intelligence/knowledge', icon: '◉' },
-      { label: 'Sources', href: '/intelligence/sources', icon: '⌥' },
       { label: 'Review Queue', href: '/review', icon: '✓' },
       { label: 'Monitor', href: '/intelligence/monitor', icon: '◷' },
     ],
