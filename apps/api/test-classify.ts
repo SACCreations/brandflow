@@ -1,40 +1,17 @@
 import { IngestionService } from './src/modules/knowledge/ingestion.service';
-import { PrismaClient } from '@prisma/client';
-import { LLMGateway, TextSplitter, VectorService } from '@brandflow/ai';
+import { PrismaService } from './src/common/database/prisma.service';
+import { Queue } from 'bullmq';
 
 async function main() {
-  const llm = new LLMGateway({ defaultProvider: 'openai' });
-  
-  const text = 'This is a test feature: Auto-scaling. This feature helps scale automatically.';
-  const prompt = `
-You are an expert Brand Intelligence Engineer.
-Extract "Identity Atoms" from the text below.
-An Identity Atom is an atomic, self-contained fact about a brand, product, audience, or guideline.
-
-Classify each atom as one of EXACTLY these strings:
-[product, feature, faq, claim, pricing, testimonial, audience, objective, guideline, legal, fact]
-
-Rules:
-- Each atom must be self-contained.
-- Assign confidence 0.0–1.0 based on how explicit the fact is.
-- Do NOT hallucinate.
-- Return ONLY a valid JSON object containing an "atoms" array. Example: {"atoms": [{"type":"<classification_from_list>","content":"...","confidence":0.9}]}
-
-Text:
-${text}
-  `.trim();
-
-  try {
-    console.log('Calling AI Gateway...');
-    const { response } = await llm.complete(
-      'You are a Brand Knowledge Extractor. You only output valid JSON objects.',
-      prompt,
-      { model: 'gpt-4o-mini', jsonMode: true }
-    );
-    console.log('Response:', response.content);
-  } catch (err) {
-    console.error('Error:', err);
-  }
+  const prisma = new PrismaService();
+  const queue = new Queue('knowledge-ingestion');
+  const service = new IngestionService(prisma, queue as any);
+  const chunks = ["This is a test chunk.", "Another test chunk."];
+  const atoms = await service.classify(chunks, "business-id-test");
+  console.log("Classified atoms count:", atoms.length);
+  console.log("Atoms:", JSON.stringify(atoms, null, 2));
+  await (prisma as any).$disconnect();
+  await queue.close();
 }
 
 main().catch(console.error);
