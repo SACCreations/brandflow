@@ -138,6 +138,18 @@ export class LLMGateway {
     const cleanUser = userPrompt.toLowerCase();
 
     // 1. Structured JSON topics check
+    if (cleanSystem.includes('atoms') || cleanUser.includes('atoms')) {
+      return JSON.stringify({
+        atoms: [
+          { type: 'feature', content: 'Auto-scaling infrastructure to handle massive traffic spikes.', confidence: 0.95 },
+          { type: 'faq', content: 'How do I upgrade my plan? You can upgrade directly from your billing dashboard.', confidence: 0.9 },
+          { type: 'guideline', content: 'Always use our primary brand colors in all external communications.', confidence: 1.0 },
+          { type: 'product', content: 'BrandFlow Enterprise Suite includes unlimited API calls.', confidence: 0.85 },
+          { type: 'testimonial', content: 'BrandFlow changed how our agency operates entirely! - CEO of DesignCo', confidence: 0.99 }
+        ],
+      });
+    }
+
     if (
       cleanSystem.includes('topics') ||
       cleanUser.includes('topics') ||

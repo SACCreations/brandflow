@@ -93,7 +93,9 @@ export class KnowledgeService {
     return this.prisma.client.knowledgeEntry.findMany({
       where: {
         businessId,
-        ...(classification && classification !== 'all' ? { classification } : {}),
+        ...(classification && classification !== 'all' ? { 
+          classification: { contains: classification, mode: 'insensitive' } 
+        } : {}),
         ...(querySearch ? {
           OR: [
             { content: { contains: querySearch, mode: 'insensitive' } },
@@ -158,6 +160,10 @@ export class KnowledgeService {
     });
     if (!source) throw new NotFoundException('Source not found');
 
+    if (source.type !== 'url' && source.type !== 'api' && source.type !== 'manual' && !text) {
+      throw new BadRequestException(`Cannot re-sync a ${source.type} without the original file. Please re-upload.`);
+    }
+
     // Mark existing entries as stale
     await this.prisma.client.knowledgeEntry.updateMany({
       where: { sourceId, isStale: false },
@@ -165,6 +171,48 @@ export class KnowledgeService {
     });
 
     return this.ingestionService.enqueue(sourceId, businessId, text);
+  }
+
+  async triggerIngestionAll(businessId: string) {
+    const sources = await this.prisma.client.knowledgeSource.findMany({
+      where: { 
+        businessId,
+        type: { in: ['url', 'api', 'manual'] }
+      },
+    });
+    
+    for (const source of sources) {
+      await this.triggerIngestion(source.id, businessId);
+    }
+    return { syncedCount: sources.length };
+  }
+
+  async fixAllFacts(businessId: string) {
+    // Clean up annoying failed jobs with missing text
+    await this.prisma.client.knowledgeJob.deleteMany({
+      where: { businessId, status: 'failed', error: { contains: 'text (base64) is required' } }
+    });
+
+    const entries = await this.prisma.client.knowledgeEntry.findMany({
+      where: { businessId, classification: 'fact' }
+    });
+
+    if (entries.length === 0) return { fixed: 0, total: 0 };
+
+    const chunks = entries.map(e => e.content);
+    const atoms = await this.ingestionService.classify(chunks, businessId);
+
+    let updated = 0;
+    for (let i = 0; i < entries.length; i++) {
+       if (atoms[i] && atoms[i].type && atoms[i].type !== 'fact') {
+           await this.prisma.client.knowledgeEntry.update({
+              where: { id: entries[i].id },
+              data: { classification: atoms[i].type }
+           });
+           updated++;
+       }
+    }
+    return { fixed: updated, total: entries.length };
   }
 
 

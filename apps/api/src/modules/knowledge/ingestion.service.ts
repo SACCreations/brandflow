@@ -235,7 +235,7 @@ export class IngestionService {
   // -------------------------------------------------------------------------
   // CLASSIFICATION via LLM (with fallback to raw chunks)
   // -------------------------------------------------------------------------
-  private async classify(chunks: string[], businessId: string): Promise<KnowledgeAtom[]> {
+  public async classify(chunks: string[], businessId: string): Promise<KnowledgeAtom[]> {
     const allAtoms: KnowledgeAtom[] = [];
     const BATCH_SIZE = 5;
     const CONCURRENCY = 5;
@@ -258,14 +258,14 @@ You are an expert Brand Intelligence Engineer.
 Extract "Identity Atoms" from the text below.
 An Identity Atom is an atomic, self-contained fact about a brand, product, audience, or guideline.
 
-Classify each atom as one of:
+Classify each atom as one of EXACTLY these strings:
 [product, feature, faq, claim, pricing, testimonial, audience, objective, guideline, legal, fact]
 
 Rules:
 - Each atom must be self-contained.
 - Assign confidence 0.0–1.0 based on how explicit the fact is.
 - Do NOT hallucinate.
-- Return ONLY a valid JSON array: [{"type":"fact","content":"...","confidence":0.9}]
+- Return ONLY a valid JSON object containing an "atoms" array. Example: {"atoms": [{"type":"<classification_from_list>","content":"...","confidence":0.9}]}
 
 Text:
 ${text}
@@ -273,16 +273,37 @@ ${text}
 
           try {
             const { response } = await this.aiGateway.complete(
-              'You are a Brand Knowledge Extractor. You only output valid JSON arrays.',
+              'You are a Brand Knowledge Extractor. You only output valid JSON objects.',
               prompt,
               { model: 'gpt-4o-mini', jsonMode: true },
             );
-            const atoms = JSON.parse(response.content);
-            if (Array.isArray(atoms) && atoms.length > 0) {
-              return atoms;
+            
+            // Strip markdown fences just in case
+            const cleanContent = response.content.replace(/```json/gi, '').replace(/```/g, '').trim();
+            const data = JSON.parse(cleanContent);
+            
+            // Find the array no matter what the key is
+            let atoms: any[] = [];
+            if (Array.isArray(data)) {
+              atoms = data;
+            } else if (data && typeof data === 'object') {
+              for (const val of Object.values(data)) {
+                if (Array.isArray(val)) {
+                  atoms = val;
+                  break;
+                }
+              }
             }
-          } catch (err) {
-            this.logger.warn(`AI classification failed for batch, using raw chunks: ${err}`);
+            
+            if (atoms.length > 0) {
+              return atoms.map((a: any) => ({
+                type: (a.type || a.classification || a.category || 'fact').toLowerCase(),
+                content: a.content || a.text || a.fact || '',
+                confidence: a.confidence ?? 0.8
+              })).filter((a: any) => a.content.trim().length > 0);
+            }
+          } catch (err: any) {
+            this.logger.warn(`AI classification failed for batch: ${err?.message}`);
           }
 
           // Fallback: raw chunks as atoms for this batch

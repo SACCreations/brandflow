@@ -89,6 +89,18 @@ export class KnowledgeController {
     return this.knowledgeService.deleteSource(id, user.businessId);
   }
 
+  @Post('sources/sync-all')
+  @ApiOperation({ summary: 'Trigger a re-sync of all knowledge sources' })
+  syncAllSources(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.triggerIngestionAll(user.businessId);
+  }
+
+  @Post('fix-all-facts')
+  @ApiOperation({ summary: 'Temp script to reclassify all broken fact entries and delete failed file jobs' })
+  fixAllFacts(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.fixAllFacts(user.businessId);
+  }
+
   @Post('sources/:id/sync')
   @ApiOperation({ summary: 'Trigger a re-sync of a knowledge source' })
   syncSource(

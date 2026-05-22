@@ -57,6 +57,15 @@ export default function SourcesTable() {
     },
   });
 
+  const syncAllMutation = useMutation({
+    mutationFn: async () => {
+      await apiClient.post(`/knowledge/sources/sync-all`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledge-sources'] });
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex h-40 items-center justify-center border border-gray-200 dark:border-gray-800 rounded-2xl bg-white dark:bg-gray-900 mt-8">
@@ -79,9 +88,24 @@ export default function SourcesTable() {
     <div className="mt-8 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
       <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white">Active Knowledge Sources</h3>
-        <button onClick={() => refetch()} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-          <RefreshCw className="h-4 w-4" />
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => syncAllMutation.mutate()} 
+            disabled={syncAllMutation.isPending} 
+            className="flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
+            title="Re-sync all knowledge sources"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${syncAllMutation.isPending ? 'animate-spin' : ''}`} />
+            Re-sync All
+          </button>
+          <button 
+            onClick={() => refetch()} 
+            className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            title="Refresh table"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left">
@@ -161,7 +185,8 @@ export default function SourcesTable() {
                   <div className="flex items-center justify-end gap-2">
                     <button 
                       onClick={() => resyncMutation.mutate(source.id)}
-                      disabled={resyncMutation.isPending}
+                      disabled={resyncMutation.isPending || !['url', 'api', 'manual'].includes(source.type)}
+                      title={!['url', 'api', 'manual'].includes(source.type) ? "Cannot re-sync files without re-uploading" : "Re-sync"}
                       className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 disabled:opacity-50"
                     >
                       <RefreshCw className={`h-4 w-4 ${resyncMutation.isPending && resyncMutation.variables === source.id ? 'animate-spin' : ''}`} />
@@ -173,7 +198,11 @@ export default function SourcesTable() {
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => resyncMutation.mutate(source.id)} disabled={resyncMutation.isPending}>
+                        <DropdownMenuItem 
+                          onClick={() => resyncMutation.mutate(source.id)} 
+                          disabled={resyncMutation.isPending || !['url', 'api', 'manual'].includes(source.type)}
+                          title={!['url', 'api', 'manual'].includes(source.type) ? "Cannot re-sync files without re-uploading" : ""}
+                        >
                           <RefreshCw className={`mr-2 h-4 w-4 ${resyncMutation.isPending && resyncMutation.variables === source.id ? 'animate-spin' : ''}`} /> Re-sync Now
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />

@@ -198,73 +198,242 @@ export default function KnowledgeExplorer({ isOpen, onClose }: { isOpen: boolean
               </button>
             </div>
           ) : entries.length > 0 ? (
-            <div className="space-y-4">
-              {entries.map((entry) => (
-                <div 
-                  key={entry.id} 
-                  className={`relative p-5 rounded-2xl border border-slate-800 bg-slate-950/40 hover:bg-slate-950/80 transition-all ${
-                    entry.isStale ? 'opacity-50 grayscale border-slate-900' : ''
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-3">
-                      {/* Badge header */}
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${getCategoryStyles(entry.classification)}`}>
-                          {entry.classification || 'Unclassified'}
-                        </span>
-                        
-                        <span className="flex items-center gap-1 bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 px-2 py-0.5 rounded-lg">
-                          <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
-                          {(entry.confidence * 100).toFixed(0)}% extraction confidence
-                        </span>
+            classification === 'all' ? (
+              <div className="space-y-8">
+                {CATEGORIES.filter(c => c.id !== 'all').map((category) => {
+                  const categoryEntries = entries.filter(
+                    e => (e.classification || 'unclassified').toLowerCase().includes(category.id.toLowerCase())
+                  );
+                  
+                  // Also capture unclassified in the 'fact' or 'unclassified' category if needed, but let's stick to standard logic
+                  if (categoryEntries.length === 0) return null;
 
-                        {entry.isStale && (
-                          <span className="bg-red-500/10 border border-red-500/20 text-[10px] font-bold text-red-400 px-2 py-0.5 rounded-lg">
-                            Stale / Deprecated
-                          </span>
-                        )}
+                  return (
+                    <div key={category.id} className="space-y-4">
+                      <div className="flex items-center gap-2 pb-2 border-b border-slate-800/50">
+                        <h3 className="text-sm font-black uppercase tracking-wider text-slate-300">
+                          {category.label}
+                        </h3>
+                        <span className="px-2 py-0.5 rounded-full bg-slate-800 text-xs font-bold text-slate-400">
+                          {categoryEntries.length}
+                        </span>
                       </div>
-
-                      {/* Content statement */}
-                      <p className="text-slate-200 text-sm font-medium leading-relaxed font-sans pr-6 select-all">
-                        {entry.content}
-                      </p>
-
-                      {/* Source footer */}
-                      <div className="flex items-center gap-2 pt-2 border-t border-slate-800/40 text-[10px] text-slate-500 font-semibold">
-                        <span className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-md text-slate-400">
-                          {entry.source.type === 'url' ? <Globe className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
-                          {entry.source.name || 'Anonymous Source'}
-                        </span>
-                        {entry.source.sourceUrl && entry.source.sourceUrl.startsWith('http') && (
-                          <a 
-                            href={entry.source.sourceUrl} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="text-slate-400 hover:text-white flex items-center gap-0.5"
+                      <div className="space-y-4">
+                        {categoryEntries.map((entry) => (
+                          <div 
+                            key={entry.id} 
+                            className={`relative p-5 rounded-2xl border border-slate-800 bg-slate-950/40 hover:bg-slate-950/80 transition-all ${
+                              entry.isStale ? 'opacity-50 grayscale border-slate-900' : ''
+                            }`}
                           >
-                            Source link <ExternalLink className="h-2.5 w-2.5" />
-                          </a>
-                        )}
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="space-y-3">
+                                {/* Badge header */}
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${getCategoryStyles(entry.classification)}`}>
+                                    {entry.classification || 'Unclassified'}
+                                  </span>
+                                  
+                                  <span className="flex items-center gap-1 bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 px-2 py-0.5 rounded-lg">
+                                    <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
+                                    {(entry.confidence * 100).toFixed(0)}% extraction confidence
+                                  </span>
+
+                                  {entry.isStale && (
+                                    <span className="bg-red-500/10 border border-red-500/20 text-[10px] font-bold text-red-400 px-2 py-0.5 rounded-lg">
+                                      Stale / Deprecated
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Content statement */}
+                                <p className="text-slate-200 text-sm font-medium leading-relaxed font-sans pr-6 select-all">
+                                  {entry.content}
+                                </p>
+
+                                {/* Source footer */}
+                                <div className="flex items-center gap-2 pt-2 border-t border-slate-800/40 text-[10px] text-slate-500 font-semibold">
+                                  <span className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-md text-slate-400">
+                                    {entry.source.type === 'url' ? <Globe className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
+                                    {entry.source.name || 'Anonymous Source'}
+                                  </span>
+                                  {entry.source.sourceUrl && entry.source.sourceUrl.startsWith('http') && (
+                                    <a 
+                                      href={entry.source.sourceUrl} 
+                                      target="_blank" 
+                                      rel="noreferrer"
+                                      className="text-slate-400 hover:text-white flex items-center gap-0.5"
+                                    >
+                                      Source link <ExternalLink className="h-2.5 w-2.5" />
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Manage actions */}
+                              {!entry.isStale && (
+                                <button 
+                                  onClick={() => markStaleMutation.mutate(entry.id)}
+                                  disabled={markStaleMutation.isPending}
+                                  title="Mark fact as stale"
+                                  className="p-2 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-colors shrink-0 self-start"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
+                  );
+                })}
+                
+                {/* Fallback for unclassified or other categories */}
+                {entries.filter(e => !CATEGORIES.some(c => (e.classification || '').toLowerCase().includes(c.id.toLowerCase()))).length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 pb-2 border-b border-slate-800/50">
+                      <h3 className="text-sm font-black uppercase tracking-wider text-slate-300">Other</h3>
+                    </div>
+                    <div className="space-y-4">
+                      {entries.filter(e => !CATEGORIES.some(c => (e.classification || '').toLowerCase().includes(c.id.toLowerCase()))).map((entry) => (
+                        <div 
+                          key={entry.id} 
+                          className={`relative p-5 rounded-2xl border border-slate-800 bg-slate-950/40 hover:bg-slate-950/80 transition-all ${
+                            entry.isStale ? 'opacity-50 grayscale border-slate-900' : ''
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-3">
+                              {/* Badge header */}
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${getCategoryStyles(entry.classification)}`}>
+                                  {entry.classification || 'Unclassified'}
+                                </span>
+                                
+                                <span className="flex items-center gap-1 bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 px-2 py-0.5 rounded-lg">
+                                  <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
+                                  {(entry.confidence * 100).toFixed(0)}% extraction confidence
+                                </span>
 
-                    {/* Manage actions */}
-                    {!entry.isStale && (
-                      <button 
-                        onClick={() => markStaleMutation.mutate(entry.id)}
-                        disabled={markStaleMutation.isPending}
-                        title="Mark fact as stale"
-                        className="p-2 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-colors shrink-0 self-start"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
+                                {entry.isStale && (
+                                  <span className="bg-red-500/10 border border-red-500/20 text-[10px] font-bold text-red-400 px-2 py-0.5 rounded-lg">
+                                    Stale / Deprecated
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Content statement */}
+                              <p className="text-slate-200 text-sm font-medium leading-relaxed font-sans pr-6 select-all">
+                                {entry.content}
+                              </p>
+
+                              {/* Source footer */}
+                              <div className="flex items-center gap-2 pt-2 border-t border-slate-800/40 text-[10px] text-slate-500 font-semibold">
+                                <span className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-md text-slate-400">
+                                  {entry.source.type === 'url' ? <Globe className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
+                                  {entry.source.name || 'Anonymous Source'}
+                                </span>
+                                {entry.source.sourceUrl && entry.source.sourceUrl.startsWith('http') && (
+                                  <a 
+                                    href={entry.source.sourceUrl} 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    className="text-slate-400 hover:text-white flex items-center gap-0.5"
+                                  >
+                                    Source link <ExternalLink className="h-2.5 w-2.5" />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Manage actions */}
+                            {!entry.isStale && (
+                              <button 
+                                onClick={() => markStaleMutation.mutate(entry.id)}
+                                disabled={markStaleMutation.isPending}
+                                title="Mark fact as stale"
+                                className="p-2 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-colors shrink-0 self-start"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {entries.map((entry) => (
+                  <div 
+                    key={entry.id} 
+                    className={`relative p-5 rounded-2xl border border-slate-800 bg-slate-950/40 hover:bg-slate-950/80 transition-all ${
+                      entry.isStale ? 'opacity-50 grayscale border-slate-900' : ''
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-3">
+                        {/* Badge header */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${getCategoryStyles(entry.classification)}`}>
+                            {entry.classification || 'Unclassified'}
+                          </span>
+                          
+                          <span className="flex items-center gap-1 bg-slate-900 border border-slate-800 text-[10px] font-bold text-slate-400 px-2 py-0.5 rounded-lg">
+                            <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
+                            {(entry.confidence * 100).toFixed(0)}% extraction confidence
+                          </span>
+
+                          {entry.isStale && (
+                            <span className="bg-red-500/10 border border-red-500/20 text-[10px] font-bold text-red-400 px-2 py-0.5 rounded-lg">
+                              Stale / Deprecated
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Content statement */}
+                        <p className="text-slate-200 text-sm font-medium leading-relaxed font-sans pr-6 select-all">
+                          {entry.content}
+                        </p>
+
+                        {/* Source footer */}
+                        <div className="flex items-center gap-2 pt-2 border-t border-slate-800/40 text-[10px] text-slate-500 font-semibold">
+                          <span className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-md text-slate-400">
+                            {entry.source.type === 'url' ? <Globe className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
+                            {entry.source.name || 'Anonymous Source'}
+                          </span>
+                          {entry.source.sourceUrl && entry.source.sourceUrl.startsWith('http') && (
+                            <a 
+                              href={entry.source.sourceUrl} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="text-slate-400 hover:text-white flex items-center gap-0.5"
+                            >
+                              Source link <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Manage actions */}
+                      {!entry.isStale && (
+                        <button 
+                          onClick={() => markStaleMutation.mutate(entry.id)}
+                          disabled={markStaleMutation.isPending}
+                          title="Mark fact as stale"
+                          className="p-2 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-colors shrink-0 self-start"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
           ) : (
             <div className="flex flex-col h-[40vh] items-center justify-center gap-4 text-center">
               <div className="p-4 bg-slate-950 border border-slate-800 rounded-3xl text-slate-600">
