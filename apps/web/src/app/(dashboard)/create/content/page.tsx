@@ -183,8 +183,9 @@ export default function ContentGeneratorPage() {
   const { data: suggestedTopicsData, isFetching: isSuggestionsLoading, refetch: generateTopics } = useQuery<{ topics: SuggestedTopic[] }>({
     queryKey: ['topic-suggestions', selectedBrandId, selectedCategory],
     queryFn: async () => {
-      const res = await apiClient.get('/content/topics/suggest', {
-        params: { brandId: selectedBrandId, category: selectedCategory },
+      const res = await apiClient.post('/content/topics/suggest', {
+        brandId: selectedBrandId, 
+        category: selectedCategory 
       });
       return res.data;
     },

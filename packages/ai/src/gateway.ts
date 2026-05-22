@@ -166,19 +166,20 @@ export class LLMGateway {
       cleanSystem.includes('json') ||
       cleanUser.includes('json')
     ) {
-      const factsMatch = systemPrompt.match(/Brand Knowledge Context:\n([\s\S]*?)\n+CRITICAL/i);
+      const factsMatch = systemPrompt.match(/(?:Brand Knowledge Context:|Extracted Brand Knowledge Data:)\n([\s\S]*?)\n+CRITICAL/i);
       let facts: string[] = [];
       if (factsMatch && factsMatch[1]) {
-        facts = factsMatch[1].split('\n').filter(l => l.trim().length > 10 && !l.toLowerCase().includes('no specific brand knowledge'));
+        facts = factsMatch[1].split('\n').filter(l => l.trim().length > 10 && !l.toLowerCase().includes('no specific'));
       }
       
+      const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
       let baseTopics = [];
       if (facts.length > 0) {
         baseTopics = facts.slice(0, 5).map((fact, index) => {
           const title = fact.replace(/^\d+\.\s*/, '').replace(/^#\s*/, '').substring(0, 60).trim();
           return {
             id: String(index + 1),
-            name: `Focus: ${title}`,
+            name: `Focus: ${title} [${randomSuffix}]`,
             tag: 'Data-driven Topic'
           };
         });
@@ -190,11 +191,11 @@ export class LLMGateway {
         const cat = catMatch ? catMatch[1] : 'Content';
         
         baseTopics = [
-          { id: '1', name: `Introduction to ${brand} ${cat}`, tag: 'Introduction' },
-          { id: '2', name: `Why Choose ${brand} for Your Needs`, tag: 'Benefits' },
-          { id: '3', name: `The Future of ${brand} Offerings`, tag: 'Vision' },
-          { id: '4', name: `Customer Success with ${brand}`, tag: 'Case Study' },
-          { id: '5', name: `Behind the Scenes at ${brand}`, tag: 'Culture' }
+          { id: '1', name: `Introduction to ${brand} ${cat} [${randomSuffix}]`, tag: 'Introduction' },
+          { id: '2', name: `Why Choose ${brand} for Your Needs [${randomSuffix}]`, tag: 'Benefits' },
+          { id: '3', name: `The Future of ${brand} Offerings [${randomSuffix}]`, tag: 'Vision' },
+          { id: '4', name: `Customer Success with ${brand} [${randomSuffix}]`, tag: 'Case Study' },
+          { id: '5', name: `Behind the Scenes at ${brand} [${randomSuffix}]`, tag: 'Culture' }
         ];
       }
       

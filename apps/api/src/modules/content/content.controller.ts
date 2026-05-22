@@ -35,14 +35,14 @@ import {
 export class ContentController {
   constructor(private readonly contentService: ContentService) {}
 
-  @Get('topics/suggest')
+  @Post('topics/suggest')
   @Permissions('content:read')
   @ApiOperation({ summary: 'Get AI recommended topic ideas' })
   suggestTopics(
-    @Query('brandId') brandId: string,
-    @Query('category') category: string,
+    @Body('brandId') brandId: string,
+    @Body('category') category: string,
     @CurrentUser() user: JwtPayload,
-    @Query('campaignId') campaignId?: string,
+    @Body('campaignId') campaignId?: string,
   ) {
     return this.contentService.suggestTopics(user.businessId, brandId, category, campaignId);
   }
