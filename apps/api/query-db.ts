@@ -3,11 +3,8 @@ const prisma = new PrismaClient();
 
 async function main() {
   const entries = await prisma.knowledgeEntry.findMany({
-    select: { content: true, createdAt: true }
+    select: { content: true }
   });
-  console.log("Entries:", entries.length);
-  if (entries.length > 0) {
-    console.log(entries[0]);
-  }
+  console.log("Unique contents:", Array.from(new Set(entries.map(e => e.content))));
 }
 main().finally(() => prisma.$disconnect());
