@@ -48,6 +48,15 @@ export default function SourcesTable() {
     },
   });
 
+  const resyncMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.post(`/knowledge/sources/${id}/sync`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledge-sources'] });
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex h-40 items-center justify-center border border-gray-200 dark:border-gray-800 rounded-2xl bg-white dark:bg-gray-900 mt-8">
@@ -151,10 +160,11 @@ export default function SourcesTable() {
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button 
-                      onClick={() => refetch()}
-                      className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+                      onClick={() => resyncMutation.mutate(source.id)}
+                      disabled={resyncMutation.isPending}
+                      className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 disabled:opacity-50"
                     >
-                      <RefreshCw className="h-4 w-4" />
+                      <RefreshCw className={`h-4 w-4 ${resyncMutation.isPending && resyncMutation.variables === source.id ? 'animate-spin' : ''}`} />
                     </button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -163,8 +173,8 @@ export default function SourcesTable() {
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => refetch()}>
-                          <RefreshCw className="mr-2 h-4 w-4" /> Re-sync Now
+                        <DropdownMenuItem onClick={() => resyncMutation.mutate(source.id)} disabled={resyncMutation.isPending}>
+                          <RefreshCw className={`mr-2 h-4 w-4 ${resyncMutation.isPending && resyncMutation.variables === source.id ? 'animate-spin' : ''}`} /> Re-sync Now
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 

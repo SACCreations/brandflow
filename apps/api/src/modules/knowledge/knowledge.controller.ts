@@ -89,6 +89,15 @@ export class KnowledgeController {
     return this.knowledgeService.deleteSource(id, user.businessId);
   }
 
+  @Post('sources/:id/sync')
+  @ApiOperation({ summary: 'Trigger a re-sync of a knowledge source' })
+  syncSource(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.knowledgeService.triggerIngestion(id, user.businessId);
+  }
+
   @Post('entries/:id/review')
   @ApiOperation({ summary: 'Submit a human review for a knowledge entry' })
   updateReview(

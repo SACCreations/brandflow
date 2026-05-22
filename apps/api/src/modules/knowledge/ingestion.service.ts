@@ -236,8 +236,24 @@ export class IngestionService {
   // CLASSIFICATION via LLM (with fallback to raw chunks)
   // -------------------------------------------------------------------------
   private async classify(chunks: string[], businessId: string): Promise<KnowledgeAtom[]> {
-    const text = chunks.join('\n---\n');
-    const prompt = `
+    const allAtoms: KnowledgeAtom[] = [];
+    const BATCH_SIZE = 5;
+    const CONCURRENCY = 5;
+
+    // Group chunks into batches
+    const batches: string[][] = [];
+    for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
+      batches.push(chunks.slice(i, i + BATCH_SIZE));
+    }
+
+    // Process batches with a concurrency limit
+    for (let i = 0; i < batches.length; i += CONCURRENCY) {
+      const concurrentBatches = batches.slice(i, i + CONCURRENCY);
+      
+      const results = await Promise.all(
+        concurrentBatches.map(async (batchChunks) => {
+          const text = batchChunks.join('\n---\n');
+          const prompt = `
 You are an expert Brand Intelligence Engineer.
 Extract "Identity Atoms" from the text below.
 An Identity Atom is an atomic, self-contained fact about a brand, product, audience, or guideline.
@@ -252,62 +268,90 @@ Rules:
 - Return ONLY a valid JSON array: [{"type":"fact","content":"...","confidence":0.9}]
 
 Text:
-${text.slice(0, 8000)}
-    `.trim();
+${text}
+          `.trim();
 
-    try {
-      const { response } = await this.aiGateway.complete(
-        'You are a Brand Knowledge Extractor. You only output valid JSON arrays.',
-        prompt,
-        { model: 'gpt-4o-mini', jsonMode: true },
+          try {
+            const { response } = await this.aiGateway.complete(
+              'You are a Brand Knowledge Extractor. You only output valid JSON arrays.',
+              prompt,
+              { model: 'gpt-4o-mini', jsonMode: true },
+            );
+            const atoms = JSON.parse(response.content);
+            if (Array.isArray(atoms) && atoms.length > 0) {
+              return atoms;
+            }
+          } catch (err) {
+            this.logger.warn(`AI classification failed for batch, using raw chunks: ${err}`);
+          }
+
+          // Fallback: raw chunks as atoms for this batch
+          return batchChunks.map((c) => ({
+            type: 'fact' as KnowledgeEntryClassification,
+            content: c,
+            confidence: 0.6,
+          }));
+        })
       );
-      const atoms = JSON.parse(response.content);
-      if (Array.isArray(atoms) && atoms.length > 0) return atoms;
-    } catch (err) {
-      this.logger.warn(`AI classification failed, using raw chunks: ${err}`);
+
+      for (const res of results) {
+        allAtoms.push(...res);
+      }
     }
 
-    // Fallback: raw chunks as atoms
-    return chunks.map((c) => ({
-      type: 'fact' as KnowledgeEntryClassification,
-      content: c,
-      confidence: 0.6,
-    }));
+    return allAtoms;
   }
 
   // -------------------------------------------------------------------------
   // INDEXING: dedup + persist KnowledgeEntry + embedding
   // -------------------------------------------------------------------------
   private async index(sourceId: string, businessId: string, atoms: KnowledgeAtom[]): Promise<number> {
-    const rows: any[] = [];
+    const newAtoms: { atom: KnowledgeAtom, hash: string }[] = [];
 
+    // Filter out existing atoms sequentially (fast DB checks)
     for (const atom of atoms) {
       const hash = crypto.createHash('md5').update(atom.content).digest('hex');
       const exists = await this.prisma.client.knowledgeEntry.findFirst({
         where: { businessId, contentHash: hash },
         select: { id: true },
       });
-      if (exists) continue;
-
-      let embedding: string | undefined;
-      try {
-        const vec = await this.vectorService.generateEmbedding(atom.content);
-        embedding = this.vectorService.formatForStorage(vec);
-      } catch {
-        // embedding is optional — proceed without
+      if (!exists) {
+        newAtoms.push({ atom, hash });
       }
+    }
 
-      rows.push({
-        businessId,
-        sourceId,
-        classification: atom.type,
-        content: atom.content,
-        contentHash: hash,
-        confidence: atom.confidence ?? 0.8,
-        version: 1,
-        embedding: embedding ? JSON.stringify(embedding) : null,
-        metadata: { extractionDate: new Date().toISOString() },
-      });
+    const rows: any[] = [];
+    const CONCURRENCY = 10;
+
+    // Generate embeddings concurrently
+    for (let i = 0; i < newAtoms.length; i += CONCURRENCY) {
+      const batch = newAtoms.slice(i, i + CONCURRENCY);
+      
+      const batchRows = await Promise.all(
+        batch.map(async ({ atom, hash }) => {
+          let embedding: string | undefined;
+          try {
+            const vec = await this.vectorService.generateEmbedding(atom.content);
+            embedding = this.vectorService.formatForStorage(vec);
+          } catch {
+            // embedding is optional — proceed without
+          }
+
+          return {
+            businessId,
+            sourceId,
+            classification: atom.type,
+            content: atom.content,
+            contentHash: hash,
+            confidence: atom.confidence ?? 0.8,
+            version: 1,
+            embedding: embedding ? JSON.stringify(embedding) : null,
+            metadata: { extractionDate: new Date().toISOString() },
+          };
+        })
+      );
+      
+      rows.push(...batchRows);
     }
 
     if (rows.length > 0) {
