@@ -88,11 +88,13 @@ export class VectorService {
             ke.content, 
             ke.metadata, 
             ke.classification,
-            ke.embedding
+            ke.embedding,
+            ke."createdAt"
           FROM "knowledge_entries" ke
           ${brandId ? `JOIN "knowledge_sources" ks ON ke."sourceId" = ks.id` : ''}
           WHERE ke."businessId" = '${businessId}'
           ${brandId ? `AND ks."brandId" = '${brandId}'` : ''}
+          ORDER BY ke."createdAt" DESC
         `);
         
         const parsedResults = (fallbackResults as any[]).map((r) => {
@@ -107,11 +109,17 @@ export class VectorService {
             content: r.content,
             metadata: r.metadata,
             classification: r.classification,
+            createdAt: r.createdAt,
             similarity: this.cosineSimilarity(embedding, emb)
           };
         });
         
-        parsedResults.sort((a, b) => b.similarity - a.similarity);
+        parsedResults.sort((a, b) => {
+          if (Math.abs(b.similarity - a.similarity) > 0.001) {
+            return b.similarity - a.similarity;
+          }
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
         return parsedResults.slice(0, limit);
       } catch (innerErr) {
         console.error('[VectorService] Extreme fallback failed:', innerErr);

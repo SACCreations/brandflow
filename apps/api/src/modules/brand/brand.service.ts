@@ -150,7 +150,14 @@ export class BrandService {
       },
     });
     if (!brand) throw new NotFoundException('Brand not found');
-    return brand;
+    
+    // Map entries so the UI can easily display them under brandContext.knowledgeEntries
+    const knowledgeEntries = brand.knowledgeSources.flatMap(ks => ks.entries);
+    
+    return {
+      ...brand,
+      knowledgeEntries,
+    };
   }
 
   async connectSocial(businessId: string, platform: string) {
