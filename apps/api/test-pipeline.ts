@@ -9,8 +9,20 @@ async function main() {
   const service = new IngestionService(prisma, queue as any);
   
   const businessId = "00000000-0000-0000-0001-000000000001";
-  const sourceId = "8e0331d1-abe6-4f3f-aad8-01dcd732ff0a";
+  const sourceId = uuidv4();
   
+  await prisma.client.knowledgeSource.create({
+    data: {
+      id: sourceId,
+      businessId,
+      name: "RentAsst Blogs",
+      type: "url",
+      sourceUrl: "https://rentasst.com/blogs",
+      status: "pending",
+      metadata: {}
+    }
+  });
+
   // We need to create a job first
   const job = await prisma.client.knowledgeJob.create({
     data: { sourceId, businessId, status: 'pending' },

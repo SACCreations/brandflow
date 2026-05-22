@@ -139,15 +139,24 @@ export class LLMGateway {
 
     // 1. Structured JSON topics check
     if (cleanSystem.includes('atoms') || cleanUser.includes('atoms')) {
-      // Generate unique mock content based on a short hash of the input
-      const chunkHash = Array.from(userPrompt).reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0).toString(16).substring(0, 6);
+      // Parse the actual text chunks from the prompt to avoid dummy data
+      const textMatch = userPrompt.match(/Text:\n([\s\S]*)/i);
+      let chunks: string[] = [];
+      if (textMatch && textMatch[1]) {
+        chunks = textMatch[1].split('\n---\n').map(c => c.trim()).filter(Boolean);
+      }
+      
+      if (chunks.length === 0) {
+        const chunkHash = Array.from(userPrompt).reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0).toString(16).substring(0, 6);
+        chunks = [`Feature extracted from chunk [${chunkHash}]: Advanced system optimization and capabilities.`];
+      }
+
       return JSON.stringify({
-        atoms: [
-          { type: 'feature', content: `Feature extracted from chunk [${chunkHash}]: Advanced system optimization and capabilities.`, confidence: 0.95 },
-          { type: 'faq', content: `FAQ extracted from chunk [${chunkHash}]: How does this component work? It automatically scales.`, confidence: 0.9 },
-          { type: 'guideline', content: `Guideline extracted from chunk [${chunkHash}]: Ensure strict compliance with data protocols.`, confidence: 1.0 },
-          { type: 'product', content: `Product info from chunk [${chunkHash}]: BrandFlow integration module.`, confidence: 0.85 },
-        ],
+        atoms: chunks.map(chunk => ({
+          type: 'fact',
+          content: chunk,
+          confidence: 0.9
+        }))
       });
     }
 
