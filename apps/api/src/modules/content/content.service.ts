@@ -158,7 +158,8 @@ export class ContentService {
       this.prisma.client,
       businessId,
       effectiveTopic,
-      10 // Top 10 facts
+      10, // Top 10 facts
+      effectiveBrandId
     );
 
     const brandContext: BrandContext = {
@@ -517,7 +518,8 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
       this.prisma.client,
       businessId,
       category,
-      10
+      10,
+      brandId
     );
     const knowledgeBlock = relevantFacts.length > 0 
       ? `Brand Knowledge Context:\n${relevantFacts.map((f: any, i: number) => `${i + 1}. ${f.content}`).join('\n')}`
@@ -529,11 +531,11 @@ Tone: ${tone}.
 
 ${knowledgeBlock}
 
-Topics must be dynamically tailored to the brand knowledge above. Do not use generic industry topics if specific brand facts are available.
+CRITICAL INSTRUCTION: If Brand Knowledge Context is provided above, EVERY single topic MUST be strictly derived from these extracted facts. Do NOT output generic ${industry} topics under any circumstances when facts are present. If no specific brand knowledge is retrieved, you may provide default industry topics.
 Respond in strict JSON format matching:
 {
   "topics": [
-    { "id": "1", "name": "Topic title", "tag": "Trend" }
+    { "id": "1", "name": "Topic title", "tag": "Fact-based Tag" }
   ]
 }`;
 
@@ -557,15 +559,7 @@ Respond in strict JSON format matching:
       const parsed = JSON.parse(cleanJson);
       return parsed;
     } catch (err: any) {
-      return {
-        topics: [
-          { id: '1', name: `${brandName} Premium Launch`, tag: 'Product Launch' },
-          { id: '2', name: `Summer Special Combo Discount`, tag: 'Offer' },
-          { id: '3', name: `Why Customers Choose ${brandName}`, tag: 'Brand Awareness' },
-          { id: '4', name: `Top 5 Tips for ${industry} in 2026`, tag: 'Educational' },
-          { id: '5', name: `Our Customer Testimonials & Success Stories`, tag: 'Social Proof' },
-        ],
-      };
+      throw new BadRequestException(`Topic suggestion failed: ${err.message || 'Unknown LLM or system error'}`);
     }
   }
 }

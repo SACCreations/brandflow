@@ -185,7 +185,7 @@ export default function ContentGeneratorPage() {
   });
 
   // --- Fetch AI Suggested Topics based on Brand & Category ---
-  const { data: suggestedTopicsData, isLoading: isSuggestionsLoading } = useQuery<{ topics: SuggestedTopic[] }>({
+  const { data: suggestedTopicsData, isFetching: isSuggestionsLoading, refetch: generateTopics } = useQuery<{ topics: SuggestedTopic[] }>({
     queryKey: ['topic-suggestions', selectedBrandId, selectedCategory],
     queryFn: async () => {
       const res = await apiClient.get('/content/topics/suggest', {
@@ -193,7 +193,7 @@ export default function ContentGeneratorPage() {
       });
       return res.data;
     },
-    enabled: !!selectedBrandId && !!selectedCategory,
+    enabled: false,
   });
 
   // --- Background Job Polling Query ---
@@ -466,14 +466,36 @@ export default function ContentGeneratorPage() {
                 <BrainCircuit className="h-5 w-5 text-brand-600" />
                 <h2 className="text-base font-bold text-gray-950 dark:text-white">3. Intelligent Topic Selection</h2>
               </div>
-              {suggestedTopicsData && suggestedTopicsData.topics.length > 0 && (
-                <button 
-                  onClick={handleSelectAllTopics} 
-                  className="text-xs font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400"
+              <div className="flex items-center gap-4">
+                <Button 
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    const res = await generateTopics();
+                    if (res.isError) {
+                      toast({
+                        title: 'Failed to generate topics',
+                        description: (res.error as any)?.response?.data?.message || (res.error as any)?.message || 'Unknown error occurred.',
+                        variant: 'destructive',
+                      });
+                    }
+                  }} 
+                  disabled={!selectedBrandId || isSuggestionsLoading}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs font-bold gap-1.5"
                 >
-                  {selectedTopics.length === suggestedTopicsData.topics.length ? 'Clear All' : 'Select All'}
-                </button>
-              )}
+                  {isSuggestionsLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  Generate Topics
+                </Button>
+                {suggestedTopicsData && suggestedTopicsData.topics.length > 0 && (
+                  <button 
+                    onClick={handleSelectAllTopics} 
+                    className="text-xs font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400"
+                  >
+                    {selectedTopics.length === suggestedTopicsData.topics.length ? 'Clear All' : 'Select All'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Quick AI Suggestions Grid */}

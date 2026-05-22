@@ -53,6 +53,7 @@ export class VectorService {
     businessId: string,
     query: string,
     limit: number = 5,
+    brandId?: string,
   ): Promise<any[]> {
     const embedding = await this.generateEmbedding(query);
     const vectorString = `[${embedding.join(',')}]`;
@@ -63,14 +64,16 @@ export class VectorService {
       // similarity = 1 - distance
       const results = await prisma.$queryRawUnsafe(`
         SELECT 
-          id, 
-          content, 
-          metadata, 
-          classification,
-          1 - (embedding <=> '${vectorString}'::vector) as similarity
-        FROM "knowledge_entries"
-        WHERE "businessId" = '${businessId}'
-        ORDER BY embedding <=> '${vectorString}'::vector
+          ke.id, 
+          ke.content, 
+          ke.metadata, 
+          ke.classification,
+          1 - (ke.embedding <=> '${vectorString}'::vector) as similarity
+        FROM "knowledge_entries" ke
+        ${brandId ? `JOIN "knowledge_sources" ks ON ke."sourceId" = ks.id` : ''}
+        WHERE ke."businessId" = '${businessId}'
+        ${brandId ? `AND ks."brandId" = '${brandId}'` : ''}
+        ORDER BY ke.embedding <=> '${vectorString}'::vector
         LIMIT ${limit}
       `);
 
@@ -81,16 +84,35 @@ export class VectorService {
       try {
         const fallbackResults = await prisma.$queryRawUnsafe(`
           SELECT 
-            id, 
-            content, 
-            metadata, 
-            classification,
-            0.5 as similarity
-          FROM "knowledge_entries"
-          WHERE "businessId" = '${businessId}'
-          LIMIT ${limit}
+            ke.id, 
+            ke.content, 
+            ke.metadata, 
+            ke.classification,
+            ke.embedding
+          FROM "knowledge_entries" ke
+          ${brandId ? `JOIN "knowledge_sources" ks ON ke."sourceId" = ks.id` : ''}
+          WHERE ke."businessId" = '${businessId}'
+          ${brandId ? `AND ks."brandId" = '${brandId}'` : ''}
         `);
-        return fallbackResults as any[];
+        
+        const parsedResults = (fallbackResults as any[]).map((r) => {
+          let emb: number[] = [];
+          if (typeof r.embedding === 'string') {
+            try { emb = JSON.parse(r.embedding); } catch {}
+          } else if (Array.isArray(r.embedding)) {
+            emb = r.embedding;
+          }
+          return {
+            id: r.id,
+            content: r.content,
+            metadata: r.metadata,
+            classification: r.classification,
+            similarity: this.cosineSimilarity(embedding, emb)
+          };
+        });
+        
+        parsedResults.sort((a, b) => b.similarity - a.similarity);
+        return parsedResults.slice(0, limit);
       } catch (innerErr) {
         console.error('[VectorService] Extreme fallback failed:', innerErr);
         return [];
