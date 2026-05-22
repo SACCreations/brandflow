@@ -436,26 +436,26 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           <div className="pt-6 border-t border-gray-100 dark:border-gray-800 space-y-4">
              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Business Contact (Internal)</label>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-1.5">
+                 <div className="space-y-1.5">
                    <label className="text-[9px] font-bold text-gray-500 ml-1">Contact Person</label>
                    <Input {...register('contactInfo.personName')} placeholder="Full Name" className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
-                   {errors.contactInfo?.personName && <p className="text-xs text-red-500 font-bold">{errors.contactInfo.personName.message as string}</p>}
+                   {(errors['contactInfo'] as any)?.personName && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).personName.message as string}</p>}
                 </div>
                 <div className="space-y-1.5">
                    <label className="text-[9px] font-bold text-gray-500 ml-1">Phone</label>
                    <Input {...register('contactInfo.phoneNumber')} placeholder="+1..." className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
-                   {errors.contactInfo?.phoneNumber && <p className="text-xs text-red-500 font-bold">{errors.contactInfo.phoneNumber.message as string}</p>}
+                   {(errors['contactInfo'] as any)?.phoneNumber && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).phoneNumber.message as string}</p>}
                 </div>
                 <div className="space-y-1.5">
                    <label className="text-[9px] font-bold text-gray-500 ml-1">Email</label>
                    <Input {...register('contactInfo.email')} placeholder="contact@brand.com" className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
-                   {errors.contactInfo?.email && <p className="text-xs text-red-500 font-bold">{errors.contactInfo.email.message as string}</p>}
+                   {(errors['contactInfo'] as any)?.email && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).email.message as string}</p>}
                 </div>
              </div>
              <div className="space-y-1.5 mt-4">
                 <label className="text-[9px] font-bold text-gray-500 ml-1">Office Address</label>
                 <Input {...register('contactInfo.officeAddress')} placeholder="123 Business St, Suite 400..." className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
-                {errors.contactInfo?.officeAddress && <p className="text-xs text-red-500 font-bold">{errors.contactInfo.officeAddress.message as string}</p>}
+                {(errors['contactInfo'] as any)?.officeAddress && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).officeAddress.message as string}</p>}
              </div>
           </div>
         </Card>

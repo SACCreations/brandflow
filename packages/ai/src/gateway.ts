@@ -139,13 +139,14 @@ export class LLMGateway {
 
     // 1. Structured JSON topics check
     if (cleanSystem.includes('atoms') || cleanUser.includes('atoms')) {
+      // Generate unique mock content based on a short hash of the input
+      const chunkHash = Array.from(userPrompt).reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0).toString(16).substring(0, 6);
       return JSON.stringify({
         atoms: [
-          { type: 'feature', content: 'Auto-scaling infrastructure to handle massive traffic spikes.', confidence: 0.95 },
-          { type: 'faq', content: 'How do I upgrade my plan? You can upgrade directly from your billing dashboard.', confidence: 0.9 },
-          { type: 'guideline', content: 'Always use our primary brand colors in all external communications.', confidence: 1.0 },
-          { type: 'product', content: 'BrandFlow Enterprise Suite includes unlimited API calls.', confidence: 0.85 },
-          { type: 'testimonial', content: 'BrandFlow changed how our agency operates entirely! - CEO of DesignCo', confidence: 0.99 }
+          { type: 'feature', content: `Feature extracted from chunk [${chunkHash}]: Advanced system optimization and capabilities.`, confidence: 0.95 },
+          { type: 'faq', content: `FAQ extracted from chunk [${chunkHash}]: How does this component work? It automatically scales.`, confidence: 0.9 },
+          { type: 'guideline', content: `Guideline extracted from chunk [${chunkHash}]: Ensure strict compliance with data protocols.`, confidence: 1.0 },
+          { type: 'product', content: `Product info from chunk [${chunkHash}]: BrandFlow integration module.`, confidence: 0.85 },
         ],
       });
     }
