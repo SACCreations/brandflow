@@ -512,6 +512,8 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
     const brandName = brand.name;
     const tone = Array.isArray(brand.tone) ? brand.tone.join(', ') : 'professional';
     const industry = brand.industry || 'marketing';
+    const positioning = brand.positioning || 'General brand positioning';
+    const audience = brand.audience || 'General audience';
 
     // Retrieve relevant brand context for intelligent topic generation
     const searchQuery = `${brandName} ${industry} core offerings, products, and positioning`;
@@ -523,20 +525,32 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
       brandId
     );
     const knowledgeBlock = relevantFacts.length > 0 
-      ? `Brand Knowledge Context:\n${relevantFacts.map((f: any, i: number) => `${i + 1}. ${f.content}`).join('\n')}`
-      : 'No specific brand knowledge retrieved.';
+      ? `Extracted Brand Knowledge Data:\n${relevantFacts.map((f: any, i: number) => `${i + 1}. ${f.content}`).join('\n')}`
+      : 'No specific extracted knowledge retrieved, rely strictly on the provided brand positioning and industry.';
 
-    const systemPrompt = `You are a Senior Content strategist for the brand "${brandName}" in the "${industry}" industry.
-Generate exactly 5 creative, highly relevant marketing and content topic ideas for the category "${category}".
-Tone: ${tone}.
+    const systemPrompt = `You are a Senior Content strategist and AI Analyst for the brand "${brandName}" in the "${industry}" industry.
+Analyze the provided brand data and extracted knowledge to generate exactly 5 creative, highly relevant marketing topic ideas for the category "${category}".
+
+Brand Analysis Context:
+- Brand Name: ${brandName}
+- Industry: ${industry}
+- Positioning: ${positioning}
+- Target Audience: ${audience}
+- Preferred Tone: ${tone}
 
 ${knowledgeBlock}
 
-CRITICAL INSTRUCTION: You MUST generate topics that explicitly reference the specific products, features, or details mentioned in the Brand Knowledge Context above. For example, if the context mentions a specific feature or service, your topic MUST be about that specific feature or service. Do NOT output generic marketing topics (like "Premium Launch Strategy" or "Leveraging AI") under any circumstances. Every single topic must be uniquely tied to the provided knowledge.
+CRITICAL INSTRUCTION:
+1. You MUST generate topics that are STRICTLY tailored to "${brandName}" and its specific products/features.
+2. DO NOT output topics related to other brands or generic industry fluff.
+3. If extracted brand knowledge data is provided, explicitly use those facts in the topics.
+4. If no extracted knowledge is available, use the brand positioning and audience to create highly specific topics.
+5. Provide completely new, unique, and diverse angles. Think outside the box to ensure variety in the suggestions (Seed: ${Date.now()}).
+
 Respond in strict JSON format matching:
 {
   "topics": [
-    { "id": "1", "name": "Specific topic using extracted data", "tag": "Extracted Fact Tag" }
+    { "id": "1", "name": "Specific topic using extracted data", "tag": "AI Analyzed / Fact Tag" }
   ]
 }`;
 
@@ -546,11 +560,11 @@ Respond in strict JSON format matching:
 
       const { response } = await this.gateway.complete(
         systemPrompt,
-        `Generate 5 topic suggestions for Category: ${category}`,
+        `Generate 5 unique and diverse topic suggestions for Category: ${category}`,
         {
           provider: (llmSettings.provider as any) ?? 'openai',
           model: llmSettings.model ?? undefined,
-          temperature: 0.3,
+          temperature: 0.85,
           apiKey: decryptedApiKey ?? undefined,
         }
       );

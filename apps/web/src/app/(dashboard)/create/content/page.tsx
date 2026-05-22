@@ -167,12 +167,7 @@ export default function ContentGeneratorPage() {
     }
   }, [briefId, brandIdParam, campaignIdParam]);
 
-  // Auto-select first brand if none selected and brands list is loaded
-  useEffect(() => {
-    if (!selectedBrandId && brands.length > 0 && brands[0]) {
-      setSelectedBrandId(brands[0].id);
-    }
-  }, [selectedBrandId, brands]);
+  // Auto-select first brand logic removed to allow explicit "-- Choose Brand --" selection
 
   // --- Fetch Brand Intelligence Context for Sticky Sidebar ---
   const { data: brandContext, isLoading: isBrandContextLoading } = useQuery({
@@ -366,10 +361,10 @@ export default function ContentGeneratorPage() {
                 <select
                   disabled={!!briefId}
                   className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                  value={selectedBrandId || (brands.length > 0 ? brands[0].id : '')}
+                  value={selectedBrandId}
                   onChange={(e) => setSelectedBrandId(e.target.value)}
                 >
-                  {brands.length === 0 && <option value="">-- Choose Brand --</option>}
+                  <option value="" disabled>-- Choose Brand --</option>
                   {brands.map((b) => (
                     <option key={b.id} value={b.id}>{b.name}</option>
                   ))}
