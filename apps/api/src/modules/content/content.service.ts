@@ -514,10 +514,11 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
     const industry = brand.industry || 'marketing';
 
     // Retrieve relevant brand context for intelligent topic generation
+    const searchQuery = `${brandName} ${industry} core offerings, products, and positioning`;
     const relevantFacts = await this.vectorService.findRelevantContext(
       this.prisma.client,
       businessId,
-      category,
+      searchQuery,
       10,
       brandId
     );
@@ -531,11 +532,11 @@ Tone: ${tone}.
 
 ${knowledgeBlock}
 
-CRITICAL INSTRUCTION: If Brand Knowledge Context is provided above, EVERY single topic MUST be strictly derived from these extracted facts. Do NOT output generic ${industry} topics under any circumstances when facts are present. If no specific brand knowledge is retrieved, you may provide default industry topics.
+CRITICAL INSTRUCTION: You MUST generate topics that explicitly reference the specific products, features, or details mentioned in the Brand Knowledge Context above. For example, if the context mentions a specific feature or service, your topic MUST be about that specific feature or service. Do NOT output generic marketing topics (like "Premium Launch Strategy" or "Leveraging AI") under any circumstances. Every single topic must be uniquely tied to the provided knowledge.
 Respond in strict JSON format matching:
 {
   "topics": [
-    { "id": "1", "name": "Topic title", "tag": "Fact-based Tag" }
+    { "id": "1", "name": "Specific topic using extracted data", "tag": "Extracted Fact Tag" }
   ]
 }`;
 
@@ -549,7 +550,7 @@ Respond in strict JSON format matching:
         {
           provider: (llmSettings.provider as any) ?? 'openai',
           model: llmSettings.model ?? undefined,
-          temperature: 0.8,
+          temperature: 0.3,
           apiKey: decryptedApiKey ?? undefined,
         }
       );
