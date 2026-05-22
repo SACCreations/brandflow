@@ -65,8 +65,7 @@ function inferFileMimeType(fileName: string): string {
 }
 
 export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
-  const [step, setStep] = useState(1);
-  const [selectedType, setSelectedType] = useState<SourceType>(null);
+  const [selectedType, setSelectedType] = useState<SourceType>('web');
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [success, setSuccess] = useState(false);
   const queryClient = useQueryClient();
@@ -84,8 +83,7 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
   if (!isOpen) return null;
 
   const reset = () => {
-    setStep(1);
-    setSelectedType(null);
+    setSelectedType('web');
     setSelectedBrandId('');
     setSuccess(false);
     onClose();
@@ -126,54 +124,48 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
           </div>
         ) : (
           <>
-            {step === 1 && (
-              <div className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Connect Knowledge Source</h2>
-                <p className="mt-2 text-gray-500 dark:text-gray-400">Select how you want to ingest knowledge into your brand brain.</p>
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add Knowledge Source</h2>
+              <p className="mt-2 text-gray-500 dark:text-gray-400">Select how you want to ingest knowledge into your brand brain.</p>
 
-                <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                  <SourceOption 
-                    icon={<Globe className="h-6 w-6 text-blue-500" />}
-                    title="Website / URL"
-                    description="Crawl websites, sitemaps, or RSS feeds automatically."
-                    onClick={() => { setSelectedType('web'); setStep(2); }}
-                  />
-                  <SourceOption 
-                    icon={<Upload className="h-6 w-6 text-brand-500" />}
-                    title="File Upload"
-                    description="Upload PDF, DOCX, XLSX, CSV, PPTX, or TXT documents."
-                    onClick={() => { setSelectedType('file'); setStep(2); }}
-                  />
-                  <SourceOption 
-                    icon={<Cloud className="h-6 w-6 text-emerald-500" />}
-                    title="Integrations"
-                    description="Connect Notion, Google Drive, or Confluence."
-                    onClick={() => { setSelectedType('integration'); setStep(2); }}
-                  />
-                  <SourceOption 
-                    icon={<Database className="h-6 w-6 text-purple-500" />}
-                    title="Direct API / Text"
-                    description="Push raw text data or connect via custom API."
-                    onClick={() => { setSelectedType('api'); setStep(2); }}
-                  />
-                </div>
+              {/* Tabs */}
+              <div className="mt-6 flex gap-2 border-b border-gray-200 pb-2 dark:border-gray-800 overflow-x-auto scrollbar-none">
+                {[
+                  { id: 'web', label: 'Website URL', icon: Globe },
+                  { id: 'file', label: 'File Upload', icon: Upload },
+                  { id: 'integration', label: 'Integrations', icon: Cloud },
+                  { id: 'api', label: 'Direct Text / API', icon: Database },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedType(tab.id as SourceType)}
+                    className={`flex shrink-0 items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all border-b-2 -mb-[9px] ${
+                      selectedType === tab.id
+                        ? 'border-brand-500 text-brand-600 dark:text-brand-500'
+                        : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
+                    }`}
+                  >
+                    <tab.icon className="h-4 w-4" />
+                    {tab.label}
+                  </button>
+                ))}
               </div>
+            </div>
+
+            {selectedType === 'web' && (
+              <WebSourceForm onSuccess={handleSourceCreated} {...sharedFormProps} />
             )}
 
-            {step === 2 && selectedType === 'web' && (
-              <WebSourceForm onBack={() => setStep(1)} onSuccess={handleSourceCreated} {...sharedFormProps} />
+            {selectedType === 'file' && (
+              <FileSourceForm onSuccess={handleSourceCreated} {...sharedFormProps} />
             )}
 
-            {step === 2 && selectedType === 'file' && (
-              <FileSourceForm onBack={() => setStep(1)} onSuccess={handleSourceCreated} {...sharedFormProps} />
+            {selectedType === 'integration' && (
+              <IntegrationSourceForm onSuccess={handleSourceCreated} />
             )}
 
-            {step === 2 && selectedType === 'integration' && (
-              <IntegrationSourceForm onBack={() => setStep(1)} onSuccess={handleSourceCreated} />
-            )}
-
-            {step === 2 && selectedType === 'api' && (
-              <ApiSourceForm onBack={() => setStep(1)} onSuccess={handleSourceCreated} {...sharedFormProps} />
+            {selectedType === 'api' && (
+              <ApiSourceForm onSuccess={handleSourceCreated} {...sharedFormProps} />
             )}
           </>
         )}
@@ -227,7 +219,7 @@ function SourceOption({ icon, title, description, onClick }: any) {
   );
 }
 
-function WebSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, setBrandId }: any) {
+function WebSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId }: any) {
   const [method, setMethod] = useState('single');
   const [url, setUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -260,10 +252,7 @@ function WebSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, se
   };
 
   return (
-    <div className="p-8">
-      <button onClick={onBack} className="mb-6 flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white">
-        <ArrowLeft className="h-4 w-4" /> Back to selection
-      </button>
+    <div className="p-8 pt-0">
 
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Website Ingestion</h2>
       <p className="mt-2 text-gray-500 dark:text-gray-400">Extract intelligence from live web content.</p>
@@ -303,7 +292,6 @@ function WebSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, se
       )}
 
       <div className="mt-10 flex justify-end gap-3">
-        <button onClick={onBack} className="px-6 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">Cancel</button>
         <button 
           onClick={handleSubmit}
           disabled={isSubmitting || isBrandsLoading || brands.length === 0}
@@ -316,7 +304,7 @@ function WebSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, se
   );
 }
 
-function FileSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, setBrandId }: any) {
+function FileSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId }: any) {
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -371,10 +359,7 @@ function FileSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, s
 
 
   return (
-    <div className="p-8">
-      <button onClick={onBack} className="mb-6 flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white">
-        <ArrowLeft className="h-4 w-4" /> Back to selection
-      </button>
+    <div className="p-8 pt-0">
 
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Upload Documents</h2>
       <p className="mt-2 text-gray-500 dark:text-gray-400">PDF, DOCX, CSV, and TXT files supported.</p>
@@ -416,7 +401,6 @@ function FileSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, s
       )}
 
       <div className="mt-10 flex justify-end gap-3">
-        <button onClick={onBack} className="px-6 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">Cancel</button>
         <button 
           onClick={handleSubmit}
           disabled={isSubmitting || files.length === 0 || isBrandsLoading || brands.length === 0}
@@ -429,7 +413,7 @@ function FileSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, s
   );
 }
 
-function ApiSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, setBrandId }: any) {
+function ApiSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId }: any) {
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -460,10 +444,7 @@ function ApiSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, se
   };
 
   return (
-    <div className="p-8">
-      <button onClick={onBack} className="mb-6 flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white">
-        <ArrowLeft className="h-4 w-4" /> Back to selection
-      </button>
+    <div className="p-8 pt-0">
 
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Direct Knowledge Input</h2>
       <p className="mt-2 text-gray-500 dark:text-gray-400">Paste raw text, snippets, or connect custom data.</p>
@@ -499,7 +480,6 @@ function ApiSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, se
       )}
 
       <div className="mt-10 flex justify-end gap-3">
-        <button onClick={onBack} className="px-6 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">Cancel</button>
         <button 
           onClick={handleSubmit}
           disabled={isSubmitting || isBrandsLoading || brands.length === 0}
@@ -512,7 +492,7 @@ function ApiSourceForm({ onBack, onSuccess, brandId, brands, isBrandsLoading, se
   );
 }
 
-function IntegrationSourceForm({ onBack, onSuccess }: any) {
+function IntegrationSourceForm({ onSuccess }: any) {
   const integrations = [
     { name: 'Notion', icon: <Database className="h-5 w-5" />, status: 'popular' },
     { name: 'Google Drive', icon: <Cloud className="h-5 w-5" />, status: 'available' },
@@ -521,10 +501,7 @@ function IntegrationSourceForm({ onBack, onSuccess }: any) {
   ];
 
   return (
-    <div className="p-8">
-      <button onClick={onBack} className="mb-6 flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white">
-        <ArrowLeft className="h-4 w-4" /> Back to selection
-      </button>
+    <div className="p-8 pt-0">
 
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Integrations</h2>
       <p className="mt-2 text-gray-500 dark:text-gray-400">Sync knowledge from your existing tools.</p>

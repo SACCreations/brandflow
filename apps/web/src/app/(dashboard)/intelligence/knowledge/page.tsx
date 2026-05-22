@@ -89,31 +89,13 @@ export default function KnowledgeDashboard() {
             Explorer
           </button>
           
-          <div className="relative group">
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700"
-            >
-              <Plus className="h-4 w-4" />
-              Add Knowledge
-            </button>
-            
-            {/* Quick Actions Dropdown */}
-            <div className="absolute right-0 top-full mt-2 w-56 origin-top-right rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl ring-1 ring-black/5 transition-all opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto dark:border-gray-800 dark:bg-gray-900 z-50">
-              <button onClick={() => setIsModalOpen(true)} className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
-                <FileText className="h-4 w-4 text-brand-500" />
-                Upload File
-              </button>
-              <button onClick={() => setIsModalOpen(true)} className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
-                <Globe className="h-4 w-4 text-blue-500" />
-                Add URL
-              </button>
-              <button onClick={() => setIsModalOpen(true)} className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 border-t border-gray-50 dark:border-gray-800 mt-1 pt-2">
-                <Search className="h-4 w-4 text-purple-500" />
-                Full Connector Hub
-              </button>
-            </div>
-          </div>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700"
+          >
+            <Plus className="h-4 w-4" />
+            Add Knowledge
+          </button>
         </div>
       </div>
 
