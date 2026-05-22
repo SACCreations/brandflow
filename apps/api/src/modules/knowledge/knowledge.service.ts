@@ -204,10 +204,13 @@ export class KnowledgeService {
 
     let updated = 0;
     for (let i = 0; i < entries.length; i++) {
-       if (atoms[i] && atoms[i].type && atoms[i].type !== 'fact') {
+       const atom = atoms[i];
+       const entry = entries[i];
+       
+       if (entry && atom && atom.type && atom.type !== 'fact') {
            await this.prisma.client.knowledgeEntry.update({
-              where: { id: entries[i].id },
-              data: { classification: atoms[i].type }
+              where: { id: entry.id },
+              data: { classification: atom.type }
            });
            updated++;
        }
