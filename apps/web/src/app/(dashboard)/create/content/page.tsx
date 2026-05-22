@@ -366,10 +366,10 @@ export default function ContentGeneratorPage() {
                 <select
                   disabled={!!briefId}
                   className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                  value={selectedBrandId}
+                  value={selectedBrandId || (brands.length > 0 ? brands[0].id : '')}
                   onChange={(e) => setSelectedBrandId(e.target.value)}
                 >
-                  <option value="">-- Choose Brand --</option>
+                  {brands.length === 0 && <option value="">-- Choose Brand --</option>}
                   {brands.map((b) => (
                     <option key={b.id} value={b.id}>{b.name}</option>
                   ))}

@@ -166,15 +166,43 @@ export class LLMGateway {
       cleanSystem.includes('json') ||
       cleanUser.includes('json')
     ) {
-      return JSON.stringify({
-        topics: [
-          { id: '1', name: 'Premium Launch Strategy & Optimization', tag: 'Product Launch' },
-          { id: '2', name: 'Why Customers Love Our Brand Identity', tag: 'Social Proof' },
-          { id: '3', name: 'Top 5 Tips for Industry Success in 2026', tag: 'Educational' },
-          { id: '4', name: 'Leveraging AI for Next-Gen Creative Workflows', tag: 'Trend' },
-          { id: '5', name: 'Behind the Scenes: Crafting Our Narrative', tag: 'Behind the Scenes' }
-        ],
-      });
+      const factsMatch = systemPrompt.match(/Brand Knowledge Context:\n([\s\S]*?)\n+CRITICAL/i);
+      let facts: string[] = [];
+      if (factsMatch && factsMatch[1]) {
+        facts = factsMatch[1].split('\n').filter(l => l.trim().length > 10 && !l.toLowerCase().includes('no specific brand knowledge'));
+      }
+      
+      let baseTopics = [];
+      if (facts.length > 0) {
+        baseTopics = facts.slice(0, 5).map((fact, index) => {
+          const title = fact.replace(/^\d+\.\s*/, '').replace(/^#\s*/, '').substring(0, 60).trim();
+          return {
+            id: String(index + 1),
+            name: `Focus: ${title}`,
+            tag: 'Data-driven Topic'
+          };
+        });
+      } else {
+        // Fallback when no facts are available: extract brand and category from prompt
+        const brandMatch = systemPrompt.match(/brand "([^"]+)"/i);
+        const catMatch = systemPrompt.match(/category "([^"]+)"/i);
+        const brand = brandMatch ? brandMatch[1] : 'Your Brand';
+        const cat = catMatch ? catMatch[1] : 'Content';
+        
+        baseTopics = [
+          { id: '1', name: `Introduction to ${brand} ${cat}`, tag: 'Introduction' },
+          { id: '2', name: `Why Choose ${brand} for Your Needs`, tag: 'Benefits' },
+          { id: '3', name: `The Future of ${brand} Offerings`, tag: 'Vision' },
+          { id: '4', name: `Customer Success with ${brand}`, tag: 'Case Study' },
+          { id: '5', name: `Behind the Scenes at ${brand}`, tag: 'Culture' }
+        ];
+      }
+      
+      while (baseTopics.length < 5) {
+        baseTopics.push({ id: String(baseTopics.length + 1), name: 'Additional Brand Insights', tag: 'General' });
+      }
+      
+      return JSON.stringify({ topics: baseTopics });
     }
 
     // 1.5 Image prompt architect check
