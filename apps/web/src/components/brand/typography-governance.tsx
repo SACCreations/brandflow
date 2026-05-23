@@ -42,6 +42,10 @@ export function TypographyGovernance({
   onChange, 
   onScaleChange 
 }: TypographyGovernanceProps) {
+  const headingFont = settings.find((setting) => setting.id === 'h')?.fontFamily;
+  const bodyFont = settings.find((setting) => setting.id === 'b')?.fontFamily;
+  const hasDetectedPairing = Boolean(headingFont || bodyFont);
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -122,13 +126,15 @@ export function TypographyGovernance({
           <div className="p-6 rounded-2xl bg-brand-600 text-white shadow-xl shadow-brand-100 dark:shadow-none space-y-4">
             <div className="flex items-center gap-3">
               <Sparkles className="w-5 h-5" />
-              <h3 className="text-sm font-black uppercase tracking-widest">AI Type Pairing</h3>
+              <h3 className="text-sm font-black uppercase tracking-widest">Typography Signal</h3>
             </div>
             <p className="text-xs font-medium text-brand-50 leading-relaxed opacity-90">
-              Our AI recommends pairing <span className="font-bold underline">Outfit</span> for headings with <span className="font-bold underline">Inter</span> for body text to achieve a modern, geometric aesthetic with high legibility.
+              {hasDetectedPairing
+                ? <>Detected pairing from your brand data: <span className="font-bold underline">{headingFont || 'Not set yet'}</span> for headings and <span className="font-bold underline">{bodyFont || headingFont || 'Not set yet'}</span> for body text.</>
+                : 'No typography was confidently detected from the analysed brand sources yet. Add or adjust fonts manually if needed.'}
             </p>
-            <Button className="w-full bg-white text-brand-600 hover:bg-brand-50 rounded-xl text-[10px] font-black uppercase tracking-widest h-10 shadow-lg">
-              Apply Recommendation
+            <Button className="w-full bg-white text-brand-600 hover:bg-brand-50 rounded-xl text-[10px] font-black uppercase tracking-widest h-10 shadow-lg" disabled={!hasDetectedPairing}>
+              {hasDetectedPairing ? 'Keep Current Pairing' : 'Await Source Signals'}
             </Button>
           </div>
 

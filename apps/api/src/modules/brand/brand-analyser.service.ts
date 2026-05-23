@@ -22,6 +22,20 @@ interface ResolvedAnalysisSource {
   evidenceCount: number;
   status?: string;
   warnings: string[];
+  signals?: ExtractedPageSignals;
+}
+
+interface ExtractedPageSignals {
+  brandName?: string;
+  siteName?: string;
+  title?: string;
+  description?: string;
+  canonicalUrl?: string;
+  headings: string[];
+  logoUrls: string[];
+  socialLinks: string[];
+  fonts: string[];
+  colors: string[];
 }
 
 @Injectable()
@@ -56,6 +70,8 @@ export class BrandAnalyserService {
       'Use only the supplied evidence. Do not invent facts.',
       'Return a single JSON object with a `brand` object only. No markdown, no prose.',
       'If information is uncertain, use null for strings and empty arrays for lists.',
+      'For core basics like brand name, website, and description, strongly prefer explicit page signals such as canonical URL, organization schema, title, meta description, and repeated headings.',
+      'Never write generic placeholder copy. If the sources do not support a field, leave it null or empty.',
       'The brand object must use this shape:',
       JSON.stringify({
         brand: {
@@ -330,31 +346,14 @@ export class BrandAnalyserService {
     }
 
     const rawContent = await response.text();
-    
-    // Extract metadata before stripping tags
-    const logoMatches = [...rawContent.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi)];
-    const linkMatches = [...rawContent.matchAll(/<link[^>]+href=["']([^"']+)["'][^>]*>/gi)];
-    
-    const potentialLogos = [
-      ...logoMatches.filter(m => /logo/i.test(m[0]) || /brand/i.test(m[0])).map(m => m[1] || ''),
-      ...linkMatches.filter(m => /rel=["'].*icon.*["']/i.test(m[0])).map(m => m[1] || '')
-    ].filter(Boolean).map(url => {
-        try {
-           return new URL(url, normalizedUrl).toString();
-        } catch {
-           return url;
-        }
-      });
-      
-    const fontMatches = [...rawContent.matchAll(/font-family:\s*([^;"'}]+)/gi)];
-    const potentialFonts = Array.from(new Set(fontMatches.map(m => (m[1] || '').replace(/['"]/g, '').trim()))).filter(Boolean);
-    
-    const colorMatches = [...rawContent.matchAll(/(color|background-color):\s*(#[0-9a-fA-F]{3,6}|rgb\([^)]+\))/gi)];
-    const potentialColors = Array.from(new Set(colorMatches.map(m => (m[2] || '').trim()))).filter(Boolean);
-
+    const signals = this.extractPageSignals(rawContent, normalizedUrl);
     const baseText = this.limitText(this.extractReadableText(rawContent), 6_000);
-    
-    const text = `${baseText}\n\n--- Metadata for AI Analysis ---\nPotential Logo URLs: ${potentialLogos.slice(0, 5).join(', ')}\nPotential Fonts: ${potentialFonts.slice(0, 10).join(', ')}\nPotential Brand Colors: ${potentialColors.slice(0, 10).join(', ')}`;
+
+    const text = [
+      this.formatPageSignalsForPrompt(signals),
+      'Readable page excerpt:',
+      baseText,
+    ].filter(Boolean).join('\n\n');
 
     if (text.length < 200) {
       throw new BadRequestException(`Source ${normalizedUrl} did not contain enough readable text to analyze.`);
@@ -368,6 +367,7 @@ export class BrandAnalyserService {
       evidenceCount: 1,
       status: 'fetched',
       warnings: [],
+      signals,
     };
   }
 
@@ -389,6 +389,8 @@ export class BrandAnalyserService {
     return [
       'Analyze the evidence below and extract a usable brand draft for BrandFlow.',
       'Prioritize recurring patterns across sources over one-off claims.',
+      'Use structured page signals (title, meta description, canonical URL, organization schema, headings, logos, social links) before inferring from long-form text.',
+      'Keep `name`, `website`, `description`, `tone`, `positioning`, and identity fields grounded in explicit evidence.',
       'If you cannot verify a field from the supplied evidence, return null or an empty array.',
       '',
       sourceContext,
@@ -418,6 +420,13 @@ export class BrandAnalyserService {
     const socialAccess = this.asObject(rawBrand['socialAccess']);
     const competitors = Array.isArray(rawBrand['competitors']) ? rawBrand['competitors'] : [];
     const contactInfo = this.asObject(rawBrand['contactInfo']);
+    const primarySignals = context.resolvedSources.find((source) => source.signals)?.signals;
+    const socialSignals = this.extractSocialAccess(primarySignals);
+    const logoUrlFallbacks = (primarySignals?.logoUrls ?? []).slice(0, 5).map((url, index) => ({
+      url,
+      type: index === 0 ? 'primary' : 'secondary',
+      name: index === 0 ? 'Primary Logo' : `Detected Logo ${index + 1}`,
+    }));
 
     const warnings = Array.from(new Set([
       ...context.resolvedSources.flatMap((source) => source.warnings),
@@ -428,12 +437,15 @@ export class BrandAnalyserService {
 
     const brand = {
       name: this.normalizeString(rawBrand['name'], 255)
+        ?? this.normalizeString(primarySignals?.brandName, 255)
         ?? this.inferBrandName(context.resolvedSources)
         ?? 'Untitled Brand',
       tagline: this.normalizeString(rawBrand['tagline'], 255),
-      description: this.normalizeString(rawBrand['description'], 2000),
+      description: this.normalizeString(rawBrand['description'], 2000)
+        ?? this.normalizeString(primarySignals?.description, 2000),
       industry: this.normalizeString(rawBrand['industry'], 100),
       website: this.normalizeUrl(this.normalizeString(rawBrand['website'], 500))
+        ?? this.normalizeUrl(primarySignals?.canonicalUrl)
         ?? context.resolvedSources.find((source) => source.url)?.url
         ?? null,
       positioning: this.normalizeString(rawBrand['positioning'], 2000),
@@ -446,77 +458,83 @@ export class BrandAnalyserService {
         ctaPreferences: this.normalizeStringArray(governance?.['ctaPreferences'], 20, 100),
         requiredDisclaimer: this.normalizeString(governance?.['requiredDisclaimer'], 1000),
       },
-      visualRules: visualRules ? {
-        primaryColor: this.normalizeString(visualRules['primaryColor'], 20),
-        secondaryColor: this.normalizeString(visualRules['secondaryColor'], 20),
-        accentColor: this.normalizeString(visualRules['accentColor'], 20),
-        fontFamily: this.normalizeString(visualRules['fontFamily'], 100),
-        headingFont: this.normalizeString(visualRules['headingFont'], 100),
-        bodyFont: this.normalizeString(visualRules['bodyFont'], 100),
-        logoUrls: Array.isArray(visualRules['logoUrls']) ? visualRules['logoUrls'].map((l: any) => ({
+      visualRules: this.compactObject({
+        primaryColor: this.normalizeColor(this.normalizeString(visualRules?.['primaryColor'], 20))
+          ?? this.normalizeColor(primarySignals?.colors?.[0]),
+        secondaryColor: this.normalizeColor(this.normalizeString(visualRules?.['secondaryColor'], 20))
+          ?? this.normalizeColor(primarySignals?.colors?.[1]),
+        accentColor: this.normalizeColor(this.normalizeString(visualRules?.['accentColor'], 20))
+          ?? this.normalizeColor(primarySignals?.colors?.[2]),
+        fontFamily: this.normalizeString(visualRules?.['fontFamily'], 100)
+          ?? this.normalizeString(primarySignals?.fonts?.[0], 100),
+        headingFont: this.normalizeString(visualRules?.['headingFont'], 100)
+          ?? this.normalizeString(primarySignals?.fonts?.[0], 100),
+        bodyFont: this.normalizeString(visualRules?.['bodyFont'], 100)
+          ?? this.normalizeString(primarySignals?.fonts?.[1] ?? primarySignals?.fonts?.[0], 100),
+        logoUrls: Array.isArray(visualRules?.['logoUrls']) ? visualRules['logoUrls'].map((l: any) => ({
           url: this.normalizeString(l?.url, 1000),
           type: this.normalizeString(l?.type, 50),
           name: this.normalizeString(l?.name, 100),
-        })) : null,
-      } : null,
-      identity: identity ? {
+        })) : logoUrlFallbacks.length > 0 ? logoUrlFallbacks : null,
+      }),
+      identity: this.compactObject({
         mission: this.normalizeString(identity['mission'], 1000),
         vision: this.normalizeString(identity['vision'], 1000),
         values: this.normalizeStringArray(identity['values'], 10, 100),
         promise: this.normalizeString(identity['promise'], 500),
         personality: this.normalizeString(identity['personality'], 500),
-      } : null,
-      designTokens: designTokens ? {
+      }),
+      designTokens: this.compactObject({
         borderRadius: this.normalizeString(designTokens['borderRadius'], 50),
         shadows: this.normalizeString(designTokens['shadows'], 50),
         spacing: this.normalizeString(designTokens['spacing'], 50),
-      } : null,
-      strategy: strategy ? {
+      }),
+      strategy: this.compactObject({
         targetLocation: this.normalizeString(strategy['targetLocation'], 255),
         ageGroup: this.normalizeString(strategy['ageGroup'], 100),
         interests: this.normalizeString(strategy['interests'], 1000),
-        postingFrequency: strategy['postingFrequency'] as any,
-        festivalPosts: strategy['festivalPosts'] === true || strategy['festivalPosts'] === 'true',
-        offerPosts: strategy['offerPosts'] === true || strategy['offerPosts'] === 'true',
+        postingFrequency: this.normalizeEnum(strategy?.['postingFrequency'], ['daily', 'weekly', 'bi-weekly', 'monthly'] as const),
+        festivalPosts: this.normalizeBoolean(strategy?.['festivalPosts']),
+        offerPosts: this.normalizeBoolean(strategy?.['offerPosts']),
         preferredTypes: this.normalizeStringArray(strategy['preferredTypes'], 10, 100),
-        contentLanguage: strategy['contentLanguage'] as any || 'english',
-        ctaPreference: strategy['ctaPreference'] as any,
-      } : null,
-      designPreferences: designPreferences ? {
-        preferredStyle: designPreferences['preferredStyle'] as any,
+        contentLanguage: this.normalizeEnum(strategy?.['contentLanguage'], ['tamil', 'english', 'mixed'] as const),
+        ctaPreference: this.normalizeEnum(strategy?.['ctaPreference'], ['Call Now', 'DM', 'Visit Website'] as const),
+      }),
+      designPreferences: this.compactObject({
+        preferredStyle: this.normalizeEnum(designPreferences?.['preferredStyle'], ['Minimal', 'Corporate', '3D', 'Modern', 'Playful', 'Luxury'] as const),
         referenceLinks: this.normalizeStringArray(designPreferences['referenceLinks'], 5, 1000),
-        imageStyle: designPreferences['imageStyle'] as any,
-        animationRequirement: designPreferences['animationRequirement'] === true || designPreferences['animationRequirement'] === 'true',
-      } : null,
-      approvalWorkflow: approvalWorkflow ? {
+        imageStyle: this.normalizeEnum(designPreferences?.['imageStyle'], ['Minimal', 'Corporate', '3D', 'Modern'] as const),
+        animationRequirement: this.normalizeBoolean(designPreferences?.['animationRequirement']),
+      }),
+      approvalWorkflow: this.compactObject({
         reviewerName: this.normalizeString(approvalWorkflow['reviewerName'], 255),
         finalApproverName: this.normalizeString(approvalWorkflow['finalApproverName'], 255),
         processSteps: this.normalizeStringArray(approvalWorkflow['processSteps'], 10, 100),
         approvalTiming: this.normalizeString(approvalWorkflow['approvalTiming'], 100),
-        revisionLimit: typeof approvalWorkflow['revisionLimit'] === 'number' ? approvalWorkflow['revisionLimit'] : null,
-      } : null,
-      campaignDetails: campaignDetails ? {
-        marketingGoal: campaignDetails['marketingGoal'] as any,
-        monthlyBudget: typeof campaignDetails['monthlyBudget'] === 'number' ? campaignDetails['monthlyBudget'] : null,
+        revisionLimit: this.normalizeNumber(approvalWorkflow?.['revisionLimit']),
+      }),
+      campaignDetails: this.compactObject({
+        marketingGoal: this.normalizeEnum(campaignDetails?.['marketingGoal'], ['Brand Awareness', 'Leads', 'Sales'] as const),
+        monthlyBudget: this.normalizeNumber(campaignDetails?.['monthlyBudget']),
         duration: this.normalizeString(campaignDetails['duration'], 100),
-        targetLeads: typeof campaignDetails['targetLeads'] === 'number' ? campaignDetails['targetLeads'] : null,
+        targetLeads: this.normalizeNumber(campaignDetails?.['targetLeads']),
         adPlatforms: this.normalizeStringArray(campaignDetails['adPlatforms'], 10, 100),
-      } : null,
-      analyticsConfig: analyticsConfig ? {
-        monthlyReport: analyticsConfig['monthlyReport'] === true || analyticsConfig['monthlyReport'] === 'true',
+      }),
+      analyticsConfig: this.compactObject({
+        monthlyReport: this.normalizeBoolean(analyticsConfig?.['monthlyReport']),
         kpiExpectations: this.normalizeString(analyticsConfig['kpiExpectations'], 1000),
-        leadTracking: analyticsConfig['leadTracking'] === true || analyticsConfig['leadTracking'] === 'true',
-        engagementTracking: analyticsConfig['engagementTracking'] !== false && analyticsConfig['engagementTracking'] !== 'false',
-      } : null,
-      socialAccess: socialAccess ? {
+        leadTracking: this.normalizeBoolean(analyticsConfig?.['leadTracking']),
+        engagementTracking: this.normalizeBoolean(analyticsConfig?.['engagementTracking']),
+      }),
+      socialAccess: this.compactObject({
         metaBusinessManagerId: this.normalizeString(socialAccess['metaBusinessManagerId'], 100),
         adAccountId: this.normalizeString(socialAccess['adAccountId'], 100),
-        instagramHandle: this.normalizeString(socialAccess['instagramHandle'], 100),
-        facebookPage: this.normalizeString(socialAccess['facebookPage'], 255),
-        linkedinPage: this.normalizeString(socialAccess['linkedinPage'], 255),
-        youtubeChannel: this.normalizeString(socialAccess['youtubeChannel'], 255),
-        twitterHandle: this.normalizeString(socialAccess['twitterHandle'], 100),
-      } : null,
+        instagramHandle: this.normalizeString(socialAccess['instagramHandle'], 100) ?? socialSignals.instagramHandle ?? null,
+        facebookPage: this.normalizeString(socialAccess['facebookPage'], 255) ?? socialSignals.facebookPage ?? null,
+        linkedinPage: this.normalizeString(socialAccess['linkedinPage'], 255) ?? socialSignals.linkedinPage ?? null,
+        youtubeChannel: this.normalizeString(socialAccess['youtubeChannel'], 255) ?? socialSignals.youtubeChannel ?? null,
+        twitterHandle: this.normalizeString(socialAccess['twitterHandle'], 100) ?? socialSignals.twitterHandle ?? null,
+      }),
       competitors: competitors.map((c: any) => ({
         name: this.normalizeString(c?.name, 255) || 'Unknown',
         website: this.normalizeUrl(this.normalizeString(c?.website, 500)),

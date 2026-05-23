@@ -70,6 +70,10 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
     setMaxVisitedStepIdx(prev => Math.max(prev, currentStepIdx));
   }, [currentStepIdx]);
 
+  React.useEffect(() => {
+    setFormData(initialData || {});
+  }, [initialData]);
+
   const handleNext = async () => {
     if (triggerValidationRef.current) {
       const isValid = await triggerValidationRef.current();

@@ -67,12 +67,50 @@ interface BrandFormProps {
   triggerValidationRef?: React.MutableRefObject<(() => Promise<boolean>) | undefined>;
 }
 
+const defaultBrandFormValues = {
+  name: '',
+  status: 'published',
+  tone: [],
+  visualRules: {
+    logoUrls: [
+      { url: '', type: 'primary', name: 'Primary Logo' },
+      { url: '', type: 'dark', name: 'Dark Variant' }
+    ],
+    colorTokens: [],
+    typographySettings: [],
+    typographyScales: [],
+  },
+  identity: {
+    values: []
+  },
+  governance: {
+    bannedPhrases: [],
+    requiredPhrases: []
+  },
+  competitors: [],
+  assets: {
+    documents: []
+  },
+  strategy: {
+    preferredTypes: []
+  },
+  designPreferences: {
+    referenceLinks: []
+  },
+  approvalWorkflow: {
+    processSteps: []
+  },
+  campaignDetails: {
+    adPlatforms: []
+  }
+};
+
 const sanitizeInitialData = (data: any) => {
   if (!data) return undefined;
   
-  // Recursively convert nulls to empty strings
+  // Recursively normalize nulls so optional fields stay unset instead of being turned into fake defaults.
   const clean = (obj: any): any => {
-    if (obj === null) return '';
+    if (obj === null) return undefined;
     if (Array.isArray(obj)) return obj.map(clean);
     if (typeof obj === 'object' && obj !== null) {
       return Object.keys(obj).reduce((acc, key) => {
@@ -99,33 +137,42 @@ const sanitizeInitialData = (data: any) => {
     tone: Array.isArray(cleaned.tone) ? cleaned.tone : [],
     visualRules: {
       ...cleaned.visualRules,
-      primaryColor: cleaned.visualRules?.primaryColor || '#6366f1',
-      secondaryColor: cleaned.visualRules?.secondaryColor || '#a855f7',
-      accentColor: cleaned.visualRules?.accentColor || '#f59e0b',
-      headingFont: cleaned.visualRules?.headingFont || 'Inter',
-      bodyFont: cleaned.visualRules?.bodyFont || 'Inter',
-      fontFamily: cleaned.visualRules?.fontFamily || 'Inter',
+      primaryColor: cleaned.visualRules?.primaryColor || '',
+      secondaryColor: cleaned.visualRules?.secondaryColor || '',
+      accentColor: cleaned.visualRules?.accentColor || '',
+      headingFont: cleaned.visualRules?.headingFont,
+      bodyFont: cleaned.visualRules?.bodyFont,
+      fontFamily: cleaned.visualRules?.fontFamily,
       logoUrls: (() => {
         const arr = Array.isArray(cleaned.visualRules?.logoUrls) ? [...cleaned.visualRules.logoUrls.filter(Boolean)] : [];
         if (!arr[0]) arr[0] = { url: '', type: 'primary', name: 'Primary Logo' };
         if (!arr[1]) arr[1] = { url: '', type: 'dark', name: 'Dark Variant' };
         return arr;
       })(),
-      colorTokens: Array.isArray(cleaned.visualRules?.colorTokens) && cleaned.visualRules.colorTokens.length > 0 ? cleaned.visualRules.colorTokens : [
-        { id: '1', name: 'Primary', value: cleaned.visualRules?.primaryColor || '#6366f1', type: 'primary' },
-        { id: '2', name: 'Secondary', value: cleaned.visualRules?.secondaryColor || '#a855f7', type: 'secondary' },
-        { id: '3', name: 'Accent', value: cleaned.visualRules?.accentColor || '#f59e0b', type: 'accent' }
-      ].filter(c => c.value),
-      typographySettings: Array.isArray(cleaned.visualRules?.typographySettings) && cleaned.visualRules.typographySettings.length > 0 ? cleaned.visualRules.typographySettings : [
-        { id: 'h', label: 'Heading Font', fontFamily: cleaned.visualRules?.headingFont || cleaned.visualRules?.fontFamily || 'Inter', weight: '900', sizeScale: '1.5', lineHeight: '1.2' },
-        { id: 'b', label: 'Body Font', fontFamily: cleaned.visualRules?.bodyFont || cleaned.visualRules?.fontFamily || 'Inter', weight: '400', sizeScale: '1', lineHeight: '1.5' }
-      ]
+      colorTokens: Array.isArray(cleaned.visualRules?.colorTokens)
+        ? cleaned.visualRules.colorTokens
+        : [
+            cleaned.visualRules?.primaryColor ? { id: '1', name: 'Primary', value: cleaned.visualRules.primaryColor, type: 'primary' } : null,
+            cleaned.visualRules?.secondaryColor ? { id: '2', name: 'Secondary', value: cleaned.visualRules.secondaryColor, type: 'secondary' } : null,
+            cleaned.visualRules?.accentColor ? { id: '3', name: 'Accent', value: cleaned.visualRules.accentColor, type: 'accent' } : null,
+          ].filter(Boolean),
+      typographySettings: Array.isArray(cleaned.visualRules?.typographySettings)
+        ? cleaned.visualRules.typographySettings
+        : [
+            cleaned.visualRules?.headingFont || cleaned.visualRules?.fontFamily
+              ? { id: 'h', label: 'Heading Font', fontFamily: cleaned.visualRules?.headingFont || cleaned.visualRules?.fontFamily, weight: '900', sizeScale: '1.5', lineHeight: '1.2' }
+              : null,
+            cleaned.visualRules?.bodyFont || cleaned.visualRules?.fontFamily
+              ? { id: 'b', label: 'Body Font', fontFamily: cleaned.visualRules?.bodyFont || cleaned.visualRules?.fontFamily, weight: '400', sizeScale: '1', lineHeight: '1.5' }
+              : null,
+          ].filter(Boolean),
+      typographyScales: Array.isArray(cleaned.visualRules?.typographyScales) ? cleaned.visualRules.typographyScales : []
     },
     designTokens: {
       ...cleaned.designTokens,
-      borderRadius: cleaned.designTokens?.borderRadius || '0.5rem',
-      shadows: cleaned.designTokens?.shadows || 'sm',
-      spacing: cleaned.designTokens?.spacing || 'comfortable',
+      borderRadius: cleaned.designTokens?.borderRadius,
+      shadows: cleaned.designTokens?.shadows,
+      spacing: cleaned.designTokens?.spacing,
     },
     assets: {
       ...cleaned.assets,
@@ -149,38 +196,38 @@ const sanitizeInitialData = (data: any) => {
       targetLocation: cleaned.strategy?.targetLocation || '',
       ageGroup: cleaned.strategy?.ageGroup || '',
       interests: cleaned.strategy?.interests || '',
-      postingFrequency: cleaned.strategy?.postingFrequency || 'weekly',
-      festivalPosts: !!cleaned.strategy?.festivalPosts,
-      offerPosts: !!cleaned.strategy?.offerPosts,
-      contentLanguage: cleaned.strategy?.contentLanguage || 'english',
-      preferredTypes: Array.isArray(cleaned.strategy?.preferredTypes) ? cleaned.strategy.preferredTypes : ['Poster', 'Reel'],
-      ctaPreference: cleaned.strategy?.ctaPreference || 'Call Now'
+      postingFrequency: cleaned.strategy?.postingFrequency,
+      festivalPosts: cleaned.strategy?.festivalPosts,
+      offerPosts: cleaned.strategy?.offerPosts,
+      contentLanguage: cleaned.strategy?.contentLanguage,
+      preferredTypes: Array.isArray(cleaned.strategy?.preferredTypes) ? cleaned.strategy.preferredTypes : [],
+      ctaPreference: cleaned.strategy?.ctaPreference
     },
     designPreferences: {
-      preferredStyle: cleaned.designPreferences?.preferredStyle || 'Modern',
+      preferredStyle: cleaned.designPreferences?.preferredStyle,
       referenceLinks: Array.isArray(cleaned.designPreferences?.referenceLinks) ? cleaned.designPreferences.referenceLinks : [],
-      imageStyle: cleaned.designPreferences?.imageStyle || 'Minimal',
-      animationRequirement: !!cleaned.designPreferences?.animationRequirement
+      imageStyle: cleaned.designPreferences?.imageStyle,
+      animationRequirement: cleaned.designPreferences?.animationRequirement
     },
     approvalWorkflow: {
       reviewerName: cleaned.approvalWorkflow?.reviewerName || '',
       finalApproverName: cleaned.approvalWorkflow?.finalApproverName || '',
       processSteps: Array.isArray(cleaned.approvalWorkflow?.processSteps) ? cleaned.approvalWorkflow.processSteps : [],
       approvalTiming: cleaned.approvalWorkflow?.approvalTiming || '',
-      revisionLimit: cleaned.approvalWorkflow?.revisionLimit || 3
+      revisionLimit: cleaned.approvalWorkflow?.revisionLimit
     },
     campaignDetails: {
-      marketingGoal: cleaned.campaignDetails?.marketingGoal || 'Brand Awareness',
-      monthlyBudget: cleaned.campaignDetails?.monthlyBudget || 0,
+      marketingGoal: cleaned.campaignDetails?.marketingGoal,
+      monthlyBudget: cleaned.campaignDetails?.monthlyBudget,
       duration: cleaned.campaignDetails?.duration || '',
-      targetLeads: cleaned.campaignDetails?.targetLeads || 0,
+      targetLeads: cleaned.campaignDetails?.targetLeads,
       adPlatforms: Array.isArray(cleaned.campaignDetails?.adPlatforms) ? cleaned.campaignDetails.adPlatforms : []
     },
     analyticsConfig: {
-      monthlyReport: cleaned.analyticsConfig?.monthlyReport ?? true,
+      monthlyReport: cleaned.analyticsConfig?.monthlyReport,
       kpiExpectations: cleaned.analyticsConfig?.kpiExpectations || '',
-      leadTracking: !!cleaned.analyticsConfig?.leadTracking,
-      engagementTracking: cleaned.analyticsConfig?.engagementTracking ?? true
+      leadTracking: cleaned.analyticsConfig?.leadTracking,
+      engagementTracking: cleaned.analyticsConfig?.engagementTracking
     },
     competitors: Array.isArray(cleaned.competitors) ? cleaned.competitors : [],
     contactInfo: {
@@ -201,32 +248,33 @@ const sanitizeInitialData = (data: any) => {
   };
 };
 
+const buildTaglineSuggestion = (data: any): string | null => {
+  const candidate = [data.tagline, data.identity?.promise, data.positioning]
+    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+    .map((value) => value.trim())[0];
+
+  if (!candidate) return null;
+
+  const firstSentence = candidate.split(/(?<=[.!?])\s+/)[0]?.trim() || candidate;
+  return firstSentence.length <= 120 ? firstSentence : `${firstSentence.slice(0, 117).trimEnd()}...`;
+};
+
+const buildDescriptionSuggestion = (data: any): string | null => {
+  const parts = [data.description, data.positioning, data.identity?.mission, data.differentiators]
+    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+    .map((value) => value.trim());
+
+  if (parts.length === 0) return null;
+
+  return Array.from(new Set(parts)).join(' ').slice(0, 500);
+};
+
 export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, lastSaved, wizardMode, activeStepId, triggerValidationRef }: BrandFormProps) {
   const { toast } = useToast();
 
   const form = useForm<any>({
     resolver: zodResolver(createBrandSchema),
-    defaultValues: sanitizeInitialData(initialData) || {
-      name: '',
-      status: 'published',
-      tone: [],
-      visualRules: {
-        primaryColor: '#6366f1',
-        secondaryColor: '#a855f7',
-        fontFamily: 'Inter',
-        logoUrls: [
-          { url: '', type: 'primary', name: 'Primary Logo' },
-          { url: '', type: 'dark', name: 'Dark Variant' }
-        ]
-      },
-      identity: {
-        values: []
-      },
-      governance: {
-        bannedPhrases: [],
-        requiredPhrases: []
-      }
-    }
+    defaultValues: sanitizeInitialData(initialData) || defaultBrandFormValues
   });
 
   const { watch, setValue, register, handleSubmit, reset, formState: { errors, isDirty } } = form;
@@ -282,6 +330,10 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       onDataChange(values);
     }
   }, [values, onDataChange]);
+
+  React.useEffect(() => {
+    reset(sanitizeInitialData(initialData) || defaultBrandFormValues);
+  }, [initialData, reset]);
 
   const getFieldsForStep = (stepId: string): string[] => {
     switch (stepId) {
@@ -421,8 +473,13 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                 size="sm" 
                 className="h-6 text-[9px] font-black uppercase tracking-widest text-brand-600 hover:bg-brand-50 rounded-lg group-hover:opacity-100 opacity-0 transition-opacity"
                 onClick={() => {
-                  toast({ title: 'AI Copilot', description: 'Generating creative taglines based on your brand description...' });
-                  setValue('tagline', 'The Future of Intelligent Branding');
+                  const suggestion = buildTaglineSuggestion(values);
+                  if (!suggestion) {
+                    toast({ title: 'AI Copilot', description: 'Not enough analysed brand context yet to suggest a tagline.' });
+                    return;
+                  }
+                  toast({ title: 'AI Copilot', description: 'Generated a tagline from the analysed brand evidence already in the form.' });
+                  setValue('tagline', suggestion, { shouldDirty: true });
                 }}
               >
                 <Sparkles className="w-3 h-3 mr-1" /> Generate with AI
@@ -454,8 +511,13 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                 size="sm" 
                 className="h-6 text-[9px] font-black uppercase tracking-widest text-brand-600 hover:bg-brand-50 rounded-lg group-hover:opacity-100 opacity-0 transition-opacity"
                 onClick={() => {
-                  toast({ title: 'AI Copilot', description: 'Expanding your brand mission into a compelling description...' });
-                  setValue('description', 'An industry-leading platform focused on bridging the gap between artificial intelligence and human creativity.');
+                  const suggestion = buildDescriptionSuggestion(values);
+                  if (!suggestion) {
+                    toast({ title: 'AI Copilot', description: 'Not enough analysed brand context yet to expand the description.' });
+                    return;
+                  }
+                  toast({ title: 'AI Copilot', description: 'Expanded the description using analysed brand evidence already present in the form.' });
+                  setValue('description', suggestion, { shouldDirty: true });
                 }}
               >
                 <Sparkles className="w-3 h-3 mr-1" /> Expand with AI
@@ -651,16 +713,8 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         </div>
 
         <TypographyGovernance 
-          settings={values.visualRules?.typographySettings || [
-            { id: 'h', label: 'Heading Font', fontFamily: 'Inter', weight: '900', sizeScale: '1.5', lineHeight: '1.2' },
-            { id: 'b', label: 'Body Font', fontFamily: 'Inter', weight: '400', sizeScale: '1', lineHeight: '1.5' }
-          ]}
-          scales={values.visualRules?.typographyScales || [
-            { id: 'h1', label: 'H1 - Hero Title', size: '48px', spacing: '-0.02em' },
-            { id: 'h2', label: 'H2 - Section Header', size: '32px', spacing: '-0.01em' },
-            { id: 'body', label: 'Body - Large', size: '18px', spacing: '0' },
-            { id: 'caption', label: 'Caption', size: '12px', spacing: '0.05em' },
-          ]}
+          settings={values.visualRules?.typographySettings ?? []}
+          scales={values.visualRules?.typographyScales ?? []}
           onChange={(val) => setValue('visualRules.typographySettings', val, { shouldDirty: true })}
           onScaleChange={(val) => setValue('visualRules.typographyScales', val, { shouldDirty: true })}
         />
@@ -681,9 +735,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         </div>
 
         <ColorGovernance 
-          colors={values.visualRules?.colorTokens || [
-            { id: '1', name: 'Primary Indigo', value: '#6366f1', type: 'primary' }
-          ]}
+          colors={values.visualRules?.colorTokens ?? []}
           onChange={(val) => setValue('visualRules.colorTokens', val, { shouldDirty: true })}
         />
       </section>
@@ -995,7 +1047,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       <p className="text-[10px] text-gray-500">Auto-generate posts for major festivals.</p>
                     </div>
                     <Switch 
-                      checked={values.strategy?.festivalPosts} 
+                      checked={values.strategy?.festivalPosts ?? false} 
                       onCheckedChange={(checked) => setValue('strategy.festivalPosts', checked, { shouldDirty: true })} 
                     />
                   </div>
@@ -1005,7 +1057,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       <p className="text-[10px] text-gray-500">Enable AI-driven offer and discount content.</p>
                     </div>
                     <Switch 
-                      checked={values.strategy?.offerPosts} 
+                      checked={values.strategy?.offerPosts ?? false} 
                       onCheckedChange={(checked) => setValue('strategy.offerPosts', checked, { shouldDirty: true })} 
                     />
                   </div>
@@ -1259,7 +1311,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                     <p className="text-[10px] text-gray-500">Enable animation/video requirements.</p>
                   </div>
                   <Switch 
-                    checked={values.designPreferences?.animationRequirement} 
+                    checked={values.designPreferences?.animationRequirement ?? false} 
                     onCheckedChange={(checked) => setValue('designPreferences.animationRequirement', checked, { shouldDirty: true })} 
                   />
                </div>
@@ -1502,7 +1554,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                     <p className="text-[10px] text-gray-500">Auto-generate monthly performance PDF.</p>
                   </div>
                   <Switch 
-                    checked={values.analyticsConfig?.monthlyReport} 
+                    checked={values.analyticsConfig?.monthlyReport ?? false} 
                     onCheckedChange={(checked) => setValue('analyticsConfig.monthlyReport', checked, { shouldDirty: true })} 
                   />
                 </div>
@@ -1512,7 +1564,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                     <p className="text-[10px] text-gray-500">Track form submissions and conversions.</p>
                   </div>
                   <Switch 
-                    checked={values.analyticsConfig?.leadTracking} 
+                    checked={values.analyticsConfig?.leadTracking ?? false} 
                     onCheckedChange={(checked) => setValue('analyticsConfig.leadTracking', checked, { shouldDirty: true })} 
                   />
                 </div>
@@ -1522,7 +1574,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                     <p className="text-[10px] text-gray-500">Track likes, shares, and comments.</p>
                   </div>
                   <Switch 
-                    checked={values.analyticsConfig?.engagementTracking} 
+                    checked={values.analyticsConfig?.engagementTracking ?? false} 
                     onCheckedChange={(checked) => setValue('analyticsConfig.engagementTracking', checked, { shouldDirty: true })} 
                   />
                 </div>
