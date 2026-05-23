@@ -18,11 +18,12 @@ import {
   ArrowRight,
   Zap,
   Info,
-  Loader2
+  Loader2,
+  RefreshCw,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { Button, useToast } from '@brandflow/ui';
+import { Button, useToast, ErrorBoundary, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@brandflow/ui';
 
 interface Approval {
   id: string;
@@ -61,6 +62,8 @@ export default function ReviewQueuePage() {
   const [activeReview, setActiveReview] = useState<Approval | null>(null);
   const [activeTab, setActiveTab] = useState('pending');
   const [reviewNote, setReviewNote] = useState('');
+  const [searchFilter, setSearchFilter] = useState('');
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -99,6 +102,9 @@ export default function ReviewQueuePage() {
       queryClient.invalidateQueries({ queryKey: ['approvals'] });
       toast({ title: 'Bulk Approved', description: `${selectedItems.length} items have been approved.` });
       setSelectedItems([]);
+      setShowBulkConfirm(false);
+      setActiveReview(null);
+      setSelectedItems([]);
     },
   });
 
@@ -110,8 +116,58 @@ export default function ReviewQueuePage() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-4 text-center">
+        <div className="rounded-full bg-red-100 p-4 dark:bg-red-900/30">
+          <AlertTriangle className="h-8 w-8 text-red-500" />
+        </div>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Unable to load review queue</h3>
+        <p className="max-w-sm text-sm text-gray-500">There was a problem fetching pending approvals. Please try again.</p>
+        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['approvals'] })} className="gap-2">
+          <RefreshCw className="h-4 w-4" /> Retry
+        </Button>
+      </div>
+    );
+  }
+
+  const filteredQueue = searchFilter
+    ? queue?.filter((r) =>
+        r.content.body.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        r.content.brand?.name?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        r.content.platform.toLowerCase().includes(searchFilter.toLowerCase())
+      )
+    : queue;
+
   return (
+    <ErrorBoundary backHref="/projects">
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
+      {/* Bulk Approve Confirmation Dialog */}
+      <Dialog open={showBulkConfirm} onOpenChange={setShowBulkConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Bulk Approve</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            You are about to approve <strong>{selectedItems.length}</strong> content item{selectedItems.length > 1 ? 's' : ''}. 
+            This action will move them to the publishing queue and cannot be easily undone.
+          </p>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              onClick={() => bulkApproveMutation.mutate(selectedItems)}
+              disabled={bulkApproveMutation.isPending}
+              className="gap-2"
+            >
+              {bulkApproveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              Approve {selectedItems.length} Items
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
@@ -123,8 +179,9 @@ export default function ReviewQueuePage() {
             <Clock className="h-4 w-4" /> History
           </button>
           <button 
-            onClick={() => bulkApproveMutation.mutate(selectedItems)}
+            onClick={() => setShowBulkConfirm(true)}
             disabled={selectedItems.length === 0 || bulkApproveMutation.isPending}
+            aria-label={`Bulk approve ${selectedItems.length} selected items`}
             className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all disabled:opacity-50"
           >
             {bulkApproveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
@@ -142,18 +199,24 @@ export default function ReviewQueuePage() {
             <div className="flex items-center gap-4 text-sm font-bold text-gray-400">
               <button 
                 onClick={() => setActiveTab('pending')}
+                role="tab"
+                aria-selected={activeTab === 'pending'}
                 className={`${activeTab === 'pending' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4`}
               >
                 Awaiting Review ({queue?.length || 0})
               </button>
               <button 
                 onClick={() => setActiveTab('approved')}
+                role="tab"
+                aria-selected={activeTab === 'approved'}
                 className={`${activeTab === 'approved' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4`}
               >
                 Approved
               </button>
               <button 
                 onClick={() => setActiveTab('revision_requested')}
+                role="tab"
+                aria-selected={activeTab === 'revision_requested'}
                 className={`${activeTab === 'revision_requested' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4`}
               >
                 Revisions
@@ -163,22 +226,25 @@ export default function ReviewQueuePage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
                 <input 
-                  type="text" 
+                  type="text"
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
                   placeholder="Filter queue..." 
+                  aria-label="Filter review queue"
                   className="rounded-lg border border-gray-100 bg-white pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
                 />
               </div>
-              <button className="rounded-lg border border-gray-100 p-1.5 text-gray-500 dark:border-gray-800"><Filter className="h-4 w-4" /></button>
+              <button aria-label="Advanced filters" className="rounded-lg border border-gray-100 p-1.5 text-gray-500 dark:border-gray-800"><Filter className="h-4 w-4" /></button>
             </div>
           </div>
 
           <div className="space-y-4">
-            {queue?.length === 0 ? (
+            {filteredQueue?.length === 0 ? (
               <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 text-sm font-medium text-gray-400 dark:border-gray-800">
-                Queue is empty.
+                {searchFilter ? 'No items match your filter.' : 'All caught up — queue is empty!'}
               </div>
             ) : (
-              queue?.map((review) => (
+              filteredQueue?.map((review) => (
                 <div 
                   key={review.id} 
                   onClick={() => handleSelectReview(review)}
@@ -301,6 +367,7 @@ export default function ReviewQueuePage() {
                     <button 
                       onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'rejected', note: reviewNote })}
                       disabled={decideMutation.isPending}
+                      aria-label="Reject content"
                       className="flex items-center justify-center gap-2 rounded-xl border border-red-200 py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-all dark:border-red-900 dark:hover:bg-red-900/20"
                     >
                       {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
@@ -309,6 +376,7 @@ export default function ReviewQueuePage() {
                     <button 
                       onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'revision_requested', note: reviewNote })}
                       disabled={decideMutation.isPending}
+                      aria-label="Request changes on content"
                       className="flex items-center justify-center gap-2 rounded-xl border border-amber-200 py-3 text-sm font-bold text-amber-700 hover:bg-amber-50 transition-all dark:border-amber-900 dark:hover:bg-amber-900/20"
                     >
                       {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
@@ -317,6 +385,7 @@ export default function ReviewQueuePage() {
                     <button 
                       onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'approved', note: reviewNote })}
                       disabled={decideMutation.isPending}
+                      aria-label="Approve content"
                       className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
                     >
                       {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
@@ -357,5 +426,6 @@ export default function ReviewQueuePage() {
 
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

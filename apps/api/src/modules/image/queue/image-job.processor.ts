@@ -51,6 +51,9 @@ export class ImageJobProcessor extends WorkerHost {
       where: { id: jobId },
       data: { status: 'PROCESSING', progress: 10 },
     });
+    this.wsGateway.emitJobProgress(businessId, {
+      jobId, progress: 10, status: 'PROCESSING', stage: 'queued',
+    });
 
     try {
       const brand = await this.prismaService.client.brand.findUnique({
@@ -62,6 +65,9 @@ export class ImageJobProcessor extends WorkerHost {
         where: { id: jobId },
         data: { progress: 30 },
       });
+      this.wsGateway.emitJobProgress(businessId, {
+        jobId, progress: 30, status: 'PROCESSING', stage: 'enhancing',
+      });
 
       const enhancedPrompt = await this.enhancePrompt(rawPrompt, brand.visualRules, category, settings.style, businessId);
       
@@ -71,6 +77,9 @@ export class ImageJobProcessor extends WorkerHost {
           finalPrompt: enhancedPrompt,
           progress: 50
         },
+      });
+      this.wsGateway.emitJobProgress(businessId, {
+        jobId, progress: 50, status: 'PROCESSING', stage: 'generating', finalPrompt: enhancedPrompt,
       });
 
       const imageResponse = await this.imageGateway.generate(settings.provider, {
@@ -85,6 +94,9 @@ export class ImageJobProcessor extends WorkerHost {
       await this.prismaService.client.imageGenerationJob.update({
         where: { id: jobId },
         data: { progress: 80 },
+      });
+      this.wsGateway.emitJobProgress(businessId, {
+        jobId, progress: 80, status: 'PROCESSING', stage: 'finalizing',
       });
 
       if (!imageResponse || !imageResponse.images || imageResponse.images.length === 0) {
@@ -163,6 +175,10 @@ export class ImageJobProcessor extends WorkerHost {
         },
       });
 
+      this.wsGateway.emitJobCompleted(businessId, {
+        jobId, progress: 100, status: 'COMPLETED', stage: 'done', imageUrl: imageUrl,
+      });
+
       this.logger.log(`[IMAGE_JOB] Completed generation job ${jobId} successfully. Asset ID: ${asset.id}`);
 
     } catch (err) {
@@ -193,6 +209,10 @@ export class ImageJobProcessor extends WorkerHost {
           progress: 100,
           error: errorMessage,
         },
+      });
+
+      this.wsGateway.emitJobFailed(businessId, {
+        jobId, progress: 100, status: 'FAILED', error: errorMessage,
       });
 
       throw err;

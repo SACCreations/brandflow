@@ -48,7 +48,9 @@ export class KnowledgeService {
       recentJobs,
       sourcesByStatus: sourcesByStatus.reduce((acc, curr) => ({ ...acc, [curr.status]: curr._count }), {}),
       averageConfidence: averageConfidence._avg.confidence ?? 0,
-      healthScore: 85, // Mock health score for now
+      healthScore: totalSources > 0 
+        ? Math.min(100, Math.round(((totalEntries > 0 ? 30 : 0) + (totalSources >= 3 ? 25 : totalSources * 8) + ((averageConfidence._avg.confidence ?? 0) * 30) + (pendingReviews === 0 ? 15 : 0))))
+        : 0,
     };
   }
 

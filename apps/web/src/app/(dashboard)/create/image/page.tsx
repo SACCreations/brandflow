@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -31,8 +31,14 @@ import {
   ExternalLink,
   ChevronRight,
   Check,
-  Maximize2
+  Maximize2,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  Filter,
+  Zap
 } from 'lucide-react';
+import { useImageSocket, type ImageJobProgress } from '@/hooks/use-image-socket';
 
 interface BrandOption {
   id: string;
@@ -143,9 +149,74 @@ export default function ImageGeneratorPage() {
 
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'COMPLETED' | 'FAILED' | 'PROCESSING'>('all');
+  const [wsProgress, setWsProgress] = useState<ImageJobProgress | null>(null);
+
+  // --- VALIDATION ---
+  const PROMPT_MIN = 10;
+  const PROMPT_MAX = 2000;
+  const DIM_MIN = 256;
+  const DIM_MAX = 2048;
+
+  const promptError = useMemo(() => {
+    if (!promptText.trim()) return null; // Don't show error when empty (will be caught on submit)
+    if (promptText.trim().length < PROMPT_MIN) return `Minimum ${PROMPT_MIN} characters required`;
+    if (promptText.length > PROMPT_MAX) return `Maximum ${PROMPT_MAX} characters exceeded`;
+    return null;
+  }, [promptText]);
+
+  const dimensionError = useMemo(() => {
+    if (!isCustomSize) return null;
+    if (customWidth < DIM_MIN || customWidth > DIM_MAX) return `Width must be ${DIM_MIN}–${DIM_MAX}px`;
+    if (customHeight < DIM_MIN || customHeight > DIM_MAX) return `Height must be ${DIM_MIN}–${DIM_MAX}px`;
+    return null;
+  }, [isCustomSize, customWidth, customHeight]);
+
+  // --- COST ESTIMATION ---
+  const estimatedCost = useMemo(() => {
+    if (selectedProvider === 'openai') {
+      return selectedQuality === 'hd' ? 8.0 : 4.0;
+    }
+    return 3.0; // stability
+  }, [selectedProvider, selectedQuality]);
+
+  // --- WEBSOCKET ---
+  const { isConnected: wsConnected } = useImageSocket({
+    enabled: true,
+    onProgress: (payload) => {
+      if (payload.jobId === activeJobId) {
+        setWsProgress(payload);
+      }
+    },
+    onCompleted: (payload) => {
+      if (payload.jobId === activeJobId) {
+        setWsProgress(payload);
+        setActiveJobId(null);
+        refetchJobs();
+        queryClient.invalidateQueries({ queryKey: ['image-generation-jobs'] });
+        toast({
+          title: 'Generation successful!',
+          description: 'Your creative image was added to the workspace.',
+        });
+      }
+    },
+    onFailed: (payload) => {
+      if (payload.jobId === activeJobId) {
+        setWsProgress(payload);
+        setActiveJobId(null);
+        refetchJobs();
+        queryClient.invalidateQueries({ queryKey: ['image-generation-jobs'] });
+        toast({
+          title: 'Generation failed',
+          description: payload.error || 'An error occurred during creative generation.',
+          variant: 'destructive',
+        });
+      }
+    },
+  });
 
   // --- QUERIES ---
-  const { data: brands = [] } = useQuery<BrandOption[]>({
+  const { data: brands = [], isLoading: brandsLoading } = useQuery<BrandOption[]>({
     queryKey: ['workspace-brands'],
     queryFn: async () => {
       const res = await apiClient.get('/brands');
@@ -153,7 +224,7 @@ export default function ImageGeneratorPage() {
     },
   });
 
-  const { data: campaigns = [] } = useQuery<CampaignOption[]>({
+  const { data: campaigns = [], isLoading: campaignsLoading } = useQuery<CampaignOption[]>({
     queryKey: ['workspace-campaigns'],
     queryFn: async () => {
       const res = await apiClient.get('/campaigns');
@@ -161,7 +232,7 @@ export default function ImageGeneratorPage() {
     },
   });
 
-  const { data: jobs = [], refetch: refetchJobs } = useQuery<ImageJob[]>({
+  const { data: jobs = [], isLoading: jobsLoading, refetch: refetchJobs } = useQuery<ImageJob[]>({
     queryKey: ['image-generation-jobs'],
     queryFn: async () => {
       const res = await apiClient.get('/images/jobs');
@@ -169,7 +240,7 @@ export default function ImageGeneratorPage() {
     },
   });
 
-  // Active Job Polling
+  // Polling fallback — only active when WebSocket disconnected
   useQuery({
     queryKey: ['active-image-job', activeJobId],
     queryFn: async () => {
@@ -196,8 +267,8 @@ export default function ImageGeneratorPage() {
       }
       return job;
     },
-    enabled: !!activeJobId,
-    refetchInterval: 1500,
+    enabled: !!activeJobId && !wsConnected, // Only poll when WS is down
+    refetchInterval: 5000, // Slower polling as fallback
   });
 
   // Preloads
@@ -216,7 +287,15 @@ export default function ImageGeneratorPage() {
   // --- MUTATIONS ---
   const generateMutation = useMutation({
     mutationFn: async () => {
-      if (!promptText.trim()) throw new Error('Prompt text cannot be empty');
+      if (!promptText.trim() || promptText.trim().length < PROMPT_MIN) {
+        throw new Error(`Prompt must be at least ${PROMPT_MIN} characters`);
+      }
+      if (promptText.length > PROMPT_MAX) {
+        throw new Error(`Prompt cannot exceed ${PROMPT_MAX} characters`);
+      }
+      if (isCustomSize && (customWidth < DIM_MIN || customWidth > DIM_MAX || customHeight < DIM_MIN || customHeight > DIM_MAX)) {
+        throw new Error(`Dimensions must be between ${DIM_MIN}px and ${DIM_MAX}px`);
+      }
       const ratio = isCustomSize
         ? { id: 'custom', width: customWidth, height: customHeight }
         : ASPECT_RATIOS.find((r) => r.id === selectedRatioId) || ASPECT_RATIOS[0]!;
@@ -239,6 +318,7 @@ export default function ImageGeneratorPage() {
     },
     onSuccess: (data) => {
       setActiveJobId(data.id);
+      setWsProgress(null);
       toast({
         title: 'Job Queued Successfully',
         description: 'Generating your brand creative in the background.',
@@ -257,8 +337,27 @@ export default function ImageGeneratorPage() {
   const selectedRatio = ASPECT_RATIOS.find((r) => r.id === selectedRatioId) || ASPECT_RATIOS[0]!;
   const generating = generateMutation.isPending || !!activeJobId;
 
-  // Find active job detailed progress
-  const activeJob = jobs.find((j) => j.id === activeJobId);
+  // Real-time progress from WebSocket or fallback to job polling
+  const currentProgress = wsProgress?.progress ?? jobs.find((j) => j.id === activeJobId)?.progress ?? 0;
+  const currentStage = wsProgress?.stage ?? (jobs.find((j) => j.id === activeJobId)?.status === 'PROCESSING' ? 'generating' : 'queued');
+  const currentFinalPrompt = wsProgress?.finalPrompt ?? jobs.find((j) => j.id === activeJobId)?.finalPrompt;
+
+  // Filtered jobs for gallery
+  const filteredJobs = useMemo(() => {
+    if (statusFilter === 'all') return jobs;
+    return jobs.filter((j) => j.status === statusFilter);
+  }, [jobs, statusFilter]);
+
+  // Pipeline stage labels
+  const STAGES = [
+    { key: 'queued', label: 'Queued' },
+    { key: 'enhancing', label: 'Enhancing Prompt' },
+    { key: 'generating', label: 'Generating Image' },
+    { key: 'finalizing', label: 'Finalizing' },
+    { key: 'done', label: 'Complete' },
+  ];
+
+  const canSubmit = !generating && !!selectedBrandId && promptText.trim().length >= PROMPT_MIN && !promptError && !dimensionError;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 space-y-8 animate-in fade-in duration-500">
@@ -277,21 +376,41 @@ export default function ImageGeneratorPage() {
                 AI Image Creation Workspace
                 <span className="rounded-full bg-indigo-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-indigo-400 border border-indigo-500/30">PRO GATEWAY</span>
               </h1>
-              <p className="mt-1 text-sm text-slate-400">
-                Trigger multi-tenant background generation queues, auto-enhance prompts using Brand Visual Identity, and log performance metrics.
+              <p className="mt-1 text-sm text-slate-400 flex items-center gap-2">
+                Trigger multi-tenant background generation queues, auto-enhance prompts using Brand Visual Identity.
+                {wsConnected ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400">
+                    <Wifi className="h-3 w-3" /> Live
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400">
+                    <WifiOff className="h-3 w-3" /> Polling
+                  </span>
+                )}
               </p>
             </div>
           </div>
         </div>
 
-        <Button 
-          onClick={() => generateMutation.mutate()} 
-          disabled={generating || !selectedBrandId || !promptText.trim()} 
-          className="gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
-        >
-          {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          Queue Creative Design
-        </Button>
+        <div className="flex items-center gap-3">
+          {/* Cost Estimation Badge */}
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Est. Cost</span>
+            <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-black px-2.5 py-1 rounded-lg">
+              <Zap className="h-3 w-3" />
+              ~${(estimatedCost / 100).toFixed(2)}
+            </span>
+          </div>
+          <Button 
+            onClick={() => generateMutation.mutate()} 
+            disabled={!canSubmit} 
+            className="gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
+            aria-label="Queue creative design for generation"
+          >
+            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            Queue Creative Design
+          </Button>
+        </div>
       </div>
 
       {/* Main Grid */}
@@ -309,25 +428,37 @@ export default function ImageGeneratorPage() {
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Active Brand Profile *</span>
-                <select
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
-                  value={selectedBrandId}
-                  onChange={(e) => setSelectedBrandId(e.target.value)}
-                >
-                  <option value="">-- Select Brand --</option>
-                  {brands.map((b) => (
-                    <option key={b.id} value={b.id}>{b.name}</option>
-                  ))}
-                </select>
+                {brandsLoading ? (
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                ) : (
+                  <select
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+                    value={selectedBrandId}
+                    onChange={(e) => setSelectedBrandId(e.target.value)}
+                    aria-label="Select brand profile"
+                  >
+                    <option value="">-- Select Brand --</option>
+                    {brands.map((b) => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                )}
+                {!selectedBrandId && promptText.trim().length > 0 && (
+                  <span className="text-[10px] text-amber-400 font-bold">Brand selection required</span>
+                )}
               </div>
 
               <div className="space-y-2">
                 <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Link to Campaign (Optional)</span>
-                <select
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
-                  value={selectedCampaignId}
-                  onChange={(e) => setSelectedCampaignId(e.target.value)}
-                >
+                {campaignsLoading ? (
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                ) : (
+                  <select
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+                    value={selectedCampaignId}
+                    onChange={(e) => setSelectedCampaignId(e.target.value)}
+                    aria-label="Link to campaign"
+                  >
                   <option value="">Standalone Creative (No Campaign link)</option>
                   {campaigns.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>

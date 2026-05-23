@@ -873,5 +873,6 @@ export default function ContentGeneratorPage() {
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

@@ -603,35 +603,37 @@ model Brief {
 }
 
 model Content {
-  id            String           @id @default(uuid())
-  businessId    String
-  brandId       String
-  briefId       String?
-  campaignId    String?
-  platform      String
-  type          String
-  locale        String           @default("en-US")
-  body          String
-  status        ContentStatus    @default(draft)
-  qualityScore  Float?
-  promptId      String?
-  promptVersion Int?
-  topicId       String?
-  metadata      Json?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  approvals     Approval[]
-  versions      ContentVersion[]
-  brand         Brand            @relation(fields: [brandId], references: [id])
-  brief         Brief?           @relation(fields: [briefId], references: [id])
-  business      Business         @relation(fields: [businessId], references: [id])
-  campaign      Campaign?        @relation(fields: [campaignId], references: [id])
-  topic         ContentTopic?    @relation(fields: [topicId], references: [id])
-  publishJobs   PublishJob[]
-  qualityChecks QualityCheck[]
-  reviewTasks   ReviewTask[]
-  schedules     Schedule[]
+  id                String           @id @default(uuid())
+  businessId        String
+  brandId           String
+  briefId           String?
+  campaignId        String?
+  generationGroupId String?
+  platform          String
+  type              String
+  locale            String           @default("en-US")
+  body              String
+  status            ContentStatus    @default(draft)
+  qualityScore      Float?
+  promptId          String?
+  promptVersion     Int?
+  topicId           String?
+  metadata          Json?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  approvals         Approval[]
+  versions          ContentVersion[]
+  brand             Brand            @relation(fields: [brandId], references: [id])
+  brief             Brief?           @relation(fields: [briefId], references: [id])
+  business          Business         @relation(fields: [businessId], references: [id])
+  campaign          Campaign?        @relation(fields: [campaignId], references: [id])
+  topic             ContentTopic?    @relation(fields: [topicId], references: [id])
+  publishJobs       PublishJob[]
+  qualityChecks     QualityCheck[]
+  reviewTasks       ReviewTask[]
+  schedules         Schedule[]
 
+  @@index([generationGroupId])
   @@map("contents")
 }
 

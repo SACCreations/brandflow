@@ -15,11 +15,13 @@ import {
   ChevronRight,
   Sparkles,
   CheckCircle2,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 import { cn, Button, Progress, useToast } from '@brandflow/ui';
 import { BrandForm } from './brand-form';
 import { LivePreview } from './live-preview';
+import { useDraft } from '@/hooks/use-draft';
 
 interface BrandWizardProps {
   onSubmit: (data: any) => Promise<void>;
@@ -44,9 +46,22 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
   const [currentStepIdx, setCurrentStepIdx] = React.useState(0);
   const [maxVisitedStepIdx, setMaxVisitedStepIdx] = React.useState(0);
   const [formData, setFormData] = React.useState<any>(initialData || {});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
+  const { saveDraft, clearDraft } = useDraft<any>('brand_wizard');
   
   const triggerValidationRef = React.useRef<(() => Promise<boolean>) | undefined>(undefined);
+
+  // Warn on unsaved changes
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (formData && Object.keys(formData).length > 0) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [formData]);
 
   const currentStep = (STEPS[currentStepIdx] || STEPS[0]) as typeof STEPS[number];
   const progress = ((currentStepIdx + 1) / STEPS.length) * 100;
@@ -71,7 +86,19 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
     if (currentStepIdx < STEPS.length - 1) {
       setCurrentStepIdx(prev => prev + 1);
     } else {
-      await onSubmit(formData);
+      try {
+        setIsSubmitting(true);
+        await onSubmit(formData);
+        clearDraft();
+      } catch (err: any) {
+        toast({
+          variant: 'destructive',
+          title: 'Failed to create brand',
+          description: err?.message || 'An unexpected error occurred. Please try again.',
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -164,6 +191,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
             size="sm" 
             className="rounded-xl font-bold text-[10px] uppercase tracking-widest"
             onClick={() => {
+              saveDraft(formData);
               toast({ title: 'Draft Saved', description: 'Your progress has been saved locally.' });
               if (onClose) onClose();
             }}
@@ -226,7 +254,19 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
         </aside>
 
         {/* Main Form Area */}
-        <main className="flex-1 min-w-[500px] overflow-y-auto bg-white dark:bg-gray-950 px-12 py-16 custom-scrollbar relative">
+        <main className="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-gray-950 px-6 sm:px-12 py-8 sm:py-16 custom-scrollbar relative">
+           {/* Mobile Step Indicator */}
+           <div className="flex items-center gap-2 mb-6 lg:hidden">
+             {STEPS.map((_, idx) => (
+               <div
+                 key={idx}
+                 className={cn(
+                   "h-1.5 flex-1 rounded-full transition-colors",
+                   idx <= currentStepIdx ? "bg-brand-600" : "bg-gray-200 dark:bg-gray-700"
+                 )}
+               />
+             ))}
+           </div>
            <div className="max-w-2xl mx-auto">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -261,10 +301,12 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
 
                  <Button
                     onClick={handleNext}
-                    disabled={isLoading}
+                    disabled={isLoading || isSubmitting}
                     className="rounded-xl font-black h-12 px-12 bg-brand-600 hover:bg-brand-700 shadow-xl shadow-brand-500/20 uppercase tracking-tight"
                  >
-                    {currentStepIdx === STEPS.length - 1 ? (
+                    {isSubmitting ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating...</>
+                    ) : currentStepIdx === STEPS.length - 1 ? (
                       <>Finish & Publish <CheckCircle2 className="w-4 h-4 ml-2" /></>
                     ) : (
                       <>Continue <ChevronRight className="w-4 h-4 ml-2" /></>

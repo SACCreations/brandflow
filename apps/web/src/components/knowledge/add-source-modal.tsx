@@ -308,12 +308,43 @@ function FileSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandI
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
+  const validateAndSetFiles = (fileList: File[]) => {
+    const oversized = fileList.filter(f => f.size > MAX_FILE_SIZE);
+    if (oversized.length > 0) {
+      setError(`File(s) exceed 50MB limit: ${oversized.map(f => f.name).join(', ')}`);
+      return;
+    }
+    setError(null);
+    setFiles(fileList);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files));
+      validateAndSetFiles(Array.from(e.target.files));
     }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files.length > 0) {
+      validateAndSetFiles(Array.from(e.dataTransfer.files));
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
   };
 
   const handleSubmit = async () => {
@@ -380,7 +411,14 @@ function FileSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandI
 
       <div 
         onClick={() => fileInputRef.current?.click()}
-        className="mt-6 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-12 dark:border-gray-800 dark:bg-gray-800/30 transition-all hover:border-brand-500 hover:bg-brand-50/10 group cursor-pointer"
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        className={`mt-6 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-all group cursor-pointer ${
+          isDragging 
+            ? 'border-brand-500 bg-brand-50/20 dark:bg-brand-900/20' 
+            : 'border-gray-200 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/30 hover:border-brand-500 hover:bg-brand-50/10'
+        }`}
       >
         <div className="rounded-full bg-white p-4 shadow-sm dark:bg-gray-800 group-hover:scale-110 transition-transform">
           <Upload className="h-8 w-8 text-brand-600" />

@@ -54,10 +54,11 @@ export default function KnowledgeExplorer({ isOpen, onClose }: { isOpen: boolean
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [classification, setClassification] = useState('all');
   const queryClient = useQueryClient();
-  // Simple toast fallback since we removed @brandflow/ui useToast
+  // Toast notification
+  const [toastMessage, setToastMessage] = useState<{ title: string; description: string } | null>(null);
   const toast = ({ title, description }: { title: string, description: string }) => {
-    console.log(`Toast: ${title} - ${description}`);
-    // You can implement a real toast here or import it separately
+    setToastMessage({ title, description });
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   // Debounce search input
