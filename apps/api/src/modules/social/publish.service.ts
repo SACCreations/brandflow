@@ -251,21 +251,8 @@ export class PublishService {
   ) {
     const { accessToken } = await this.socialService.getDecryptedTokens(account.id, businessId);
     
-    const isMock = accessToken.startsWith('mock') || accessToken.startsWith('sk-mock') || process.env['NODE_ENV'] !== 'production';
-    if (isMock) {
-      this.logger.log(`[Instagram Sandbox] Simulating post for IG account external ID ${account.externalId}`);
-      const externalPostId = `instagram:${account.externalId}:${Date.now()}`;
-      await prisma.auditLog.create({
-        data: {
-          businessId,
-          action: 'publish',
-          entityType: 'content',
-          entityId: contentId,
-          after: { platform: 'instagram', externalPostId },
-          hash: `pub-${crypto.randomUUID()}`,
-        }
-      });
-      return { externalPostId };
+    if (!accessToken) {
+      throw new BadRequestException('No access token available for Instagram account. Please re-authenticate.');
     }
 
     // Standard Instagram Graph API requires creating a media container first, then publishing it.
@@ -330,21 +317,8 @@ export class PublishService {
   ) {
     const { accessToken } = await this.socialService.getDecryptedTokens(account.id, businessId);
 
-    const isMock = accessToken.startsWith('mock') || accessToken.startsWith('sk-mock') || process.env['NODE_ENV'] !== 'production';
-    if (isMock) {
-      this.logger.log(`[Twitter Sandbox] Simulating tweet for external ID ${account.externalId}`);
-      const externalPostId = `twitter:${account.externalId}:${Date.now()}`;
-      await prisma.auditLog.create({
-        data: {
-          businessId,
-          action: 'publish',
-          entityType: 'content',
-          entityId: contentId,
-          after: { platform: 'twitter', externalPostId },
-          hash: `pub-${crypto.randomUUID()}`,
-        }
-      });
-      return { externalPostId };
+    if (!accessToken) {
+      throw new BadRequestException('No access token available for Twitter account. Please re-authenticate.');
     }
 
     const response = await fetch('https://api.twitter.com/2/tweets', {
