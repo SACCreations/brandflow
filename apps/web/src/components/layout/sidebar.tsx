@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { cn } from '@brandflow/ui';
+import { apiClient } from '@/lib/api-client';
 import {
   LayoutDashboard,
   Fingerprint,
@@ -60,7 +62,7 @@ const NAV: NavEntry[] = [
     items: [
       { label: 'Brands', href: '/intelligence/brands', icon: Fingerprint },
       { label: 'Knowledge Hub', href: '/intelligence/knowledge', icon: BookOpen },
-      { label: 'Review Queue', href: '/review', icon: CheckSquare, badge: 3 },
+      { label: 'Review Queue', href: '/review', icon: CheckSquare },
       { label: 'Monitor', href: '/intelligence/monitor', icon: Eye },
     ],
   },
@@ -106,6 +108,29 @@ const NAV: NavEntry[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: approvalCount } = useQuery<number>({
+    queryKey: ['approval-queue-count'],
+    queryFn: async () => {
+      const res = await apiClient.get('/approvals/queue');
+      const items = Array.isArray(res.data) ? res.data : [];
+      return items.length;
+    },
+    staleTime: 30_000,
+    refetchInterval: 30_000,
+  });
+
+  // Patch badge for Review Queue
+  const navWithBadge = NAV.map((item) => {
+    if ('group' in item && item.group === 'Intelligence') {
+      return {
+        ...item,
+        items: item.items.map((sub) =>
+          sub.href === '/review' ? { ...sub, badge: approvalCount ?? 0 } : sub,
+        ),
+      };
+    }
+    return item;
+  });
 
   return (
     <aside className="flex h-full w-56 flex-shrink-0 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
@@ -116,7 +141,7 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        {NAV.map((item) => {
+        {navWithBadge.map((item) => {
           if ('href' in item) {
             return (
               <NavLink key={item.href} href={item.href} Icon={item.icon} label={item.label} pathname={pathname} badge={item.badge} />

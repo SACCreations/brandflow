@@ -13,16 +13,25 @@ export class ApprovalService {
   /**
    * Retrieves the pending approval queue for a specific business/user.
    */
-  async getQueue(businessId: string, status = 'pending') {
+  async getQueue(businessId: string, status = 'pending', source?: string) {
     const normalizedStatus = APPROVAL_STATUSES.includes(status as ApprovalStatus)
       ? (status as ApprovalStatus)
       : 'pending';
 
+    const where: any = {
+      businessId,
+      status: normalizedStatus,
+    };
+
+    // Filter by route source (auto-routed vs manual)
+    if (source === 'auto') {
+      where.routeReason = { not: null };
+    } else if (source === 'manual') {
+      where.routeReason = null;
+    }
+
     return this.prisma.client.approval.findMany({
-      where: { 
-        businessId,
-        status: normalizedStatus,
-      },
+      where,
       include: {
         content: {
           include: {
@@ -44,6 +53,15 @@ export class ApprovalService {
         }
       },
       orderBy: { createdAt: 'asc' }
+    });
+  }
+
+  /**
+   * Returns the count of pending approvals.
+   */
+  async getQueueCount(businessId: string): Promise<number> {
+    return this.prisma.client.approval.count({
+      where: { businessId, status: 'pending' },
     });
   }
 

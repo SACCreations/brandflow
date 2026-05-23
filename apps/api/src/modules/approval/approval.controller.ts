@@ -35,8 +35,15 @@ export class ApprovalController {
   getQueue(
     @CurrentUser() user: JwtPayload,
     @Query('status') status?: string,
+    @Query('source') source?: string,
   ) {
-    return this.approvalService.getQueue(user.businessId, status);
+    return this.approvalService.getQueue(user.businessId, status, source);
+  }
+
+  @Get('queue/count')
+  @ApiOperation({ summary: 'Get pending approval count' })
+  getQueueCount(@CurrentUser() user: JwtPayload) {
+    return this.approvalService.getQueueCount(user.businessId);
   }
 
   @Post(':id/decide')

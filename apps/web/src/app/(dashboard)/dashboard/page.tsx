@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { apiClient } from '@/lib/api-client';
+import { KnowledgeFreshnessWidget } from '@/components/dashboard/knowledge-freshness-widget';
 
 interface DashboardSummaryResponse {
   stats: {
@@ -96,6 +97,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <KnowledgeFreshnessWidget />
         <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
             <h2 className="font-semibold text-gray-900 dark:text-white">Recent Activity</h2>

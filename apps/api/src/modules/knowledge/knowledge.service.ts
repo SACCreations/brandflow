@@ -54,6 +54,53 @@ export class KnowledgeService {
     };
   }
 
+  async getFreshnessData(businessId: string) {
+    const now = new Date();
+
+    const allSources = await this.prisma.client.knowledgeSource.findMany({
+      where: { businessId },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        lastSyncedAt: true,
+        syncFrequency: true,
+        _count: { select: { entries: true } },
+      },
+    });
+
+    const thresholds: Record<string, number> = {
+      daily: 1,
+      weekly: 7,
+      monthly: 30,
+    };
+
+    const staleSources = allSources.filter((source) => {
+      if (!source.lastSyncedAt) return true;
+      const freq = source.syncFrequency ?? 'weekly';
+      const thresholdDays = thresholds[freq] ?? 7;
+      const ageMs = now.getTime() - new Date(source.lastSyncedAt).getTime();
+      return ageMs > thresholdDays * 24 * 60 * 60 * 1000;
+    });
+
+    const staleEntries = staleSources.reduce((sum, s) => sum + s._count.entries, 0);
+
+    return {
+      totalSources: allSources.length,
+      staleSources: staleSources.length,
+      staleEntries,
+      lastChecked: now.toISOString(),
+      sources: staleSources.map((s) => ({
+        id: s.id,
+        title: s.name,
+        type: s.type,
+        lastSyncedAt: s.lastSyncedAt,
+        staleSince: s.lastSyncedAt,
+        entryCount: s._count.entries,
+      })),
+    };
+  }
+
   async findSources(businessId: string, brandId?: string) {
     return this.prisma.client.knowledgeSource.findMany({
       where: { businessId, ...(brandId ? { brandId } : {}) },

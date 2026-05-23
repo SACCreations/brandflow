@@ -32,6 +32,12 @@ export class KnowledgeController {
     return this.knowledgeService.getDashboardStats(user.businessId);
   }
 
+  @Get('freshness')
+  @ApiOperation({ summary: 'Get knowledge freshness data for stale sources' })
+  getFreshness(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.getFreshnessData(user.businessId);
+  }
+
   @Get('sources')
   @ApiOperation({ summary: 'List knowledge sources' })
   findSources(

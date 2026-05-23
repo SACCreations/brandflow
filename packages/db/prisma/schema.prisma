@@ -748,6 +748,7 @@ model Approval {
   slaDeadline DateTime?
   note        String?
   reason      String?
+  routeReason String?
   decidedAt   DateTime?
   createdAt   DateTime       @default(now())
   business    Business       @relation(fields: [businessId], references: [id])

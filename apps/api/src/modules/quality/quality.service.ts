@@ -135,6 +135,37 @@ export class QualityService {
             reason,
           },
         });
+
+        // 5b. Auto-route to approval queue if grade < B
+        const gradesBelowB = ['C', 'D', 'F'];
+        if (gradesBelowB.includes(result.overallGrade)) {
+          // Check no existing pending approval
+          const existingApproval = await tx.approval.findFirst({
+            where: { contentId, status: 'pending' },
+          });
+
+          if (!existingApproval) {
+            await tx.approval.create({
+              data: {
+                businessId,
+                contentId,
+                reviewType: 'internal',
+                status: 'pending',
+                routeReason: `Auto-routed: quality grade ${result.overallGrade}`,
+                slaDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
+              },
+            });
+
+            await tx.content.update({
+              where: { id: contentId },
+              data: { status: 'in_review' },
+            });
+
+            this.logger.log(
+              `Auto-routed content ${contentId} to approval queue (grade: ${result.overallGrade})`,
+            );
+          }
+        }
       }
 
       // 6. Update content quality score
