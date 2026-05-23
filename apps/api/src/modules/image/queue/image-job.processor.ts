@@ -1,10 +1,11 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import type { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
-import { QUEUES } from '@brandflow/shared';
 import { LLMGateway, ImageGateway, VectorService } from '@brandflow/ai';
 import { PrismaService } from '../../../common/database/prisma.service';
 import { ImageWebSocketGateway } from '../image.gateway';
+
+const IMAGE_GENERATION_QUEUE = 'image-generation';
 
 interface ImageJobData {
   jobId: string;
@@ -24,7 +25,7 @@ interface ImageJobData {
   };
 }
 
-@Processor(QUEUES.IMAGE_GENERATION, { concurrency: 3 })
+@Processor(IMAGE_GENERATION_QUEUE, { concurrency: 3 })
 export class ImageJobProcessor extends WorkerHost {
   private readonly logger = new Logger(ImageJobProcessor.name);
   private readonly llm: LLMGateway;

@@ -3,7 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { IoAdapter } from '@nestjs/platform-socket.io';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import * as fs from 'fs';
@@ -52,9 +51,6 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug'],
     rawBody: true,
   });
-
-  // ─── WebSocket Adapter ───────────────────────────────────────
-  app.useWebSocketAdapter(new IoAdapter(app));
 
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ limit: '50mb', extended: true }));

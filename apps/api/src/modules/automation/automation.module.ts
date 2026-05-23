@@ -6,13 +6,15 @@ import { AutomationEngineService } from './automation-engine.service';
 import { AutomationProcessor } from './automation.processor';
 import { SocialModule } from '../social/social.module';
 import { QualityModule } from '../quality/quality.module';
-import { QUEUES } from '@brandflow/shared';
+
+const AUTOMATION_QUEUE = 'automation';
+const AUTOMATION_EXECUTION_QUEUE = 'automation-execution';
 
 @Module({
   imports: [
     BullModule.registerQueue(
-      { name: QUEUES.AUTOMATION },
-      { name: QUEUES.AUTOMATION_EXECUTION },
+      { name: AUTOMATION_QUEUE },
+      { name: AUTOMATION_EXECUTION_QUEUE },
     ),
     SocialModule,
     QualityModule,

@@ -1,15 +1,16 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { QUEUES } from '@brandflow/shared';
 import { PrismaService } from '../../common/database/prisma.service';
+
+const IMAGE_GENERATION_QUEUE = 'image-generation';
 
 @Injectable()
 export class CreativeGenerationService {
   private readonly logger = new Logger(CreativeGenerationService.name);
 
   constructor(
-    @InjectQueue(QUEUES.IMAGE_GENERATION) private readonly imageQueue: Queue,
+    @InjectQueue(IMAGE_GENERATION_QUEUE) private readonly imageQueue: Queue,
     private readonly prisma: PrismaService,
   ) {}
 

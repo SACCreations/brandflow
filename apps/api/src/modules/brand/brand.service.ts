@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@brandflow/db';
 import { PrismaService } from '../../common/database/prisma.service';
 import { AuditService } from '../business/audit.service';
 import type { CreateBrandDto, UpdateBrandDto } from '@brandflow/shared';

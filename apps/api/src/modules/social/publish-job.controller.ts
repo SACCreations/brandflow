@@ -6,7 +6,17 @@ import { prisma } from '@brandflow/db';
 import { ResilientPublishService } from './resilient-publish.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { type JwtPayload, type PublishJobStatus } from '@brandflow/shared';
+import { type JwtPayload } from '@brandflow/shared';
+
+type PublishJobStatusFilter =
+  | 'pending'
+  | 'processing'
+  | 'published'
+  | 'failed'
+  | 'retrying'
+  | 'dead_letter'
+  | 'canceled'
+  | 'cancelled';
 
 @ApiTags('publish-jobs')
 @ApiBearerAuth()
@@ -19,13 +29,15 @@ export class PublishJobController {
   @ApiOperation({ summary: 'List all publish jobs for the business' })
   async findAll(
     @CurrentUser() user: JwtPayload,
-    @Query('status') status?: PublishJobStatus,
+    @Query('status') status?: PublishJobStatusFilter,
     @Query('platform') platform?: string,
   ) {
+    const normalizedStatus = status === 'cancelled' ? 'canceled' : status;
+
     return prisma.publishJob.findMany({
       where: {
         businessId: user.businessId,
-        ...(status ? { status } : {}),
+        ...(normalizedStatus ? { status: normalizedStatus } : {}),
         ...(platform ? { socialAccount: { platform } } : {}),
       },
       include: {

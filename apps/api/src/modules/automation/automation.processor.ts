@@ -2,15 +2,16 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
-import { QUEUES } from '@brandflow/shared';
 import { PublishService } from '../social/publish.service';
 import { ResilientPublishService } from '../social/resilient-publish.service';
 import { QualityService } from '../quality/quality.service';
 import fetch from 'node-fetch';
 import { validateWebhookUrl } from '../../common/security/ssrf-protection';
 
+const AUTOMATION_EXECUTION_QUEUE = 'automation-execution';
 
-@Processor(QUEUES.AUTOMATION_EXECUTION)
+
+@Processor(AUTOMATION_EXECUTION_QUEUE)
 export class AutomationProcessor extends WorkerHost {
   private readonly logger = new Logger(AutomationProcessor.name);
 

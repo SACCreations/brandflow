@@ -20,6 +20,16 @@ import { Queue } from 'bullmq';
 import { QUEUES } from '@brandflow/shared';
 import { BillingService } from '../billing/billing.service';
 
+type ExtendedGenerateContentDto = GenerateContentDto & {
+  topics?: string[] | null;
+  count?: number | null;
+  creativity?: number | null;
+};
+
+type BudgetAwareLLMConfig = LLMConfig & {
+  businessId?: string;
+};
+
 
 @Injectable()
 export class ContentService {
@@ -43,7 +53,8 @@ export class ContentService {
       fallbackProvider: config.get('llm.fallbackProvider', 'anthropic') as 'anthropic' | 'openai',
       requestTimeoutMs: config.get('llm.requestTimeoutMs', 30000),
       onBeforeComplete: async (options: LLMConfig) => {
-        const tenantId = (this.prisma.client as any)['tenantId'] || options.businessId;
+        const tenantId =
+          (this.prisma.client as any)['tenantId'] || (options as BudgetAwareLLMConfig).businessId;
         if (tenantId) {
           await this.budgetService.checkBudget(tenantId);
         }
@@ -108,12 +119,16 @@ export class ContentService {
   }
 
   async generate(businessId: string, userId: string, dto: GenerateContentDto) {
+    const batchDto = dto as ExtendedGenerateContentDto;
+
     // Check if background queue execution is needed
-    const topicsList = dto.topics && dto.topics.length > 0 ? dto.topics : (dto.topic ? [dto.topic] : []);
-    const totalCount = topicsList.length * (dto.count || 1);
+    const topicsList = batchDto.topics && batchDto.topics.length > 0
+      ? batchDto.topics
+      : (dto.topic ? [dto.topic] : []);
+    const totalCount = topicsList.length * (batchDto.count || 1);
     const generationGroupId = randomUUID();
 
-    if (totalCount > 3 || (dto.topics && dto.topics.length > 1)) {
+    if (totalCount > 3 || ((batchDto.topics?.length ?? 0) > 1)) {
       const job = await this.aiGenerationQueue.add(
         'generate-batch',
         { businessId, userId, dto, generationGroupId },
@@ -218,7 +233,7 @@ export class ContentService {
       {
         provider: (llmSettings.provider as any) ?? 'openai',
         model: llmSettings.model ?? undefined,
-        temperature: dto.temperature ?? llmSettings.temperature ?? 0.75,
+        temperature: dto.temperature ?? batchDto.creativity ?? llmSettings.temperature ?? 0.75,
         maxTokens: dto.maxTokens ?? llmSettings.maxTokens ?? 1024,
         apiKey: decryptedApiKey ?? undefined,
       },

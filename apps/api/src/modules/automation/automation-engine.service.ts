@@ -3,8 +3,9 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { prisma } from '@brandflow/db';
 import { PrismaService } from '../../common/database/prisma.service';
-import { QUEUES } from '@brandflow/shared';
 import fetch from 'node-fetch';
+
+const AUTOMATION_EXECUTION_QUEUE = 'automation-execution';
 
 @Injectable()
 export class AutomationEngineService {
@@ -12,7 +13,7 @@ export class AutomationEngineService {
 
   constructor(
     private readonly prisma: PrismaService,
-    @InjectQueue(QUEUES.AUTOMATION_EXECUTION) private readonly executionQueue: Queue,
+    @InjectQueue(AUTOMATION_EXECUTION_QUEUE) private readonly executionQueue: Queue,
   ) {}
 
   /**
