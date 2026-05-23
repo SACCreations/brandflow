@@ -3,20 +3,18 @@ import type { ImageProvider, ImageGenerationRequest, ImageGenerationResponse } f
 
 export class OpenAIImageProvider implements ImageProvider {
   readonly name = 'openai' as const;
-  private client?: OpenAI;
+  private client: OpenAI;
   private model: string;
   private apiKey: string;
 
   constructor(apiKey: string, model = 'dall-e-3') {
     this.apiKey = apiKey;
     this.model = model;
-    if (apiKey && !apiKey.startsWith('sk-mock')) {
-      this.client = new OpenAI({ apiKey });
-    }
+    this.client = new OpenAI({ apiKey });
   }
 
   isAvailable(): boolean {
-    return Boolean(this.apiKey && !this.apiKey.startsWith('sk-mock-disabled'));
+    return Boolean(this.apiKey && !this.apiKey.startsWith('sk-mock') && !this.apiKey.includes('mock'));
   }
 
   getCapabilities() {
@@ -28,31 +26,11 @@ export class OpenAIImageProvider implements ImageProvider {
   }
 
   async generate(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {
-    const isMock = this.apiKey.startsWith('sk-mock') || !this.apiKey;
     const modelToUse = request.model ?? this.model;
     const quality = request.quality ?? 'standard';
 
-    if (isMock) {
-      const mockImages = [
-        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=80'
-      ];
-      
-      const seed = Math.floor(Math.random() * 1000);
-      const url = mockImages[seed % mockImages.length];
-
-      return {
-        images: [{ url, seed }],
-        costCents: quality === 'hd' ? 8.0 : 4.0,
-        provider: 'openai',
-        model: `${modelToUse}-${quality}-mock`,
-      };
-    }
-
     if (!this.client) {
-      throw new Error('OpenAI Image Client not initialized correctly');
+      throw new Error('OpenAI Image Client not initialized — API key is required');
     }
 
     const response = await this.client.images.generate({

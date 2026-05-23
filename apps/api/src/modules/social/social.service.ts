@@ -579,18 +579,9 @@ export class SocialService {
 
     this.logger.log(`Refreshing token for ${account.platform} account: ${account.name}`);
 
-    // Sandbox/Mock Fallback: if in development or access token matches sandbox patterns, simulate success
     const { accessToken } = await this.getDecryptedTokens(accountId, businessId);
-    const isMock = !accessToken || accessToken.startsWith('mock') || accessToken.startsWith('sk-mock') || accessToken.includes('mock') || process.env['NODE_ENV'] !== 'production';
-    if (isMock) {
-      this.logger.log(`Sandbox Mode: Gracefully simulating successful token refresh for ${account.platform}`);
-      await prisma.socialAccount.update({
-        where: { id: accountId },
-        data: {
-          tokenExpiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // Push expiration by 60 days
-        },
-      });
-      return;
+    if (!accessToken) {
+      throw new BadRequestException('No access token found for this social account. Please re-authenticate.');
     }
 
     switch (account.platform) {
@@ -642,8 +633,11 @@ export class SocialService {
     const { refreshToken } = await this.getDecryptedTokens(accountId, businessId);
     if (!refreshToken) throw new BadRequestException('No Twitter refresh token available.');
 
-    const clientId = process.env['TWITTER_CLIENT_ID'] || 'mock-client-id';
-    const clientSecret = process.env['TWITTER_CLIENT_SECRET'] || 'mock-client-secret';
+    const clientId = process.env['TWITTER_CLIENT_ID'];
+    const clientSecret = process.env['TWITTER_CLIENT_SECRET'];
+    if (!clientId || !clientSecret) {
+      throw new BadRequestException('Twitter OAuth credentials not configured. Set TWITTER_CLIENT_ID and TWITTER_CLIENT_SECRET.');
+    }
 
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     const response = await fetch('https://api.twitter.com/2/oauth2/token', {

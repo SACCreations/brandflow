@@ -11,23 +11,10 @@ export class GoogleProvider implements LLMProvider {
   }
 
   isAvailable(): boolean {
-    return Boolean(process.env['GOOGLE_API_KEY'] || this.apiKey);
+    return Boolean(this.apiKey && !this.apiKey.startsWith('sk-mock') && !this.apiKey.includes('mock'));
   }
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
-    const isMockKey = 
-      this.apiKey.startsWith('sk-mock') || 
-      this.apiKey.startsWith('gemini-mock') || 
-      this.apiKey.includes('mock');
-
-    if (isMockKey) {
-      return {
-        content: `[Mock Google Gemini Response] Received user prompt: "${request.userPrompt}". Your Gemini LLM infrastructure is functioning correctly end-to-end.`,
-        model: request.model ?? this.model,
-        inputTokens: Math.ceil(request.userPrompt.length / 4),
-        outputTokens: 25,
-      };
-    }
 
     const modelName = request.model ?? this.model;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${this.apiKey}`;

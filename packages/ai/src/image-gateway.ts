@@ -19,11 +19,15 @@ export class ImageGateway {
       maxRetries: config.maxRetries ?? 2,
     };
 
-    const stabilityKey = process.env['STABILITY_API_KEY'] || 'sk-mock-stability-key';
-    this.providers.set('stability', new StabilityImageProvider(stabilityKey));
+    const stabilityKey = process.env['STABILITY_API_KEY'];
+    if (stabilityKey && !stabilityKey.includes('mock')) {
+      this.providers.set('stability', new StabilityImageProvider(stabilityKey));
+    }
 
-    const openaiKey = process.env['OPENAI_API_KEY'] || 'sk-mock-openai-key';
-    this.providers.set('openai', new OpenAIImageProvider(openaiKey));
+    const openaiKey = process.env['OPENAI_API_KEY'];
+    if (openaiKey && !openaiKey.startsWith('sk-mock') && !openaiKey.includes('mock')) {
+      this.providers.set('openai', new OpenAIImageProvider(openaiKey));
+    }
   }
 
   async generate(
