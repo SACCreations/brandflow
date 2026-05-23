@@ -705,7 +705,8 @@ export class BrandAnalyserService {
     return {
       brandName: this.normalizeString(jsonLdSignals.brandName, 255)
         ?? this.normalizeString(siteName, 255)
-        ?? this.deriveBrandNameFromTitle(title),
+        ?? this.deriveBrandNameFromTitle(title)
+        ?? undefined,
       siteName: this.normalizeString(siteName, 255) ?? this.normalizeString(jsonLdSignals.siteName, 255) ?? undefined,
       title: this.normalizeString(title, 255) ?? undefined,
       description: this.normalizeString(metaDescription, 2000)
@@ -766,7 +767,7 @@ export class BrandAnalyserService {
   private extractHeadingTexts(html: string): string[] {
     const matches = [...html.matchAll(/<h[1-2][^>]*>([\s\S]*?)<\/h[1-2]>/gi)];
     return Array.from(new Set(matches
-      .map((match) => this.normalizeText(match[1].replace(/<[^>]+>/g, ' ')))
+      .map((match) => this.normalizeText((match[1] || '').replace(/<[^>]+>/g, ' ')))
       .filter((heading) => heading.length > 2)))
       .slice(0, 8);
   }

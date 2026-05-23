@@ -1,9 +1,11 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Body,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { LlmSettingsService } from './llm-settings.service';
@@ -36,5 +38,23 @@ export class LlmSettingsController {
     @Body(new ZodValidationPipe(updateLlmSettingsSchema)) dto: UpdateLlmSettingsDto,
   ) {
     return this.llmSettingsService.updateSettings(user.businessId, dto);
+  }
+
+  @Post('validate')
+  @ApiOperation({ summary: 'Validate an API key' })
+  async validateApiKey(
+    @Body() dto: { provider: string; apiKey: string }
+  ) {
+    if (!dto.provider || !dto.apiKey) {
+      throw new BadRequestException('Provider and API Key are required');
+    }
+    
+    const isValid = await this.llmSettingsService.validateApiKey(dto.provider, dto.apiKey);
+    
+    if (!isValid) {
+      throw new BadRequestException('Invalid API Key');
+    }
+    
+    return { success: true };
   }
 }

@@ -85,4 +85,35 @@ export class LlmSettingsService {
       return null;
     }
   }
+
+  async validateApiKey(provider: string, apiKey: string): Promise<boolean> {
+    try {
+      switch (provider) {
+        case 'openai': {
+          const res = await fetch('https://api.openai.com/v1/models', {
+            headers: { Authorization: `Bearer ${apiKey}` },
+          });
+          return res.ok;
+        }
+        case 'anthropic': {
+          const res = await fetch('https://api.anthropic.com/v1/models', {
+            headers: { 
+              'x-api-key': apiKey,
+              'anthropic-version': '2023-06-01'
+            },
+          });
+          return res.ok;
+        }
+        case 'google': {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+          return res.ok;
+        }
+        default:
+          return false;
+      }
+    } catch (error) {
+      console.error(`[LlmSettingsService] Failed to validate ${provider} API key:`, error);
+      return false;
+    }
+  }
 }

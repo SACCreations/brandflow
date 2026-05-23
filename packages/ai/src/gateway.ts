@@ -97,7 +97,9 @@ export class LLMGateway {
           return { response, requestId, provider: preferredProvider };
         } catch (err) {
           console.error(`[LLMGateway] Temporary provider ${preferredProvider} failed:`, err);
-          // Fall back to platform providers if allowed
+          // If the user provided a custom API key, they should see why it failed 
+          // (e.g., rate limit, invalid key) rather than a generic fallback error.
+          throw err;
         }
       }
     }

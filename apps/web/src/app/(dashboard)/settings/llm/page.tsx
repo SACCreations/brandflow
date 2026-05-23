@@ -12,6 +12,8 @@ import { Cpu, Key, ShieldCheck, Sparkles, AlertCircle, Save } from 'lucide-react
 export default function LlmSettingsPage() {
   const queryClient = useQueryClient();
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<{success: boolean, message: string} | null>(null);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['llm-settings'],
@@ -27,6 +29,26 @@ export default function LlmSettingsPage() {
   });
 
   const temperatureValue = watch('temperature') ?? settings?.temperature ?? 0.7;
+  const watchProvider = watch('provider') || settings?.provider || 'openai';
+  const watchApiKey = watch('apiKey');
+
+  const handleValidateKey = async () => {
+    if (!watchApiKey) return;
+    
+    setIsValidating(true);
+    setValidationResult(null);
+    try {
+      await apiClient.post('/settings/llm/validate', {
+        provider: watchProvider,
+        apiKey: watchApiKey
+      });
+      setValidationResult({ success: true, message: 'API Key is valid!' });
+    } catch (error) {
+      setValidationResult({ success: false, message: 'Invalid API Key. Please check and try again.' });
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: async (data: UpdateLlmSettingsDto) => {
@@ -151,12 +173,34 @@ export default function LlmSettingsPage() {
                   </span>
                 )}
               </div>
-              <Input
-                type="password"
-                {...register('apiKey')}
-                placeholder={settings?.hasApiKey ? 'Enter new key to replace existing' : 'sk-....'}
-                error={errors.apiKey?.message}
-              />
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Input
+                    type="password"
+                    {...register('apiKey')}
+                    placeholder={settings?.hasApiKey ? 'Enter new key to replace existing' : 'sk-....'}
+                    error={errors.apiKey?.message}
+                  />
+                </div>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleValidateKey}
+                  disabled={isValidating || !watchApiKey}
+                  className="shrink-0"
+                >
+                  {isValidating ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-600 mr-2"></div>
+                  ) : null}
+                  {isValidating ? 'Validating...' : 'Validate Key'}
+                </Button>
+              </div>
+              {validationResult && (
+                <div className={`text-sm mt-2 flex items-center gap-1 ${validationResult.success ? 'text-green-600' : 'text-red-600'}`}>
+                  {validationResult.success ? <ShieldCheck className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                  {validationResult.message}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">

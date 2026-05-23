@@ -30,7 +30,7 @@ export class ChatService {
       if (ai.VectorService) {
         this.vectorService = new ai.VectorService();
       }
-    } catch {
+    } catch (err) { console.error("Error in getBusinessLlmSettings:", err);
       // Vector search unavailable
     }
   }
@@ -184,7 +184,7 @@ export class ChatService {
             results.map((r: any) => `- ${r.content}`).join('\n');
         }
       }
-    } catch {
+    } catch (err) { console.error("Error in getBusinessLlmSettings:", err);
       // Vector search is non-critical
     }
 
@@ -336,7 +336,7 @@ export class ChatService {
         apiKey: llmSettings?.apiKey,
       });
       finalBody = result.response.content;
-    } catch {
+    } catch (err) { console.error("Error in getBusinessLlmSettings:", err);
       // Use raw message if refinement fails
     }
 
@@ -480,7 +480,7 @@ export class ChatService {
         maxTokens: settings.maxTokens,
         apiKey: decryptedKey,
       };
-    } catch {
+    } catch (err) { console.error("Error in getBusinessLlmSettings:", err);
       return null;
     }
   }
