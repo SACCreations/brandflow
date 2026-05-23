@@ -32,13 +32,14 @@ interface Approval {
   reviewType: string;
   note: string | null;
   reason?: string | null;
+  routeReason?: string | null;
   createdAt: string;
   content: {
     id: string;
     body: string;
     type: string;
     platform: string;
-    qualityScore: number;
+    qualityScore: number | null;
     brand?: {
       name: string;
     };
@@ -293,13 +294,19 @@ export default function ReviewQueuePage() {
                                 <span>{review.content.brand.name}</span>
                               </>
                             )}
+                            {review.routeReason && (
+                              <>
+                                <span className="text-gray-200">|</span>
+                                <span className="text-amber-600 dark:text-amber-400">Auto-routed</span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
                       <div className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black ${
-                        review.content.qualityScore > 80 ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                        (review.content.qualityScore ?? 0) > 0.8 ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
                       }`}>
-                        {Math.round(review.content.qualityScore * 100)}% SCORE
+                        {Math.round((review.content.qualityScore ?? 0) * 100)}% SCORE
                       </div>
                     </div>
                   </div>
@@ -325,13 +332,13 @@ export default function ReviewQueuePage() {
                     <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
                       <span className="text-[10px] font-bold text-gray-400 uppercase">Brand Voice</span>
                       <div className="text-xl font-black text-emerald-500">
-                        {Math.round(activeReview.content.qualityScore * 100)}%
+                        {Math.round((activeReview.content.qualityScore ?? 0) * 100)}%
                       </div>
                     </div>
                     <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
                       <span className="text-[10px] font-bold text-gray-400 uppercase">Fact Accuracy</span>
-                      <div className={`text-xl font-black ${activeReview.content.qualityScore < 0.7 ? 'text-amber-500' : 'text-emerald-500'}`}>
-                        {activeReview.content.qualityScore < 0.7 ? 'Review Needed' : 'Verified'}
+                      <div className={`text-xl font-black ${(activeReview.content.qualityScore ?? 0) < 0.7 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                        {(activeReview.content.qualityScore ?? 0) < 0.7 ? 'Review Needed' : 'Verified'}
                       </div>
                     </div>
                   </div>
@@ -355,7 +362,7 @@ export default function ReviewQueuePage() {
                   </div>
 
                   {/* Violations / Insights */}
-                  {activeReview.content.qualityScore < 0.8 && (
+                  {(activeReview.content.qualityScore ?? 0) < 0.8 && (
                     <div className="rounded-xl border border-amber-100 bg-amber-50/30 p-4 dark:border-amber-500/20 dark:bg-amber-500/5">
                       <div className="flex items-center gap-2 mb-2 text-amber-700 dark:text-amber-400">
                         <AlertTriangle className="h-4 w-4" />

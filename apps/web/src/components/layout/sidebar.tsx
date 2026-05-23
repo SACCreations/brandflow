@@ -111,9 +111,8 @@ export function Sidebar() {
   const { data: approvalCount } = useQuery<number>({
     queryKey: ['approval-queue-count'],
     queryFn: async () => {
-      const res = await apiClient.get('/approvals/queue');
-      const items = Array.isArray(res.data) ? res.data : [];
-      return items.length;
+      const res = await apiClient.get('/approvals/queue/count');
+      return typeof res.data === 'number' ? res.data : 0;
     },
     staleTime: 30_000,
     refetchInterval: 30_000,
