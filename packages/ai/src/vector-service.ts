@@ -11,30 +11,28 @@ export class VectorService {
 
   /**
    * Generates a 1536-dimensional embedding for the given text.
+   * Requires a valid OpenAI API key.
    */
   async generateEmbedding(text: string): Promise<number[]> {
-    const isMock =
-      !this.openai.apiKey ||
-      this.openai.apiKey.startsWith('sk-mock') ||
-      this.openai.apiKey.includes('mock') ||
-      this.openai.apiKey === 'undefined';
-
-    if (isMock) {
-      return new Array(1536).fill(0);
+    if (!this.openai.apiKey || this.openai.apiKey === 'undefined') {
+      throw new Error(
+        'OpenAI API key is required for embedding generation. ' +
+        'Set OPENAI_API_KEY environment variable or configure in Settings → AI Provider.',
+      );
     }
 
-    try {
-      const response = await this.openai.embeddings.create({
-        model: 'text-embedding-3-small',
-        input: text.replace(/\n/g, ' '),
-        encoding_format: 'float',
-      });
+    const response = await this.openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: text.replace(/\n/g, ' ').substring(0, 8000),
+      encoding_format: 'float',
+    });
 
-      return response.data?.[0]?.embedding || [];
-    } catch (err) {
-      console.warn('[VectorService] OpenAI embeddings API call failed, falling back to dummy vector.', err);
-      return new Array(1536).fill(0);
+    const embedding = response.data?.[0]?.embedding;
+    if (!embedding || embedding.length === 0) {
+      throw new Error('OpenAI returned empty embedding response');
     }
+
+    return embedding;
   }
 
   /**
@@ -46,7 +44,7 @@ export class VectorService {
 
   /**
    * Performs a vector similarity search to find the most relevant context.
-   * Fallback for when pgvector is not available.
+   * Uses parameterized queries to prevent SQL injection.
    */
   async findRelevantContext(
     prisma: any,
@@ -60,43 +58,76 @@ export class VectorService {
 
     try {
       // Use pgvector's cosine distance operator <=>
-      // We order by distance ascending (closest first)
-      // similarity = 1 - distance
-      const results = await prisma.$queryRawUnsafe(`
-        SELECT 
-          ke.id, 
-          ke.content, 
-          ke.metadata, 
-          ke.classification,
-          1 - (ke.embedding <=> '${vectorString}'::vector) as similarity
-        FROM "knowledge_entries" ke
-        ${brandId ? `JOIN "knowledge_sources" ks ON ke."sourceId" = ks.id` : ''}
-        WHERE ke."businessId" = '${businessId}'
-        ${brandId ? `AND ks."brandId" = '${brandId}'` : ''}
-        ORDER BY ke.embedding <=> '${vectorString}'::vector
-        LIMIT ${limit}
-      `);
-
-      return results as any[];
-    } catch (err: any) {
-      console.warn('[VectorService] pgvector query failed (possibly missing extension), falling back to basic scalar query.');
-      
-      try {
-        const fallbackResults = await prisma.$queryRawUnsafe(`
-          SELECT 
+      // Parameterized query to prevent SQL injection
+      if (brandId) {
+        const results = await prisma.$queryRawUnsafe(
+          `SELECT 
             ke.id, 
             ke.content, 
             ke.metadata, 
             ke.classification,
-            ke.embedding,
-            ke."createdAt"
+            ke."sourceId",
+            1 - (ke.embedding <=> $1::vector) as similarity
           FROM "knowledge_entries" ke
-          ${brandId ? `JOIN "knowledge_sources" ks ON ke."sourceId" = ks.id` : ''}
-          WHERE ke."businessId" = '${businessId}'
-          ${brandId ? `AND ks."brandId" = '${brandId}'` : ''}
-          ORDER BY ke."createdAt" DESC
-        `);
-        
+          JOIN "knowledge_sources" ks ON ke."sourceId" = ks.id
+          WHERE ke."businessId" = $2
+          AND ks."brandId" = $3
+          AND ke."isStale" = false
+          ORDER BY ke.embedding <=> $1::vector
+          LIMIT $4`,
+          vectorString,
+          businessId,
+          brandId,
+          limit,
+        );
+        return results as any[];
+      } else {
+        const results = await prisma.$queryRawUnsafe(
+          `SELECT 
+            ke.id, 
+            ke.content, 
+            ke.metadata, 
+            ke.classification,
+            ke."sourceId",
+            1 - (ke.embedding <=> $1::vector) as similarity
+          FROM "knowledge_entries" ke
+          WHERE ke."businessId" = $2
+          AND ke."isStale" = false
+          ORDER BY ke.embedding <=> $1::vector
+          LIMIT $3`,
+          vectorString,
+          businessId,
+          limit,
+        );
+        return results as any[];
+      }
+    } catch (err: any) {
+      // Fallback: if pgvector extension is not available, use application-level cosine similarity
+      console.warn('[VectorService] pgvector query failed, using application-level similarity search.');
+
+      try {
+        const fallbackResults = brandId
+          ? await prisma.$queryRawUnsafe(
+              `SELECT 
+                ke.id, ke.content, ke.metadata, ke.classification, ke.embedding, ke."sourceId", ke."createdAt"
+              FROM "knowledge_entries" ke
+              JOIN "knowledge_sources" ks ON ke."sourceId" = ks.id
+              WHERE ke."businessId" = $1 AND ks."brandId" = $2 AND ke."isStale" = false
+              ORDER BY ke."createdAt" DESC
+              LIMIT 50`,
+              businessId,
+              brandId,
+            )
+          : await prisma.$queryRawUnsafe(
+              `SELECT 
+                ke.id, ke.content, ke.metadata, ke.classification, ke.embedding, ke."sourceId", ke."createdAt"
+              FROM "knowledge_entries" ke
+              WHERE ke."businessId" = $1 AND ke."isStale" = false
+              ORDER BY ke."createdAt" DESC
+              LIMIT 50`,
+              businessId,
+            );
+
         const parsedResults = (fallbackResults as any[]).map((r) => {
           let emb: number[] = [];
           if (typeof r.embedding === 'string') {
@@ -109,20 +140,15 @@ export class VectorService {
             content: r.content,
             metadata: r.metadata,
             classification: r.classification,
-            createdAt: r.createdAt,
-            similarity: this.cosineSimilarity(embedding, emb)
+            sourceId: r.sourceId,
+            similarity: this.cosineSimilarity(embedding, emb),
           };
         });
-        
-        parsedResults.sort((a, b) => {
-          if (Math.abs(b.similarity - a.similarity) > 0.001) {
-            return b.similarity - a.similarity;
-          }
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        });
+
+        parsedResults.sort((a, b) => b.similarity - a.similarity);
         return parsedResults.slice(0, limit);
       } catch (innerErr) {
-        console.error('[VectorService] Extreme fallback failed:', innerErr);
+        console.error('[VectorService] Fallback query also failed:', innerErr);
         return [];
       }
     }

@@ -14,19 +14,10 @@ export class AnthropicProvider implements LLMProvider {
   }
 
   isAvailable(): boolean {
-    return Boolean(process.env['ANTHROPIC_API_KEY']);
+    return Boolean(this.apiKey && !this.apiKey.startsWith('sk-ant-mock') && !this.apiKey.includes('mock'));
   }
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
-    if (this.apiKey.startsWith('sk-ant-mock')) {
-      return {
-        content: `[Mock Anthropic Response] Received user prompt: "${request.userPrompt}". Your LLM infrastructure is functioning correctly end-to-end.`,
-        model: request.model ?? this.model,
-        inputTokens: Math.ceil(request.userPrompt.length / 4),
-        outputTokens: 25,
-      };
-    }
-
     const response = await this.client.messages.create({
       model: request.model ?? this.model,
       max_tokens: request.maxTokens ?? 1024,

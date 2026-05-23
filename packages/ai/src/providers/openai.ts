@@ -14,19 +14,10 @@ export class OpenAIProvider implements LLMProvider {
   }
 
   isAvailable(): boolean {
-    return Boolean(process.env['OPENAI_API_KEY']);
+    return Boolean(this.apiKey && !this.apiKey.startsWith('sk-mock'));
   }
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
-    if (this.apiKey.startsWith('sk-mock')) {
-      return {
-        content: `[Mock OpenAI Response] Received user prompt: "${request.userPrompt}". Your LLM infrastructure is functioning correctly end-to-end.`,
-        model: request.model ?? this.model,
-        inputTokens: Math.ceil(request.userPrompt.length / 4),
-        outputTokens: 25,
-      };
-    }
-
     const response = await this.client.chat.completions.create({
       model: request.model ?? this.model,
       messages: [

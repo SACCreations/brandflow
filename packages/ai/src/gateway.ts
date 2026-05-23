@@ -19,21 +19,21 @@ export class LLMGateway {
       onBeforeComplete: config.onBeforeComplete ?? (() => {}),
     };
 
-    // Initialize providers from environment
+    // Initialize providers from environment — only register with valid keys
     this.providers = new Map();
 
     const openaiKey = process.env['OPENAI_API_KEY'];
-    if (openaiKey) {
+    if (openaiKey && !openaiKey.startsWith('sk-mock') && !openaiKey.includes('mock')) {
       this.providers.set('openai', new OpenAIProvider(openaiKey));
     }
 
     const anthropicKey = process.env['ANTHROPIC_API_KEY'];
-    if (anthropicKey) {
+    if (anthropicKey && !anthropicKey.startsWith('sk-ant-mock') && !anthropicKey.includes('mock')) {
       this.providers.set('anthropic', new AnthropicProvider(anthropicKey));
     }
 
-    const googleKey = process.env['GOOGLE_API_KEY'] || 'sk-mock-google-key';
-    if (googleKey) {
+    const googleKey = process.env['GOOGLE_API_KEY'];
+    if (googleKey && !googleKey.includes('mock')) {
       this.providers.set('google', new GoogleProvider(googleKey));
     }
 
@@ -48,28 +48,13 @@ export class LLMGateway {
     const requestId = uuidv4();
     const preferredProvider = options.provider ?? this.config.defaultProvider;
 
-    // Detect mock sandbox api keys and intercept with high-fidelity completions
-    const isMockKey =
-      options.apiKey?.startsWith('sk-mock') ||
-      options.apiKey?.includes('mock') ||
-      process.env['OPENAI_API_KEY']?.startsWith('sk-mock') ||
-      process.env['OPENAI_API_KEY']?.includes('mock') ||
-      process.env['ANTHROPIC_API_KEY']?.startsWith('sk-mock') ||
-      process.env['ANTHROPIC_API_KEY']?.includes('mock') ||
-      (!options.apiKey && !process.env['OPENAI_API_KEY'] && !process.env['ANTHROPIC_API_KEY']);
-
-    if (isMockKey) {
-      const mockContent = this.generateMockCompletion(systemPrompt, userPrompt);
-      return {
-        response: {
-          content: mockContent,
-          model: options.model ?? 'mock-gpt-4',
-          inputTokens: 120,
-          outputTokens: 250,
-        },
-        requestId,
-        provider: preferredProvider,
-      };
+    // Validate that at least one real API key is available
+    const hasApiKey = options.apiKey || process.env['OPENAI_API_KEY'] || process.env['ANTHROPIC_API_KEY'];
+    if (!hasApiKey) {
+      throw new Error(
+        'No AI provider API key configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable, ' +
+        'or configure a per-workspace API key in Settings → AI Provider.',
+      );
     }
 
     // ─── PII Sanitization (Optional) ─────────────────────────────
@@ -131,163 +116,6 @@ export class LLMGateway {
     }
 
     throw lastError ?? new Error('All providers failed');
-  }
-
-  private generateMockCompletion(systemPrompt: string, userPrompt: string): string {
-    const cleanSystem = systemPrompt.toLowerCase();
-    const cleanUser = userPrompt.toLowerCase();
-
-    // 1. Structured JSON topics check
-    if (cleanSystem.includes('atoms') || cleanUser.includes('atoms')) {
-      // Parse the actual text chunks from the prompt to avoid dummy data
-      const textMatch = userPrompt.match(/Text:\n([\s\S]*)/i);
-      let chunks: string[] = [];
-      if (textMatch && textMatch[1]) {
-        chunks = textMatch[1].split('\n---\n').map(c => c.trim()).filter(Boolean);
-      }
-      
-      if (chunks.length === 0) {
-        const chunkHash = Array.from(userPrompt).reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0).toString(16).substring(0, 6);
-        chunks = [`Feature extracted from chunk [${chunkHash}]: Advanced system optimization and capabilities.`];
-      }
-
-      return JSON.stringify({
-        atoms: chunks.map(chunk => ({
-          type: 'fact',
-          content: chunk,
-          confidence: 0.9
-        }))
-      });
-    }
-
-    if (
-      cleanSystem.includes('topics') ||
-      cleanUser.includes('topics')
-    ) {
-      const factsMatch = systemPrompt.match(/(?:Brand Knowledge Context:|Extracted Brand Knowledge Data:)\n([\s\S]*?)\n+CRITICAL/i);
-      let facts: string[] = [];
-      if (factsMatch && factsMatch[1]) {
-        facts = factsMatch[1].split('\n').filter(l => l.trim().length > 10 && !l.toLowerCase().includes('no specific'));
-      }
-      
-      const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-      let baseTopics = [];
-      if (facts.length > 0) {
-        baseTopics = facts.slice(0, 5).map((fact, index) => {
-          const title = fact.replace(/^\d+\.\s*/, '').replace(/^#\s*/, '').substring(0, 60).trim();
-          return {
-            id: String(index + 1),
-            name: `Focus: ${title} [${randomSuffix}]`,
-            tag: 'Data-driven Topic'
-          };
-        });
-      } else {
-        // Fallback when no facts are available: extract brand and category from prompt
-        const brandMatch = systemPrompt.match(/brand "([^"]+)"/i);
-        const catMatch = systemPrompt.match(/category "([^"]+)"/i);
-        const brand = brandMatch ? brandMatch[1] : 'Your Brand';
-        const cat = catMatch ? catMatch[1] : 'Content';
-        
-        baseTopics = [
-          { id: '1', name: `Introduction to ${brand} ${cat} [${randomSuffix}]`, tag: 'Introduction' },
-          { id: '2', name: `Why Choose ${brand} for Your Needs [${randomSuffix}]`, tag: 'Benefits' },
-          { id: '3', name: `The Future of ${brand} Offerings [${randomSuffix}]`, tag: 'Vision' },
-          { id: '4', name: `Customer Success with ${brand} [${randomSuffix}]`, tag: 'Case Study' },
-          { id: '5', name: `Behind the Scenes at ${brand} [${randomSuffix}]`, tag: 'Culture' }
-        ];
-      }
-      
-      while (baseTopics.length < 5) {
-        baseTopics.push({ id: String(baseTopics.length + 1), name: 'Additional Brand Insights', tag: 'General' });
-      }
-      
-      return JSON.stringify({ topics: baseTopics });
-    }
-    
-    // Brand Analysis mock
-    if (cleanSystem.includes('brand') && cleanSystem.includes('visualrules')) {
-      const isZoho = userPrompt.includes('zoho.com');
-      
-      // Parse metadata if available
-      const logoMatch = userPrompt.match(/Potential Logo URLs:\s*(.+)$/m);
-      const fontMatch = userPrompt.match(/Potential Fonts:\s*(.+)$/m);
-      const colorMatch = userPrompt.match(/Potential Brand Colors:\s*(.+)$/m);
-      
-      const logos = logoMatch ? (logoMatch[1] || '').split(',').map(l => ({ url: l.trim(), type: 'primary', name: 'Logo' })).filter(l => l.url) : [];
-      const fonts = fontMatch ? (fontMatch[1] || '').split(',').map(f => f.trim()).filter(Boolean) : [];
-      const colors = colorMatch ? (colorMatch[1] || '').split(',').map(c => c.trim()).filter(Boolean) : [];
-
-      return JSON.stringify({
-        brand: {
-          name: isZoho ? 'Zoho' : 'Mock Brand',
-          tagline: 'Your Life\'s Work, Powered by Zoho',
-          description: 'A comprehensive suite of award-winning online business, productivity & collaboration applications.',
-          industry: 'Software & Technology',
-          website: isZoho ? 'https://www.zoho.com' : 'https://example.com',
-          positioning: 'All-in-one business software',
-          audience: 'Small to medium businesses',
-          differentiators: 'Affordable, integrated suite, privacy-focused',
-          tone: ['Professional', 'Innovative', 'Reliable'],
-          governance: {
-            bannedPhrases: ['Cheap', 'Quick fix'],
-            requiredPhrases: ['Operating system for business'],
-            ctaPreferences: ['Get Started', 'Learn More'],
-            requiredDisclaimer: null
-          },
-          visualRules: {
-            primaryColor: colors[0] || '#f0483e',
-            secondaryColor: colors[1] || '#1f2937',
-            accentColor: colors[2] || '#4ade80',
-            fontFamily: fonts[0] || 'Puvi, sans-serif',
-            headingFont: fonts[0] || 'Puvi, sans-serif',
-            bodyFont: fonts[1] || 'Puvi, sans-serif',
-            logoUrls: logos.length > 0 ? logos : [{ url: 'https://www.zohowebstatic.com/sites/zweb/images/zoho_general_pages/index/zia-logo-gradient.png', type: 'primary', name: 'Zoho Logo' }]
-          },
-          identity: {
-            mission: 'To create software that empowers business worldwide.',
-            vision: 'The operating system for business.',
-            values: ['Privacy', 'Innovation', 'Customer Success'],
-            promise: 'We never sell your data.',
-            personality: 'Helpful expert'
-          },
-          strategy: {
-            targetLocation: 'Global',
-            postingFrequency: 'weekly',
-            contentLanguage: 'english',
-            ctaPreference: 'Visit Website'
-          }
-        }
-      });
-    }
-
-    // 1.5 Image prompt architect check
-    if (
-      cleanSystem.includes('prompt') ||
-      cleanSystem.includes('image') ||
-      cleanUser.includes('prompt') ||
-      cleanUser.includes('visual rules')
-    ) {
-      const promptClean = userPrompt
-        .replace(/User Prompt:\s*/i, '')
-        .replace(/Brand Design Tokens & Rules:[\s\S]*/i, '')
-        .trim();
-      return `Masterpiece, high-fidelity digital art representing: "${promptClean}". Extremely detailed, professional studio lighting, depth of field, vivid harmonious colors, modern premium composition, optimized for branding guidelines.`;
-    }
-
-    // 2. High-fidelity creative social draft
-    let topic = 'our latest feature';
-    const topicMatch = userPrompt.match(/about:\s*(.+)$/i) || userPrompt.match(/about\s+(.+)$/i);
-    if (topicMatch && topicMatch[1]) {
-      topic = topicMatch[1].trim();
-    }
-
-    return `🚀 Exciting news! We are officially introducing our premium strategy focusing on: "${topic}".
-
-Designed to maximize impact and elevate brand consistency, this campaign delivers the exact tools you need to streamline content publishing, automate workflows, and build strong consumer trust.
-
-Let's build the future together! 🌟
-
-#Marketing #Innovation #BrandFlow #CreativeStudio`;
   }
 
   private createTemporaryProvider(providerName: string, apiKey: string, model?: string): LLMProvider | null {

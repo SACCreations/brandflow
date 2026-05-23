@@ -67,15 +67,6 @@ async function bootstrap() {
 
 
   // ─── Environment Keys Validation ─────────────────────────────
-  console.log('DEBUG env keys:', {
-    processOpenAi: process.env['OPENAI_API_KEY'],
-    processAnthropic: process.env['ANTHROPIC_API_KEY'],
-    processEncryption: process.env['ENCRYPTION_KEY'],
-    configOpenAi: config.get<string>('OPENAI_API_KEY'),
-    configLlmOpenAi: config.get<string>('llm.openaiApiKey'),
-    configAppEncryption: config.get<string>('app.encryptionKey'),
-  });
-
   const openAiKey = config.get<string>('llm.openaiApiKey') || process.env['OPENAI_API_KEY'];
   const anthropicKey = config.get<string>('llm.anthropicApiKey') || process.env['ANTHROPIC_API_KEY'];
   const encryptionKey = config.get<string>('app.encryptionKey') || process.env['ENCRYPTION_KEY'];
