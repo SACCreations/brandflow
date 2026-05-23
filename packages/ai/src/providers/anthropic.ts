@@ -14,7 +14,7 @@ export class AnthropicProvider implements LLMProvider {
   }
 
   isAvailable(): boolean {
-    return Boolean(this.apiKey && !this.apiKey.startsWith('sk-ant-mock') && !this.apiKey.includes('mock'));
+    return Boolean(this.apiKey);
   }
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {

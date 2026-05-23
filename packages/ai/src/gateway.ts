@@ -23,17 +23,17 @@ export class LLMGateway {
     this.providers = new Map();
 
     const openaiKey = process.env['OPENAI_API_KEY'];
-    if (openaiKey && !openaiKey.startsWith('sk-mock') && !openaiKey.includes('mock')) {
+    if (openaiKey) {
       this.providers.set('openai', new OpenAIProvider(openaiKey));
     }
 
     const anthropicKey = process.env['ANTHROPIC_API_KEY'];
-    if (anthropicKey && !anthropicKey.startsWith('sk-ant-mock') && !anthropicKey.includes('mock')) {
+    if (anthropicKey) {
       this.providers.set('anthropic', new AnthropicProvider(anthropicKey));
     }
 
     const googleKey = process.env['GOOGLE_API_KEY'];
-    if (googleKey && !googleKey.includes('mock')) {
+    if (googleKey) {
       this.providers.set('google', new GoogleProvider(googleKey));
     }
 

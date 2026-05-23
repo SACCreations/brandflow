@@ -14,7 +14,7 @@ export class OpenAIProvider implements LLMProvider {
   }
 
   isAvailable(): boolean {
-    return Boolean(this.apiKey && !this.apiKey.startsWith('sk-mock'));
+    return Boolean(this.apiKey);
   }
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
