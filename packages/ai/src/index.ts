@@ -3,6 +3,8 @@ export { PromptEngine } from './prompt-engine';
 export { QualityControl } from './quality-control';
 export { CostTracker } from './cost-tracker';
 export { RateLimiter } from './rate-limiter';
+export { CircuitBreaker, CircuitState } from './circuit-breaker';
+export type { CircuitBreakerConfig } from './circuit-breaker';
 export { OpenAIProvider } from './providers/openai';
 export { AnthropicProvider } from './providers/anthropic';
 export { GoogleProvider } from './providers/google';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import {
@@ -15,15 +15,62 @@ import {
   Bar,
   Cell,
 } from 'recharts';
+import {
+  RefreshCw,
+  DollarSign,
+  BrainCircuit,
+  BarChart3,
+  Activity,
+  Sparkles,
+  ArrowUpRight,
+  TrendingUp,
+  Eye,
+  MousePointerClick,
+  Zap,
+} from 'lucide-react';
 import { CostAnalysisDashboard } from '@/components/analytics/cost-dashboard';
-import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 
+const PLATFORM_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+
+interface AnalyticsSummary {
+  range: { from: string; to: string };
+  summary: {
+    totalReach: number;
+    totalImpressions: number;
+    totalEngagement: number;
+    totalClicks: number;
+    averageCtr: number;
+    engagementRate: number;
+    attributedRoiCents: number;
+    generationCostCents: number;
+    inputTokens: number;
+    outputTokens: number;
+    totalEvents: number;
+  };
+  trend: Array<{ label: string; reach: number; engagement: number; clicks: number; roiCents: number }>;
+  platformBreakdown: Array<{ platform: string; reach: number; engagement: number; clicks: number; roiCents: number }>;
+  topSources: Array<{ sourceId: string; name: string; type: string; reach: number; engagement: number; roiCents: number; usageCount: number }>;
+  eventMix: Array<{ eventType: string; count: number }>;
+}
+
 export default function AnalyticsDashboard() {
-  const { data: performanceData, isLoading: isPerfLoading } = useQuery({
-    queryKey: ['analytics', 'performance'],
+  const [windowDays, setWindowDays] = useState<'7' | '30'>('7');
+
+  const from = new Date();
+  from.setDate(from.getDate() - Number(windowDays));
+
+  const {
+    data: analytics,
+    isLoading,
+    isRefetching,
+    refetch,
+  } = useQuery<AnalyticsSummary>({
+    queryKey: ['analytics', 'summary', windowDays],
     queryFn: async () => {
-      const res = await apiClient.get<any[]>('/analytics/performance');
+      const res = await apiClient.get('/analytics/summary', {
+        params: { from: from.toISOString(), to: new Date().toISOString() },
+      });
       return res.data;
     },
   });
@@ -44,28 +91,44 @@ export default function AnalyticsDashboard() {
     },
   });
 
-  const chartData = performanceData?.map(m => ({
-    name: new Date(m.collectedAt).toLocaleDateString('en-US', { weekday: 'short' }),
-    engagement: m.engagement,
-    reach: m.reach
-  })).reverse() || [
-    { name: 'Mon', engagement: 0, reach: 0 },
-    { name: 'Tue', engagement: 0, reach: 0 },
-    { name: 'Wed', engagement: 0, reach: 0 },
-    { name: 'Thu', engagement: 0, reach: 0 },
-    { name: 'Fri', engagement: 0, reach: 0 },
-    { name: 'Sat', engagement: 0, reach: 0 },
-    { name: 'Sun', engagement: 0, reach: 0 },
+  const chartData = analytics?.trend ?? [
+    { label: 'Mon', engagement: 0, reach: 0 },
+    { label: 'Tue', engagement: 0, reach: 0 },
+    { label: 'Wed', engagement: 0, reach: 0 },
+    { label: 'Thu', engagement: 0, reach: 0 },
+    { label: 'Fri', engagement: 0, reach: 0 },
+    { label: 'Sat', engagement: 0, reach: 0 },
+    { label: 'Sun', engagement: 0, reach: 0 },
   ];
 
-  const impactSummary = impactData?.slice(0, 4).map((item, i) => ({
+  const impactSummary = impactData?.slice(0, 4).map((item: any, i: number) => ({
     name: item.name,
     engagement: Math.round(item.engagement),
-    color: ['#6366f1', '#10b981', '#f59e0b', '#ef4444'][i % 4]
+    color: PLATFORM_COLORS[i % PLATFORM_COLORS.length],
   })) || [];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-in fade-in duration-300">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-48 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800" />
+            <div className="h-4 w-72 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-36 animate-pulse rounded-2xl bg-gray-100 dark:bg-gray-800" />
+          ))}
+        </div>
+        <div className="h-80 animate-pulse rounded-2xl bg-gray-100 dark:bg-gray-800" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+      {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">ROI & Intelligence</h1>
@@ -76,7 +139,7 @@ export default function AnalyticsDashboard() {
         <div className="flex items-center gap-3">
           <select
             value={windowDays}
-            onChange={(event) => setWindowDays(event.target.value as '7' | '30')}
+            onChange={(e) => setWindowDays(e.target.value as '7' | '30')}
             className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
           >
             <option value="7">Last 7 days</option>
@@ -92,6 +155,35 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
+      {/* Summary Metrics */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          title="Total Reach"
+          value={formatCompactNumber(analytics?.summary.totalReach ?? 0)}
+          helper={`${windowDays} day window`}
+          icon={<Eye className="h-5 w-5 text-brand-600" />}
+        />
+        <MetricCard
+          title="Engagement"
+          value={formatCompactNumber(analytics?.summary.totalEngagement ?? 0)}
+          helper={`${((analytics?.summary.engagementRate ?? 0) * 100).toFixed(1)}% rate`}
+          icon={<TrendingUp className="h-5 w-5 text-emerald-500" />}
+        />
+        <MetricCard
+          title="Clicks"
+          value={formatCompactNumber(analytics?.summary.totalClicks ?? 0)}
+          helper={`${((analytics?.summary.averageCtr ?? 0) * 100).toFixed(1)}% CTR`}
+          icon={<MousePointerClick className="h-5 w-5 text-blue-500" />}
+        />
+        <MetricCard
+          title="AI Cost"
+          value={formatCurrency(analytics?.summary.generationCostCents ?? 0)}
+          helper={`${formatCompactNumber((analytics?.summary.inputTokens ?? 0) + (analytics?.summary.outputTokens ?? 0))} tokens`}
+          icon={<Zap className="h-5 w-5 text-amber-500" />}
+        />
+      </div>
+
+      {/* AI Spend Section */}
       <div className="rounded-3xl bg-brand-50/30 p-8 dark:bg-brand-500/5">
         <h2 className="text-xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-3">
           <DollarSign className="h-6 w-6 text-emerald-500" />
@@ -100,7 +192,9 @@ export default function AnalyticsDashboard() {
         <CostAnalysisDashboard />
       </div>
 
+      {/* Charts Grid */}
       <div className="grid gap-8 lg:grid-cols-12">
+        {/* Performance Trend */}
         <div className="lg:col-span-8 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div>
@@ -110,7 +204,9 @@ export default function AnalyticsDashboard() {
               </p>
             </div>
             <div className="rounded-xl bg-gray-50 px-3 py-2 text-xs font-bold uppercase tracking-widest text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-              {analytics ? `${formatDistanceToNow(new Date(analytics.range.to), { addSuffix: true })}` : 'Loading'}
+              {analytics?.range?.to
+                ? formatDistanceToNow(new Date(analytics.range.to), { addSuffix: true })
+                : 'Current'}
             </div>
           </div>
 
@@ -141,26 +237,27 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
 
+        {/* Impact Attribution */}
         <div className="lg:col-span-4 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
           <h2 className="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
             <BrainCircuit className="h-5 w-5 text-brand-600" />
             Impact Attribution
-          </h3>
+          </h2>
           <div className="flex-1 space-y-6">
             {isImpactLoading ? (
-               Array.from({ length: 4 }).map((_, i) => (
-                 <div key={i} className="h-10 w-full animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
-               ))
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-10 w-full animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+              ))
             ) : impactSummary.length > 0 ? (
-              impactSummary.map((item, i) => (
+              impactSummary.map((item: any, i: number) => (
                 <div key={i} className="space-y-2">
                   <div className="flex items-center justify-between text-xs font-bold">
                     <span className="text-gray-700 dark:text-gray-300">{item.name}</span>
                     <span className="text-gray-400">{item.engagement} pts</span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-                    <div 
-                      className="h-full transition-all duration-1000" 
+                    <div
+                      className="h-full transition-all duration-1000"
                       style={{ width: `${Math.min(100, (item.engagement / 500) * 100)}%`, backgroundColor: item.color }}
                     />
                   </div>
@@ -176,15 +273,19 @@ export default function AnalyticsDashboard() {
               Top source ROI contribution
             </p>
             <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-              {analytics?.topSources[0]
-                ? <>
-                    <span className="font-bold text-brand-600">{analytics.topSources[0].name}</span> currently drives the strongest engagement signal in your content mix.
-                  </>
-                : 'Add performance data and source attribution to surface your strongest knowledge drivers.'}
+              {analytics?.topSources?.[0] ? (
+                <>
+                  <span className="font-bold text-brand-600">{analytics.topSources[0].name}</span> currently drives
+                  the strongest engagement signal in your content mix.
+                </>
+              ) : (
+                'Add performance data and source attribution to surface your strongest knowledge drivers.'
+              )}
             </p>
           </div>
         </div>
 
+        {/* Platform Breakdown */}
         <div className="lg:col-span-7 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
@@ -202,8 +303,8 @@ export default function AnalyticsDashboard() {
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8' }} />
                 <Tooltip formatter={(value: number) => [formatCompactNumber(value), 'Reach']} />
                 <Bar dataKey="reach" radius={[8, 8, 0, 0]}>
-                  {(analytics?.platformBreakdown ?? []).map((entry, index) => (
-                    <Cell key={entry.platform} fill={PLATFORM_COLORS[index % PLATFORM_COLORS.length]} />
+                  {(analytics?.platformBreakdown ?? []).map((_entry: any, index: number) => (
+                    <Cell key={index} fill={PLATFORM_COLORS[index % PLATFORM_COLORS.length]} />
                   ))}
                 </Bar>
               </BarChart>
@@ -211,6 +312,7 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
 
+        {/* Event Mix */}
         <div className="lg:col-span-5 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
@@ -221,8 +323,8 @@ export default function AnalyticsDashboard() {
           </div>
           <div className="space-y-4">
             {(analytics?.eventMix ?? []).length ? (
-              analytics?.eventMix.map((item, index) => {
-                const maxCount = analytics.eventMix[0]?.count ?? 1;
+              analytics!.eventMix.map((item, index) => {
+                const maxCount = analytics!.eventMix[0]?.count ?? 1;
                 const width = maxCount > 0 ? Math.max(10, Math.round((item.count / maxCount) * 100)) : 0;
                 return (
                   <div key={item.eventType} className="space-y-2">
@@ -245,6 +347,7 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
 
+        {/* Knowledge Impact Matrix */}
         <div className="lg:col-span-12 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/60 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50">
             <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-900 dark:text-white">
@@ -266,13 +369,13 @@ export default function AnalyticsDashboard() {
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {(analytics?.topSources ?? []).length ? (
-                  analytics?.topSources.map((source, index) => {
-                    const maxEngagement = analytics.topSources[0]?.engagement ?? 1;
+                  analytics!.topSources.map((source, index) => {
+                    const maxEngagement = analytics!.topSources[0]?.engagement ?? 1;
                     const percent = maxEngagement > 0 ? Math.round((source.engagement / maxEngagement) * 100) : 0;
                     return (
                       <tr key={source.sourceId} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
                         <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{source.name}</td>
-                        <td className="px-6 py-4 text-xs text-gray-500 uppercase">{formatLabel(source.type)}</td>
+                        <td className="px-6 py-4 text-xs uppercase text-gray-500">{formatLabel(source.type)}</td>
                         <td className="px-6 py-4 text-xs text-gray-500">{source.usageCount} posts</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
@@ -295,28 +398,9 @@ export default function AnalyticsDashboard() {
                       No attributed source impact available yet.
                     </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
-                  {isImpactLoading ? (
-                    <tr><td colSpan={5} className="p-8 text-center animate-pulse">Loading matrix...</td></tr>
-                  ) : impactData?.length ? (
-                    impactData.map((item, i) => (
-                      <KnowledgeRow 
-                        key={i} 
-                        name={item.name} 
-                        usage={item.count} 
-                        sentiment={item.type} 
-                        impact={Math.round(Math.min(100, item.engagement / 10))} 
-                        roi={`$${((item.roiCents || 0) / 100).toFixed(0)}`} 
-                        color={['bg-brand-500', 'bg-emerald-500', 'bg-blue-500', 'bg-amber-500'][i % 4]} 
-                      />
-                    ))
-                  ) : (
-                    <tr><td colSpan={5} className="p-8 text-center text-gray-500">No knowledge impact recorded yet.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -329,10 +413,10 @@ export default function AnalyticsDashboard() {
             </h3>
             <div className="grid gap-6 md:grid-cols-2">
               {isRecLoading ? (
-                [1, 2].map(i => <div key={i} className="h-40 animate-pulse rounded-2xl bg-white dark:bg-gray-800" />)
+                [1, 2].map((i) => <div key={i} className="h-40 animate-pulse rounded-2xl bg-white dark:bg-gray-800" />)
               ) : recommendations?.length ? (
-                recommendations.map((rec, i) => (
-                  <RecommendationCard 
+                recommendations.map((rec: any, i: number) => (
+                  <RecommendationCard
                     key={i}
                     topic={rec.topic}
                     recommendation={rec.recommendation}
@@ -365,19 +449,33 @@ function MetricCard({ title, value, helper, icon }: { title: string; value: stri
   );
 }
 
-function RecommendationCard({ topic, recommendation, confidence, impact }: { topic: string; recommendation: string; confidence: number; impact: string }) {
+function RecommendationCard({
+  topic,
+  recommendation,
+  confidence,
+  impact,
+}: {
+  topic: string;
+  recommendation: string;
+  confidence: number;
+  impact: string;
+}) {
   return (
     <div className="group rounded-2xl border border-brand-100 bg-white p-6 shadow-sm transition-all hover:shadow-lg dark:border-gray-800 dark:bg-gray-900">
       <div className="mb-4 flex items-center justify-between">
         <span className="rounded-lg bg-brand-50 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-700 dark:bg-brand-500/10">
           Recommendation
         </span>
-        <span className={`rounded-md px-2 py-1 text-[10px] font-bold ${impact === 'High' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+        <span
+          className={`rounded-md px-2 py-1 text-[10px] font-bold ${
+            impact === 'High' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
+          }`}
+        >
           {impact} Impact
         </span>
       </div>
       <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-white">{topic}</h3>
-      <p className="mb-6 text-sm italic leading-relaxed text-gray-600 dark:text-gray-400">“{recommendation}”</p>
+      <p className="mb-6 text-sm italic leading-relaxed text-gray-600 dark:text-gray-400">&ldquo;{recommendation}&rdquo;</p>
       <div className="flex items-center justify-between border-t border-gray-50 pt-4 dark:border-gray-800">
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">

@@ -8,8 +8,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- Enable vector extension for embeddings (pgvector)
--- Uncomment if pgvector is available
--- CREATE EXTENSION IF NOT EXISTS "vector";
+CREATE EXTENSION IF NOT EXISTS "vector";
 
 -- Helper function: get the current tenant from session variable
 CREATE OR REPLACE FUNCTION current_tenant_id()

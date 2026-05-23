@@ -134,4 +134,93 @@ export class ChatService {
       fallbackProvider: fallbackUsed ? fallbackProvider : null,
     };
   }
+
+  /**
+   * Brand-aware chat endpoint: enriches prompt with brand context
+   * and relevant knowledge base entries via vector search.
+   */
+  async ask(businessId: string, message: string, brandId?: string) {
+    const start = Date.now();
+    const requestId = randomUUID();
+
+    // Gather brand context if specified
+    let brandContext = '';
+    if (brandId) {
+      const brand = await prisma.brand.findFirst({
+        where: { id: brandId, businessId },
+        select: { name: true, industry: true, toneOfVoice: true, targetAudience: true, description: true },
+      });
+      if (brand) {
+        brandContext = `\n\nBrand Context:\n- Name: ${brand.name}\n- Industry: ${brand.industry || 'N/A'}\n- Tone: ${brand.toneOfVoice || 'N/A'}\n- Target Audience: ${brand.targetAudience || 'N/A'}\n- Description: ${brand.description || 'N/A'}`;
+      }
+    }
+
+    // Retrieve relevant knowledge via vector search (requires rebuilt @brandflow/ai)
+    let knowledgeContext = '';
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const ai = require('@brandflow/ai');
+      if (ai.VectorService) {
+        const vectorService = new ai.VectorService();
+        const results = await vectorService.search(message, { businessId, topK: 3 });
+        if (results.length > 0) {
+          knowledgeContext = '\n\nRelevant Knowledge:\n' + results.map((r: any) => `- ${r.content}`).join('\n');
+        }
+      }
+    } catch {
+      // Vector search is non-critical — proceed without it
+    }
+
+    const systemPrompt = `You are BrandFlow AI, a helpful brand strategy and content assistant. Help users with content ideas, brand positioning, marketing strategy, and creative direction. Be concise, actionable, and professional.${brandContext}${knowledgeContext}`;
+
+    // Get business API key if available
+    let decryptedApiKey: string | undefined;
+    const settings = await prisma.llmSettings.findUnique({
+      where: { businessId },
+    });
+    if (settings?.apiKey) {
+      try {
+        const encryptionKey = this.config.get<string>('ENCRYPTION_KEY')!;
+        decryptedApiKey = encryption.decrypt(settings.apiKey, encryptionKey);
+      } catch {
+        // Use platform key as fallback
+      }
+    }
+
+    try {
+      const result = await this.gateway.complete(systemPrompt, message, {
+        provider: 'openai',
+        maxTokens: 1000,
+        temperature: 0.7,
+        apiKey: decryptedApiKey,
+      });
+
+      const latency = Date.now() - start;
+
+      // Log request
+      await prisma.aIRequestLog.create({
+        data: {
+          requestId,
+          businessId,
+          provider: result.provider,
+          model: result.response.model,
+          latency,
+          inputTokens: result.response.inputTokens || 0,
+          outputTokens: result.response.outputTokens || 0,
+          success: true,
+          errorMessage: null,
+        },
+      }).catch(() => { /* non-critical */ });
+
+      return {
+        success: true,
+        response: result.response.content,
+        provider: result.provider,
+        model: result.response.model,
+        latency,
+      };
+    } catch (err: any) {
+      throw new InternalServerErrorException(err?.message || 'Chat request failed');
+    }
+  }
 }

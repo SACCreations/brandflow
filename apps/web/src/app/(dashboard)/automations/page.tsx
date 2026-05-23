@@ -18,7 +18,14 @@ import {
   Trash2,
   ToggleRight,
   ToggleLeft,
-  Loader2
+  Loader2,
+  X,
+  Bell,
+  FileText,
+  Send,
+  Calendar,
+  UserCheck,
+  Webhook,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
@@ -42,6 +49,7 @@ interface Automation {
 export default function AutomationsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const { data: automations, isLoading, isError } = useQuery({
     queryKey: ['automations'],
@@ -95,7 +103,10 @@ export default function AutomationsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Workflow Automation</h1>
           <p className="mt-2 text-gray-500 dark:text-gray-400">Automate your brand operations with custom IF-THIS-THEN-THAT rules.</p>
         </div>
-        <button className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all">
+        <button 
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
+        >
           <Plus className="h-4 w-4" /> Create Automation
         </button>
       </div>
@@ -231,6 +242,18 @@ export default function AutomationsPage() {
         </div>
 
       </div>
+
+      {/* Create Automation Modal */}
+      {showCreateModal && (
+        <CreateAutomationModal 
+          onClose={() => setShowCreateModal(false)} 
+          onCreated={() => {
+            setShowCreateModal(false);
+            queryClient.invalidateQueries({ queryKey: ['automations'] });
+            toast({ title: 'Automation Created', description: 'Your new workflow is ready.' });
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -259,6 +282,176 @@ function ActivityItem({ title, detail, time, status }: any) {
           <span className="text-[10px] text-gray-400 font-medium">{time}</span>
         </div>
         <p className="text-[10px] text-gray-500 leading-relaxed">{detail}</p>
+      </div>
+    </div>
+  );
+}
+
+const TRIGGER_TYPES = [
+  { id: 'content_created', label: 'Content Created', description: 'When new content is generated', icon: FileText },
+  { id: 'content_approved', label: 'Content Approved', description: 'When content passes approval', icon: CheckCircle2 },
+  { id: 'schedule_time', label: 'Scheduled Time', description: 'At a specific time or recurring', icon: Calendar },
+  { id: 'webhook', label: 'Webhook Received', description: 'When an external webhook fires', icon: Webhook },
+];
+
+const ACTION_TYPES = [
+  { id: 'send_notification', label: 'Send Notification', icon: Bell },
+  { id: 'publish_content', label: 'Publish Content', icon: Send },
+  { id: 'assign_reviewer', label: 'Assign Reviewer', icon: UserCheck },
+  { id: 'generate_content', label: 'Generate Content', icon: FileText },
+];
+
+function CreateAutomationModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const [step, setStep] = useState<'trigger' | 'actions' | 'name'>('trigger');
+  const [name, setName] = useState('');
+  const [triggerType, setTriggerType] = useState('');
+  const [actions, setActions] = useState<string[]>([]);
+
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      await apiClient.post('/automations', {
+        name,
+        triggerType,
+        triggerConfig: {},
+        steps: actions.map((type, i) => ({ type, order: i, config: {} })),
+        isActive: true,
+      });
+    },
+    onSuccess: onCreated,
+  });
+
+  const toggleAction = (actionId: string) => {
+    setActions((prev) =>
+      prev.includes(actionId) ? prev.filter((a) => a !== actionId) : [...prev, actionId],
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Create Automation</h2>
+          <button onClick={onClose} className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Progress */}
+        <div className="mb-8 flex items-center gap-2">
+          {['trigger', 'actions', 'name'].map((s, i) => (
+            <React.Fragment key={s}>
+              <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${step === s ? 'bg-brand-600 text-white' : i < ['trigger', 'actions', 'name'].indexOf(step) ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 dark:bg-gray-800'}`}>
+                {i + 1}
+              </div>
+              {i < 2 && <div className={`h-0.5 flex-1 rounded ${i < ['trigger', 'actions', 'name'].indexOf(step) ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'}`} />}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Step 1: Trigger */}
+        {step === 'trigger' && (
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">When should this automation trigger?</p>
+            {TRIGGER_TYPES.map((trigger) => (
+              <button
+                key={trigger.id}
+                onClick={() => setTriggerType(trigger.id)}
+                className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-all ${
+                  triggerType === trigger.id
+                    ? 'border-brand-500 bg-brand-50/50 ring-2 ring-brand-500/20 dark:bg-brand-500/10'
+                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                }`}
+              >
+                <div className={`rounded-lg p-2 ${triggerType === trigger.id ? 'bg-brand-100 dark:bg-brand-500/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                  <trigger.icon className={`h-5 w-5 ${triggerType === trigger.id ? 'text-brand-600' : 'text-gray-500'}`} />
+                </div>
+                <div>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">{trigger.label}</span>
+                  <p className="text-xs text-gray-500">{trigger.description}</p>
+                </div>
+              </button>
+            ))}
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setStep('actions')}
+                disabled={!triggerType}
+                className="rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                Next: Choose Actions
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Actions */}
+        {step === 'actions' && (
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">What actions should execute? (select one or more)</p>
+            {ACTION_TYPES.map((action) => (
+              <button
+                key={action.id}
+                onClick={() => toggleAction(action.id)}
+                className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-all ${
+                  actions.includes(action.id)
+                    ? 'border-brand-500 bg-brand-50/50 ring-2 ring-brand-500/20 dark:bg-brand-500/10'
+                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                }`}
+              >
+                <div className={`rounded-lg p-2 ${actions.includes(action.id) ? 'bg-brand-100 dark:bg-brand-500/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                  <action.icon className={`h-5 w-5 ${actions.includes(action.id) ? 'text-brand-600' : 'text-gray-500'}`} />
+                </div>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">{action.label}</span>
+                {actions.includes(action.id) && <CheckCircle2 className="ml-auto h-5 w-5 text-brand-600" />}
+              </button>
+            ))}
+            <div className="mt-6 flex justify-between">
+              <button onClick={() => setStep('trigger')} className="rounded-xl border border-gray-200 px-6 py-2.5 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:text-gray-300">
+                Back
+              </button>
+              <button
+                onClick={() => setStep('name')}
+                disabled={actions.length === 0}
+                className="rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                Next: Name it
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Name */}
+        {step === 'name' && (
+          <div className="space-y-4">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Give your automation a name</p>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., Auto-publish approved content"
+              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              autoFocus
+            />
+            <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Summary</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                <span className="font-semibold">When</span> {TRIGGER_TYPES.find(t => t.id === triggerType)?.label} → {' '}
+                <span className="font-semibold">Then</span> {actions.map(a => ACTION_TYPES.find(at => at.id === a)?.label).join(', ')}
+              </p>
+            </div>
+            <div className="mt-6 flex justify-between">
+              <button onClick={() => setStep('actions')} className="rounded-xl border border-gray-200 px-6 py-2.5 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:text-gray-300">
+                Back
+              </button>
+              <button
+                onClick={() => createMutation.mutate()}
+                disabled={!name.trim() || createMutation.isPending}
+                className="rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                {createMutation.isPending ? 'Creating...' : 'Create Automation'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

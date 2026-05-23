@@ -2,63 +2,104 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { cn } from '@brandflow/ui';
+import {
+  LayoutDashboard,
+  Fingerprint,
+  BookOpen,
+  CheckSquare,
+  Eye,
+  PenTool,
+  Image,
+  Target,
+  FolderKanban,
+  Calendar,
+  Share2,
+  Zap,
+  BarChart3,
+  Cpu,
+  Building2,
+  Settings2,
+  CreditCard,
+  Users,
+  Briefcase,
+  Shield,
+  MessageSquare,
+  ChevronDown,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-const NAV = [
+interface NavItem {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  badge?: number;
+}
+
+interface NavGroup {
+  group: string;
+  items: NavItem[];
+}
+
+type NavEntry = NavItem | NavGroup;
+
+const NAV: NavEntry[] = [
   {
     label: 'Dashboard',
     href: '/dashboard',
-    icon: '⊞',
+    icon: LayoutDashboard,
+  },
+  {
+    label: 'Chat',
+    href: '/chat',
+    icon: MessageSquare,
   },
   {
     group: 'Intelligence',
     items: [
-      { label: 'Brands', href: '/intelligence/brands', icon: '◈' },
-      { label: 'Knowledge Hub', href: '/intelligence/knowledge', icon: '◉' },
-      { label: 'Review Queue', href: '/review', icon: '✓' },
-      { label: 'Monitor', href: '/intelligence/monitor', icon: '◷' },
+      { label: 'Brands', href: '/intelligence/brands', icon: Fingerprint },
+      { label: 'Knowledge Hub', href: '/intelligence/knowledge', icon: BookOpen },
+      { label: 'Review Queue', href: '/review', icon: CheckSquare, badge: 3 },
+      { label: 'Monitor', href: '/intelligence/monitor', icon: Eye },
     ],
   },
   {
     group: 'Create',
     items: [
-      { label: 'Content', href: '/create/content', icon: '✦' },
-      { label: 'AI Image Generator', href: '/create/image', icon: '🎨' },
-      { label: 'Campaigns', href: '/campaigns', icon: '◎' },
-      { label: 'Projects', href: '/projects', icon: '⧉' },
+      { label: 'Content', href: '/create/content', icon: PenTool },
+      { label: 'AI Images', href: '/create/image', icon: Image },
+      { label: 'Campaigns', href: '/campaigns', icon: Target },
+      { label: 'Projects', href: '/projects', icon: FolderKanban },
     ],
-  },
-  {
-    group: 'Review',
-    items: [{ label: 'Approvals', href: '/review', icon: '✓' }],
   },
   {
     group: 'Publish',
     items: [
-      { label: 'Calendar', href: '/publish/calendar', icon: '◷' },
-      { label: 'Social Accounts', href: '/publish/social', icon: '◈' },
+      { label: 'Calendar', href: '/publish/calendar', icon: Calendar },
+      { label: 'Social Accounts', href: '/publish/social', icon: Share2 },
     ],
   },
   {
     group: 'Automate',
-    items: [{ label: 'Automations', href: '/automations', icon: '⚡' }],
+    items: [{ label: 'Automations', href: '/automations', icon: Zap }],
   },
   {
     group: 'Insights',
     items: [
-      { label: 'Analytics', href: '/analytics', icon: '◉' },
-      { label: 'AI Diagnostics', href: '/ai-test', icon: '✦' },
+      { label: 'Analytics', href: '/analytics', icon: BarChart3 },
+      { label: 'AI Diagnostics', href: '/ai-test', icon: Cpu },
     ],
   },
   {
     group: 'Settings',
     items: [
-      { label: 'Business', href: '/settings/business', icon: '⚙' },
-      { label: 'LLM Settings', href: '/settings/llm', icon: '◈' },
-      { label: 'Billing', href: '/settings/billing', icon: '＄' },
-      { label: 'Team', href: '/settings/team', icon: '👥' },
-      { label: 'Clients', href: '/settings/clients', icon: '💼' },
-      { label: 'Compliance', href: '/settings/compliance', icon: '🛡️' },
+      { label: 'Business', href: '/settings/business', icon: Building2 },
+      { label: 'LLM Settings', href: '/settings/llm', icon: Settings2 },
+      { label: 'Billing', href: '/settings/billing', icon: CreditCard },
+      { label: 'Team', href: '/settings/team', icon: Users },
+      { label: 'Clients', href: '/settings/clients', icon: Briefcase },
+      { label: 'Compliance', href: '/settings/compliance', icon: Shield },
     ],
   },
 ];
@@ -78,18 +119,11 @@ export function Sidebar() {
         {NAV.map((item) => {
           if ('href' in item) {
             return (
-              <NavLink key={item.href} href={item.href ?? ''} icon={item.icon ?? ''} label={item.label ?? ''} pathname={pathname} />
+              <NavLink key={item.href} href={item.href} Icon={item.icon} label={item.label} pathname={pathname} badge={item.badge} />
             );
           }
           return (
-            <div key={item.group} className="pt-3 first:pt-0">
-              <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                {item.group}
-              </p>
-              {item.items.map((sub) => (
-                <NavLink key={sub.href} href={sub.href} icon={sub.icon ?? ''} label={sub.label ?? ''} pathname={pathname} />
-              ))}
-            </div>
+            <CollapsibleGroup key={item.group} group={item.group} items={item.items} pathname={pathname} />
           );
         })}
       </nav>
@@ -97,7 +131,31 @@ export function Sidebar() {
   );
 }
 
-function NavLink({ href, icon, label, pathname }: { href: string; icon: string; label: string; pathname: string }) {
+function CollapsibleGroup({ group, items, pathname }: { group: string; items: NavItem[]; pathname: string }) {
+  const hasActive = items.some((item) => pathname === item.href || pathname.startsWith(item.href + '/'));
+  const [open, setOpen] = useState(hasActive);
+
+  return (
+    <div className="pt-3 first:pt-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between px-2 py-1 text-xs font-semibold uppercase tracking-wider text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+      >
+        {group}
+        <ChevronDown className={cn('h-3 w-3 transition-transform', open ? '' : '-rotate-90')} />
+      </button>
+      {open && (
+        <div className="mt-1 space-y-0.5">
+          {items.map((sub) => (
+            <NavLink key={sub.href} href={sub.href} Icon={sub.icon} label={sub.label} pathname={pathname} badge={sub.badge} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NavLink({ href, Icon, label, pathname, badge }: { href: string; Icon: LucideIcon; label: string; pathname: string; badge?: number }) {
   const active = pathname === href || pathname.startsWith(href + '/');
   return (
     <Link
@@ -109,8 +167,13 @@ function NavLink({ href, icon, label, pathname }: { href: string; icon: string; 
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100',
       )}
     >
-      <span className="w-4 text-center">{icon}</span>
-      {label}
+      <Icon className="h-4 w-4 shrink-0" />
+      <span className="flex-1">{label}</span>
+      {badge != null && badge > 0 && (
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+          {badge}
+        </span>
+      )}
     </Link>
   );
 }

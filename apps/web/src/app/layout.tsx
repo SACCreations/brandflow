@@ -20,7 +20,19 @@ export default function RootLayout({
   const isRtl = locale === 'ar';
 
   return (
-    <html lang={locale} dir={isRtl ? 'rtl' : 'ltr'} className={inter.variable}>
+    <html lang={locale} dir={isRtl ? 'rtl' : 'ltr'} className={inter.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var theme = localStorage.getItem('theme');
+              if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+              }
+            } catch(e) {}
+          })();
+        ` }} />
+      </head>
       <body className="antialiased">
         <Providers>{children}</Providers>
       </body>

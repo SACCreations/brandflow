@@ -12,6 +12,7 @@ import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { initSentry } from './common/observability/sentry.init';
 import { SentryFilter } from './common/filters/sentry.filter';
 
@@ -53,6 +54,10 @@ async function bootstrap() {
 
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ limit: '50mb', extended: true }));
+
+  // ─── Correlation ID (before all other middleware) ─────────────
+  const correlationMiddleware = new CorrelationIdMiddleware();
+  app.use(correlationMiddleware.use.bind(correlationMiddleware));
 
   const config = app.get(ConfigService);
 
@@ -162,6 +167,17 @@ modules, startup has been aborted. Please update your .env.
   await app.listen(port);
   console.log(`🚀 BrandFlow API running on http://localhost:${port}/api/v1`);
   console.log(`📚 Swagger docs: http://localhost:${port}/docs`);
+
+  // ─── Graceful Shutdown ───────────────────────────────────────
+  app.enableShutdownHooks();
+  const signals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT'];
+  for (const signal of signals) {
+    process.on(signal, async () => {
+      console.log(`\n⏹️  Received ${signal} — shutting down gracefully...`);
+      await app.close();
+      process.exit(0);
+    });
+  }
 }
 
 bootstrap().catch((err) => {
