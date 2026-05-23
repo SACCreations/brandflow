@@ -16,10 +16,10 @@ export class FallbackProvider implements LLMProvider {
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
     if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
       return {
-        content: `[Mock AI Response] I am a fallback response because valid API keys for OpenAI/Anthropic are not configured. I received your prompt: "${request.userPrompt.substring(0, 50)}..."`,
+        content: `api key is not integrated`,
         model: 'mock-fallback-model',
-        inputTokens: 10,
-        outputTokens: 30,
+        inputTokens: 0,
+        outputTokens: 0,
       };
     }
 

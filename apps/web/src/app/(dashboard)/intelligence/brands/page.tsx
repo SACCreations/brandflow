@@ -415,8 +415,8 @@ export default function BrandsPage() {
                   </div>
 
                   <div className="w-16 h-16 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl border border-white/20 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 relative z-10 p-3">
-                    {brand.visualRules?.logoUrls?.[0] ? (
-                      <img src={brand.visualRules.logoUrls[0]} alt={brand.name} className="w-full h-full object-contain drop-shadow-sm" />
+                    {brand.visualRules?.logoUrls?.[0]?.url ? (
+                      <img src={brand.visualRules.logoUrls[0].url} alt={brand.name} className="w-full h-full object-contain drop-shadow-sm" />
                     ) : (
                       <Building2 className="w-8 h-8 text-brand-600" />
                     )}
@@ -511,8 +511,8 @@ export default function BrandsPage() {
                               : 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)'
                           }}
                         >
-                          {brand.visualRules?.logoUrls?.[0] ? (
-                            <img src={brand.visualRules.logoUrls[0]} alt={brand.name} className="w-6 h-6 object-contain" />
+                          {brand.visualRules?.logoUrls?.[0]?.url ? (
+                            <img src={brand.visualRules.logoUrls[0].url} alt={brand.name} className="w-6 h-6 object-contain" />
                           ) : (
                             <Building2 className="w-5 h-5" />
                           )}
