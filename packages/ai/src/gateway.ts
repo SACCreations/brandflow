@@ -162,9 +162,7 @@ export class LLMGateway {
 
     if (
       cleanSystem.includes('topics') ||
-      cleanUser.includes('topics') ||
-      cleanSystem.includes('json') ||
-      cleanUser.includes('json')
+      cleanUser.includes('topics')
     ) {
       const factsMatch = systemPrompt.match(/(?:Brand Knowledge Context:|Extracted Brand Knowledge Data:)\n([\s\S]*?)\n+CRITICAL/i);
       let facts: string[] = [];
@@ -204,6 +202,62 @@ export class LLMGateway {
       }
       
       return JSON.stringify({ topics: baseTopics });
+    }
+    
+    // Brand Analysis mock
+    if (cleanSystem.includes('brand') && cleanSystem.includes('visualrules')) {
+      const isZoho = userPrompt.includes('zoho.com');
+      
+      // Parse metadata if available
+      const logoMatch = userPrompt.match(/Potential Logo URLs:\s*(.+)$/m);
+      const fontMatch = userPrompt.match(/Potential Fonts:\s*(.+)$/m);
+      const colorMatch = userPrompt.match(/Potential Brand Colors:\s*(.+)$/m);
+      
+      const logos = logoMatch ? (logoMatch[1] || '').split(',').map(l => ({ url: l.trim(), type: 'primary', name: 'Logo' })).filter(l => l.url) : [];
+      const fonts = fontMatch ? (fontMatch[1] || '').split(',').map(f => f.trim()).filter(Boolean) : [];
+      const colors = colorMatch ? (colorMatch[1] || '').split(',').map(c => c.trim()).filter(Boolean) : [];
+
+      return JSON.stringify({
+        brand: {
+          name: isZoho ? 'Zoho' : 'Mock Brand',
+          tagline: 'Your Life\'s Work, Powered by Zoho',
+          description: 'A comprehensive suite of award-winning online business, productivity & collaboration applications.',
+          industry: 'Software & Technology',
+          website: isZoho ? 'https://www.zoho.com' : 'https://example.com',
+          positioning: 'All-in-one business software',
+          audience: 'Small to medium businesses',
+          differentiators: 'Affordable, integrated suite, privacy-focused',
+          tone: ['Professional', 'Innovative', 'Reliable'],
+          governance: {
+            bannedPhrases: ['Cheap', 'Quick fix'],
+            requiredPhrases: ['Operating system for business'],
+            ctaPreferences: ['Get Started', 'Learn More'],
+            requiredDisclaimer: null
+          },
+          visualRules: {
+            primaryColor: colors[0] || '#f0483e',
+            secondaryColor: colors[1] || '#1f2937',
+            accentColor: colors[2] || '#4ade80',
+            fontFamily: fonts[0] || 'Puvi, sans-serif',
+            headingFont: fonts[0] || 'Puvi, sans-serif',
+            bodyFont: fonts[1] || 'Puvi, sans-serif',
+            logoUrls: logos.length > 0 ? logos : [{ url: 'https://www.zohowebstatic.com/sites/zweb/images/zoho_general_pages/index/zia-logo-gradient.png', type: 'primary', name: 'Zoho Logo' }]
+          },
+          identity: {
+            mission: 'To create software that empowers business worldwide.',
+            vision: 'The operating system for business.',
+            values: ['Privacy', 'Innovation', 'Customer Success'],
+            promise: 'We never sell your data.',
+            personality: 'Helpful expert'
+          },
+          strategy: {
+            targetLocation: 'Global',
+            postingFrequency: 'weekly',
+            contentLanguage: 'english',
+            ctaPreference: 'Visit Website'
+          }
+        }
+      });
     }
 
     // 1.5 Image prompt architect check
