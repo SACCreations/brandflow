@@ -59,7 +59,7 @@ export class ContentService {
   }
 
 
-  async findAll(businessId: string, filters: { brandId?: string; campaignId?: string; status?: string }) {
+  async findAll(businessId: string, filters: { brandId?: string; campaignId?: string; status?: string; generationGroupId?: string }) {
     return this.prisma.client.content.findMany({
       where: { businessId, ...filters } as any,
       orderBy: { createdAt: 'desc' },
@@ -111,11 +111,12 @@ export class ContentService {
     // Check if background queue execution is needed
     const topicsList = dto.topics && dto.topics.length > 0 ? dto.topics : (dto.topic ? [dto.topic] : []);
     const totalCount = topicsList.length * (dto.count || 1);
+    const generationGroupId = randomUUID();
 
     if (totalCount > 3 || (dto.topics && dto.topics.length > 1)) {
       const job = await this.aiGenerationQueue.add(
         'generate-batch',
-        { businessId, userId, dto },
+        { businessId, userId, dto, generationGroupId },
         { attempts: 3, backoff: 5000 }
       );
 
@@ -124,6 +125,7 @@ export class ContentService {
         status: 'queued',
         progress: 0,
         async: true,
+        generationGroupId,
       } as any;
     }
 
@@ -240,6 +242,7 @@ export class ContentService {
           brandId: effectiveBrandId,
           briefId: dto.briefId ?? null,
           campaignId: effectiveCampaignId ?? null,
+          generationGroupId,
           platform: dto.platform,
           type: dto.type,
           body: response.content,
@@ -295,6 +298,44 @@ export class ContentService {
       }
       throw new BadRequestException(`Generation failed: ${error.message || 'Unknown LLM or system error'}`);
     }
+  }
+
+
+  async regenerate(id: string, businessId: string, userId: string) {
+    const original = await this.findById(id, businessId);
+    if (!original) throw new NotFoundException('Content not found');
+
+    const dto: GenerateContentDto = {
+      brandId: original.brandId,
+      briefId: original.briefId ?? undefined,
+      campaignId: original.campaignId ?? undefined,
+      platform: original.platform,
+      type: original.type,
+      topic: (original.metadata as any)?.topic || `${original.type} for ${original.platform}`,
+      count: 1,
+    } as any;
+
+    // Generate with the same group ID so they appear as variants together
+    const generationGroupId = (original as any).generationGroupId || randomUUID();
+    const result = await this.generate(businessId, userId, dto);
+
+    // Update the new content's generationGroupId to match original
+    if (result.content?.id) {
+      await this.prisma.client.content.update({
+        where: { id: result.content.id },
+        data: { generationGroupId },
+      });
+
+      // Also ensure original has the group ID set
+      if (!(original as any).generationGroupId) {
+        await this.prisma.client.content.update({
+          where: { id: original.id },
+          data: { generationGroupId },
+        });
+      }
+    }
+
+    return result;
   }
 
 

@@ -65,8 +65,9 @@ export class ContentController {
     @Query('brandId') brandId?: string,
     @Query('campaignId') campaignId?: string,
     @Query('status') status?: string,
+    @Query('generationGroupId') generationGroupId?: string,
   ) {
-    return this.contentService.findAll(user.businessId, { brandId, campaignId, status });
+    return this.contentService.findAll(user.businessId, { brandId, campaignId, status, generationGroupId });
   }
 
   @Get(':id')
@@ -87,6 +88,16 @@ export class ContentController {
     @Body(new ZodValidationPipe(generateContentSchema)) dto: GenerateContentDto,
   ) {
     return this.contentService.generate(user.businessId, user.sub, dto);
+  }
+
+  @Post(':id/regenerate')
+  @Permissions('content:create')
+  @ApiOperation({ summary: 'Regenerate content as a new variant in the same group' })
+  regenerate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.contentService.regenerate(id, user.businessId, user.sub);
   }
 
   @Patch(':id')

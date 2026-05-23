@@ -449,6 +449,14 @@ export default function KnowledgeExplorer({ isOpen, onClose }: { isOpen: boolean
             </div>
           )}
         </div>
+
+        {/* Toast notification */}
+        {toastMessage && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <p className="text-sm font-semibold text-white">{toastMessage.title}</p>
+            <p className="text-xs text-slate-400">{toastMessage.description}</p>
+          </div>
+        )}
       </div>
     </div>
   );

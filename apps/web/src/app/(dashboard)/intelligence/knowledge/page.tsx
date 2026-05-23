@@ -100,6 +100,19 @@ export default function KnowledgeDashboard() {
       </div>
 
       {/* Stats Grid */}
+      {isError ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 dark:border-red-800/50 dark:bg-red-900/10">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-red-100 p-2 dark:bg-red-900/30">
+              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-red-900 dark:text-red-200">Failed to load knowledge stats</h3>
+              <p className="text-xs text-red-600 dark:text-red-400">Check your connection and try again.</p>
+            </div>
+          </div>
+        </div>
+      ) : (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard 
           title="Intelligence Health" 
@@ -129,6 +142,7 @@ export default function KnowledgeDashboard() {
           alert={stats.pendingReviews > 10}
         />
       </div>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Live Ingestion Monitor */}

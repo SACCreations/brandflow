@@ -464,6 +464,7 @@ export default function ImageGeneratorPage() {
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
+                )}
               </div>
             </div>
           </Card>
@@ -559,26 +560,41 @@ export default function ImageGeneratorPage() {
 
               {/* Custom Size Inputs */}
               {isCustomSize && (
-                <div className="flex gap-4 items-center">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Width (px)</label>
-                    <input
-                      type="number"
-                      value={customWidth}
-                      onChange={(e) => setCustomWidth(parseInt(e.target.value) || 0)}
-                      className="w-24 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 transition-colors"
-                    />
+                <div className="space-y-2">
+                  <div className="flex gap-4 items-center">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Width (px)</label>
+                      <input
+                        type="number"
+                        value={customWidth}
+                        onChange={(e) => setCustomWidth(parseInt(e.target.value) || 0)}
+                        min={DIM_MIN}
+                        max={DIM_MAX}
+                        className={`w-24 rounded-xl border bg-slate-950 px-3 py-2 text-xs text-white outline-none transition-colors ${
+                          isCustomSize && (customWidth < DIM_MIN || customWidth > DIM_MAX) ? 'border-rose-500' : 'border-slate-800 focus:border-indigo-500'
+                        }`}
+                        aria-label="Custom width in pixels"
+                      />
+                    </div>
+                    <span className="text-slate-500 font-bold mt-5">×</span>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Height (px)</label>
+                      <input
+                        type="number"
+                        value={customHeight}
+                        onChange={(e) => setCustomHeight(parseInt(e.target.value) || 0)}
+                        min={DIM_MIN}
+                        max={DIM_MAX}
+                        className={`w-24 rounded-xl border bg-slate-950 px-3 py-2 text-xs text-white outline-none transition-colors ${
+                          isCustomSize && (customHeight < DIM_MIN || customHeight > DIM_MAX) ? 'border-rose-500' : 'border-slate-800 focus:border-indigo-500'
+                        }`}
+                        aria-label="Custom height in pixels"
+                      />
+                    </div>
                   </div>
-                  <span className="text-slate-500 font-bold mt-5">×</span>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Height (px)</label>
-                    <input
-                      type="number"
-                      value={customHeight}
-                      onChange={(e) => setCustomHeight(parseInt(e.target.value) || 0)}
-                      className="w-24 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
+                  {dimensionError && (
+                    <span className="text-[10px] text-rose-400 font-bold">{dimensionError}</span>
+                  )}
                 </div>
               )}
             </div>
@@ -622,11 +638,28 @@ export default function ImageGeneratorPage() {
                     <span className="text-[9px] text-indigo-400 font-bold uppercase">Enhanced by Brand Prompt-Engine</span>
                   </span>
                   <textarea
-                    className="w-full min-h-[100px] rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
+                    className={`w-full min-h-[100px] rounded-xl border bg-slate-950 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-slate-600 ${
+                      promptError ? 'border-rose-500 focus:border-rose-400' : 'border-slate-800 focus:border-indigo-500'
+                    }`}
                     value={promptText}
                     onChange={(e) => setPromptText(e.target.value)}
                     placeholder="E.g. Dynamic capture of organic product, droplets, studio light setup, visual symmetry, clean background placeholder"
+                    maxLength={PROMPT_MAX}
+                    aria-label="Image generation prompt"
+                    aria-describedby="prompt-counter"
                   />
+                  <div className="flex justify-between items-center" id="prompt-counter">
+                    {promptError ? (
+                      <span className="text-[10px] text-rose-400 font-bold">{promptError}</span>
+                    ) : (
+                      <span className="text-[10px] text-slate-600">Min {PROMPT_MIN} characters</span>
+                    )}
+                    <span className={`text-[10px] font-mono font-bold ${
+                      promptText.length > PROMPT_MAX * 0.9 ? 'text-amber-400' : 'text-slate-600'
+                    }`}>
+                      {promptText.length}/{PROMPT_MAX}
+                    </span>
+                  </div>
                 </div>
               )}
 
@@ -760,29 +793,53 @@ export default function ImageGeneratorPage() {
 
           {/* Active Job Progress Visualizer */}
           {generating && (
-            <Card className="p-6 border-indigo-500/30 bg-indigo-950/10 space-y-4 animate-in slide-in-from-bottom-2 duration-300">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Loader2 className="h-5 w-5 animate-spin text-indigo-400" />
+            <Card className="p-6 border-indigo-500/30 bg-indigo-950/10 space-y-5 animate-in slide-in-from-bottom-2 duration-300">
+              {/* Pipeline Stage Indicators */}
+              <div className="flex items-center justify-between gap-1">
+                {STAGES.map((stage, idx) => {
+                  const stageIdx = STAGES.findIndex(s => s.key === currentStage);
+                  const isActive = stage.key === currentStage;
+                  const isCompleted = idx < stageIdx;
+                  return (
+                    <div key={stage.key} className="flex items-center gap-1 flex-1">
+                      <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${
+                        isActive ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 animate-pulse' :
+                        isCompleted ? 'bg-emerald-500/10 text-emerald-400' :
+                        'text-slate-600'
+                      }`}>
+                        {isCompleted ? <CheckCircle2 className="h-3 w-3" /> : isActive ? <Loader2 className="h-3 w-3 animate-spin" /> : <div className="h-3 w-3 rounded-full border border-slate-700" />}
+                        <span className="hidden sm:inline">{stage.label}</span>
+                      </div>
+                      {idx < STAGES.length - 1 && (
+                        <div className={`flex-1 h-px ${isCompleted ? 'bg-emerald-500/40' : 'bg-slate-800'}`} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
                   <span className="text-xs font-black uppercase tracking-widest text-indigo-300">
-                    {activeJob?.status === 'PROCESSING' ? 'Running prompt and gateway paint pipeline...' : 'Awaiting RabbitMQ/BullMQ redis dispatch...'}
+                    {STAGES.find(s => s.key === currentStage)?.label || 'Processing'}...
+                  </span>
+                  <span className="text-xs font-black text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                    {currentProgress}%
                   </span>
                 </div>
-                <span className="text-xs font-black text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
-                  {activeJob?.progress ?? 0}% PROGRESS
-                </span>
+                <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden" role="progressbar" aria-valuenow={currentProgress} aria-valuemin={0} aria-valuemax={100}>
+                  <div 
+                    className="bg-gradient-to-r from-indigo-500 to-violet-500 h-2.5 rounded-full transition-all duration-700 ease-out shadow-md shadow-indigo-500/50"
+                    style={{ width: `${currentProgress}%` }}
+                  />
+                </div>
               </div>
 
-              <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                <div 
-                  className="bg-indigo-500 h-2.5 rounded-full transition-all duration-500 shadow-md shadow-indigo-500/50"
-                  style={{ width: `${activeJob?.progress ?? 0}%` }}
-                />
-              </div>
-
-              {activeJob?.finalPrompt && (
-                <div className="bg-slate-950 border border-slate-850 p-3 rounded-lg text-[10px] text-slate-500 font-mono italic">
-                  ENHANCED PROMPT: "{activeJob.finalPrompt}"
+              {/* Enhanced Prompt Display */}
+              {currentFinalPrompt && (
+                <div className="bg-slate-950 border border-slate-800 p-3 rounded-lg text-[10px] text-slate-500 font-mono italic">
+                  ENHANCED PROMPT: &ldquo;{currentFinalPrompt}&rdquo;
                 </div>
               )}
             </Card>
