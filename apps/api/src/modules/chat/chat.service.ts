@@ -420,6 +420,13 @@ export class ChatService {
         model: result.response.model,
         response: result.response.content,
         latency,
+        tokens: {
+          input: result.response.inputTokens || 0,
+          output: result.response.outputTokens || 0,
+        },
+        retryCount: 0,
+        fallbackUsed: result.provider !== primaryProvider,
+        fallbackProvider: result.provider !== primaryProvider ? result.provider : null,
       };
     } catch (err: any) {
       prisma.aIRequestLog.create({

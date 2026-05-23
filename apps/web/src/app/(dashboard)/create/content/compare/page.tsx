@@ -136,7 +136,7 @@ export default function VariantComparisonPage() {
 
   const bestVariant = variants.reduce((best, v) => {
     const score = v.qualityChecks?.[0]?.confidenceScore ?? v.qualityScore ?? 0;
-    const bestScore = best.qualityChecks?.[0]?.confidenceScore ?? best.qualityScore ?? 0;
+    const bestScore = best?.qualityChecks?.[0]?.confidenceScore ?? best?.qualityScore ?? 0;
     return score > bestScore ? v : best;
   }, variants[0]);
 
