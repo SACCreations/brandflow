@@ -386,4 +386,14 @@ export class AnalyticsService {
       recentJobs: slaResults
     };
   }
+
+  private resolveDateRange(from?: string, to?: string): { start: Date; end: Date } {
+    const end = to ? new Date(to) : new Date();
+    const start = from ? new Date(from) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return { start, end };
+  }
+
+  private formatDayKey(date: Date): string {
+    return date.toISOString().split('T')[0]!;
+  }
 }

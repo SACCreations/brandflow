@@ -58,7 +58,6 @@ export class IngestionService {
         backoff: { type: 'exponential', delay: 2000 },
         removeOnComplete: 50,
         removeOnFail: { age: 604800 }, // 7 days retention for observability
-        timeout: 300_000, // 5 minute hard timeout per job
       },
     );
 
@@ -217,7 +216,7 @@ export class IngestionService {
       if (effectiveType === 'pptx' || mimeType?.includes('presentationml')) {
         // pptx is a ZIP archive — extract XML slide content
         try {
-          const { extractPptxText } = await import('./utils/pptx-extractor');
+          const { extractPptxText } = await import('./utils/pptx-extractor.js');
           return await extractPptxText(raw);
         } catch {
           // Fallback: try reading as UTF-8 and extracting text nodes

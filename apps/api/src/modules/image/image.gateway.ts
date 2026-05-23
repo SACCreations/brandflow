@@ -38,7 +38,7 @@ export class ImageWebSocketGateway implements OnGatewayConnection, OnGatewayDisc
   async handleConnection(client: Socket) {
     try {
       const token =
-        client.handshake.auth?.token ||
+        client.handshake.auth?.['token'] ||
         client.handshake.headers?.authorization?.replace('Bearer ', '');
 
       if (!token) {

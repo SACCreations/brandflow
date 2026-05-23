@@ -117,7 +117,7 @@ export class KnowledgeController {
     @CurrentUser() user: JwtPayload,
     @Body(new ZodValidationPipe(knowledgeReviewSchema)) dto: KnowledgeReviewDto,
   ) {
-    return this.knowledgeService.updateEntryReview(id, user.businessId, dto.status, dto.note);
+    return this.knowledgeService.updateEntryReview(id, user.businessId, dto.status, dto.note ?? undefined);
   }
 
   @Patch('entries/:id/stale')
