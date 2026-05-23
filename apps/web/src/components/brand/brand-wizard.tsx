@@ -26,6 +26,7 @@ interface BrandWizardProps {
   isLoading?: boolean;
   title: string;
   onClose?: () => void;
+  initialData?: any;
 }
 
 const STEPS = [
@@ -39,10 +40,10 @@ const STEPS = [
   { id: 'finish', label: 'Analytics & Finish', icon: Sparkles, description: 'Reporting & Review' }
 ];
 
-export function BrandWizard({ onSubmit, isLoading, title, onClose }: BrandWizardProps) {
+export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }: BrandWizardProps) {
   const [currentStepIdx, setCurrentStepIdx] = React.useState(0);
   const [maxVisitedStepIdx, setMaxVisitedStepIdx] = React.useState(0);
-  const [formData, setFormData] = React.useState<any>({});
+  const [formData, setFormData] = React.useState<any>(initialData || {});
   const { toast } = useToast();
   
   const triggerValidationRef = React.useRef<(() => Promise<boolean>) | undefined>(undefined);

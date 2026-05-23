@@ -210,6 +210,85 @@ export interface BrandAnalysisBrandDraft {
     ctaPreferences: string[];
     requiredDisclaimer?: string | null;
   };
+  visualRules?: {
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
+    accentColor?: string | null;
+    fontFamily?: string | null;
+    headingFont?: string | null;
+    bodyFont?: string | null;
+    logoUrls?: Array<{ url?: string | null; type?: string | null; name?: string | null }> | null;
+  } | null;
+  identity?: {
+    mission?: string | null;
+    vision?: string | null;
+    values?: string[] | null;
+    promise?: string | null;
+    personality?: string | null;
+  } | null;
+  designTokens?: {
+    borderRadius?: string | null;
+    shadows?: string | null;
+    spacing?: string | null;
+  } | null;
+  strategy?: {
+    targetLocation?: string | null;
+    ageGroup?: string | null;
+    interests?: string | null;
+    postingFrequency?: 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | null;
+    festivalPosts?: boolean;
+    offerPosts?: boolean;
+    preferredTypes?: string[] | null;
+    contentLanguage?: 'tamil' | 'english' | 'mixed' | null;
+    ctaPreference?: 'Call Now' | 'DM' | 'Visit Website' | null;
+  } | null;
+  designPreferences?: {
+    preferredStyle?: 'Minimal' | 'Corporate' | '3D' | 'Modern' | 'Playful' | 'Luxury' | null;
+    referenceLinks?: string[] | null;
+    imageStyle?: 'Minimal' | 'Corporate' | '3D' | 'Modern' | null;
+    animationRequirement?: boolean;
+  } | null;
+  approvalWorkflow?: {
+    reviewerName?: string | null;
+    finalApproverName?: string | null;
+    processSteps?: string[] | null;
+    approvalTiming?: string | null;
+    revisionLimit?: number | null;
+  } | null;
+  campaignDetails?: {
+    marketingGoal?: 'Brand Awareness' | 'Leads' | 'Sales' | null;
+    monthlyBudget?: number | null;
+    duration?: string | null;
+    targetLeads?: number | null;
+    adPlatforms?: string[] | null;
+  } | null;
+  analyticsConfig?: {
+    monthlyReport?: boolean;
+    kpiExpectations?: string | null;
+    leadTracking?: boolean;
+    engagementTracking?: boolean;
+  } | null;
+  socialAccess?: {
+    metaBusinessManagerId?: string | null;
+    adAccountId?: string | null;
+    instagramHandle?: string | null;
+    facebookPage?: string | null;
+    linkedinPage?: string | null;
+    youtubeChannel?: string | null;
+    twitterHandle?: string | null;
+  } | null;
+  competitors?: Array<{
+    name: string;
+    website?: string | null;
+    strengths?: string | null;
+    weaknesses?: string | null;
+  }> | null;
+  contactInfo?: {
+    personName?: string | null;
+    phoneNumber?: string | null;
+    email?: string | null;
+    officeAddress?: string | null;
+  } | null;
 }
 
 export interface BrandAnalysisResult {

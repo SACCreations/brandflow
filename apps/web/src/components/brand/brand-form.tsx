@@ -105,7 +105,21 @@ const sanitizeInitialData = (data: any) => {
       headingFont: cleaned.visualRules?.headingFont || 'Inter',
       bodyFont: cleaned.visualRules?.bodyFont || 'Inter',
       fontFamily: cleaned.visualRules?.fontFamily || 'Inter',
-      logoUrls: Array.isArray(cleaned.visualRules?.logoUrls) ? cleaned.visualRules.logoUrls.filter(Boolean) : []
+      logoUrls: (() => {
+        const arr = Array.isArray(cleaned.visualRules?.logoUrls) ? [...cleaned.visualRules.logoUrls.filter(Boolean)] : [];
+        if (!arr[0]) arr[0] = { url: '', type: 'primary', name: 'Primary Logo' };
+        if (!arr[1]) arr[1] = { url: '', type: 'dark', name: 'Dark Variant' };
+        return arr;
+      })(),
+      colorTokens: Array.isArray(cleaned.visualRules?.colorTokens) && cleaned.visualRules.colorTokens.length > 0 ? cleaned.visualRules.colorTokens : [
+        { id: '1', name: 'Primary', value: cleaned.visualRules?.primaryColor || '#6366f1', type: 'primary' },
+        { id: '2', name: 'Secondary', value: cleaned.visualRules?.secondaryColor || '#a855f7', type: 'secondary' },
+        { id: '3', name: 'Accent', value: cleaned.visualRules?.accentColor || '#f59e0b', type: 'accent' }
+      ].filter(c => c.value),
+      typographySettings: Array.isArray(cleaned.visualRules?.typographySettings) && cleaned.visualRules.typographySettings.length > 0 ? cleaned.visualRules.typographySettings : [
+        { id: 'h', label: 'Heading Font', fontFamily: cleaned.visualRules?.headingFont || cleaned.visualRules?.fontFamily || 'Inter', weight: '900', sizeScale: '1.5', lineHeight: '1.2' },
+        { id: 'b', label: 'Body Font', fontFamily: cleaned.visualRules?.bodyFont || cleaned.visualRules?.fontFamily || 'Inter', weight: '400', sizeScale: '1', lineHeight: '1.5' }
+      ]
     },
     designTokens: {
       ...cleaned.designTokens,
@@ -118,10 +132,11 @@ const sanitizeInitialData = (data: any) => {
       documents: Array.isArray(cleaned.assets?.documents) ? cleaned.assets.documents : []
     },
     identity: {
-      mission: cleaned.mission || '',
-      vision: cleaned.vision || '',
-      promise: cleaned.promise || '',
-      personality: cleaned.personality || '',
+      ...cleaned.identity,
+      mission: cleaned.identity?.mission || '',
+      vision: cleaned.identity?.vision || '',
+      promise: cleaned.identity?.promise || '',
+      personality: cleaned.identity?.personality || '',
       values: Array.isArray(cleaned.identity?.values) ? cleaned.identity.values : []
     },
     governance: {
@@ -302,11 +317,32 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
   }, [activeStepId, form, triggerValidationRef]);
 
   // Keyboard Shortcuts
+  const handleFormSubmit = (data: any) => {
+    const submitData = { ...data };
+    if (submitData.visualRules) {
+       const colors = submitData.visualRules.colorTokens || [];
+       const primary = colors.find((c: any) => c.type === 'primary')?.value || submitData.visualRules.primaryColor;
+       const secondary = colors.find((c: any) => c.type === 'secondary')?.value || submitData.visualRules.secondaryColor;
+       const accent = colors.find((c: any) => c.type === 'accent')?.value || submitData.visualRules.accentColor;
+       
+       const fonts = submitData.visualRules.typographySettings || [];
+       const heading = fonts.find((f: any) => f.id === 'h')?.fontFamily || submitData.visualRules.headingFont;
+       const body = fonts.find((f: any) => f.id === 'b')?.fontFamily || submitData.visualRules.bodyFont;
+
+       submitData.visualRules.primaryColor = primary;
+       submitData.visualRules.secondaryColor = secondary;
+       submitData.visualRules.accentColor = accent;
+       submitData.visualRules.headingFont = heading;
+       submitData.visualRules.bodyFont = body;
+    }
+    onSubmit(submitData);
+  };
+
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
-        handleSubmit(onSubmit)();
+        handleSubmit(handleFormSubmit)();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -348,7 +384,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={cn("space-y-12", !wizardMode && "pb-32")}>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className={cn("space-y-12", !wizardMode && "pb-32")}>
       {/* 1. Brand Basics */}
       {isSectionVisible('basics') && (
         <section id="basics" className="space-y-6 scroll-mt-24">
@@ -709,7 +745,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
               <div className="space-y-2">
                 <label className="text-sm font-black uppercase tracking-widest text-gray-400">Mission Statement</label>
                 <Textarea 
-                  {...register('mission')} 
+                  {...register('identity.mission')} 
                   placeholder="Why do you exist?" 
                   className="min-h-[120px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
                 />
