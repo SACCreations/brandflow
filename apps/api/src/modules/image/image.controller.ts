@@ -7,6 +7,7 @@ import { CreativeGenerationService } from './creative-generation.service';
 import { CanvasService } from './canvas.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { GenerateImageDto } from './dto/generate-image.dto';
 import type { JwtPayload } from '@brandflow/shared';
 
 @ApiTags('image')
@@ -49,20 +50,7 @@ export class ImageController {
   @ApiOperation({ summary: 'Schedule an asynchronous background image generation job' })
   async generateImage(
     @CurrentUser() user: JwtPayload,
-    @Body() data: {
-      brandId: string;
-      campaignId?: string;
-      prompt: string;
-      category: string;
-      settings?: {
-        width?: number;
-        height?: number;
-        aspectRatio?: string;
-        style?: string;
-        quality?: 'standard' | 'hd';
-        provider?: string;
-      };
-    },
+    @Body() data: GenerateImageDto,
   ) {
     const width = data.settings?.width ?? 1024;
     const height = data.settings?.height ?? 1024;

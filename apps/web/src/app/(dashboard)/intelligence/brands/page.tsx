@@ -25,7 +25,8 @@ import {
   Palette,
   Loader2,
   Undo2,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { 
   Card, 
@@ -260,19 +261,21 @@ export default function BrandsPage() {
           </div>
         </Card>
 
-        <Card className="p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group overflow-hidden relative border-l-4 border-l-amber-500">
+        <Card className="p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
           <div className="relative z-10 space-y-4">
             <div className="flex items-center justify-between">
               <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600">
                 <Palette className="w-5 h-5" />
               </div>
-              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-amber-100 text-amber-500">Action Required</Badge>
+              {stats.active > 0 && (
+                <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-amber-100 text-amber-500">Active</Badge>
+              )}
             </div>
             <div>
-              <p className="text-3xl font-black text-gray-900 dark:text-white">4</p>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">Governance Alerts</p>
+              <p className="text-3xl font-black text-gray-900 dark:text-white">{stats.active}</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">Active This Week</p>
             </div>
-            <p className="text-[10px] text-amber-600 font-bold leading-tight">Missing typography tokens in 3 brands.</p>
+            <p className="text-[10px] text-gray-500 font-bold leading-tight">Brands updated in the last 7 days.</p>
           </div>
         </Card>
 
@@ -284,12 +287,14 @@ export default function BrandsPage() {
               </div>
             </div>
             <div>
-              <p className="text-3xl font-black text-gray-900 dark:text-white">128</p>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">AI Generated Assets</p>
+              <p className="text-3xl font-black text-gray-900 dark:text-white">{stats.total}</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">Brand Profiles</p>
             </div>
             <div className="flex items-center gap-1.5 pt-2">
-              <div className="h-1 flex-1 bg-purple-100 dark:bg-purple-900/20 rounded-full" />
-              <span className="text-[9px] font-black text-purple-600 uppercase tracking-widest">Budget: 74%</span>
+              <div className="h-1 flex-1 bg-purple-100 dark:bg-purple-900/20 rounded-full overflow-hidden">
+                <div className="h-full bg-purple-500 transition-all duration-1000" style={{ width: `${stats.avgHealth}%` }} />
+              </div>
+              <span className="text-[9px] font-black text-purple-600 uppercase tracking-widest">Avg: {stats.avgHealth}%</span>
             </div>
           </div>
         </Card>
@@ -441,16 +446,16 @@ export default function BrandsPage() {
                     
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">Governance</p>
+                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">Health</p>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-black text-gray-900 dark:text-white">84%</span>
-                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                          <span className="text-xs font-black text-gray-900 dark:text-white">{brand.healthScore ?? 0}%</span>
+                          {(brand.healthScore ?? 0) >= 70 ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <AlertCircle className="w-3 h-3 text-amber-500" />}
                         </div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">AI Ready</p>
+                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">Status</p>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-black text-gray-900 dark:text-white">92%</span>
+                          <span className="text-xs font-black text-gray-900 dark:text-white capitalize">{brand.status || 'draft'}</span>
                           <Sparkles className="w-3 h-3 text-brand-500" />
                         </div>
                       </div>
@@ -458,15 +463,12 @@ export default function BrandsPage() {
 
                     <div className="flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
                       <div className="flex items-center gap-2">
-                        <div className="flex -space-x-2">
-                          {[1, 2].map(i => (
-                            <div key={i} className="w-6 h-6 rounded-full border-2 border-white dark:border-gray-900 bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[8px] font-black">JD</div>
-                          ))}
-                        </div>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none">Shared With</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none">v{brand.version || 1}</span>
                       </div>
                       
-                      <Badge className="bg-blue-50 text-blue-600 border-blue-100 text-[9px] font-black uppercase h-5">3 Campaigns</Badge>
+                      {brand.tone && Array.isArray(brand.tone) && brand.tone.length > 0 && (
+                        <Badge className="bg-blue-50 text-blue-600 border-blue-100 text-[9px] font-black uppercase h-5">{brand.tone[0]}</Badge>
+                      )}
                     </div>
                   </div>
                 </Link>

@@ -847,34 +847,73 @@ export default function ImageGeneratorPage() {
 
           {/* Historical Generations Grid */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <History className="h-5 w-5 text-slate-400" />
-              <h2 className="text-sm font-black uppercase tracking-wider text-slate-300">Workspace Generation History ({jobs.length})</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <History className="h-5 w-5 text-slate-400" />
+                <h2 className="text-sm font-black uppercase tracking-wider text-slate-300">Generation History ({filteredJobs.length})</h2>
+              </div>
+              {/* Status Filter */}
+              <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 p-0.5 rounded-lg">
+                {(['all', 'COMPLETED', 'FAILED', 'PROCESSING'] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setStatusFilter(f)}
+                    className={`text-[9px] font-black px-2 py-1 rounded transition-all uppercase ${
+                      statusFilter === f 
+                        ? 'bg-slate-800 text-indigo-400 shadow-sm' 
+                        : 'text-slate-500 hover:text-slate-300'
+                    }`}
+                    aria-label={`Filter by ${f === 'all' ? 'all statuses' : f.toLowerCase()}`}
+                  >
+                    {f === 'all' ? 'All' : f === 'COMPLETED' ? '✓ Done' : f === 'FAILED' ? '✗ Failed' : '⟳ Active'}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {jobs.length === 0 ? (
+            {jobsLoading ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <Card key={i} className="border-slate-800 bg-slate-900/30 overflow-hidden">
+                    <Skeleton className="aspect-video w-full" />
+                    <div className="p-4 space-y-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-2/3" />
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredJobs.length === 0 ? (
               <Card className="p-8 text-center border-dashed border-slate-800 bg-slate-900/15">
                 <ImageIcon className="h-8 w-8 text-slate-600 mx-auto mb-2" />
-                <span className="text-xs font-bold text-slate-500">No images generated in this workspace yet.</span>
+                <span className="text-xs font-bold text-slate-500">
+                  {statusFilter === 'all' 
+                    ? 'No images generated in this workspace yet.' 
+                    : `No ${statusFilter.toLowerCase()} jobs found.`}
+                </span>
               </Card>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
-                {jobs.map((job) => {
+                {filteredJobs.map((job) => {
                   const img = job.images?.[0];
                   return (
-                    <Card key={job.id} className="border-slate-800 bg-slate-900/30 overflow-hidden flex flex-col justify-between">
+                    <Card key={job.id} className="border-slate-800 bg-slate-900/30 overflow-hidden flex flex-col justify-between group">
                       {job.status === 'COMPLETED' && img?.asset ? (
                         <div className="relative aspect-video w-full bg-slate-950 border-b border-slate-800">
                           <img 
                             src={img.asset.cdnUrl} 
-                            alt={job.rawPrompt} 
-                            className="h-full w-full object-cover filter brightness-[0.8] hover:brightness-100 transition-all"
+                            alt={`Generated image: ${job.rawPrompt.substring(0, 100)}`}
+                            className="h-full w-full object-cover filter brightness-[0.8] group-hover:brightness-100 transition-all"
                           />
-                          <div className="absolute top-2.5 right-2.5 flex gap-1.5">
+                          <div className="absolute top-2.5 right-2.5 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button 
-                              onClick={() => alert(`CDN Link copied: ${img.asset.cdnUrl}`)}
+                              onClick={() => {
+                                navigator.clipboard.writeText(img.asset.cdnUrl);
+                                toast({ title: 'URL copied to clipboard' });
+                              }}
                               className="p-1.5 bg-slate-900/80 hover:bg-slate-900 rounded-lg text-slate-300 border border-slate-700/50 hover:text-white transition-colors"
-                              title="Copy URL"
+                              aria-label="Copy image URL"
                             >
                               <Share2 className="h-3.5 w-3.5" />
                             </button>
@@ -884,7 +923,7 @@ export default function ImageGeneratorPage() {
                               target="_blank"
                               rel="noreferrer"
                               className="p-1.5 bg-slate-900/80 hover:bg-slate-900 rounded-lg text-slate-300 border border-slate-700/50 hover:text-white transition-colors"
-                              title="Download Asset"
+                              aria-label="Download image asset"
                             >
                               <Download className="h-3.5 w-3.5" />
                             </a>
@@ -913,7 +952,7 @@ export default function ImageGeneratorPage() {
                             {job.category} • {job.settings?.aspectRatio || '1:1'}
                           </span>
                           <p className="text-[11px] text-slate-300 font-bold mt-2 line-clamp-2 leading-relaxed">
-                            "{job.rawPrompt}"
+                            &ldquo;{job.rawPrompt}&rdquo;
                           </p>
                         </div>
 
@@ -925,6 +964,21 @@ export default function ImageGeneratorPage() {
                               </Button>
                             </Link>
                           </div>
+                        )}
+
+                        {job.status === 'FAILED' && (
+                          <Button
+                            onClick={() => {
+                              setPromptText(job.rawPrompt);
+                              if (job.settings?.aspectRatio) setSelectedRatioId(job.settings.aspectRatio);
+                              if (job.category) setSelectedCategory(job.category);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="w-full gap-1.5 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 py-2 rounded-lg text-[10.5px] font-black uppercase tracking-wider transition-colors"
+                            aria-label="Retry this generation with the same prompt"
+                          >
+                            <RefreshCw className="h-3 w-3" /> Regenerate
+                          </Button>
                         )}
                       </div>
                     </Card>
@@ -955,9 +1009,8 @@ export default function ImageGeneratorPage() {
                 <div>
                   <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block leading-none">Color Palette Tokens</span>
                   <div className="flex flex-wrap gap-1.5 mt-2">
-                    {/* Display mock brand design tokens */}
-                    {['#6366f1', '#a855f7', '#ec4899', '#f43f5e'].map((color) => (
-                      <div key={color} className="flex items-center gap-1 bg-slate-950 border border-slate-850 px-2 py-0.5 rounded text-[10px] font-mono text-slate-400">
+                    {(selectedBrand.visualRules?.colors || ['#6366f1', '#a855f7', '#ec4899', '#f43f5e']).map((color: string) => (
+                      <div key={color} className="flex items-center gap-1 bg-slate-950 border border-slate-800 px-2 py-0.5 rounded text-[10px] font-mono text-slate-400">
                         <div className="h-2.5 w-2.5 rounded-full border border-slate-800" style={{ backgroundColor: color }} />
                         {color}
                       </div>
@@ -997,14 +1050,28 @@ export default function ImageGeneratorPage() {
           {/* Pricing Info Alerts */}
           <Card className="p-4 border-slate-800 bg-slate-950 text-xs text-slate-500 space-y-2.5">
             <div className="flex items-center gap-2 font-black text-slate-400 uppercase tracking-wider text-[10px]">
-              <AlertCircle className="h-4 w-4 text-amber-500" /> Platform Billing Audits
+              <AlertCircle className="h-4 w-4 text-amber-500" /> Platform Billing
             </div>
             <p className="leading-relaxed">
-              DALL-E 3 & Stability generations consume workspace credits. 
+              Each generation consumes workspace credits based on provider and quality. 
             </p>
-            <div className="bg-slate-900 border border-slate-850 p-2.5 rounded text-[10.5px] text-slate-400 font-bold">
-              Standard: <span className="text-white">1 Credit (~4.0¢)</span><br />
-              High-Definition: <span className="text-white">2 Credits (~8.0¢)</span>
+            <div className="bg-slate-900 border border-slate-800 p-2.5 rounded text-[10.5px] text-slate-400 font-bold space-y-1">
+              <div className="flex justify-between">
+                <span>Stability AI (Standard):</span>
+                <span className="text-white">~$0.03</span>
+              </div>
+              <div className="flex justify-between">
+                <span>OpenAI DALL-E 3 (Standard):</span>
+                <span className="text-white">~$0.04</span>
+              </div>
+              <div className="flex justify-between">
+                <span>OpenAI DALL-E 3 (HD):</span>
+                <span className="text-white">~$0.08</span>
+              </div>
+              <div className="border-t border-slate-800 pt-1 mt-1 flex justify-between text-indigo-400">
+                <span>Your selection:</span>
+                <span className="font-black">~${(estimatedCost / 100).toFixed(2)}</span>
+              </div>
             </div>
           </Card>
 

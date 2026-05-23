@@ -190,11 +190,18 @@ export default function ContentGeneratorPage() {
   // --- Fetch AI Suggested Topics based on Brand & Category ---
   const { data: suggestedTopicsData, isFetching: isSuggestionsLoading, refetch: generateTopics } = useQuery<{ topics: SuggestedTopic[] }>({
     queryKey: ['topic-suggestions', selectedBrandId, selectedCategory],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
+      // Cancel any previous in-flight request
+      if (topicAbortRef.current) {
+        topicAbortRef.current.abort();
+      }
+      const controller = new AbortController();
+      topicAbortRef.current = controller;
+
       const res = await apiClient.post('/content/topics/suggest', {
         brandId: selectedBrandId, 
         category: selectedCategory 
-      });
+      }, { signal: controller.signal });
       return res.data;
     },
     enabled: false,
@@ -275,10 +282,10 @@ export default function ContentGeneratorPage() {
     mutationFn: async () => {
       // Client-side validation
       const errors: Record<string, string> = {};
-      if (!selectedBrandId) errors.brand = 'Brand selection is required';
-      if (!selectedPlatform) errors.platform = 'Platform is required';
-      if (contentCount < 1 || contentCount > 50) errors.count = 'Batch count must be between 1-50';
-      if (creativity < 0.1 || creativity > 1.5) errors.creativity = 'Creativity must be between 0.1-1.5';
+      if (!selectedBrandId) errors['brand'] = 'Brand selection is required';
+      if (!selectedPlatform) errors['platform'] = 'Platform is required';
+      if (contentCount < 1 || contentCount > 50) errors['count'] = 'Batch count must be between 1-50';
+      if (creativity < 0.1 || creativity > 1.5) errors['creativity'] = 'Creativity must be between 0.1-1.5';
       
       if (Object.keys(errors).length > 0) {
         setValidationErrors(errors);
@@ -416,7 +423,7 @@ export default function ContentGeneratorPage() {
                   ))}
                 </select>
                 {briefId && <span className="text-[10px] text-gray-400 font-medium">Locked to brief's designated brand.</span>}
-                {validationErrors.brand && <span className="text-[10px] font-semibold text-red-500">{validationErrors.brand}</span>}
+                {validationErrors['brand'] && <span className="text-[10px] font-semibold text-red-500">{validationErrors['brand']}</span>}
               </div>
 
               <div className="space-y-2">
@@ -728,9 +735,18 @@ export default function ContentGeneratorPage() {
           {/* Queue completed variants results list */}
           {completedContents.length > 0 && (
             <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-500">Generated Batch Outputs ({completedContents.length})</h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                  <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-500">Generated Batch Outputs ({completedContents.length})</h3>
+                </div>
+                {completedContents.length > 1 && completedContents.some((c) => c.status === 'success') && (
+                  <Link href={`/create/content/compare?groupId=${completedContents[0]?.generationGroupId || ''}`}>
+                    <Button variant="outline" size="sm" className="gap-1.5 text-xs font-bold">
+                      Compare Variants <ExternalLink className="h-3.5 w-3.5" />
+                    </Button>
+                  </Link>
+                )}
               </div>
 
               <div className="grid gap-4">
@@ -753,13 +769,28 @@ export default function ContentGeneratorPage() {
                       </div>
                     </div>
 
-                    {c.status === 'success' && c.contentId && (
-                      <Link href={`/create/content/${c.contentId}`}>
-                        <Button variant="outline" className="gap-1.5 text-xs font-bold">
-                          Open in Editor <ExternalLink className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-2">
+                      {c.status === 'failed' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5 text-xs font-bold text-amber-700 border-amber-200 hover:bg-amber-50"
+                          onClick={() => {
+                            // Re-trigger generation for failed item
+                            generateMutation.mutate();
+                          }}
+                        >
+                          <RotateCcw className="h-3.5 w-3.5" /> Retry
                         </Button>
-                      </Link>
-                    )}
+                      )}
+                      {c.status === 'success' && c.contentId && (
+                        <Link href={`/create/content/${c.contentId}`}>
+                          <Button variant="outline" className="gap-1.5 text-xs font-bold">
+                            Open in Editor <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
                   </Card>
                 ))}
               </div>

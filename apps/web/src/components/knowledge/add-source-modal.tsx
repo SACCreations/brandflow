@@ -103,12 +103,13 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" role="dialog" aria-modal="true" aria-labelledby="add-source-title">
       <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-gray-900 border border-gray-200 dark:border-gray-800 animate-in zoom-in-95 duration-300">
         
         {/* Close Button */}
         <button 
           onClick={reset}
+          aria-label="Close dialog"
           className="absolute right-6 top-6 rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors z-10"
         >
           <X className="h-5 w-5" />
@@ -125,7 +126,7 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
         ) : (
           <>
             <div className="p-8">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add Knowledge Source</h2>
+              <h2 id="add-source-title" className="text-2xl font-bold text-gray-900 dark:text-white">Add Knowledge Source</h2>
               <p className="mt-2 text-gray-500 dark:text-gray-400">Select how you want to ingest knowledge into your brand brain.</p>
 
               {/* Tabs */}

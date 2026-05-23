@@ -254,7 +254,7 @@ export class ContentService {
             sourceIds: relevantFacts.map((f: any) => f.sourceId).filter(Boolean),
             requestId,
           } as any,
-        },
+        } as any,
       });
 
       await tx.contentVersion.create({
@@ -311,7 +311,7 @@ export class ContentService {
       campaignId: original.campaignId ?? undefined,
       platform: original.platform,
       type: original.type,
-      topic: (original.metadata as any)?.topic || `${original.type} for ${original.platform}`,
+      topic: ((original as any).metadata as any)?.topic || `${original.type} for ${original.platform}`,
       count: 1,
     } as any;
 
@@ -323,14 +323,14 @@ export class ContentService {
     if (result.content?.id) {
       await this.prisma.client.content.update({
         where: { id: result.content.id },
-        data: { generationGroupId },
+        data: { generationGroupId } as any,
       });
 
       // Also ensure original has the group ID set
       if (!(original as any).generationGroupId) {
         await this.prisma.client.content.update({
           where: { id: original.id },
-          data: { generationGroupId },
+          data: { generationGroupId } as any,
         });
       }
     }

@@ -17,8 +17,10 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
   createBrandSchema,
   updateBrandSchema,
+  connectSocialAccountSchema,
   type CreateBrandDto,
   type UpdateBrandDto,
+  type ConnectSocialAccountDto,
   type JwtPayload,
 } from '@brandflow/shared';
 
@@ -94,7 +96,7 @@ export class BrandController {
   @ApiOperation({ summary: 'Connect a social account (simulated for demo)' })
   connectSocial(
     @CurrentUser() user: JwtPayload,
-    @Body() dto: { platform: string },
+    @Body(new ZodValidationPipe(connectSocialAccountSchema)) dto: ConnectSocialAccountDto,
   ) {
     return this.brandService.connectSocial(user.businessId, dto.platform);
   }

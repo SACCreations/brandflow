@@ -8,6 +8,7 @@ interface ContentGenerationJobData {
   businessId: string;
   userId: string;
   dto: any;
+  generationGroupId?: string;
 }
 
 @Processor(QUEUES.AI_GENERATION)
@@ -19,7 +20,7 @@ export class ContentQueueProcessor extends WorkerHost {
   }
 
   async process(job: Job<ContentGenerationJobData>): Promise<any> {
-    const { businessId, userId, dto } = job.data;
+    const { businessId, userId, dto, generationGroupId } = job.data;
     this.logger.log(`Starting background content generation job ${job.id} for business ${businessId}`);
 
     const topics = dto.topics && dto.topics.length > 0 ? dto.topics : [dto.topic];
@@ -63,10 +64,20 @@ export class ContentQueueProcessor extends WorkerHost {
 
           // Call the primary generation service
           const res = await this.contentService.generate(businessId, userId, itemDto);
+          
+          // Tag with group ID for variant comparison
+          if (generationGroupId && res.content?.id) {
+            await (this.contentService as any).prisma.client.content.update({
+              where: { id: res.content.id },
+              data: { generationGroupId } as any,
+            });
+          }
+          
           results.push({
             contentId: res.content.id,
             topic,
             status: 'success',
+            generationGroupId,
           });
         } catch (err: any) {
           this.logger.error(`Failed iteration for topic "${topic}": ${err.message}`);

@@ -164,7 +164,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
                 <span>Onboarding Progress</span>
                 <span>{Math.round(progress)}%</span>
              </div>
-             <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+             <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Wizard progress">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
@@ -204,13 +204,18 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar Nav */}
         <aside className="w-80 flex-shrink-0 border-r border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 hidden lg:block overflow-y-auto custom-scrollbar">
-          <div className="space-y-1">
+          <nav aria-label="Wizard steps" role="tablist" aria-orientation="vertical" className="space-y-1">
             {STEPS.map((step, idx) => {
               const isActive = currentStepIdx === idx;
               const isVisited = idx <= maxVisitedStepIdx;
               return (
                 <button
                   key={step.id}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls={`step-panel-${step.id}`}
+                  id={`step-tab-${step.id}`}
+                  aria-disabled={!isVisited}
                   onClick={() => handleStepClick(idx)}
                   className={cn(
                     "w-full flex items-start gap-4 p-4 rounded-2xl transition-all text-left group relative",
@@ -250,11 +255,15 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
                 </button>
               );
             })}
-          </div>
+          </nav>
         </aside>
 
         {/* Main Form Area */}
-        <main className="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-gray-950 px-6 sm:px-12 py-8 sm:py-16 custom-scrollbar relative">
+        <main className="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-gray-950 px-6 sm:px-12 py-8 sm:py-16 custom-scrollbar relative"
+          role="tabpanel"
+          id={`step-panel-${currentStep.id}`}
+          aria-labelledby={`step-tab-${currentStep.id}`}
+        >
            {/* Mobile Step Indicator */}
            <div className="flex items-center gap-2 mb-6 lg:hidden">
              {STEPS.map((_, idx) => (

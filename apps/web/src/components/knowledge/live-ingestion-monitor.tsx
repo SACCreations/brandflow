@@ -139,7 +139,7 @@ function JobRow({ job, businessId }: { job: KnowledgeJob; businessId?: string })
 export default function LiveIngestionMonitor() {
   const [tab, setTab] = useState<'jobs' | 'failed'>('jobs');
 
-  const { data: jobs = [], refetch: refetchJobs } = useQuery<KnowledgeJob[]>({
+  const { data: jobs = [], refetch: refetchJobs, isLoading: jobsLoading, isError: jobsError } = useQuery<KnowledgeJob[]>({
     queryKey: ['knowledge-jobs'],
     queryFn: async () => {
       const res = await apiClient.get('/knowledge/jobs');
@@ -210,7 +210,29 @@ export default function LiveIngestionMonitor() {
       <div className="p-4 max-h-[480px] overflow-y-auto">
         {tab === 'jobs' && (
           <>
-            {recentJobs.length === 0 ? (
+            {jobsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="rounded-xl bg-gray-50 dark:bg-gray-800/50 p-4 animate-pulse">
+                    <div className="flex items-center gap-3">
+                      <div className="h-4 w-4 rounded-full bg-gray-200 dark:bg-gray-700" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 w-1/3 rounded bg-gray-200 dark:bg-gray-700" />
+                        <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : jobsError ? (
+              <div className="py-8 text-center">
+                <AlertTriangle className="h-8 w-8 text-red-300 dark:text-red-700 mx-auto mb-2" />
+                <p className="text-sm text-red-500 font-medium">Failed to load ingestion jobs.</p>
+                <button onClick={() => refetchJobs()} className="mt-2 text-xs font-bold text-blue-600 hover:underline">
+                  Try again
+                </button>
+              </div>
+            ) : recentJobs.length === 0 ? (
               <div className="py-12 text-center">
                 <Activity className="h-10 w-10 text-gray-200 dark:text-gray-700 mx-auto mb-3" />
                 <p className="text-sm text-gray-400">No ingestion jobs yet. Add a source to get started.</p>
