@@ -469,7 +469,7 @@ export class ChatService {
 
       let decryptedKey: string | undefined;
       if (settings.apiKey) {
-        const encryptionKey = this.config.get<string>('ENCRYPTION_KEY')!;
+        const encryptionKey = this.config.get<string>('app.encryptionKey') || this.config.get<string>('ENCRYPTION_KEY') || process.env['ENCRYPTION_KEY']!;
         decryptedKey = encryption.decrypt(settings.apiKey, encryptionKey);
       }
 

@@ -9,7 +9,7 @@ export class LlmSettingsService {
   private readonly encryptionKey: string;
 
   constructor(private readonly config: ConfigService) {
-    this.encryptionKey = this.config.get<string>('ENCRYPTION_KEY')!;
+    this.encryptionKey = this.config.get<string>('app.encryptionKey') || this.config.get<string>('ENCRYPTION_KEY') || process.env['ENCRYPTION_KEY']!;
   }
 
   async getSettings(businessId: string) {
