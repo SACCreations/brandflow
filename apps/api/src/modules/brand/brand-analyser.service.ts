@@ -426,7 +426,7 @@ export class BrandAnalyserService {
         : []),
     ]));
 
-    const brand: BrandAnalysisBrandDto = {
+    const brand = {
       name: this.normalizeString(rawBrand['name'], 255)
         ?? this.inferBrandName(context.resolvedSources)
         ?? 'Untitled Brand',
@@ -529,7 +529,7 @@ export class BrandAnalyserService {
         email: this.normalizeString(contactInfo['email'], 255),
         officeAddress: this.normalizeString(contactInfo['officeAddress'], 500),
       } : null,
-    };
+    } as BrandAnalysisBrandDto;
 
     if (!brand.positioning) {
       warnings.push('Positioning could not be confidently derived from the supplied evidence.');
@@ -541,7 +541,7 @@ export class BrandAnalyserService {
       warnings.push('Tone keywords were weakly supported; review before saving.');
     }
 
-    return brandAnalysisResultSchema.parse({
+    const parsedResult = brandAnalysisResultSchema.parse({
       brand,
       diagnostics: {
         sourceCount: context.resolvedSources.length,
@@ -559,6 +559,11 @@ export class BrandAnalyserService {
       provider: context.provider,
       model: context.model,
     });
+
+    return {
+      ...parsedResult,
+      brand,
+    } as BrandAnalysisResult;
   }
 
   private extractJsonObject(content: string): Record<string, unknown> {

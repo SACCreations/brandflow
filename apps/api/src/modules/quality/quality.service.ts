@@ -3,6 +3,22 @@ import { prisma } from '@brandflow/db';
 import { QualityControl, LLMGateway, VectorService } from '@brandflow/ai';
 import type { QualityCheckResult, BrandContext } from '@brandflow/shared';
 
+type QualityCheckResultLike = QualityCheckResult & {
+  overallGrade?: 'A' | 'B' | 'C' | 'D' | 'F';
+  complianceScore?: number;
+  factualScore?: number;
+  safetyScore?: number;
+  citations?: Array<{
+    entryId: string;
+    claimSnippet: string;
+    matchScore: number;
+  }>;
+  violations: Array<QualityCheckResult['violations'][number] & {
+    suggestion?: string;
+    location?: unknown;
+  }>;
+};
+
 @Injectable()
 export class QualityService {
   private readonly logger = new Logger(QualityService.name);
@@ -60,7 +76,7 @@ export class QualityService {
       governance: brand.governance as any,
     };
 
-    const result = await this.qc.check(body, brandContext, facts as any);
+    const result = await this.qc.check(body, brandContext, facts as any) as QualityCheckResultLike;
 
 
     // 4. Persist Results (Atomic Transaction)
@@ -97,7 +113,7 @@ export class QualityService {
       // Create citations
       if (result.citations && result.citations.length > 0) {
         await tx.knowledgeCitation.createMany({
-          data: result.citations.map((c) => ({
+          data: result.citations.map((c: QualityCheckResultLike['citations'][number]) => ({
             qualityCheckId: qcRecord.id,
             entryId: c.entryId,
             claimSnippet: c.claimSnippet,
@@ -153,7 +169,7 @@ export class QualityService {
                 status: 'pending',
                 routeReason: `Auto-routed: quality grade ${result.overallGrade}`,
                 slaDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
-              },
+              } as any,
             });
 
             await tx.content.update({

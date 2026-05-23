@@ -10,7 +10,26 @@ import { parse as csvParse } from 'csv-parse/sync';
 import * as crypto from 'crypto';
 import { WebConnector } from './connectors/web.connector';
 import { LLMGateway, TextSplitter, VectorService } from '@brandflow/ai';
-import type { KnowledgeAtom, KnowledgeEntryClassification } from '@brandflow/shared';
+
+type KnowledgeEntryClassification =
+  | 'product'
+  | 'feature'
+  | 'faq'
+  | 'claim'
+  | 'pricing'
+  | 'testimonial'
+  | 'audience'
+  | 'objective'
+  | 'guideline'
+  | 'legal'
+  | 'fact';
+
+interface KnowledgeAtom {
+  type: KnowledgeEntryClassification;
+  content: string;
+  confidence: number;
+  metadata?: Record<string, unknown>;
+}
 
 // ---------------------------------------------------------------------------
 // Token-based text chunker

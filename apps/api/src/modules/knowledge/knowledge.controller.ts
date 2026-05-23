@@ -13,11 +13,19 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { z } from 'zod';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
-import { createKnowledgeSourceSchema, knowledgeReviewSchema, type CreateKnowledgeSourceDto, type KnowledgeReviewDto, type JwtPayload } from '@brandflow/shared';
+import { createKnowledgeSourceSchema, type CreateKnowledgeSourceDto, type JwtPayload } from '@brandflow/shared';
+
+const knowledgeReviewSchema = z.object({
+  status: z.enum(['approved', 'rejected', 'pending']),
+  note: z.string().max(2000).nullish(),
+});
+
+type KnowledgeReviewDto = z.infer<typeof knowledgeReviewSchema>;
 
 @ApiTags('knowledge')
 @ApiBearerAuth()

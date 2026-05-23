@@ -63,7 +63,7 @@ export class KnowledgeService {
         id: true,
         name: true,
         type: true,
-        lastSyncedAt: true,
+        lastIngested: true,
         syncFrequency: true,
         _count: { select: { entries: true } },
       },
@@ -76,10 +76,10 @@ export class KnowledgeService {
     };
 
     const staleSources = allSources.filter((source) => {
-      if (!source.lastSyncedAt) return true;
+      if (!source.lastIngested) return true;
       const freq = source.syncFrequency ?? 'weekly';
       const thresholdDays = thresholds[freq] ?? 7;
-      const ageMs = now.getTime() - new Date(source.lastSyncedAt).getTime();
+      const ageMs = now.getTime() - new Date(source.lastIngested).getTime();
       return ageMs > thresholdDays * 24 * 60 * 60 * 1000;
     });
 
@@ -94,8 +94,8 @@ export class KnowledgeService {
         id: s.id,
         title: s.name,
         type: s.type,
-        lastSyncedAt: s.lastSyncedAt,
-        staleSince: s.lastSyncedAt,
+        lastSyncedAt: s.lastIngested,
+        staleSince: s.lastIngested,
         entryCount: s._count.entries,
       })),
     };

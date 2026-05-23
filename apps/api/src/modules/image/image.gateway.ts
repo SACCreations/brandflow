@@ -33,9 +33,10 @@ export class ImageWebSocketGateway {
 
   async handleConnection(client: ImageGatewayClientLike) {
     try {
+      const handshake = client.handshake;
       const token =
-        client.handshake.auth?.['token'] ||
-        client.handshake.headers?.authorization?.replace('Bearer ', '');
+        handshake?.auth?.['token'] ||
+        handshake?.headers?.['authorization']?.replace('Bearer ', '');
 
       if (!token) {
         this.logger.warn(`[WS] Connection rejected — no token provided`);
@@ -63,7 +64,7 @@ export class ImageWebSocketGateway {
   }
 
   handleDisconnect(client: ImageGatewayClientLike) {
-    const userId = client.data?.userId;
+    const userId = client.data?.['userId'];
     this.logger.debug(`[WS] Client disconnected: user=${userId}`);
   }
 

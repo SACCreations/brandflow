@@ -81,7 +81,7 @@ export class ContentController {
   }
 
   @Post('generate')
-  @Permissions('content:create')
+  @Permissions('content:create' as any)
   @ApiOperation({ summary: 'Generate new content using AI' })
   generate(
     @CurrentUser() user: JwtPayload,
@@ -91,7 +91,7 @@ export class ContentController {
   }
 
   @Post(':id/regenerate')
-  @Permissions('content:create')
+  @Permissions('content:create' as any)
   @ApiOperation({ summary: 'Regenerate content as a new variant in the same group' })
   regenerate(
     @Param('id', ParseUUIDPipe) id: string,
@@ -101,7 +101,7 @@ export class ContentController {
   }
 
   @Patch(':id')
-  @Permissions('content:edit')
+  @Permissions('content:edit' as any)
   @ApiOperation({ summary: 'Edit content body (creates new version)' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
