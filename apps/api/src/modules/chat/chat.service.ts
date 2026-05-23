@@ -196,18 +196,23 @@ export class ChatService {
       { role: 'user' as const, content: message },
     ];
 
-    // Get business API key if available
-    const apiKey = await this.getBusinessApiKey(businessId);
+    // Get business LLM settings
+    const llmSettings = await this.getBusinessLlmSettings(businessId);
+    if (!llmSettings?.apiKey) {
+      throw new InternalServerErrorException(
+        'No AI provider configured. Please add your API key in Settings → AI Provider.',
+      );
+    }
 
     const start = Date.now();
     const requestId = randomUUID();
 
     try {
       const result = await this.gateway.complete(systemPrompt, llmMessages as any, {
-        provider: 'openai',
-        maxTokens: 1500,
-        temperature: 0.7,
-        apiKey,
+        provider: llmSettings.provider as any,
+        maxTokens: llmSettings.maxTokens,
+        temperature: llmSettings.temperature,
+        apiKey: llmSettings.apiKey,
       });
 
       const latency = Date.now() - start;
@@ -312,7 +317,7 @@ export class ChatService {
     if (!chatMessage) throw new NotFoundException('Message not found');
 
     // Refine content for the target platform/type
-    const apiKey = await this.getBusinessApiKey(businessId);
+    const llmSettings = await this.getBusinessLlmSettings(businessId);
     const brand = await prisma.brand.findFirst({
       where: { id: conversation.brandId, businessId },
       select: { name: true, tone: true, audience: true },
@@ -325,10 +330,10 @@ export class ChatService {
 
     try {
       const result = await this.gateway.complete(refinePrompt, chatMessage.content, {
-        provider: 'openai',
-        maxTokens: 1000,
+        provider: (llmSettings?.provider || 'openai') as any,
+        maxTokens: llmSettings?.maxTokens || 1000,
         temperature: 0.6,
-        apiKey,
+        apiKey: llmSettings?.apiKey,
       });
       finalBody = result.response.content;
     } catch {
@@ -384,7 +389,7 @@ export class ChatService {
     const primaryProvider = (dto.provider || 'openai').toLowerCase();
     const requestId = randomUUID();
 
-    const apiKey = businessId ? await this.getBusinessApiKey(businessId) : undefined;
+    const llmSettings = businessId ? await this.getBusinessLlmSettings(businessId) : undefined;
 
     try {
       const result = await this.gateway.complete(
@@ -394,7 +399,7 @@ export class ChatService {
           provider: primaryProvider as any,
           maxTokens: 500,
           temperature: 0.7,
-          apiKey,
+          apiKey: llmSettings?.apiKey,
         },
       );
 
@@ -449,19 +454,35 @@ export class ChatService {
 
   // ─── Helpers ───────────────────────────────────────────────────
 
-  private async getBusinessApiKey(businessId: string): Promise<string | undefined> {
+  private async getBusinessLlmSettings(businessId: string): Promise<{
+    provider: string;
+    model: string;
+    temperature: number;
+    maxTokens: number;
+    apiKey: string | undefined;
+  } | null> {
     try {
       const settings = await prisma.llmSettings.findUnique({
         where: { businessId },
       });
-      if (settings?.apiKey) {
+      if (!settings) return null;
+
+      let decryptedKey: string | undefined;
+      if (settings.apiKey) {
         const encryptionKey = this.config.get<string>('ENCRYPTION_KEY')!;
-        return encryption.decrypt(settings.apiKey, encryptionKey);
+        decryptedKey = encryption.decrypt(settings.apiKey, encryptionKey);
       }
+
+      return {
+        provider: settings.provider,
+        model: settings.model,
+        temperature: settings.temperature,
+        maxTokens: settings.maxTokens,
+        apiKey: decryptedKey,
+      };
     } catch {
-      // Fall back to platform key
+      return null;
     }
-    return undefined;
   }
 
   private generateTitle(content?: string | null): string {
