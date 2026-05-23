@@ -8,6 +8,7 @@ import { CreativeGenerationService } from './creative-generation.service';
 import { ImageJobProcessor } from './queue/image-job.processor';
 import { CanvasService } from './canvas.service';
 import { ImageWebSocketGateway } from './image.gateway';
+import { LlmSettingsModule } from '../llm-settings/llm-settings.module';
 
 const IMAGE_GENERATION_QUEUE = 'image-generation';
 
@@ -29,6 +30,7 @@ const IMAGE_GENERATION_QUEUE = 'image-generation';
         secret: config.get<string>('jwt.secret') || process.env['JWT_SECRET'],
       }),
     }),
+    LlmSettingsModule,
   ],
   controllers: [ImageController],
   providers: [ImageService, CreativeGenerationService, ImageJobProcessor, CanvasService, ImageWebSocketGateway],

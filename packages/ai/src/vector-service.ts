@@ -13,15 +13,16 @@ export class VectorService {
    * Generates a 1536-dimensional embedding for the given text.
    * Requires a valid OpenAI API key.
    */
-  async generateEmbedding(text: string): Promise<number[]> {
-    if (!this.openai.apiKey || this.openai.apiKey === 'undefined') {
+  async generateEmbedding(text: string, apiKey?: string): Promise<number[]> {
+    const client = apiKey ? new OpenAI({ apiKey }) : this.openai;
+    if (!client.apiKey || client.apiKey === 'undefined') {
       throw new Error(
         'OpenAI API key is required for embedding generation. ' +
-        'Set OPENAI_API_KEY environment variable or configure in Settings → AI Provider.',
+        'Please add your API key in Settings → AI Provider.',
       );
     }
 
-    const response = await this.openai.embeddings.create({
+    const response = await client.embeddings.create({
       model: 'text-embedding-3-small',
       input: text.replace(/\n/g, ' ').substring(0, 8000),
       encoding_format: 'float',
@@ -52,8 +53,9 @@ export class VectorService {
     query: string,
     limit: number = 5,
     brandId?: string,
+    apiKey?: string,
   ): Promise<any[]> {
-    const embedding = await this.generateEmbedding(query);
+    const embedding = await this.generateEmbedding(query, apiKey);
     const vectorString = `[${embedding.join(',')}]`;
 
     try {

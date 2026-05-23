@@ -7,10 +7,12 @@ import { IngestionService } from './ingestion.service';
 import { MemoryService } from './memory.service';
 import { FreshnessService } from './freshness.service';
 import { QUEUES } from '@brandflow/shared';
+import { LlmSettingsModule } from '../llm-settings/llm-settings.module';
 
 @Module({
   imports: [
     BullModule.registerQueue({ name: QUEUES.KNOWLEDGE_INGESTION }),
+    LlmSettingsModule,
   ],
   controllers: [KnowledgeController],
   providers: [

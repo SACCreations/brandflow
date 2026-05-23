@@ -48,12 +48,11 @@ export class LLMGateway {
     const requestId = uuidv4();
     const preferredProvider = options.provider ?? this.config.defaultProvider;
 
-    // Validate that at least one real API key is available
-    const hasApiKey = options.apiKey || process.env['OPENAI_API_KEY'] || process.env['ANTHROPIC_API_KEY'];
+    // Validate that at least one way to reach an AI provider exists
+    const hasApiKey = options.apiKey || this.providers.size > 1 || process.env['OPENAI_API_KEY'] || process.env['ANTHROPIC_API_KEY'];
     if (!hasApiKey) {
       throw new Error(
-        'No AI provider API key configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable, ' +
-        'or configure a per-workspace API key in Settings → AI Provider.',
+        'No AI provider API key configured. Please add your API key in Settings → AI Provider.',
       );
     }
 

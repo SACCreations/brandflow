@@ -12,13 +12,17 @@ import type {
   CreateBriefDto,
   UpdateBriefDto,
 } from '@brandflow/shared';
+import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 
 
 @Injectable()
 export class BriefService {
   private readonly ai: LLMGateway;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly llmSettingsService: LlmSettingsService,
+  ) {
     this.ai = new LLMGateway({ defaultProvider: 'openai' });
   }
 
@@ -140,10 +144,11 @@ export class BriefService {
       Context: ${JSON.stringify(context || {})}
       Return only the suggested text.`;
 
+    const apiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
     const { response } = await this.ai.complete(
       "You suggest high-converting marketing brief details.",
       prompt,
-      { temperature: 0.8 }
+      { temperature: 0.8, apiKey }
     );
 
     return { suggestion: response.content };

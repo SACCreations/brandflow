@@ -10,6 +10,7 @@ import { parse as csvParse } from 'csv-parse/sync';
 import * as crypto from 'crypto';
 import { WebConnector } from './connectors/web.connector';
 import { LLMGateway, TextSplitter, VectorService } from '@brandflow/ai';
+import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 
 type KnowledgeEntryClassification =
   | 'product'
@@ -48,6 +49,7 @@ export class IngestionService {
   constructor(
     private readonly prisma: PrismaService,
     @InjectQueue(QUEUES.KNOWLEDGE_INGESTION) private readonly queue: Queue,
+    private readonly llmSettingsService: LlmSettingsService,
   ) {}
 
   // -------------------------------------------------------------------------
@@ -270,6 +272,7 @@ export class IngestionService {
     const allAtoms: KnowledgeAtom[] = [];
     const BATCH_SIZE = 5;
     const CONCURRENCY = 5;
+    const apiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
 
     // Group chunks into batches
     const batches: string[][] = [];
@@ -306,7 +309,7 @@ ${text}
             const { response } = await this.aiGateway.complete(
               'You are a Brand Knowledge Extractor. You only output valid JSON objects.',
               prompt,
-              { model: 'gpt-4o-mini', jsonMode: true },
+              { model: 'gpt-4o-mini', jsonMode: true, apiKey },
             );
             
             // Strip markdown fences just in case
@@ -375,6 +378,7 @@ ${text}
 
     const rows: any[] = [];
     const CONCURRENCY = 10;
+    const apiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
 
     // Generate embeddings concurrently
     for (let i = 0; i < newAtoms.length; i += CONCURRENCY) {
@@ -384,7 +388,7 @@ ${text}
         batch.map(async ({ atom, hash }) => {
           let embedding: string | undefined;
           try {
-            const vec = await this.vectorService.generateEmbedding(atom.content);
+            const vec = await this.vectorService.generateEmbedding(atom.content, apiKey);
             embedding = this.vectorService.formatForStorage(vec);
           } catch {
             // embedding is optional — proceed without

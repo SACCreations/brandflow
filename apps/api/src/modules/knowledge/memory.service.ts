@@ -1,13 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
 import { LLMGateway } from '@brandflow/ai';
+import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 
 @Injectable()
 export class MemoryService {
   private readonly logger = new Logger(MemoryService.name);
   private readonly ai: LLMGateway;
 
-  constructor() {
+  constructor(private readonly llmSettingsService: LlmSettingsService) {
     this.ai = new LLMGateway({ defaultProvider: 'openai' });
   }
 
@@ -54,10 +55,11 @@ export class MemoryService {
     `;
 
     try {
+      const apiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
       const { response } = await this.ai.complete(
         "You synthesize brand knowledge into strategic summaries. Be concise but deep.",
         prompt,
-        { model: 'gpt-4o' }
+        { model: 'gpt-4o', apiKey }
       );
 
       return response.content;

@@ -3,13 +3,17 @@ import * as crypto from 'crypto';
 import { prisma } from '@brandflow/db';
 import { LLMGateway } from '@brandflow/ai';
 import { SocialService } from './social.service';
+import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 
 @Injectable()
 export class PublishService {
   private readonly logger = new Logger(PublishService.name);
   private readonly ai: LLMGateway;
 
-  constructor(private readonly socialService: SocialService) {
+  constructor(
+    private readonly socialService: SocialService,
+    private readonly llmSettingsService: LlmSettingsService,
+  ) {
     this.ai = new LLMGateway({ defaultProvider: 'openai' });
   }
 
@@ -34,7 +38,7 @@ export class PublishService {
       this.logger.log(`Tailoring content for ${account.platform} (${account.name})`);
 
       // 1. Generate platform-specific variation using AI
-      const tailoredBody = await this.tailorContent(content.body, account.platform, content.brand);
+      const tailoredBody = await this.tailorContent(content.body, account.platform, content.brand, businessId);
 
       // 2. Create the PublishJob
       const job = await prisma.publishJob.create({
@@ -95,7 +99,7 @@ export class PublishService {
     }
   }
 
-  private async tailorContent(body: string, platform: string, brand: any): Promise<string> {
+  private async tailorContent(body: string, platform: string, brand: any, businessId: string): Promise<string> {
     const platformRules: Record<string, string> = {
       twitter: 'Keep it concise, under 280 characters. Use 1-2 relevant hashtags. Use a punchy tone.',
       linkedin: 'Professional and insightful. Use white space for readability. Focus on industry impact.',
@@ -111,10 +115,11 @@ export class PublishService {
       ${body}`;
 
     try {
+      const apiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
       const { response } = await this.ai.complete(
         "You are an expert social media manager specializing in multi-platform content tailoring.",
         prompt,
-        { temperature: 0.7 }
+        { temperature: 0.7, apiKey }
       );
       return response.content;
     } catch (error) {

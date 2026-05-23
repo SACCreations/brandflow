@@ -11,18 +11,20 @@ export class QualityControl {
     content: string,
     brand: BrandContext,
     knowledgeFacts: { id: string; content: string }[] = [],
+    options?: { apiKey?: string },
   ): Promise<QualityCheckResult> {
     const violations: QualityViolation[] = [];
     const citations: KnowledgeCitation[] = [];
+    const apiKey = options?.apiKey;
 
     // Phase 1: Rule-based Compliance
     this.checkBannedPhrases(content, brand, violations);
 
     // Phase 2: AI-driven Evaluation Layers
     const [complianceResult, factCheckResult, safetyResult] = await Promise.all([
-      this.evalCompliance(content, brand),
-      this.evalFactuality(content, brand, knowledgeFacts),
-      this.evalSafety(content),
+      this.evalCompliance(content, brand, apiKey),
+      this.evalFactuality(content, brand, knowledgeFacts, apiKey),
+      this.evalSafety(content, apiKey),
     ]);
 
     violations.push(...complianceResult.violations);
@@ -77,7 +79,7 @@ export class QualityControl {
     }
   }
 
-  private async evalCompliance(content: string, brand: BrandContext) {
+  private async evalCompliance(content: string, brand: BrandContext, apiKey?: string) {
     const toneDescription = Array.isArray(brand.tone) ? brand.tone.join(', ') : JSON.stringify(brand.tone);
     
     const systemPrompt = `You are a Senior Brand Auditor for "${brand.name}".
@@ -106,7 +108,7 @@ Respond in JSON format:
 }`;
 
     try {
-      const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0.1 });
+      const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0.1, apiKey });
       const cleanJson = response.content.replace(/```json\n?|\n?```/gi, '').trim();
       const parsed = JSON.parse(cleanJson);
       return { score: parsed.score ?? 1.0, violations: parsed.violations ?? [] };
@@ -120,6 +122,7 @@ Respond in JSON format:
     content: string,
     brand: BrandContext,
     facts: { id: string; content: string }[],
+    apiKey?: string,
   ) {
     if (facts.length === 0) return { score: 1.0, violations: [], citations: [] };
 
@@ -155,7 +158,7 @@ Respond in JSON format:
 }`;
 
     try {
-      const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0 });
+      const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0, apiKey });
       const cleanJson = response.content.replace(/```json\n?|\n?```/gi, '').trim();
       const parsed = JSON.parse(cleanJson);
       return { 
@@ -169,12 +172,12 @@ Respond in JSON format:
     }
   }
 
-  private async evalSafety(content: string) {
+  private async evalSafety(content: string, apiKey?: string) {
     const systemPrompt = `Analyze content for safety: hate speech, harassment, NSFW, or extreme bias.
 Respond in JSON: {"score": 0.0-1.0, "violations": [{"type": "unsafe_content", "severity": "critical", "detail": "string"}]}`;
 
     try {
-      const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0 });
+      const { response } = await this.gateway.complete(systemPrompt, content, { temperature: 0, apiKey });
       const cleanJson = response.content.replace(/```json\n?|\n?```/gi, '').trim();
       const parsed = JSON.parse(cleanJson);
       return { score: parsed.score ?? 1.0, violations: parsed.violations ?? [] };

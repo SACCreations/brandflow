@@ -5,12 +5,13 @@ import { SocialService } from './social.service';
 import { PublishService } from './publish.service';
 import { SocialCronService } from './social-cron.service';
 import { RedisModule } from '../../common/redis/redis.module';
+import { LlmSettingsModule } from '../llm-settings/llm-settings.module';
 
 import { PublishJobController } from './publish-job.controller';
 import { ResilientPublishService } from './resilient-publish.service';
 
 @Module({
-  imports: [AuthModule, RedisModule],
+  imports: [AuthModule, RedisModule, LlmSettingsModule],
   controllers: [SocialController, PublishJobController],
   providers: [SocialService, PublishService, SocialCronService, ResilientPublishService],
   exports: [SocialService, PublishService, ResilientPublishService],

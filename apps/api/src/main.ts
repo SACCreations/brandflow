@@ -65,26 +65,45 @@ async function bootstrap() {
   // ─── Environment Keys Validation ─────────────────────────────
   const openAiKey = config.get<string>('llm.openaiApiKey') || process.env['OPENAI_API_KEY'];
   const anthropicKey = config.get<string>('llm.anthropicApiKey') || process.env['ANTHROPIC_API_KEY'];
+  const googleAiKey = process.env['GOOGLE_API_KEY'];
   const encryptionKey = config.get<string>('app.encryptionKey') || process.env['ENCRYPTION_KEY'];
 
+  const configuredAiProviders = [
+    ['OPENAI_API_KEY', openAiKey],
+    ['ANTHROPIC_API_KEY', anthropicKey],
+    ['GOOGLE_API_KEY', googleAiKey],
+  ].filter(([, value]) => Boolean(value && !value.startsWith('change-me')));
+
   const missingKeys: string[] = [];
-  if (!openAiKey) missingKeys.push('OPENAI_API_KEY');
-  if (!anthropicKey) missingKeys.push('ANTHROPIC_API_KEY');
   if (!encryptionKey || encryptionKey.startsWith('change-me')) missingKeys.push('ENCRYPTION_KEY (must not be placeholder)');
 
   if (missingKeys.length > 0) {
     console.error(`
 ============================================================
-🚨 CRITICAL STARTUP ERROR: MISSING REQUIRED AI OR ENCRYPTION KEYS!
+🚨 CRITICAL STARTUP ERROR: MISSING REQUIRED ENCRYPTION KEYS!
 ============================================================
 The following required keys are missing or invalid in .env:
 ${missingKeys.map(k => `  - ${k}`).join('\n')}
 
-To prevent silent failures in LLMGateway or encryption-dependent
-modules, startup has been aborted. Please update your .env.
+To prevent silent failures in encryption-dependent modules,
+startup has been aborted. Please update your .env.
 ============================================================
 `);
     throw new Error(`Missing environment keys: ${missingKeys.join(', ')}`);
+  }
+
+  if (configuredAiProviders.length === 0) {
+    console.warn(`
+============================================================
+⚠️  OPTIONAL AI KEYS NOT CONFIGURED
+============================================================
+No AI provider key was found in .env.
+
+The API will still start so authentication and other non-AI
+endpoints can work, but AI-powered features will fail until you
+configure OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY.
+============================================================
+`);
   }
 
   const port = config.get<number>('app.port', 4000);

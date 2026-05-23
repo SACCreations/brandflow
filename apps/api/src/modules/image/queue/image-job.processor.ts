@@ -4,6 +4,7 @@ import { Logger } from '@nestjs/common';
 import { LLMGateway, ImageGateway, VectorService } from '@brandflow/ai';
 import { PrismaService } from '../../../common/database/prisma.service';
 import { ImageWebSocketGateway } from '../image.gateway';
+import { LlmSettingsService } from '../../llm-settings/llm-settings.service';
 
 const IMAGE_GENERATION_QUEUE = 'image-generation';
 
@@ -35,6 +36,7 @@ export class ImageJobProcessor extends WorkerHost {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly wsGateway: ImageWebSocketGateway,
+    private readonly llmSettingsService: LlmSettingsService,
   ) {
     super();
     this.llm = new LLMGateway({ defaultProvider: 'openai' });
@@ -234,11 +236,14 @@ export class ImageJobProcessor extends WorkerHost {
     let knowledgeBlock = '';
     if (businessId) {
       try {
+        const apiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
         const relevantFacts = await this.vectorService.findRelevantContext(
           this.prismaService.client,
           businessId,
           category || prompt,
-          5
+          5,
+          undefined,
+          apiKey,
         );
         if (relevantFacts && relevantFacts.length > 0) {
           knowledgeBlock = `Brand Context Insights:\n${relevantFacts.map((f: any) => `- ${f.content}`).join('\n')}`;
@@ -259,9 +264,11 @@ Brand Design Tokens & Rules: Style = "${baseStyle}"; ${colors}
 Output only the finished enhanced prompt string. No chat, no intros. Focus on layout, lighting detail, texture depth, and brand consistency.`;
 
     try {
+      const apiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
       const { response } = await this.llm.complete(systemPrompt, userMessage, {
         model: 'gpt-4o-mini',
         temperature: 0.7,
+        apiKey,
       });
       return response.content;
     } catch (err) {

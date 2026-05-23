@@ -171,12 +171,14 @@ export class ContentService {
     if (!brand) throw new NotFoundException('Brand not found');
 
     // Perform semantic retrieval for relevant facts
+    const decryptedApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId);
     const relevantFacts = await this.vectorService.findRelevantContext(
       this.prisma.client,
       businessId,
       effectiveTopic,
       10, // Top 10 facts
-      effectiveBrandId
+      effectiveBrandId,
+      decryptedApiKey ?? undefined,
     );
 
     const brandContext: BrandContext = {
@@ -224,7 +226,6 @@ export class ContentService {
 
     // 4. Generate content
     const llmSettings = await this.llmSettingsService.getSettings(businessId);
-    const decryptedApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId);
 
     const requestId = randomUUID();
     const { response, provider: usedProvider } = await this.gateway.complete(
@@ -573,12 +574,14 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
 
     // Retrieve relevant brand context for intelligent topic generation
     const searchQuery = `${brandName} ${industry} core offerings, products, and positioning`;
+    const topicApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
     const relevantFacts = await this.vectorService.findRelevantContext(
       this.prisma.client,
       businessId,
       searchQuery,
       10,
-      brandId
+      brandId,
+      topicApiKey,
     );
     const knowledgeBlock = relevantFacts.length > 0 
       ? `Extracted Brand Knowledge Data:\n${relevantFacts.map((f: any, i: number) => `${i + 1}. ${f.content}`).join('\n')}`

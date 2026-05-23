@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
 import { QualityControl, LLMGateway, VectorService } from '@brandflow/ai';
 import type { QualityCheckResult, BrandContext } from '@brandflow/shared';
+import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 
 type QualityViolationLike = QualityCheckResult['violations'][number] & {
   suggestion?: string;
@@ -29,7 +30,7 @@ export class QualityService {
   private readonly qc: QualityControl;
   private readonly vector: VectorService;
 
-  constructor() {
+  constructor(private readonly llmSettingsService: LlmSettingsService) {
     const gateway = new LLMGateway({ defaultProvider: 'openai' });
     this.qc = new QualityControl(gateway);
     this.vector = new VectorService();
@@ -62,11 +63,14 @@ export class QualityService {
     if (!brand) throw new Error('Brand not found for quality check');
 
     // 2. Fetch Relevant Knowledge Facts via Semantic Search
+    const apiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
     const relevantEntries = await this.vector.findRelevantContext(
       prisma,
       businessId,
       body,
-      10 // Take top 10 relevant facts
+      10, // Take top 10 relevant facts
+      undefined,
+      apiKey,
     );
 
     const facts = relevantEntries.map((e) => ({ id: e.id, content: e.content }));
@@ -80,7 +84,7 @@ export class QualityService {
       governance: brand.governance as any,
     };
 
-    const result = await this.qc.check(body, brandContext, facts as any) as QualityCheckResultLike;
+    const result = await this.qc.check(body, brandContext, facts as any, { apiKey }) as QualityCheckResultLike;
     const overallGrade = result.overallGrade ?? 'C';
     const violations = result.violations as QualityViolationLike[];
     const citations: KnowledgeCitationLike[] = result.citations ?? [];
