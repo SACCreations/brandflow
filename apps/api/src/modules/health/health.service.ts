@@ -71,7 +71,7 @@ export class HealthService {
   private async checkDatabase(): Promise<{ status: string; latencyMs: number }> {
     const start = Date.now();
     try {
-      await this.prisma.$queryRaw`SELECT 1`;
+      await this.prisma.client.$queryRaw`SELECT 1`;
       return { status: 'connected', latencyMs: Date.now() - start };
     } catch {
       return { status: 'unhealthy', latencyMs: Date.now() - start };
