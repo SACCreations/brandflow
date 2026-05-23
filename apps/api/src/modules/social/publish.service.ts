@@ -363,22 +363,7 @@ export class PublishService {
   ) {
     const { accessToken } = await this.socialService.getDecryptedTokens(account.id, businessId);
 
-    const isMock = accessToken.startsWith('mock') || accessToken.startsWith('sk-mock') || process.env['NODE_ENV'] !== 'production';
-    if (isMock) {
-      this.logger.log(`[YouTube Sandbox] Simulating video metadata upload for channel external ID ${account.externalId}`);
-      const externalPostId = `youtube:${account.externalId}:${Date.now()}`;
-      await prisma.auditLog.create({
-        data: {
-          businessId,
-          action: 'publish',
-          entityType: 'content',
-          entityId: contentId,
-          after: { platform: 'youtube', externalPostId },
-          hash: `pub-${crypto.randomUUID()}`,
-        }
-      });
-      return { externalPostId };
-    }
+
 
     // Standard YouTube uploads require heavy binary chunks. In this flow we register the post metadata to channel feed or simulate it.
     const response = await fetch('https://www.googleapis.com/youtube/v3/videos?part=snippet,status', {

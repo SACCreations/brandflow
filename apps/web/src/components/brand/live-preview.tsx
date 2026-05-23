@@ -109,26 +109,26 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
                     className="rounded-full px-4 text-[10px] font-black uppercase tracking-widest"
                     style={{ color: primaryColor, borderColor: `${primaryColor}40`, backgroundColor: `${primaryColor}05` }}
                   >
-                    {data.industry || 'Featured Insight'}
+                    {data.industry}
                   </Badge>
                   <h1 
                     className="text-3xl font-black leading-tight tracking-tight text-gray-900 dark:text-white"
                     style={{ fontFamily: headingFont }}
                   >
-                    {data.tagline || 'Revolutionizing the industry with AI.'}
+                    {data.tagline}
                   </h1>
                   <p 
                     className="text-gray-500 dark:text-gray-400 leading-relaxed text-sm max-w-sm mx-auto"
                     style={{ fontFamily: bodyFont }}
                   >
-                    {data.description || 'Our brand is dedicated to providing high-quality solutions that empower businesses.'}
+                    {data.description}
                   </p>
                   <div className="flex justify-center gap-3 pt-2">
                     <Button 
                       className="rounded-xl shadow-lg shadow-brand-500/20 h-10 px-6 font-bold text-white border-none transition-transform active:scale-95"
                       style={{ backgroundColor: primaryColor }}
                     >
-                      {data.strategy?.ctaPreference || 'Get Started'}
+                      {data.strategy?.ctaPreference}
                     </Button>
                   </div>
                 </div>
@@ -149,7 +149,7 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
                     className="w-full h-full rounded-2xl flex flex-col items-center justify-center p-6 text-center text-white"
                     style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
                   >
-                    <h3 className="text-xl font-black uppercase mb-4" style={{ fontFamily: headingFont }}>{data.tagline || 'The Future'}</h3>
+                    <h3 className="text-xl font-black uppercase mb-4" style={{ fontFamily: headingFont }}>{data.tagline}</h3>
                     <div className="w-12 h-1 bg-white/30 rounded-full mb-4" />
                     <p className="text-[10px] font-medium opacity-80" style={{ fontFamily: bodyFont }}>Empowered by Brand Intelligence</p>
                   </div>
@@ -157,7 +157,7 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
                 <div className="p-4 space-y-2">
                    <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400">
                      <span className="font-bold text-gray-900 dark:text-white mr-2">{data.name || 'Brand'}</span>
-                     {data.strategy?.contentLanguage === 'tamil' ? 'எங்கள் புதிய அடையாளம் இங்கே! #Branding' : 'Our new identity is live! #Branding'}
+                     {data.description}
                    </p>
                 </div>
              </div>
@@ -180,18 +180,18 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
                          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent" />
                          <div className="relative z-10 text-center px-4">
                             <h5 className="text-xs font-black text-white uppercase tracking-tight mb-1" style={{ fontFamily: headingFont }}>
-                               {data.strategy?.contentLanguage === 'tamil' ? 'வணக்கம்! புதிய அறிவிப்பு.' : 'Exciting News!'}
+                               {data.tagline}
                             </h5>
-                            <p className="text-[8px] text-white/80" style={{ fontFamily: bodyFont }}>{data.designPreferences?.imageStyle || 'Minimal'} Aesthetic Applied</p>
+                            <p className="text-[8px] text-white/80" style={{ fontFamily: bodyFont }}>{data.designPreferences?.imageStyle} Aesthetic Applied</p>
                          </div>
                       </div>
                    </div>
                    <div className="space-y-3">
                       <p className="text-[10px] leading-relaxed text-gray-600 dark:text-gray-400 font-medium italic">
-                         "{data.strategy?.contentLanguage === 'tamil' ? 'உங்கள் பிராண்டை அடுத்த நிலைக்கு கொண்டு செல்லுங்கள்.' : 'Take your brand to the next level with our AI-driven strategies.'}"
+                          {data.description}
                       </p>
                       <Button className="w-full h-10 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg" style={{ backgroundColor: primaryColor }}>
-                         {data.strategy?.ctaPreference || 'Click Here'}
+                         {data.strategy?.ctaPreference}
                       </Button>
                    </div>
                 </div>
@@ -214,8 +214,8 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
                     {data.visualRules?.logoUrls?.[0]?.url ? <img src={data.visualRules.logoUrls[0].url} className="w-full h-full object-contain" /> : <span className="font-black text-gray-900">{data.name?.[0] || 'B'}</span>}
                  </div>
                  <div className="space-y-2">
-                   <h3 className="text-2xl font-black text-white leading-tight uppercase" style={{ fontFamily: headingFont }}>{data.tagline || 'Redefine Everything'}</h3>
-                   <Button className="h-8 px-6 bg-white text-gray-900 font-bold text-[10px] uppercase rounded-lg">{data.strategy?.ctaPreference || 'Get Started'}</Button>
+                   <h3 className="text-2xl font-black text-white leading-tight uppercase" style={{ fontFamily: headingFont }}>{data.tagline}</h3>
+                   <Button className="h-8 px-6 bg-white text-gray-900 font-bold text-[10px] uppercase rounded-lg">{data.strategy?.ctaPreference}</Button>
                  </div>
                </div>
              </div>

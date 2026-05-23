@@ -376,30 +376,11 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
       {/* Main Workspace */}
       <div className="grid h-full gap-6 lg:grid-cols-12 overflow-hidden">
         
-        {/* Left Toolbar */}
-        <div className="hidden lg:flex flex-col gap-4 lg:col-span-1 border-r border-gray-100 pr-4 dark:border-gray-800">
-          <ToolbarButton icon={<Type className="h-5 w-5" />} active />
-          <ToolbarButton icon={<Layout className="h-5 w-5" />} />
-          <ToolbarButton icon={<Sparkles className="h-5 w-5" />} />
-          <ToolbarButton icon={<History className="h-5 w-5" />} />
-          <div className="mt-auto">
-            <ToolbarButton icon={<Settings className="h-5 w-5" />} />
-          </div>
-        </div>
+
 
         {/* Editor Area */}
         <div className="lg:col-span-8 flex flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-          {/* Rich Text Toolbar Mockup */}
-          <div className="flex items-center gap-2 border-b border-gray-100 p-3 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/30">
-            <select aria-label="Text format" className="rounded-md border-gray-200 bg-white px-2 py-1 text-xs font-bold dark:border-gray-700 dark:bg-gray-800">
-              <option>Heading 2</option>
-              <option>Body Text</option>
-            </select>
-            <div className="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-2"></div>
-            <button aria-label="Bold" className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-white rounded transition-colors font-serif font-bold">B</button>
-            <button aria-label="Italic" className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-white rounded transition-colors italic">I</button>
-            <button aria-label="Underline" className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-white rounded transition-colors underline">U</button>
-          </div>
+
           
           <textarea 
             aria-label="Content body editor"
@@ -410,8 +391,8 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
 
           <div className="p-4 border-t border-gray-100 bg-gray-50/30 flex items-center justify-between dark:border-gray-800">
             <div className="flex gap-4 text-xs font-bold text-gray-400">
-              <span>Words: {content.split(' ').length}</span>
-              <span>Reading time: 1m 20s</span>
+              <span>Words: {content.trim() ? content.trim().split(/\s+/).length : 0}</span>
+              <span>Reading time: {Math.max(1, Math.ceil((content.trim() ? content.trim().split(/\s+/).length : 0) / 200))}m</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Platform:</span>

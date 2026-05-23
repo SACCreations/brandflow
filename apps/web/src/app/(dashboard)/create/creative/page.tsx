@@ -88,7 +88,7 @@ export default function CreativeBuilderPage() {
 
   // --- Content Source Selection (Step 1) ---
   const [contentSource, setContentSource] = useState<'approved' | 'manual' | 'campaign' | 'library'>('manual');
-  const [marketingText, setMarketingText] = useState('Boost your business productivity by 250% using our autonomous AI marketing workforce. Try BrandFlow today.');
+  const [marketingText, setMarketingText] = useState('');
   
   // --- Brand Context Picker (Step 2) ---
   const [selectedBrand, setSelectedBrand] = useState('BrandFlow Corporate');
@@ -410,12 +410,12 @@ export default function CreativeBuilderPage() {
                 <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3 space-y-2">
                   <span className="text-[9px] font-black text-emerald-400 uppercase tracking-wider block">✓ Fetching from Content Hub</span>
                   <p className="text-slate-300 text-xs font-medium leading-relaxed italic">
-                    "Elevate your team performance: Discover SaaSify workflow analytics workspace automation tools."
+                    [No Approved Content Found]
                   </p>
                   <button 
                     onClick={() => {
-                      setMarketingText('ELEVATE TEAM PERFORMANCE');
-                      handleLayerContentChange('layer-text', 'ELEVATE TEAM PERFORMANCE');
+                      setMarketingText('');
+                      handleLayerContentChange('layer-text', '');
                     }}
                     className="text-[10px] font-black text-brand-400 hover:text-brand-300 flex items-center gap-1"
                   >
@@ -428,15 +428,15 @@ export default function CreativeBuilderPage() {
                 <div className="space-y-2 bg-slate-950 border border-slate-850 p-3 rounded-xl">
                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Linked Campaign Brief</span>
                   <div className="border-l-2 border-brand-500 pl-3">
-                    <h5 className="text-xs font-bold text-white">Q3 Scaling Campaign</h5>
-                    <p className="text-[11px] text-slate-400 mt-1">Tone: Energetic. Focus: Workflow productivity growth.</p>
+                    <h5 className="text-xs font-bold text-white">No Linked Campaign</h5>
+                    <p className="text-[11px] text-slate-400 mt-1">Select a campaign to import briefs.</p>
                   </div>
                 </div>
               )}
 
               {contentSource === 'library' && (
                 <div className="grid grid-cols-2 gap-2 max-h-24 overflow-y-auto pr-1">
-                  {['High Conversions Text', 'Autumn Offer Block', 'Corporate Pitchline', 'Flash Sales Hook'].map((t, idx) => (
+                  {['Custom Tagline 1', 'Custom Tagline 2'].map((t, idx) => (
                     <button
                       key={idx}
                       onClick={() => {
