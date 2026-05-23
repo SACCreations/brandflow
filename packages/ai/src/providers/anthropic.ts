@@ -18,11 +18,19 @@ export class AnthropicProvider implements LLMProvider {
   }
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
+    // For JSON mode, prefill the assistant response to force JSON output
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+      { role: 'user', content: request.userPrompt },
+    ];
+    if (request.jsonMode) {
+      messages.push({ role: 'assistant', content: '{' });
+    }
+
     const response = await this.client.messages.create({
       model: request.model ?? this.model,
       max_tokens: request.maxTokens ?? 1024,
       system: request.systemPrompt,
-      messages: [{ role: 'user', content: request.userPrompt }],
+      messages,
     });
 
     const textBlock = response.content.find((b) => b.type === 'text');
@@ -30,8 +38,11 @@ export class AnthropicProvider implements LLMProvider {
       throw new Error('Anthropic returned empty response');
     }
 
+    // If we prefilled with '{', prepend it to the response
+    const content = request.jsonMode ? `{${textBlock.text}` : textBlock.text;
+
     return {
-      content: textBlock.text,
+      content,
       model: response.model,
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,

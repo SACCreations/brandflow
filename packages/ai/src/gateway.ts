@@ -76,6 +76,7 @@ export class LLMGateway {
       temperature: options.temperature,
       model: options.model,
       requestId,
+      jsonMode: options.jsonMode,
     };
 
     // If a custom API key is provided, we must use a temporary provider instance

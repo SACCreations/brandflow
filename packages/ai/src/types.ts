@@ -15,6 +15,7 @@ export interface ProviderRequest {
   temperature?: number;
   requestId: string;
   model?: string;
+  jsonMode?: boolean;
 }
 
 export interface ProviderResponse {
