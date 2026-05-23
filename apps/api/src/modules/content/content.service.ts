@@ -8,36 +8,60 @@ import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { prisma } from '@brandflow/db';
 import type { Prisma, KnowledgeSource, KnowledgeEntry } from '@brandflow/db';
-import { LLMGateway, PromptEngine, QualityControl, CostTracker, type LLMConfig } from '@brandflow/ai';
+import { LLMGateway, PromptEngine, CostTracker, VectorService, type LLMConfig } from '@brandflow/ai';
 import type { GenerateContentDto, UpdateContentDto, BrandContext } from '@brandflow/shared';
 import { LlmSettingsService } from '../llm-settings/llm-settings.service';
+import { PrismaService } from '../../common/database/prisma.service';
+import { BudgetService } from '../llm-settings/budget.service';
+import { AuditService } from '../business/audit.service';
+import { QualityService } from '../quality/quality.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { QUEUES } from '@brandflow/shared';
+import { BillingService } from '../billing/billing.service';
+
 
 @Injectable()
 export class ContentService {
   private readonly gateway: LLMGateway;
   private readonly promptEngine: PromptEngine;
-  private readonly qualityControl: QualityControl;
   private readonly costTracker: CostTracker;
+  private readonly vectorService: VectorService;
 
   constructor(
     private readonly config: ConfigService,
     private readonly llmSettingsService: LlmSettingsService,
+    private readonly prisma: PrismaService,
+    private readonly budgetService: BudgetService,
+    private readonly auditService: AuditService,
+    private readonly qualityService: QualityService,
+    @InjectQueue(QUEUES.AI_GENERATION) private readonly aiGenerationQueue: Queue,
+    private readonly billingService: BillingService,
   ) {
     this.gateway = new LLMGateway({
       defaultProvider: config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic',
       fallbackProvider: config.get('llm.fallbackProvider', 'anthropic') as 'anthropic' | 'openai',
       requestTimeoutMs: config.get('llm.requestTimeoutMs', 30000),
+      onBeforeComplete: async (options: LLMConfig) => {
+        const tenantId = (this.prisma.client as any)['tenantId'] || options.businessId;
+        if (tenantId) {
+          await this.budgetService.checkBudget(tenantId);
+        }
+      },
     });
     this.promptEngine = new PromptEngine();
-    this.qualityControl = new QualityControl(this.gateway);
     this.costTracker = new CostTracker(async (event) => {
-      await prisma.costEvent.create({ data: event });
+      await this.prisma.client.costEvent.create({ data: event });
+      const totalTokens = (event.inputTokens || 0) + (event.outputTokens || 0);
+      await this.budgetService.incrementUsage(event.businessId, totalTokens).catch(() => {});
     });
+    this.vectorService = new VectorService();
   }
 
+
   async findAll(businessId: string, filters: { brandId?: string; campaignId?: string; status?: string }) {
-    return prisma.content.findMany({
-      where: { businessId, ...filters },
+    return this.prisma.client.content.findMany({
+      where: { businessId, ...filters } as any,
       orderBy: { createdAt: 'desc' },
       include: {
         brand: { select: { id: true, name: true } },
@@ -47,7 +71,7 @@ export class ContentService {
   }
 
   async findById(id: string, businessId: string) {
-    const content = await prisma.content.findFirst({
+    const content = await this.prisma.client.content.findFirst({
       where: { id, businessId },
       include: {
         brand: true,
@@ -84,29 +108,32 @@ export class ContentService {
   }
 
   async generate(businessId: string, userId: string, dto: GenerateContentDto) {
-    // 1. Check token budget
-    const subscription = await prisma.subscription.findFirst({
-      where: { businessId, status: { in: ['active', 'trialing'] } },
-    });
-    if (!subscription) {
-      throw new ForbiddenException('No active subscription found');
+    // Check if background queue execution is needed
+    const topicsList = dto.topics && dto.topics.length > 0 ? dto.topics : (dto.topic ? [dto.topic] : []);
+    const totalCount = topicsList.length * (dto.count || 1);
+
+    if (totalCount > 3 || (dto.topics && dto.topics.length > 1)) {
+      const job = await this.aiGenerationQueue.add(
+        'generate-batch',
+        { businessId, userId, dto },
+        { attempts: 3, backoff: 5000 }
+      );
+
+      return {
+        jobId: job.id,
+        status: 'queued',
+        progress: 0,
+        async: true,
+      } as any;
     }
 
-    const periodStart = new Date();
-    periodStart.setDate(1);
-    const usedThisPeriod = await prisma.costEvent.aggregate({
-      where: {
-        businessId,
-        createdAt: { gte: periodStart },
-        module: 'generation',
-      },
-      _sum: { outputTokens: true, inputTokens: true },
-    });
-
-    const totalTokensUsed = (usedThisPeriod._sum.inputTokens ?? 0) + (usedThisPeriod._sum.outputTokens ?? 0);
-    if (totalTokensUsed >= subscription.tokenBudget) {
-      throw new ForbiddenException('Token budget exhausted for this billing period');
+    const effectiveTopic = topicsList[0] || dto.topic;
+    if (!effectiveTopic) {
+      throw new BadRequestException('A topic is required to generate content.');
     }
+
+    // Enforce dynamic, plan-based entitlement and token budget limits
+    await this.billingService.checkTokenLimit(businessId, 1000);
 
     const briefContext = dto.briefId
       ? await this.resolveBriefContext(dto.briefId, businessId, dto.campaignId)
@@ -117,21 +144,23 @@ export class ContentService {
       throw new BadRequestException('A linked brand is required to generate content.');
     }
 
+    try {
     const effectiveCampaignId = dto.campaignId ?? briefContext?.campaignId ?? undefined;
 
     // 2. Resolve brand context
-    const brand = await prisma.brand.findFirst({
+    const brand = await this.prisma.client.brand.findFirst({
       where: { id: effectiveBrandId, businessId },
-      include: {
-        knowledgeSources: {
-          where: { status: 'completed' },
-          include: {
-            entries: { where: { isStale: false }, take: 10, orderBy: { confidence: 'desc' } },
-          },
-        },
-      },
     });
     if (!brand) throw new NotFoundException('Brand not found');
+
+    // Perform semantic retrieval for relevant facts
+    const relevantFacts = await this.vectorService.findRelevantContext(
+      this.prisma.client,
+      businessId,
+      effectiveTopic,
+      10, // Top 10 facts
+      effectiveBrandId
+    );
 
     const brandContext: BrandContext = {
       name: brand.name,
@@ -139,13 +168,11 @@ export class ContentService {
       audience: brand.audience,
       tone: brand.tone as string[] | null,
       governance: brand.governance as BrandContext['governance'],
-      knowledgeEntries: brand.knowledgeSources
-        .flatMap((s: KnowledgeSource & { entries: KnowledgeEntry[] }) => s.entries)
-        .map((e: KnowledgeEntry) => e.content),
+      knowledgeEntries: relevantFacts.map((f: any) => f.content),
     };
 
     // 3. Resolve prompt
-    const promptRecord = await prisma.prompt.findFirst({
+    const promptRecord = await this.prisma.client.prompt.findFirst({
       where: {
         module: 'social',
         isActive: true,
@@ -155,7 +182,7 @@ export class ContentService {
     });
 
     const promptTemplate = promptRecord?.template ?? this.getDefaultPromptTemplate(dto.platform);
-    const sanitizedTopic = this.promptEngine.sanitizeInput(dto.topic);
+    const sanitizedTopic = this.promptEngine.sanitizeInput(effectiveTopic);
 
     const systemPrompt = this.promptEngine.buildSystemPrompt(
       {
@@ -195,13 +222,6 @@ export class ContentService {
       },
     );
 
-    // 5. Quality check
-    const qualityResult = await this.qualityControl.check(
-      response.content,
-      brandContext,
-      brandContext.knowledgeEntries?.slice(0, 5) ?? [],
-    );
-
     // 6. Track cost
     await this.costTracker.track({
       businessId,
@@ -212,8 +232,8 @@ export class ContentService {
       requestId,
     });
 
-    // 7. Persist content
-    const content = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    // 7. Persist content first
+    const content = await this.prisma.client.$transaction(async (tx: Prisma.TransactionClient) => {
       const created = await tx.content.create({
         data: {
           businessId,
@@ -224,9 +244,13 @@ export class ContentService {
           type: dto.type,
           body: response.content,
           status: 'draft',
-          qualityScore: qualityResult.confidenceScore,
+          qualityScore: 0,
           promptId: promptRecord?.id,
           promptVersion: promptRecord?.version,
+          metadata: {
+            sourceIds: relevantFacts.map((f: any) => f.sourceId).filter(Boolean),
+            requestId,
+          } as any,
         },
       });
 
@@ -238,27 +262,41 @@ export class ContentService {
           editedBy: userId,
         },
       });
-
-      await tx.qualityCheck.create({
-        data: {
-          businessId,
-          contentId: created.id,
-          passed: qualityResult.passed,
-          confidenceScore: qualityResult.confidenceScore,
-          violations: qualityResult.violations as unknown as Prisma.InputJsonValue,
-        },
-      });
-
+      
       return created;
     });
 
-    return {
-      content,
-      qualityCheck: qualityResult,
-      provider: usedProvider,
-      requestId,
-    };
+    // 8. Run QC with proper contentId for persistence
+    const finalQualityResult = await this.qualityService.runCheck(
+      content.id,
+      response.content,
+      businessId,
+      effectiveBrandId,
+    );
+
+    await this.auditService.log({
+      businessId,
+      userId,
+      action: 'generate',
+      entityType: 'content',
+      entityId: content.id,
+      after: { platform: dto.platform, type: dto.type, briefId: dto.briefId },
+    });
+
+      return {
+        content,
+        qualityCheck: finalQualityResult,
+        provider: usedProvider,
+        requestId,
+      };
+    } catch (error: any) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException || error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new BadRequestException(`Generation failed: ${error.message || 'Unknown LLM or system error'}`);
+    }
   }
+
 
   async update(id: string, businessId: string, userId: string, dto: UpdateContentDto) {
     const content = await this.findById(id, businessId);
@@ -267,12 +305,12 @@ export class ContentService {
       throw new BadRequestException(`Cannot edit content in ${content.status} status`);
     }
 
-    const latestVersion = await prisma.contentVersion.findFirst({
+    const latestVersion = await this.prisma.client.contentVersion.findFirst({
       where: { contentId: id },
       orderBy: { version: 'desc' },
     });
 
-    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    return this.prisma.client.$transaction(async (tx: Prisma.TransactionClient) => {
       const updated = await tx.content.update({
         where: { id },
         data: { body: dto.body, status: 'draft' },
@@ -293,7 +331,7 @@ export class ContentService {
 
   async archive(id: string, businessId: string) {
     await this.findById(id, businessId);
-    return prisma.content.update({ where: { id }, data: { status: 'archived' } });
+    return this.prisma.client.content.update({ where: { id }, data: { status: 'archived' } });
   }
 
   private getDefaultPromptTemplate(platform: string): string {
@@ -302,6 +340,9 @@ Brand positioning: {{positioning}}
 Target audience: {{audience}}
 Tone: {{tone}}
 Banned phrases: {{banned_phrases}}
+
+Brand Knowledge Context:
+{{knowledge_entries}}
 
 Platform: ${platform}
 Topic: {{topic}}
@@ -315,7 +356,7 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
     businessId: string,
     requestedCampaignId?: string | null,
   ) {
-    const brief = await prisma.brief.findFirst({
+    const brief = await this.prisma.client.brief.findFirst({
       where: { id: briefId, businessId },
       select: {
         id: true,
@@ -406,7 +447,7 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
   }
 
   private async assertCampaignOwnership(businessId: string, campaignId: string) {
-    const campaign = await prisma.campaign.findFirst({
+    const campaign = await this.prisma.client.campaign.findFirst({
       where: { id: campaignId, businessId },
       select: { id: true },
     });
@@ -438,5 +479,102 @@ Write high-quality, engaging content appropriate for ${platform}. Stay true to t
   private normalizeOptionalText(value: string | null | undefined) {
     const normalized = value?.trim();
     return normalized ? normalized : undefined;
+  }
+
+  async getJobStatus(jobId: string, businessId: string) {
+    const job = await this.aiGenerationQueue.getJob(jobId);
+    if (!job) {
+      throw new NotFoundException(`Job ${jobId} not found`);
+    }
+
+    if (job.data.businessId !== businessId) {
+      throw new ForbiddenException('Access denied to this job');
+    }
+
+    const state = await job.getState();
+    const progress = job.progress;
+    const result = job.returnvalue;
+
+    return {
+      id: job.id,
+      status: state,
+      progress,
+      result,
+    };
+  }
+
+  async suggestTopics(businessId: string, brandId: string, category: string, campaignId?: string) {
+    const brand = await this.prisma.client.brand.findFirst({
+      where: { id: brandId, businessId },
+    });
+    if (!brand) throw new NotFoundException('Brand not found');
+
+    const brandName = brand.name;
+    const tone = Array.isArray(brand.tone) ? brand.tone.join(', ') : 'professional';
+    const industry = brand.industry || 'marketing';
+    const positioning = brand.positioning || 'General brand positioning';
+    const audience = brand.audience || 'General audience';
+
+    // Retrieve relevant brand context for intelligent topic generation
+    const searchQuery = `${brandName} ${industry} core offerings, products, and positioning`;
+    const relevantFacts = await this.vectorService.findRelevantContext(
+      this.prisma.client,
+      businessId,
+      searchQuery,
+      10,
+      brandId
+    );
+    const knowledgeBlock = relevantFacts.length > 0 
+      ? `Extracted Brand Knowledge Data:\n${relevantFacts.map((f: any, i: number) => `${i + 1}. ${f.content}`).join('\n')}`
+      : 'No specific extracted knowledge retrieved, rely strictly on the provided brand positioning and industry.';
+
+    const systemPrompt = `You are a Senior Content strategist and AI Analyst for the brand "${brandName}" in the "${industry}" industry.
+Analyze the provided brand data and extracted knowledge to generate exactly 5 creative, highly relevant marketing topic ideas for the category "${category}".
+
+Brand Analysis Context:
+- Brand Name: ${brandName}
+- Industry: ${industry}
+- Positioning: ${positioning}
+- Target Audience: ${audience}
+- Preferred Tone: ${tone}
+
+${knowledgeBlock}
+
+CRITICAL INSTRUCTION:
+1. You MUST generate topics that are STRICTLY tailored to "${brandName}" and its specific products/features.
+2. DO NOT output topics related to other brands or generic industry fluff.
+3. If extracted brand knowledge data is provided, explicitly use those facts in the topics.
+4. If no extracted knowledge is available, use the brand positioning and audience to create highly specific topics.
+5. Provide completely new, unique, and diverse angles. Think outside the box to ensure variety in the suggestions (Seed: ${Date.now()}).
+
+Respond in strict JSON format matching:
+{
+  "topics": [
+    { "id": "1", "name": "Specific topic using extracted data", "tag": "AI Analyzed / Fact Tag" }
+  ]
+}`;
+
+    try {
+      const llmSettings = await this.llmSettingsService.getSettings(businessId);
+      const decryptedApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId);
+
+      const { response } = await this.gateway.complete(
+        systemPrompt,
+        `Generate 5 unique and diverse topic suggestions for Category: ${category}`,
+        {
+          provider: (llmSettings.provider as any) ?? 'openai',
+          model: llmSettings.model ?? undefined,
+          temperature: 0.85,
+          apiKey: decryptedApiKey ?? undefined,
+        }
+      );
+
+      // robust JSON parsing to handle markdown wrappers
+      const cleanJson = response.content.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+      return parsed;
+    } catch (err: any) {
+      throw new BadRequestException(`Topic suggestion failed: ${err.message || 'Unknown LLM or system error'}`);
+    }
   }
 }

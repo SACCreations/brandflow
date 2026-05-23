@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { prisma } from '@brandflow/db';
+import { PrismaService } from '../../common/database/prisma.service';
 import type { Prisma } from '@brandflow/db';
 import type {
   CampaignWorkflowMetadata,
@@ -12,10 +12,12 @@ import type {
   UpdateCampaignDto,
 } from '@brandflow/shared';
 
+
 @Injectable()
 export class CampaignService {
+  constructor(private readonly prisma: PrismaService) {}
   async findAll(businessId: string, includeArchived = false) {
-    return prisma.campaign.findMany({
+    return this.prisma.client.campaign.findMany({
       where: { 
         businessId,
         archivedAt: includeArchived ? undefined : null
@@ -30,7 +32,7 @@ export class CampaignService {
   }
 
   async findOne(id: string, businessId: string) {
-    const campaign = await prisma.campaign.findFirst({
+    const campaign = await this.prisma.client.campaign.findFirst({
       where: { id, businessId },
       include: {
         briefs: true,
@@ -51,7 +53,7 @@ export class CampaignService {
   async create(businessId: string, dto: CreateCampaignDto) {
     const payload = this.prepareCreatePayload(businessId, dto);
 
-    return prisma.campaign.create({
+    return this.prisma.client.campaign.create({
       data: payload,
     });
   }
@@ -60,14 +62,14 @@ export class CampaignService {
     const existing = await this.findOne(id, businessId);
     const payload = this.prepareUpdatePayload(existing, dto);
 
-    return prisma.campaign.update({
+    return this.prisma.client.campaign.update({
       where: { id },
       data: payload
     });
   }
 
   async createFromBrief(briefId: string, businessId: string) {
-    const brief = await prisma.brief.findFirst({
+    const brief = await this.prisma.client.brief.findFirst({
       where: { id: briefId, businessId },
       include: {
         campaign: { select: { id: true, name: true } },
@@ -89,7 +91,7 @@ export class CampaignService {
     }
 
     const project = metadata.projectId
-      ? await prisma.project.findFirst({
+      ? await this.prisma.client.project.findFirst({
           where: { id: metadata.projectId, businessId },
           select: {
             id: true,
@@ -101,7 +103,7 @@ export class CampaignService {
         })
       : null;
 
-    const created = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const created = await this.prisma.client.$transaction(async (tx: Prisma.TransactionClient) => {
       const campaign = await tx.campaign.create({
         data: {
           businessId,
@@ -134,7 +136,7 @@ export class CampaignService {
   async archive(id: string, businessId: string) {
     await this.findOne(id, businessId);
 
-    return prisma.campaign.update({
+    return this.prisma.client.campaign.update({
       where: { id },
       data: {
         archivedAt: new Date(),
@@ -170,7 +172,7 @@ export class CampaignService {
 
     const healthScore = Math.round((strategyScore + approvalScore + scheduleScore) / 3);
 
-    await prisma.campaign.update({
+    await this.prisma.client.campaign.update({
       where: { id },
       data: { healthScore }
     });
@@ -181,7 +183,7 @@ export class CampaignService {
   async clone(id: string, businessId: string, newName: string) {
     const original = await this.findOne(id, businessId);
 
-    const cloned = await prisma.campaign.create({
+    const cloned = await this.prisma.client.campaign.create({
       data: {
         businessId,
         name: newName,
@@ -196,7 +198,7 @@ export class CampaignService {
 
     // Clone Briefs
     for (const brief of original.briefs) {
-      await prisma.brief.create({
+      await this.prisma.client.brief.create({
         data: {
           businessId,
           campaignId: cloned.id,
@@ -224,7 +226,7 @@ export class CampaignService {
   async remove(id: string, businessId: string) {
     // Check if campaign exists and belongs to business
     await this.findOne(id, businessId);
-    return prisma.campaign.delete({
+    return this.prisma.client.campaign.delete({
       where: { id }
     });
   }

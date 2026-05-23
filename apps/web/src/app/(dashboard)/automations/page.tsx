@@ -47,14 +47,14 @@ export default function AutomationsPage() {
     queryKey: ['automations'],
     queryFn: async () => {
       const res = await apiClient.get('/automations');
-      return res.data.data as Automation[];
+      return res.data as Automation[];
     },
   });
 
   const toggleMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await apiClient.patch(`/automations/${id}/toggle`);
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['automations'] });

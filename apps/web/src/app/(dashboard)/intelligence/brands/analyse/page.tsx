@@ -43,7 +43,7 @@ export default function BrandAnalysePage() {
     queryKey: ['analysis-customer-context', customerId],
     queryFn: async () => {
       const res = await apiClient.get(`/customers/${customerId}`);
-      return res.data.data as CustomerContext;
+      return res.data as CustomerContext;
     },
     enabled: !!customerId,
   });
@@ -52,7 +52,7 @@ export default function BrandAnalysePage() {
     queryKey: ['analysis-project-context', projectId],
     queryFn: async () => {
       const res = await apiClient.get(`/projects/${projectId}`);
-      return res.data.data as ProjectContext;
+      return res.data as ProjectContext;
     },
     enabled: !!projectId,
   });
@@ -105,7 +105,7 @@ export default function BrandAnalysePage() {
         })),
       });
 
-      return analysisRes.data.data as BrandAnalysisResult;
+      return analysisRes.data as BrandAnalysisResult;
     },
     onSuccess: (result) => {
       setExtractedData(result);
@@ -132,10 +132,10 @@ export default function BrandAnalysePage() {
   const saveMutation = useMutation({
     mutationFn: async (data: BrandAnalysisResult['brand']) => {
       const brandResponse = await apiClient.post('/brands', data);
-      const brand = brandResponse.data.data as CreatedBrand;
+      const brand = brandResponse.data as CreatedBrand;
 
       if (customerId) {
-        const currentCustomer = customer ?? ((await apiClient.get(`/customers/${customerId}`)).data.data as CustomerContext);
+        const currentCustomer = customer ?? ((await apiClient.get(`/customers/${customerId}`)).data as CustomerContext);
         await apiClient.patch(`/customers/${customerId}`, {
           metadata: {
             ...(currentCustomer.metadata ?? {}),
@@ -147,7 +147,7 @@ export default function BrandAnalysePage() {
       }
 
       if (projectId) {
-        const currentProject = project ?? ((await apiClient.get(`/projects/${projectId}`)).data.data as ProjectContext);
+        const currentProject = project ?? ((await apiClient.get(`/projects/${projectId}`)).data as ProjectContext);
         await apiClient.patch(`/projects/${projectId}`, {
           metadata: {
             ...(currentProject.metadata ?? {}),
@@ -384,16 +384,27 @@ export default function BrandAnalysePage() {
 
           <div className="space-y-6">
             <Card className="p-6 bg-brand-600 text-white">
-              <h3 className="text-lg font-bold mb-2">Ready to launch?</h3>
+              <h3 className="text-lg font-bold mb-2">Analysis Complete!</h3>
               <p className="text-brand-100 text-sm mb-6">
-                This analysis will create your new brand profile and set your global content guidelines.
+                We've extracted a comprehensive profile including Strategy, Identity, and Visuals. Continue to the wizard to review and fine-tune your brand before saving.
               </p>
               <Button
                 className="w-full bg-white text-brand-600 hover:bg-brand-50 border-none h-12 text-lg font-bold"
-                onClick={() => saveMutation.mutate(extractedData.brand)}
-                disabled={saveMutation.isPending}
+                onClick={() => {
+                  if (extractedData?.brand) {
+                    localStorage.setItem('brand_draft_new', JSON.stringify(extractedData.brand));
+                    let url = '/intelligence/brands/new';
+                    const params = new URLSearchParams();
+                    if (customerId) params.set('customerId', customerId);
+                    if (projectId) params.set('projectId', projectId);
+                    if (params.toString()) {
+                      url += `?${params.toString()}`;
+                    }
+                    router.push(url);
+                  }
+                }}
               >
-                {saveMutation.isPending ? 'Saving...' : 'Confirm & Save'}
+                Review in Wizard →
               </Button>
             </Card>
 

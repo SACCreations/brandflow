@@ -40,8 +40,15 @@ export class LlmSettingsService {
   async updateSettings(businessId: string, dto: UpdateLlmSettingsDto) {
     const { apiKey, ...otherSettings } = dto;
 
-    let encryptedApiKey: string | undefined;
-    if (apiKey) {
+    let encryptedApiKey: string | null | undefined;
+    if (apiKey === '********') {
+      // Keep existing key
+      encryptedApiKey = undefined;
+    } else if (apiKey === '' || apiKey === null) {
+      // Clear key
+      encryptedApiKey = null;
+    } else if (apiKey) {
+      // Encrypt new key
       encryptedApiKey = encryption.encrypt(apiKey, this.encryptionKey);
     }
 
@@ -49,7 +56,7 @@ export class LlmSettingsService {
       where: { businessId },
       update: {
         ...otherSettings,
-        ...(encryptedApiKey ? { apiKey: encryptedApiKey } : {}),
+        ...(encryptedApiKey !== undefined ? { apiKey: encryptedApiKey } : {}),
       } as any, // Cast to any to bypass strict Prisma null checks if necessary
       create: {
         businessId,
@@ -58,7 +65,7 @@ export class LlmSettingsService {
         temperature: dto.temperature ?? 0.7,
         maxTokens: dto.maxTokens ?? 2000,
         isFallbackEnabled: dto.isFallbackEnabled ?? true,
-        ...(encryptedApiKey ? { apiKey: encryptedApiKey } : {}),
+        ...(encryptedApiKey !== undefined && encryptedApiKey !== null ? { apiKey: encryptedApiKey } : {}),
       },
     });
   }

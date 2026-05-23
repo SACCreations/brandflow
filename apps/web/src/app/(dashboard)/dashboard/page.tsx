@@ -30,11 +30,11 @@ interface DashboardSummaryResponse {
 }
 
 export default function DashboardPage() {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery<DashboardSummaryResponse>({
     queryKey: ['dashboard-summary'],
     queryFn: async () => {
-      const res = await apiClient.get<{ data: DashboardSummaryResponse }>('/business/dashboard');
-      return res.data.data;
+      const res = await apiClient.get<DashboardSummaryResponse>('/business/dashboard');
+      return res.data;
     },
     staleTime: 60_000,
   });
@@ -116,7 +116,7 @@ export default function DashboardPage() {
             </div>
           ) : data?.recentActivity.length ? (
             <div className="divide-y divide-gray-200 dark:divide-gray-800">
-              {data.recentActivity.map((activity) => (
+              {data.recentActivity.map((activity: any) => (
                 <Link
                   key={activity.id}
                   href={activity.href}
@@ -158,6 +158,7 @@ export default function DashboardPage() {
             <div className="p-4 grid grid-cols-2 gap-3">
               {[
                 { label: 'Generate Content', href: '/create/content', icon: '✦' },
+                { label: 'Generate AI Image', href: '/create/image', icon: '🎨' },
                 { label: 'New Campaign', href: '/campaigns', icon: '◎' },
                 { label: 'View Approvals', href: '/review/approvals', icon: '✓' },
                 { label: 'Schedule Post', href: '/publish/calendar', icon: '◷' },

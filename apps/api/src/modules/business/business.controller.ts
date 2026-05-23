@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { BusinessService } from './business.service';
+import { AuditService } from './audit.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
@@ -20,7 +21,10 @@ import { updateBusinessSchema, type UpdateBusinessDto, type JwtPayload } from '@
 @UseGuards(JwtAuthGuard)
 @Controller('business')
 export class BusinessController {
-  constructor(private readonly businessService: BusinessService) {}
+  constructor(
+    private readonly businessService: BusinessService,
+    private readonly auditService: AuditService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get current workspace details' })
@@ -77,5 +81,11 @@ export class BusinessController {
   @ApiOperation({ summary: 'Get workspace health score' })
   getHealth(@CurrentUser() user: JwtPayload) {
     return this.businessService.getHealthScore(user.businessId);
+  }
+
+  @Get('audit-logs')
+  @ApiOperation({ summary: 'Get workspace audit logs' })
+  getAuditLogs(@CurrentUser() user: JwtPayload) {
+    return this.auditService.getLogs(user.businessId);
   }
 }

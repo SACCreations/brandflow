@@ -99,6 +99,89 @@ export const brandAnalysisBrandSchema = z.object({
     ctaPreferences: z.array(z.string().min(1).max(100)).max(20).default([]),
     requiredDisclaimer: z.string().max(1000).nullish(),
   }),
+  visualRules: z.object({
+    primaryColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, 'Invalid Hex Color').nullish().or(z.literal('')),
+    secondaryColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, 'Invalid Hex Color').nullish().or(z.literal('')),
+    accentColor: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, 'Invalid Hex Color').nullish().or(z.literal('')),
+    fontFamily: z.string().max(100).nullish().or(z.literal('')),
+    headingFont: z.string().max(100).nullish().or(z.literal('')),
+    bodyFont: z.string().max(100).nullish().or(z.literal('')),
+    logoUrls: z.array(z.object({
+      url: z.string().max(1000).nullish().or(z.literal('')),
+      type: z.string().max(50).nullish(),
+      name: z.string().max(100).nullish(),
+    })).max(20).nullish(),
+  }).nullish(),
+  identity: z.object({
+    mission: z.string().max(1000).nullish(),
+    vision: z.string().max(1000).nullish(),
+    values: z.array(z.string()).nullish(),
+    promise: z.string().max(500).nullish(),
+    personality: z.string().max(500).nullish(),
+  }).nullish(),
+  designTokens: z.object({
+    borderRadius: z.string().nullish(),
+    shadows: z.string().nullish(),
+    spacing: z.string().nullish(),
+  }).nullish(),
+  strategy: z.object({
+    targetLocation: z.string().max(255).nullish().or(z.literal('')),
+    ageGroup: z.string().max(100).nullish().or(z.literal('')),
+    interests: z.string().max(1000).nullish().or(z.literal('')),
+    postingFrequency: z.enum(['daily', 'weekly', 'bi-weekly', 'monthly']).nullish(),
+    festivalPosts: z.boolean().default(false),
+    offerPosts: z.boolean().default(false),
+    preferredTypes: z.array(z.string()).nullish(),
+    contentLanguage: z.enum(['tamil', 'english', 'mixed']).default('english'),
+    ctaPreference: z.enum(['Call Now', 'DM', 'Visit Website']).nullish(),
+  }).nullish(),
+  designPreferences: z.object({
+    preferredStyle: z.enum(['Minimal', 'Corporate', '3D', 'Modern', 'Playful', 'Luxury']).nullish(),
+    referenceLinks: z.array(z.string().url()).nullish(),
+    imageStyle: z.enum(['Minimal', 'Corporate', '3D', 'Modern']).nullish(),
+    animationRequirement: z.boolean().default(false),
+  }).nullish(),
+  approvalWorkflow: z.object({
+    reviewerName: z.string().max(255).nullish().or(z.literal('')),
+    finalApproverName: z.string().max(255).nullish().or(z.literal('')),
+    processSteps: z.array(z.string()).nullish(),
+    approvalTiming: z.string().max(100).nullish().or(z.literal('')),
+    revisionLimit: z.number().int().min(0).max(10).nullish(),
+  }).nullish(),
+  campaignDetails: z.object({
+    marketingGoal: z.enum(['Brand Awareness', 'Leads', 'Sales']).nullish(),
+    monthlyBudget: z.number().min(0).nullish(),
+    duration: z.string().max(100).nullish().or(z.literal('')),
+    targetLeads: z.number().int().min(0).nullish(),
+    adPlatforms: z.array(z.string()).nullish(),
+  }).nullish(),
+  analyticsConfig: z.object({
+    monthlyReport: z.boolean().default(true),
+    kpiExpectations: z.string().max(1000).nullish().or(z.literal('')),
+    leadTracking: z.boolean().default(false),
+    engagementTracking: z.boolean().default(true),
+  }).nullish(),
+  socialAccess: z.object({
+    metaBusinessManagerId: z.string().max(100).nullish().or(z.literal('')),
+    adAccountId: z.string().max(100).nullish().or(z.literal('')),
+    instagramHandle: z.string().max(100).nullish().or(z.literal('')),
+    facebookPage: z.string().max(255).nullish().or(z.literal('')),
+    linkedinPage: z.string().max(255).nullish().or(z.literal('')),
+    youtubeChannel: z.string().max(255).nullish().or(z.literal('')),
+    twitterHandle: z.string().max(100).nullish().or(z.literal('')),
+  }).nullish(),
+  competitors: z.array(z.object({
+    name: z.string().min(1).max(255),
+    website: z.string().url().nullish().or(z.literal('')),
+    strengths: z.string().max(1000).nullish().or(z.literal('')),
+    weaknesses: z.string().max(1000).nullish().or(z.literal('')),
+  })).nullish(),
+  contactInfo: z.object({
+    personName: z.string().max(255).nullish().or(z.literal('')),
+    phoneNumber: z.string().max(50).nullish().or(z.literal('')),
+    email: z.string().email().nullish().or(z.literal('')),
+    officeAddress: z.string().max(500).nullish().or(z.literal('')),
+  }).nullish(),
 });
 export type BrandAnalysisBrandDto = z.infer<typeof brandAnalysisBrandSchema>;
 
@@ -147,7 +230,16 @@ export const createBrandSchema = z.object({
       fontFamily: z.string().max(100).nullish().or(z.literal('')),
       headingFont: z.string().max(100).nullish().or(z.literal('')),
       bodyFont: z.string().max(100).nullish().or(z.literal('')),
-      logoUrls: z.array(z.string().url()).max(10).nullish(),
+      logoUrls: z
+        .array(
+          z.object({
+            url: z.string().max(1000).nullish().or(z.literal('')),
+            type: z.string().max(50).nullish(),
+            name: z.string().max(100).nullish(),
+          })
+        )
+        .max(20)
+        .nullish(),
     })
     .nullish(),
     
@@ -188,6 +280,45 @@ export const createBrandSchema = z.object({
       offerPosts: z.boolean().default(false),
       preferredTypes: z.array(z.string()).nullish(), // Poster, Reel, Video, Carousel, Blog
       contentLanguage: z.enum(['tamil', 'english', 'mixed']).default('english'),
+      ctaPreference: z.enum(['Call Now', 'DM', 'Visit Website']).nullish(),
+    })
+    .nullish(),
+
+  designPreferences: z
+    .object({
+      preferredStyle: z.enum(['Minimal', 'Corporate', '3D', 'Modern', 'Playful', 'Luxury']).nullish(),
+      referenceLinks: z.array(z.string().url()).nullish(),
+      imageStyle: z.enum(['Minimal', 'Corporate', '3D', 'Modern']).nullish(),
+      animationRequirement: z.boolean().default(false),
+    })
+    .nullish(),
+
+  approvalWorkflow: z
+    .object({
+      reviewerName: z.string().max(255).nullish().or(z.literal('')),
+      finalApproverName: z.string().max(255).nullish().or(z.literal('')),
+      processSteps: z.array(z.string()).nullish(),
+      approvalTiming: z.string().max(100).nullish().or(z.literal('')),
+      revisionLimit: z.number().int().min(0).max(10).nullish(),
+    })
+    .nullish(),
+
+  campaignDetails: z
+    .object({
+      marketingGoal: z.enum(['Brand Awareness', 'Leads', 'Sales']).nullish(),
+      monthlyBudget: z.number().min(0).nullish(),
+      duration: z.string().max(100).nullish().or(z.literal('')),
+      targetLeads: z.number().int().min(0).nullish(),
+      adPlatforms: z.array(z.string()).nullish(),
+    })
+    .nullish(),
+
+  analyticsConfig: z
+    .object({
+      monthlyReport: z.boolean().default(true),
+      kpiExpectations: z.string().max(1000).nullish().or(z.literal('')),
+      leadTracking: z.boolean().default(false),
+      engagementTracking: z.boolean().default(true),
     })
     .nullish(),
 
@@ -195,6 +326,11 @@ export const createBrandSchema = z.object({
     .object({
       metaBusinessManagerId: z.string().max(100).nullish().or(z.literal('')),
       adAccountId: z.string().max(100).nullish().or(z.literal('')),
+      instagramHandle: z.string().max(100).nullish().or(z.literal('')),
+      facebookPage: z.string().max(255).nullish().or(z.literal('')),
+      linkedinPage: z.string().max(255).nullish().or(z.literal('')),
+      youtubeChannel: z.string().max(255).nullish().or(z.literal('')),
+      twitterHandle: z.string().max(100).nullish().or(z.literal('')),
     })
     .nullish(),
 
@@ -214,9 +350,11 @@ export const createBrandSchema = z.object({
       personName: z.string().max(255).nullish().or(z.literal('')),
       phoneNumber: z.string().max(50).nullish().or(z.literal('')),
       email: z.string().email().nullish().or(z.literal('')),
+      officeAddress: z.string().max(500).nullish().or(z.literal('')),
     })
     .nullish(),
 });
+
 export type CreateBrandDto = z.infer<typeof createBrandSchema>;
 
 export const updateBrandSchema = createBrandSchema.partial();
@@ -236,18 +374,28 @@ export const generateContentSchema = z.object({
   brandId: z.string().uuid().nullish(),
   briefId: z.string().uuid().nullish(),
   campaignId: z.string().uuid().nullish(),
-  platform: z.enum(['linkedin', 'instagram', 'facebook', 'twitter', 'tiktok']),
-  type: z.enum(['post', 'caption', 'ad_copy', 'blog_snippet', 'hook', 'cta', 'email', 'article']),
-  topic: z.string().min(1).max(1000),
+  platform: z.string().min(1),
+  type: z.string().min(1),
+  topic: z.string().min(1).max(1000).nullish(),
+  topics: z.array(z.string().min(1)).nullish(),
+  category: z.string().nullish(),
+  count: z.coerce.number().int().min(1).max(100).default(1).nullish(),
   additionalContext: z.string().max(2000).nullish(),
   tone: z.string().max(100).nullish(),
   temperature: z.number().min(0).max(2).nullish(),
   maxTokens: z.number().int().min(1).max(32000).nullish(),
+  language: z.string().nullish(),
+  cta: z.string().nullish(),
+  creativity: z.number().min(0).max(2).nullish(),
+  seoOptimized: z.boolean().nullish(),
+  complianceStrictness: z.enum(['low', 'medium', 'high']).nullish(),
+  approvalRequired: z.boolean().nullish(),
 }).refine((value) => Boolean(value.brandId || value.briefId), {
   message: 'Either brandId or briefId is required',
   path: ['brandId'],
 });
 export type GenerateContentDto = z.infer<typeof generateContentSchema>;
+
 
 export const updateContentSchema = z.object({
   body: z.string().min(1).max(50_000),

@@ -19,7 +19,11 @@ import {
   Globe
 } from 'lucide-react';
 import AddSourceModal from '@/components/knowledge/add-source-modal';
+import KnowledgeExplorer from '@/components/knowledge/knowledge-explorer';
+import LiveIngestionMonitor from '@/components/knowledge/live-ingestion-monitor';
+import SourcesTable from '@/components/knowledge/sources-table';
 import { apiClient } from '@/lib/api-client';
+
 
 interface KnowledgeStatsResponse {
   totalSources: number;
@@ -42,14 +46,17 @@ interface KnowledgeStatsResponse {
 
 export default function KnowledgeDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { data, isLoading, isError } = useQuery({
+  const [isExplorerOpen, setIsExplorerOpen] = useState(false);
+  const { data, isLoading, isError } = useQuery<KnowledgeStatsResponse>({
     queryKey: ['knowledge-stats'],
     queryFn: async () => {
-      const response = await apiClient.get<{ data: KnowledgeStatsResponse }>('/knowledge/stats');
-      return response.data.data;
+      const response = await apiClient.get<KnowledgeStatsResponse>('/knowledge/stats');
+      return response.data;
     },
     staleTime: 30_000,
+    refetchInterval: 5000,
   });
+
 
   const stats = {
     totalSources: data?.totalSources ?? 0,
@@ -61,7 +68,7 @@ export default function KnowledgeDashboard() {
 
   const recentActivity = data?.recentJobs ?? [];
   const statusMix = Object.entries(data?.sourcesByStatus ?? {});
-  const totalStatusCount = statusMix.reduce((sum, [, count]) => sum + count, 0);
+  const totalStatusCount = statusMix.reduce((sum, [, count]) => sum + (count as number), 0);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -74,36 +81,21 @@ export default function KnowledgeDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800">
+          <button 
+            onClick={() => setIsExplorerOpen(true)}
+            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
             <Search className="h-4 w-4" />
             Explorer
           </button>
           
-          <div className="relative group">
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700"
-            >
-              <Plus className="h-4 w-4" />
-              Add Knowledge
-            </button>
-            
-            {/* Quick Actions Dropdown */}
-            <div className="absolute right-0 top-full mt-2 w-56 origin-top-right rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl ring-1 ring-black/5 transition-all opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto dark:border-gray-800 dark:bg-gray-900 z-50">
-              <button onClick={() => setIsModalOpen(true)} className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
-                <FileText className="h-4 w-4 text-brand-500" />
-                Upload File
-              </button>
-              <button onClick={() => setIsModalOpen(true)} className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
-                <Globe className="h-4 w-4 text-blue-500" />
-                Add URL
-              </button>
-              <button onClick={() => setIsModalOpen(true)} className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 border-t border-gray-50 dark:border-gray-800 mt-1 pt-2">
-                <Search className="h-4 w-4 text-purple-500" />
-                Full Connector Hub
-              </button>
-            </div>
-          </div>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700"
+          >
+            <Plus className="h-4 w-4" />
+            Add Knowledge
+          </button>
         </div>
       </div>
 
@@ -139,54 +131,9 @@ export default function KnowledgeDashboard() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Recent Ingestion Activity */}
-        <div className="lg:col-span-2 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-          <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Live Ingestion Activity</h3>
-            <button className="text-sm font-medium text-brand-600 hover:underline">View Monitor</button>
-          </div>
-          {isError ? (
-            <div className="rounded-xl border border-red-100 bg-red-50/80 p-4 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-500/10 dark:text-red-300">
-              Unable to load live ingestion activity right now.
-            </div>
-          ) : recentActivity.length > 0 ? (
-            <div className="space-y-4">
-              {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-center justify-between rounded-xl border border-gray-50 bg-gray-50/50 p-4 dark:border-gray-800/50 dark:bg-gray-800/30">
-                <div className="flex items-center gap-4">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                    activity.status === 'completed' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10' :
-                    activity.status === 'processing' ? 'bg-blue-100 text-blue-600 dark:bg-blue-500/10' :
-                    'bg-red-100 text-red-600 dark:bg-red-500/10'
-                  }`}>
-                    {activity.status === 'completed' ? <CheckCircle2 className="h-5 w-5" /> :
-                     activity.status === 'processing' ? <Activity className="h-5 w-5 animate-pulse" /> :
-                     <AlertCircle className="h-5 w-5" />}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{activity.source?.name || 'Untitled source'}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                      {activity.source?.type || activity.stage} • {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    activity.status === 'completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
-                    activity.status === 'processing' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
-                    'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'
-                  }`}>
-                    {activity.status}
-                  </span>
-                </div>
-              </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-gray-200 p-8 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
-              No ingestion jobs yet. Add a knowledge source to start populating your brand brain.
-            </div>
-          )}
+        {/* Live Ingestion Monitor */}
+        <div className="lg:col-span-2">
+          <LiveIngestionMonitor />
         </div>
 
         {/* Knowledge Distribution */}
@@ -198,7 +145,7 @@ export default function KnowledgeDashboard() {
                 <ProgressItem
                   key={status}
                   label={status.replace(/_/g, ' ')}
-                  percentage={totalStatusCount > 0 ? Math.round((count / totalStatusCount) * 100) : 0}
+                  percentage={totalStatusCount > 0 ? Math.round(((count as number) / totalStatusCount) * 100) : 0}
                   color={STATUS_COLORS[index % STATUS_COLORS.length]}
                 />
               ))
@@ -222,7 +169,10 @@ export default function KnowledgeDashboard() {
         </div>
       </div>
 
+      <SourcesTable />
+
       <AddSourceModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <KnowledgeExplorer isOpen={isExplorerOpen} onClose={() => setIsExplorerOpen(false)} />
     </div>
   );
 }

@@ -8,26 +8,61 @@ import {
   CreditCard, 
   ArrowUpRight, 
   BarChart3,
-  Infinity
+  Infinity as InfinityIcon,
+  Loader2
 } from 'lucide-react';
+
 import { cn } from '@brandflow/ui';
 
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
+import { useToast } from '@brandflow/ui';
+
 export default function BillingSettingsPage() {
-  const currentPlan = 'Starter';
+  const { toast } = useToast();
+  const { data: billing, isLoading } = useQuery({
+    queryKey: ['billing', 'subscription'],
+    queryFn: async () => {
+      const res = await apiClient.get('/billing/subscription');
+      return res.data;
+    },
+  });
+
+  const checkoutMutation = useMutation({
+    mutationFn: async (priceId: string) => {
+      const res = await apiClient.post('/billing/checkout', { priceId });
+      return res.data as { url: string };
+    },
+    onSuccess: ({ url }) => {
+      window.location.assign(url);
+    },
+    onError: (err: any) => {
+      toast({ 
+        title: 'Checkout Error', 
+        description: err.response?.data?.message || 'Could not initiate Stripe checkout.',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  const currentPlan = billing?.plan || 'Starter';
+  const usage = billing?.usage || { tokensUsed: 0, tokenLimit: 100, brandsUsed: 0, brandLimit: 1 };
   
   const plans = [
     {
       name: 'Starter',
       price: '$15',
-      tokens: '100',
+      priceId: 'price_starter_id', // Should match Stripe price IDs
+      tokens: usage.tokenLimit,
       description: 'Perfect for small businesses starting their AI journey.',
-      features: ['1 Active Brand', '100 AI Tokens /mo', 'Standard Media Library', 'Email Support'],
+      features: ['1 Active Brand', `${usage.tokenLimit} AI Tokens /mo`, 'Standard Media Library', 'Email Support'],
       highlight: false
     },
     {
       name: 'Pro',
       price: '$49',
-      tokens: '500',
+      priceId: 'price_pro_id',
+      tokens: 500,
       description: 'Advanced features for growing brands and startups.',
       features: ['5 Active Brands', '500 AI Tokens /mo', 'Advanced Intelligence', 'Priority Support', 'Custom Brand Tones'],
       highlight: true
@@ -35,7 +70,8 @@ export default function BillingSettingsPage() {
     {
       name: 'Elite',
       price: '$199',
-      tokens: '2,500',
+      priceId: 'price_elite_id',
+      tokens: 2500,
       description: 'Unlimited power for agencies and multi-brand enterprises.',
       features: ['Unlimited Brands', '2,500 AI Tokens /mo', 'API Access', 'Dedicated Success Manager', 'Custom Workflows'],
       highlight: false
@@ -65,13 +101,13 @@ export default function BillingSettingsPage() {
             <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Token Usage</h3>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-gray-900 dark:text-white">42</span>
-            <span className="text-gray-400 font-bold uppercase text-[10px] tracking-tighter">/ 100 tokens</span>
+            <span className="text-4xl font-black text-gray-900 dark:text-white">{usage.tokensUsed}</span>
+            <span className="text-gray-400 font-bold uppercase text-[10px] tracking-tighter">/ {usage.tokenLimit} tokens</span>
           </div>
           <div className="mt-6 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-            <div className="h-full bg-brand-600 transition-all" style={{ width: '42%' }} />
+            <div className="h-full bg-brand-600 transition-all" style={{ width: `${(usage.tokensUsed / usage.tokenLimit) * 100}%` }} />
           </div>
-          <p className="mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Resets in 18 days</p>
+          <p className="mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Resets in {Math.max(1, 30 - new Date().getDate())} days</p>
         </div>
 
         <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
@@ -82,13 +118,13 @@ export default function BillingSettingsPage() {
             <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Active Brands</h3>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-gray-900 dark:text-white">1</span>
-            <span className="text-gray-400 font-bold uppercase text-[10px] tracking-tighter">/ 1 brands</span>
+            <span className="text-4xl font-black text-gray-900 dark:text-white">{usage.brandsUsed}</span>
+            <span className="text-gray-400 font-bold uppercase text-[10px] tracking-tighter">/ {usage.brandLimit} brands</span>
           </div>
           <div className="mt-6 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-            <div className="h-full bg-blue-500 transition-all" style={{ width: '100%' }} />
+            <div className="h-full bg-blue-500 transition-all" style={{ width: `${(usage.brandsUsed / usage.brandLimit) * 100}%` }} />
           </div>
-          <p className="mt-4 text-[10px] font-bold text-amber-600 uppercase tracking-widest">Limit reached</p>
+          <p className="mt-4 text-[10px] font-bold text-amber-600 uppercase tracking-widest">{usage.brandsUsed >= usage.brandLimit ? 'Limit reached' : 'Available'}</p>
         </div>
 
         <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
@@ -154,6 +190,8 @@ export default function BillingSettingsPage() {
               </div>
 
               <button 
+                onClick={() => currentPlan !== plan.name && checkoutMutation.mutate(plan.priceId)}
+                disabled={checkoutMutation.isPending || currentPlan === plan.name}
                 className={cn(
                   "flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black uppercase tracking-widest transition-all",
                   currentPlan === plan.name
@@ -163,8 +201,8 @@ export default function BillingSettingsPage() {
                       : "bg-gray-900 text-white hover:bg-black dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
                 )}
               >
-                {currentPlan === plan.name ? 'Current Plan' : 'Switch Plan'}
-                {currentPlan !== plan.name && <ArrowUpRight className="h-4 w-4" />}
+                {checkoutMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : currentPlan === plan.name ? 'Current Plan' : 'Switch Plan'}
+                {currentPlan !== plan.name && !checkoutMutation.isPending && <ArrowUpRight className="h-4 w-4" />}
               </button>
             </div>
           ))}

@@ -15,109 +15,54 @@ import {
   Bar,
   Cell,
 } from 'recharts';
-import {
-  Users,
-  Target,
-  DollarSign,
-  Zap,
-  BrainCircuit,
-  Sparkles,
-  ArrowUpRight,
-  Activity,
-  BarChart3,
-  RefreshCw,
-} from 'lucide-react';
+import { CostAnalysisDashboard } from '@/components/analytics/cost-dashboard';
+import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 
-interface AnalyticsSummaryResponse {
-  range: {
-    from: string;
-    to: string;
-  };
-  summary: {
-    totalReach: number;
-    totalImpressions: number;
-    totalEngagement: number;
-    totalClicks: number;
-    averageCtr: number;
-    engagementRate: number;
-    attributedRoiCents: number;
-    generationCostCents: number;
-    inputTokens: number;
-    outputTokens: number;
-    totalEvents: number;
-  };
-  trend: Array<{
-    label: string;
-    reach: number;
-    engagement: number;
-    clicks: number;
-    roiCents: number;
-  }>;
-  platformBreakdown: Array<{
-    platform: string;
-    reach: number;
-    engagement: number;
-    clicks: number;
-    roiCents: number;
-  }>;
-  topSources: Array<{
-    sourceId: string;
-    name: string;
-    type: string;
-    reach: number;
-    engagement: number;
-    roiCents: number;
-    usageCount: number;
-  }>;
-  eventMix: Array<{
-    eventType: string;
-    count: number;
-  }>;
-}
-
-interface Recommendation {
-  topic: string;
-  recommendation: string;
-  confidence: number;
-  impact: 'High' | 'Medium' | 'Low';
-}
-
-const PLATFORM_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'];
-
 export default function AnalyticsDashboard() {
-  const [windowDays, setWindowDays] = useState<'7' | '30'>('7');
-
-  const range = useMemo(() => {
-    const to = new Date();
-    const from = new Date();
-    from.setDate(to.getDate() - (Number(windowDays) - 1));
-    from.setHours(0, 0, 0, 0);
-    to.setHours(23, 59, 59, 999);
-    return { from: from.toISOString(), to: to.toISOString() };
-  }, [windowDays]);
-
-  const { data: analytics, isLoading, isError, refetch, isRefetching } = useQuery({
-    queryKey: ['analytics-summary', windowDays],
+  const { data: performanceData, isLoading: isPerfLoading } = useQuery({
+    queryKey: ['analytics', 'performance'],
     queryFn: async () => {
-      const res = await apiClient.get<{ data: AnalyticsSummaryResponse }>('/analytics/summary', {
-        params: range,
-      });
-      return res.data.data;
+      const res = await apiClient.get<any[]>('/analytics/performance');
+      return res.data;
     },
-    staleTime: 60_000,
   });
 
-  const { data: recommendations = [] } = useQuery({
-    queryKey: ['analytics-recommendations'],
+  const { data: impactData, isLoading: isImpactLoading } = useQuery({
+    queryKey: ['analytics', 'impact'],
     queryFn: async () => {
-      const res = await apiClient.get<{ data: Recommendation[] }>('/analytics/recommendations');
-      return res.data.data;
+      const res = await apiClient.get<any[]>('/analytics/intelligence-impact');
+      return res.data;
     },
-    staleTime: 5 * 60_000,
   });
 
-  const stats = analytics?.summary;
+  const { data: recommendations, isLoading: isRecLoading } = useQuery({
+    queryKey: ['analytics', 'recommendations'],
+    queryFn: async () => {
+      const res = await apiClient.get<any[]>('/analytics/recommendations');
+      return res.data;
+    },
+  });
+
+  const chartData = performanceData?.map(m => ({
+    name: new Date(m.collectedAt).toLocaleDateString('en-US', { weekday: 'short' }),
+    engagement: m.engagement,
+    reach: m.reach
+  })).reverse() || [
+    { name: 'Mon', engagement: 0, reach: 0 },
+    { name: 'Tue', engagement: 0, reach: 0 },
+    { name: 'Wed', engagement: 0, reach: 0 },
+    { name: 'Thu', engagement: 0, reach: 0 },
+    { name: 'Fri', engagement: 0, reach: 0 },
+    { name: 'Sat', engagement: 0, reach: 0 },
+    { name: 'Sun', engagement: 0, reach: 0 },
+  ];
+
+  const impactSummary = impactData?.slice(0, 4).map((item, i) => ({
+    name: item.name,
+    engagement: Math.round(item.engagement),
+    color: ['#6366f1', '#10b981', '#f59e0b', '#ef4444'][i % 4]
+  })) || [];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
@@ -147,37 +92,12 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
-      {isError ? (
-        <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-500/10 dark:text-red-300">
-          Analytics are temporarily unavailable. Please refresh in a moment.
-        </div>
-      ) : null}
-
-      <div className="grid gap-6 md:grid-cols-4">
-        <MetricCard
-          title="Total Reach"
-          value={isLoading ? '—' : formatCompactNumber(stats?.totalReach ?? 0)}
-          helper={`${windowDays}-day audience reach`}
-          icon={<Users className="h-5 w-5 text-blue-500" />}
-        />
-        <MetricCard
-          title="Engagement Rate"
-          value={isLoading ? '—' : `${stats?.engagementRate ?? 0}%`}
-          helper={`${formatCompactNumber(stats?.totalEngagement ?? 0)} total engagements`}
-          icon={<Target className="h-5 w-5 text-emerald-500" />}
-        />
-        <MetricCard
-          title="Generation Cost"
-          value={isLoading ? '—' : formatCurrency(stats?.generationCostCents ?? 0)}
-          helper={`${formatCompactNumber((stats?.inputTokens ?? 0) + (stats?.outputTokens ?? 0))} tokens used`}
-          icon={<DollarSign className="h-5 w-5 text-amber-500" />}
-        />
-        <MetricCard
-          title="Attributed ROI"
-          value={isLoading ? '—' : formatCurrency(stats?.attributedRoiCents ?? 0)}
-          helper={`${formatCompactNumber(stats?.totalEvents ?? 0)} analytics events tracked`}
-          icon={<Zap className="h-5 w-5 text-brand-500" />}
-        />
+      <div className="rounded-3xl bg-brand-50/30 p-8 dark:bg-brand-500/5">
+        <h2 className="text-xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-3">
+          <DollarSign className="h-6 w-6 text-emerald-500" />
+          AI Spend & Compute Efficiency
+        </h2>
+        <CostAnalysisDashboard />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-12">
@@ -196,7 +116,7 @@ export default function AnalyticsDashboard() {
 
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={analytics?.trend ?? []}>
+              <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="engagementGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
@@ -224,25 +144,31 @@ export default function AnalyticsDashboard() {
         <div className="lg:col-span-4 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
           <h2 className="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
             <BrainCircuit className="h-5 w-5 text-brand-600" />
-            Intelligence Impact
-          </h2>
-          <div className="space-y-5">
-            {(analytics?.topSources ?? []).slice(0, 4).map((source) => {
-              const maxEngagement = analytics?.topSources[0]?.engagement ?? 1;
-              const width = maxEngagement > 0 ? Math.max(8, Math.round((source.engagement / maxEngagement) * 100)) : 0;
-
-              return (
-                <div key={source.sourceId} className="space-y-2">
-                  <div className="flex items-center justify-between gap-3 text-xs font-bold">
-                    <span className="truncate text-gray-700 dark:text-gray-300">{source.name}</span>
-                    <span className="whitespace-nowrap text-gray-400">{formatCompactNumber(source.engagement)} pts</span>
+            Impact Attribution
+          </h3>
+          <div className="flex-1 space-y-6">
+            {isImpactLoading ? (
+               Array.from({ length: 4 }).map((_, i) => (
+                 <div key={i} className="h-10 w-full animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+               ))
+            ) : impactSummary.length > 0 ? (
+              impactSummary.map((item, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-gray-700 dark:text-gray-300">{item.name}</span>
+                    <span className="text-gray-400">{item.engagement} pts</span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-                    <div className="h-full rounded-full bg-brand-500 transition-all duration-700" style={{ width: `${width}%` }} />
+                    <div 
+                      className="h-full transition-all duration-1000" 
+                      style={{ width: `${Math.min(100, (item.engagement / 500) * 100)}%`, backgroundColor: item.color }}
+                    />
                   </div>
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              <p className="text-xs text-gray-500">No impact data attributed yet.</p>
+            )}
           </div>
 
           <div className="mt-8 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
@@ -369,33 +295,55 @@ export default function AnalyticsDashboard() {
                       No attributed source impact available yet.
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                  {isImpactLoading ? (
+                    <tr><td colSpan={5} className="p-8 text-center animate-pulse">Loading matrix...</td></tr>
+                  ) : impactData?.length ? (
+                    impactData.map((item, i) => (
+                      <KnowledgeRow 
+                        key={i} 
+                        name={item.name} 
+                        usage={item.count} 
+                        sentiment={item.type} 
+                        impact={Math.round(Math.min(100, item.engagement / 10))} 
+                        roi={`$${((item.roiCents || 0) / 100).toFixed(0)}`} 
+                        color={['bg-brand-500', 'bg-emerald-500', 'bg-blue-500', 'bg-amber-500'][i % 4]} 
+                      />
+                    ))
+                  ) : (
+                    <tr><td colSpan={5} className="p-8 text-center text-gray-500">No knowledge impact recorded yet.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <div className="lg:col-span-12 rounded-2xl border border-brand-100 bg-brand-50/20 p-8 dark:border-brand-500/20 dark:bg-brand-500/5">
-          <h2 className="mb-6 flex items-center gap-2 text-xl font-bold text-brand-900 dark:text-white">
-            <Sparkles className="h-6 w-6 text-brand-600" />
-            Strategic Learning Loop
-          </h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            {recommendations.length ? (
-              recommendations.map((item) => (
-                <RecommendationCard
-                  key={item.topic}
-                  topic={item.topic}
-                  recommendation={item.recommendation}
-                  confidence={Math.round(item.confidence * 100)}
-                  impact={item.impact}
-                />
-              ))
-            ) : (
-              <div className="rounded-2xl border border-dashed border-brand-200 bg-white/80 p-6 text-sm text-gray-500 dark:border-brand-500/20 dark:bg-gray-900/70 dark:text-gray-400">
-                Recommendations will appear here as more performance data accumulates.
-              </div>
-            )}
+        {/* AI Recommendations */}
+        <div className="lg:col-span-12">
+          <div className="rounded-2xl border border-brand-100 bg-brand-50/20 p-8 dark:border-brand-500/20 dark:bg-brand-500/5">
+            <h3 className="text-xl font-bold text-brand-900 dark:text-white flex items-center gap-2 mb-6">
+              <Sparkles className="h-6 w-6 text-brand-600" />
+              Strategic Learning Loop
+            </h3>
+            <div className="grid gap-6 md:grid-cols-2">
+              {isRecLoading ? (
+                [1, 2].map(i => <div key={i} className="h-40 animate-pulse rounded-2xl bg-white dark:bg-gray-800" />)
+              ) : recommendations?.length ? (
+                recommendations.map((rec, i) => (
+                  <RecommendationCard 
+                    key={i}
+                    topic={rec.topic}
+                    recommendation={rec.recommendation}
+                    confidence={Math.round(rec.confidence * 100)}
+                    impact={rec.impact}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No strategic recommendations available yet.</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

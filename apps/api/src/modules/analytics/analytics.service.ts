@@ -219,27 +219,44 @@ export class AnalyticsService {
    * Attributes success back to the "Brain" atoms.
    */
   async getIntelligenceImpact(businessId: string) {
-    const metrics = await prisma.performanceMetric.findMany({
-      where: { businessId },
-      select: { sourceAttribution: true, engagement: true, reach: true }
-    });
+    const [metrics, sources] = await Promise.all([
+      prisma.performanceMetric.findMany({
+        where: { businessId },
+        select: { sourceAttribution: true, engagement: true, reach: true, roiCents: true }
+      }),
+      prisma.knowledgeSource.findMany({
+        where: { businessId },
+        select: { id: true, name: true, type: true }
+      })
+    ]);
 
-    const impactMap: Record<string, { engagement: number; reach: number; count: number }> = {};
+    const sourceMap = new Map(sources.map(s => [s.id, s]));
+    const impactMap: Record<string, { name: string; type: string; engagement: number; reach: number; roiCents: number; count: number }> = {};
 
     metrics.forEach(m => {
       const attribution = (m.sourceAttribution as any) || {};
       Object.keys(attribution).forEach(sourceId => {
         const weight = attribution[sourceId];
+        const source = sourceMap.get(sourceId);
+        
         if (!impactMap[sourceId]) {
-          impactMap[sourceId] = { engagement: 0, reach: 0, count: 0 };
+          impactMap[sourceId] = { 
+            name: source?.name || 'Unknown Source', 
+            type: source?.type || 'unknown',
+            engagement: 0, 
+            reach: 0, 
+            roiCents: 0,
+            count: 0 
+          };
         }
-        impactMap[sourceId].engagement += m.engagement * weight;
-        impactMap[sourceId].reach += m.reach * weight;
+        impactMap[sourceId].engagement += (m.engagement || 0) * weight;
+        impactMap[sourceId].reach += (m.reach || 0) * weight;
+        impactMap[sourceId].roiCents += (m.roiCents || 0) * weight;
         impactMap[sourceId].count += 1;
       });
     });
 
-    return impactMap;
+    return Object.values(impactMap).sort((a, b) => b.engagement - a.engagement);
   }
 
   /**
@@ -266,21 +283,107 @@ export class AnalyticsService {
     ];
   }
 
-  private resolveDateRange(from?: string, to?: string) {
-    const end = to ? new Date(to) : new Date();
-    const start = from ? new Date(from) : new Date(end);
-
-    if (!from) {
-      start.setDate(end.getDate() - 6);
+  async getCostAnalysis(businessId: string, from?: string, to?: string) {
+    const where: any = { businessId };
+    if (from || to) {
+      where.createdAt = {
+        ...(from ? { gte: new Date(from) } : {}),
+        ...(to ? { lte: new Date(to) } : {}),
+      };
     }
 
-    start.setHours(0, 0, 0, 0);
-    end.setHours(23, 59, 59, 999);
+    const [totalCost, byModule, byModel, dailyTrend] = await Promise.all([
+      prisma.costEvent.aggregate({
+        where,
+        _sum: { costCents: true, inputTokens: true, outputTokens: true },
+      }),
+      prisma.costEvent.groupBy({
+        by: ['module'],
+        where,
+        _sum: { costCents: true },
+      }),
+      prisma.costEvent.groupBy({
+        by: ['model'],
+        where,
+        _sum: { costCents: true },
+      }),
+      prisma.$queryRawUnsafe(
+        `SELECT date_trunc('day', "createdAt") as day, CAST(SUM("costCents") AS INTEGER) as cost
+         FROM cost_events
+         WHERE "businessId" = $1
+         GROUP BY day
+         ORDER BY day ASC`,
+        businessId,
+      )
+    ]);
 
-    return { start, end };
+    return {
+      total: totalCost._sum,
+      byModule,
+      byModel,
+      dailyTrend,
+    };
   }
 
-  private formatDayKey(value: Date) {
-    return value.toISOString().slice(0, 10);
+  async getReliabilityMetrics(businessId: string) {
+    const [totalJobs, failedJobs, successJobs] = await Promise.all([
+      prisma.publishJob.count({ where: { businessId } }),
+      prisma.publishJob.count({ where: { businessId, status: 'dead_letter' } }),
+      prisma.publishJob.count({ where: { businessId, status: 'published' } }),
+    ]);
+
+    const successRate = totalJobs > 0 ? (successJobs / totalJobs) * 100 : 100;
+    
+    const accountHealth = await prisma.socialAccount.findMany({
+      where: { businessId },
+      select: { id: true, platform: true, name: true, tokenExpiresAt: true }
+    });
+
+    const healthyAccounts = accountHealth.filter(a => !a.tokenExpiresAt || a.tokenExpiresAt > new Date());
+    
+    return {
+      successRate,
+      totalJobs,
+      failedJobs,
+      accountHealth: {
+        total: accountHealth.length,
+        healthy: healthyAccounts.length,
+        percentage: accountHealth.length > 0 ? (healthyAccounts.length / accountHealth.length) * 100 : 100
+      }
+    };
+  }
+
+  async getSlaCompliance(businessId: string) {
+    // SLA: Posts published within 5 minutes of scheduled time
+    const publishedJobs = await prisma.publishJob.findMany({
+      where: { 
+        businessId, 
+        status: 'published',
+        publishedAt: { not: null },
+        scheduleId: { not: null }
+      },
+      include: { schedule: true },
+      take: 100,
+      orderBy: { publishedAt: 'desc' }
+    });
+
+    const slaResults = publishedJobs.map(job => {
+      const scheduled = job.schedule!.scheduledAt.getTime();
+      const actual = job.publishedAt!.getTime();
+      const delayMinutes = (actual - scheduled) / (1000 * 60);
+      return {
+        jobId: job.id,
+        delayMinutes,
+        compliant: delayMinutes <= 5 // 5 minute SLA window
+      };
+    });
+
+    const compliantCount = slaResults.filter(r => r.compliant).length;
+    
+    return {
+      slaComplianceRate: slaResults.length > 0 ? (compliantCount / slaResults.length) * 100 : 100,
+      averageDelayMinutes: slaResults.length > 0 ? slaResults.reduce((acc, r) => acc + r.delayMinutes, 0) / slaResults.length : 0,
+      recentJobs: slaResults
+    };
   }
 }

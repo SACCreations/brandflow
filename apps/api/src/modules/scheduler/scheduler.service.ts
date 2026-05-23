@@ -108,7 +108,12 @@ export class SchedulerService {
     await this.publishQueue.add(
       'publish',
       { scheduleId: schedule.id, businessId, contentId: dto.contentId! },
-      { delay: Math.max(delay, 0), jobId: schedule.id, attempts: 3, backoff: { type: 'exponential', delay: 60000 } },
+      { 
+        delay: Math.max(delay, 0), 
+        jobId: schedule.id, 
+        attempts: 5, // Increased as per hardening strategy
+        backoff: { type: 'exponential', delay: 60000 } 
+      },
     );
 
     return schedule;
@@ -126,7 +131,13 @@ export class SchedulerService {
     return prisma.$transaction(async (tx) => {
       const updated = await tx.schedule.update({
         where: { id },
-        data: { status: 'cancelled' },
+        data: { status: 'canceled' },
+      });
+
+      // Update associated publish jobs if any
+      await tx.publishJob.updateMany({
+        where: { scheduleId: id, status: { in: ['pending', 'retrying', 'dead_letter'] } },
+        data: { status: 'canceled' }
       });
 
       if (schedule.contentId) {
@@ -154,16 +165,15 @@ export class SchedulerService {
   async retry(id: string, businessId: string) {
     const schedule = await this.findById(id, businessId);
 
-    if (schedule.status !== 'failed') {
-      throw new BadRequestException('Only failed schedules can be retried.');
+    // Allow retry if status is failed OR if there is a dead_letter job
+    const hasDeadLetterJob = schedule.publishJobs.some(j => j.status === 'dead_letter');
+    
+    if (schedule.status !== 'failed' && !hasDeadLetterJob) {
+      throw new BadRequestException('Only failed or dead-lettered schedules can be manually retried.');
     }
 
     if (!schedule.contentId) {
       throw new BadRequestException('This schedule is not linked to a content item.');
-    }
-
-    if (!schedule.socialAccountId) {
-      throw new BadRequestException('This schedule is not linked to a social account.');
     }
 
     const contentId = schedule.contentId;
@@ -171,7 +181,7 @@ export class SchedulerService {
     try {
       await this.publishQueue.remove(id);
     } catch {
-      // Ignore queue state mismatch; we are rebuilding the job intentionally.
+      // Ignore queue state mismatch
     }
 
     const retriedSchedule = await prisma.$transaction(async (tx) => {
@@ -179,8 +189,20 @@ export class SchedulerService {
         where: { id },
         data: {
           status: 'pending',
-          scheduledAt: new Date(),
+          scheduledAt: new Date(), // Retry immediately
         },
+      });
+
+      // Reset the PublishJob to pending
+      await tx.publishJob.updateMany({
+        where: { scheduleId: id, businessId },
+        data: { 
+          status: 'pending',
+          retryCount: 0,
+          failureReason: null,
+          failureClass: null,
+          nextRetryAt: null,
+        }
       });
 
       await tx.content.update({
@@ -196,11 +218,46 @@ export class SchedulerService {
       { scheduleId: retriedSchedule.id, businessId, contentId },
       {
         jobId: retriedSchedule.id,
-        attempts: 3,
+        attempts: 5,
         backoff: { type: 'exponential', delay: 60000 },
       },
     );
 
     return this.findById(retriedSchedule.id, businessId);
   }
+
+  async findPublishJobs(businessId: string, status?: string) {
+    return prisma.publishJob.findMany({
+      where: { 
+        businessId,
+        ...(status ? { status: status as any } : {}),
+      },
+      include: {
+        content: { select: { body: true, type: true } },
+        socialAccount: { select: { platform: true, name: true } },
+        schedule: { select: { scheduledAt: true, status: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 100,
+    });
+  }
+
+  /**
+   * SLA Monitoring: Finds pending schedules that are past their scheduled time.
+   */
+  async findSLAViolations(businessId: string) {
+    const now = new Date();
+    return prisma.schedule.findMany({
+      where: {
+        businessId,
+        status: 'pending',
+        scheduledAt: { lt: now },
+      },
+      include: {
+        socialAccount: { select: { platform: true, name: true } },
+        content: { select: { id: true, type: true } },
+      },
+    });
+  }
+
 }

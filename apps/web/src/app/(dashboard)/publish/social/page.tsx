@@ -49,7 +49,7 @@ export default function SocialAccountsPage() {
     queryKey: ['social-accounts'],
     queryFn: async () => {
       const res = await apiClient.get('/social/accounts');
-      return res.data.data as SocialAccount[];
+      return res.data as SocialAccount[];
     },
   });
 
@@ -93,7 +93,7 @@ export default function SocialAccountsPage() {
         scopes: form.scopes.split(',').map((value) => value.trim()).filter(Boolean),
       };
       const res = await apiClient.post('/social/accounts', payload);
-      return res.data.data as SocialAccount;
+      return res.data as SocialAccount;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['social-accounts'] });
@@ -125,7 +125,7 @@ export default function SocialAccountsPage() {
       const res = await apiClient.get('/social/linkedin/auth-url', {
         params: { returnTo: '/publish/social' },
       });
-      return res.data.data as { authUrl: string };
+      return res.data as { authUrl: string };
     },
     onSuccess: ({ authUrl }) => {
       window.location.assign(authUrl);

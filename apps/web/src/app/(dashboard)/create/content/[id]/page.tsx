@@ -2,6 +2,7 @@
 
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { Button, Card, useToast } from '@brandflow/ui';
@@ -96,18 +97,32 @@ interface SocialAccount {
 
 export default function ContentEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [content, setContent] = useState('');
   const [scheduleAt, setScheduleAt] = useState('');
   const [selectedSocialAccountId, setSelectedSocialAccountId] = useState('');
 
+  // Safeguard: Redirect if the dynamic ID parameter is invalid or resolves as string literal 'undefined'
+  useEffect(() => {
+    if (id === 'undefined') {
+      toast({
+        title: 'Invalid content ID',
+        description: 'You are being redirected back to the content creation workspace.',
+        variant: 'destructive',
+      });
+      router.push('/create/content');
+    }
+  }, [id, router, toast]);
+
   const { data, isLoading } = useQuery({
     queryKey: ['content-editor', id],
     queryFn: async () => {
       const res = await apiClient.get(`/content/${id}`);
-      return res.data.data as ContentDetail;
+      return res.data as ContentDetail;
     },
+    enabled: !!id && id !== 'undefined',
   });
 
   useEffect(() => {
@@ -120,7 +135,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
     queryKey: ['social-accounts'],
     queryFn: async () => {
       const res = await apiClient.get('/social/accounts');
-      return res.data.data as SocialAccount[];
+      return res.data as SocialAccount[];
     },
   });
 
@@ -136,7 +151,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
   const saveMutation = useMutation({
     mutationFn: async () => {
       const res = await apiClient.patch(`/content/${id}`, { body: content });
-      return res.data.data as ContentDetail;
+      return res.data as ContentDetail;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content-editor', id] });
@@ -160,7 +175,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
         contentId: id,
         reviewType: 'internal',
       });
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content-editor', id] });
@@ -188,7 +203,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
         scheduledAt: new Date(scheduleAt).toISOString(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
-      return res.data.data;
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content-editor', id] });
@@ -392,6 +407,23 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                 Reviewer note: {latestApproval.note}
               </div>
             )}
+          </Card>
+
+          <Card className="p-5 border-indigo-100 bg-indigo-50/10 dark:border-indigo-950/20 dark:bg-indigo-950/5">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-indigo-500" /> Creative Assets
+            </h3>
+            <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">
+              Need a brand-aligned visual banner or post graphic? Create one instantly with AI.
+            </p>
+            <Link 
+              href={`/create/image?brandId=${data.brand.id}${data.campaign ? `&campaignId=${data.campaign.id}` : ''}&prompt=${encodeURIComponent(content.slice(0, 150))}`}
+              className="mt-4 block"
+            >
+              <Button variant="outline" className="w-full gap-2 text-xs font-bold border-indigo-200 hover:bg-indigo-50 text-indigo-600 dark:border-indigo-900 dark:text-indigo-400 dark:hover:bg-indigo-950/30">
+                Create Graphic with AI
+              </Button>
+            </Link>
           </Card>
 
           <Card className="p-5">

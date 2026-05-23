@@ -21,11 +21,10 @@ const SESSION_COOKIE = 'bf-session';
 function setSessionCookie(value: string | null) {
   if (typeof document === 'undefined') return;
   if (value) {
-    // Expires in 7 days (matches refresh token lifetime)
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
     document.cookie = `${SESSION_COOKIE}=1; path=/; expires=${expires}; samesite=strict`;
   } else {
-    document.cookie = `${SESSION_COOKIE}=; path=/; max-age=0; samesite=strict`;
+    document.cookie = `${SESSION_COOKIE}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; samesite=strict`;
   }
 }
 

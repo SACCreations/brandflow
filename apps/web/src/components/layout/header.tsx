@@ -2,6 +2,7 @@
 
 import { useAuthStore } from '@/store/auth.store';
 import { apiClient } from '@/lib/api-client';
+import { NotificationCenter } from '../notifications/notification-center';
 
 export function Header() {
   const user = useAuthStore((s) => s.user);
@@ -31,7 +32,9 @@ export function Header() {
           </span>
         )}
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
+        <NotificationCenter />
+        <div className="h-6 w-px bg-gray-200 dark:bg-gray-800" />
         {user && (
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-semibold">

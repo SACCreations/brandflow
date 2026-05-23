@@ -27,6 +27,14 @@ import { QualityModule } from './modules/quality/quality.module';
 import { BriefModule } from './modules/brief/brief.module';
 import { CustomerModule } from './modules/customer/customer.module';
 import { ProjectModule } from './modules/project/project.module';
+import { BillingModule } from './modules/billing/billing.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { DatabaseModule } from './common/database/database.module';
+import { RedisModule } from './common/redis/redis.module';
+import { ObservabilityModule } from './common/observability/observability.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { TenantInterceptor } from './common/tenant/tenant.interceptor';
 
 @Module({
   imports: [
@@ -91,6 +99,18 @@ import { ProjectModule } from './modules/project/project.module';
     BriefModule,
     CustomerModule,
     ProjectModule,
+    BillingModule,
+    NotificationsModule,
+    ChatModule,
+    DatabaseModule,
+    RedisModule,
+    ObservabilityModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TenantInterceptor,
+    },
   ],
 })
 export class AppModule {}

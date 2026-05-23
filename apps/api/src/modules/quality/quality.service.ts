@@ -1,17 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { prisma } from '@brandflow/db';
-import { QualityControl, LLMGateway } from '@brandflow/ai';
+import { QualityControl, LLMGateway, VectorService } from '@brandflow/ai';
 import type { QualityCheckResult, BrandContext } from '@brandflow/shared';
 
 @Injectable()
 export class QualityService {
   private readonly logger = new Logger(QualityService.name);
   private readonly qc: QualityControl;
+  private readonly vector: VectorService;
 
   constructor() {
-    // In production, the gateway should be injected or configured per business
     const gateway = new LLMGateway({ defaultProvider: 'openai' });
     this.qc = new QualityControl(gateway);
+    this.vector = new VectorService();
   }
 
   /**
@@ -24,7 +25,7 @@ export class QualityService {
     businessId: string,
     brandId: string,
   ): Promise<QualityCheckResult> {
-    this.logger.log(`Starting Quality Check for Content ${contentId}`);
+    this.logger.log(`Starting Enterprise Quality Check for Content ${contentId}`);
 
     // 1. Fetch Brand Context
     const brand = await prisma.brand.findUnique({
@@ -40,17 +41,15 @@ export class QualityService {
 
     if (!brand) throw new Error('Brand not found for quality check');
 
-    // 2. Fetch Relevant Knowledge Facts (RAG-lite for fact-checking)
-    // In a real production app, we would use vector search here.
-    // For this implementation, we fetch the most recent/relevant atoms.
-    const entries = await prisma.knowledgeEntry.findMany({
-      where: { businessId, source: { brandId } },
-      take: 10,
-      orderBy: { confidence: 'desc' },
-      select: { content: true },
-    });
+    // 2. Fetch Relevant Knowledge Facts via Semantic Search
+    const relevantEntries = await this.vector.findRelevantContext(
+      prisma,
+      businessId,
+      body,
+      10 // Take top 10 relevant facts
+    );
 
-    const facts = entries.map((e) => e.content);
+    const facts = relevantEntries.map((e) => ({ id: e.id, content: e.content }));
 
     // 3. Run Validation Pipeline
     const brandContext: BrandContext = {
@@ -61,45 +60,91 @@ export class QualityService {
       governance: brand.governance as any,
     };
 
-    const result = await this.qc.check(body, brandContext, facts);
+    const result = await this.qc.check(body, brandContext, facts as any);
 
-    // 4. Persist Results
-    await prisma.qualityCheck.create({
-      data: {
-        businessId,
-        contentId,
-        passed: result.passed,
-        confidenceScore: result.confidenceScore,
-        violations: result.violations as any,
-        category: this.determinePrimaryCategory(result.violations),
-        remediation: this.generateRemediationHint(result.violations),
-      },
-    });
 
-    // 5. Update content quality score
-    await prisma.content.update({
-      where: { id: contentId },
-      data: { qualityScore: result.confidenceScore },
+    // 4. Persist Results (Atomic Transaction)
+    await prisma.$transaction(async (tx) => {
+      const qcRecord = await tx.qualityCheck.create({
+        data: {
+          businessId,
+          contentId,
+          passed: result.passed,
+          confidenceScore: result.confidenceScore,
+          overallGrade: result.overallGrade,
+          complianceScore: result.complianceScore,
+          factualScore: result.factualScore,
+          safetyScore: result.safetyScore,
+          metadata: { engine: 'brandflow-qc-v2', timestamp: new Date() } as any,
+        },
+      });
+
+
+      // Create violations
+      if (result.violations.length > 0) {
+        await tx.qualityViolation.createMany({
+          data: result.violations.map((v) => ({
+            qualityCheckId: qcRecord.id,
+            type: v.type,
+            severity: v.severity,
+            detail: v.detail,
+            suggestion: v.suggestion,
+            location: v.location as any,
+          })),
+        });
+      }
+
+      // Create citations
+      if (result.citations && result.citations.length > 0) {
+        await tx.knowledgeCitation.createMany({
+          data: result.citations.map((c) => ({
+            qualityCheckId: qcRecord.id,
+            entryId: c.entryId,
+            claimSnippet: c.claimSnippet,
+            matchScore: c.matchScore,
+          })),
+        });
+      }
+
+      // 5. Human Review Routing Logic (Enterprise Grade)
+      const needsReview = 
+        !result.passed || 
+        result.overallGrade === 'C' || 
+        result.overallGrade === 'D' || 
+        (result.factualScore ?? 0) < 0.8 || 
+        (result.complianceScore ?? 0) < 0.8 ||
+        (result.safetyScore ?? 0) < 0.95;
+
+      if (needsReview) {
+        const priority = 
+          result.overallGrade === 'F' || (result.safetyScore ?? 0) < 0.9 ? 'critical' : 
+          result.overallGrade === 'D' || (result.factualScore ?? 0) < 0.6 ? 'high' : 'medium';
+
+        let reason = `Automated QC Grade: ${result.overallGrade}.`;
+        if ((result.factualScore ?? 0) < 0.8) reason += ' Potential hallucination detected.';
+        if ((result.complianceScore ?? 0) < 0.8) reason += ' Brand compliance risk.';
+        if ((result.safetyScore ?? 0) < 0.95) reason += ' Content safety warning.';
+
+        await tx.reviewTask.create({
+          data: {
+            businessId,
+            contentId,
+            qualityCheckId: qcRecord.id,
+            status: 'pending',
+            priority,
+            reason,
+          },
+        });
+      }
+
+      // 6. Update content quality score
+      await tx.content.update({
+        where: { id: contentId },
+        data: { qualityScore: result.confidenceScore },
+      });
     });
 
     return result;
   }
-
-  private determinePrimaryCategory(violations: any[]): string {
-    if (violations.length === 0) return 'none';
-    const counts: Record<string, number> = {};
-    violations.forEach((v) => {
-      counts[v.type] = (counts[v.type] || 0) + 1;
-    });
-    return Object.keys(counts).reduce((a, b) => 
-      (counts[a] || 0) > (counts[b] || 0) ? a : b
-    );
-  }
-
-  private generateRemediationHint(violations: any[]): string {
-    if (violations.length === 0) return 'Content passed all checks.';
-    return violations
-      .map((v) => `[${v.severity.toUpperCase()}] ${v.detail}`)
-      .join('\n');
-  }
 }
+

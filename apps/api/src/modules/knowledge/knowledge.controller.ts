@@ -59,6 +59,17 @@ export class KnowledgeController {
     return this.knowledgeService.findEntries(user.businessId, id);
   }
 
+  @Get('entries')
+  @ApiOperation({ summary: 'Search and filter all knowledge entries' })
+  searchEntries(
+    @CurrentUser() user: JwtPayload,
+    @Query('search') search?: string,
+    @Query('classification') classification?: string,
+  ) {
+    return this.knowledgeService.searchEntries(user.businessId, search, classification);
+  }
+
+
   @Post('sources')
   @ApiOperation({ summary: 'Add a knowledge source (triggers ingestion)' })
   createSource(
@@ -78,6 +89,27 @@ export class KnowledgeController {
     return this.knowledgeService.deleteSource(id, user.businessId);
   }
 
+  @Post('sources/sync-all')
+  @ApiOperation({ summary: 'Trigger a re-sync of all knowledge sources' })
+  syncAllSources(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.triggerIngestionAll(user.businessId);
+  }
+
+  @Post('fix-all-facts')
+  @ApiOperation({ summary: 'Temp script to reclassify all broken fact entries and delete failed file jobs' })
+  fixAllFacts(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.fixAllFacts(user.businessId);
+  }
+
+  @Post('sources/:id/sync')
+  @ApiOperation({ summary: 'Trigger a re-sync of a knowledge source' })
+  syncSource(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.knowledgeService.triggerIngestion(id, user.businessId);
+  }
+
   @Post('entries/:id/review')
   @ApiOperation({ summary: 'Submit a human review for a knowledge entry' })
   updateReview(
@@ -95,5 +127,50 @@ export class KnowledgeController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.knowledgeService.markEntryStale(id, user.businessId);
+  }
+
+  @Get('jobs')
+  @ApiOperation({ summary: 'List knowledge ingestion jobs' })
+  findJobs(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.findJobs(user.businessId);
+  }
+
+  @Get('review-queue')
+  @ApiOperation({ summary: 'Get the knowledge review queue' })
+  getReviewQueue(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.getReviewQueue(user.businessId);
+  }
+
+  @Post('jobs/:id/retry')
+  @ApiOperation({ summary: 'Retry a failed ingestion job' })
+  retryJob(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.knowledgeService.retryJob(id, user.businessId);
+  }
+
+  @Get('sources/:id/logs')
+  @ApiOperation({ summary: 'Get ingestion logs for a source' })
+  getIngestionLogs(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.knowledgeService.getIngestionLogs(id, user.businessId);
+  }
+
+  @Get('sources/:id/sync-history')
+  @ApiOperation({ summary: 'Get sync history for a source' })
+  getSyncHistory(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.knowledgeService.getSyncHistory(id, user.businessId);
+  }
+
+  @Get('failed-records')
+  @ApiOperation({ summary: 'Get all failed ingestion records for the business' })
+  getFailedRecords(@CurrentUser() user: JwtPayload) {
+    return this.knowledgeService.getFailedRecords(user.businessId);
   }
 }

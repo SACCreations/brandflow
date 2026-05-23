@@ -30,6 +30,7 @@ export interface GatewayConfig {
   fallbackProvider?: AIProvider;
   requestTimeoutMs?: number;
   maxRetries?: number;
+  onBeforeComplete?: (options: LLMConfig) => Promise<void> | void;
 }
 
 // ─── Prompt Resolution ───────────────────────────────────────────
@@ -64,7 +65,9 @@ export type {
   GenerationResponse,
   QualityCheckResult,
   QualityViolation,
+  KnowledgeCitation,
   BrandContext,
   CostEventPayload,
   LLMConfig,
 } from '@brandflow/shared';
+

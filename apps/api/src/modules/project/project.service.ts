@@ -1,17 +1,20 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { prisma } from '@brandflow/db';
+import { PrismaService } from '../../common/database/prisma.service';
 import type { Prisma } from '@brandflow/db';
 import type { CreateProjectDto, UpdateProjectDto } from '@brandflow/shared';
 
+
 @Injectable()
 export class ProjectService {
+  constructor(private readonly prisma: PrismaService) {}
+
   async findAll(
     businessId: string,
     filters: { status?: string; search?: string; customerId?: string } = {},
   ) {
     const search = this.normalizeOptionalText(filters.search);
 
-    return prisma.project.findMany({
+    return this.prisma.client.project.findMany({
       where: {
         businessId,
         ...(filters.status ? { status: filters.status } : {}),
@@ -32,7 +35,7 @@ export class ProjectService {
   }
 
   async findOne(id: string, businessId: string) {
-    const project = await prisma.project.findUnique({
+    const project = await this.prisma.client.project.findUnique({
       where: { id },
       include: { customer: { select: { id: true, name: true, company: true } } },
     });
@@ -45,7 +48,7 @@ export class ProjectService {
   async create(businessId: string, data: CreateProjectDto) {
     const payload = await this.prepareCreateProjectPayload(businessId, data);
 
-    return prisma.project.create({
+    return this.prisma.client.project.create({
       data: {
         ...payload,
       },
@@ -58,7 +61,7 @@ export class ProjectService {
 
     const payload = await this.prepareUpdateProjectPayload(businessId, data);
 
-    return prisma.project.update({
+    return this.prisma.client.project.update({
       where: { id },
       data: payload,
       include: { customer: { select: { id: true, name: true, company: true } } },
@@ -71,7 +74,7 @@ export class ProjectService {
       throw new ConflictException('Archive or complete the project before deleting it.');
     }
 
-    return prisma.project.delete({
+    return this.prisma.client.project.delete({
       where: { id },
     });
   }
@@ -130,7 +133,7 @@ export class ProjectService {
   }
 
   private async assertCustomerOwnership(businessId: string, customerId: string) {
-    const customer = await prisma.customer.findFirst({
+    const customer = await this.prisma.client.customer.findFirst({
       where: { id: customerId, businessId },
       select: { id: true },
     });

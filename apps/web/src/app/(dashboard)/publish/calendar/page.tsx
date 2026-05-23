@@ -36,7 +36,7 @@ export default function CalendarPage() {
     queryKey: ['publish-calendar'],
     queryFn: async () => {
       const res = await apiClient.get('/schedules');
-      return res.data.data as ScheduleItem[];
+      return res.data as ScheduleItem[];
     },
   });
 

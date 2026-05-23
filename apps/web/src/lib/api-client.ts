@@ -5,6 +5,7 @@ export const apiClient = axios.create({
   baseURL: process.env['NEXT_PUBLIC_API_URL']?.includes('3001') ? 'http://localhost:4000/api/v1' : (process.env['NEXT_PUBLIC_API_URL'] || 'http://localhost:4000/api/v1'),
   withCredentials: true, // send cookies (refresh token)
   headers: { 'Content-Type': 'application/json' },
+  timeout: 15000, // 15s timeout
 });
 
 // Attach access token from store
@@ -26,7 +27,17 @@ function drainQueue(token: string | null, err: unknown = null) {
 }
 
 apiClient.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // Automatically unwrap standard API envelope
+    if (res.data && typeof res.data === 'object' && 'data' in res.data && 'success' in res.data) {
+      return {
+        ...res,
+        data: res.data.data,
+
+      };
+    }
+    return res;
+  },
   async (error: import('axios').AxiosError) => {
     const original = error.config as import('axios').InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -54,15 +65,18 @@ apiClient.interceptors.response.use(
 
       try {
         // refreshToken is sent automatically as httpOnly cookie
-        const res = await apiClient.post<{ data: { accessToken: string; refreshToken: string; expiresIn: number } }>('/auth/refresh', {});
-        const newToken = res.data.data.accessToken;
+        // The interceptor above will unwrap this to { accessToken, refreshToken, expiresIn }
+        const res = await apiClient.post<{ accessToken: string; refreshToken: string; expiresIn: number }>('/auth/refresh', {});
+        const newToken = res.data.accessToken;
+        
         useAuthStore.getState().updateToken(newToken);
         drainQueue(newToken);
+        
         original.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(original);
       } catch (refreshError) {
         drainQueue(null, refreshError);
-        useAuthStore.getState().logout();
+        useAuthStore.getState().logout({ redirect: true });
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -72,3 +86,4 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+

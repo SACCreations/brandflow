@@ -65,17 +65,47 @@ export interface ApiError {
 
 // ─── Quality Check Result ─────────────────────────────────────────
 export interface QualityViolation {
-  type: 'banned_phrase' | 'tone_mismatch' | 'factual_error' | 'hallucination' | 'cta_missing';
-  severity: 'low' | 'medium' | 'high';
+  id?: string;
+  type:
+    | 'banned_phrase'
+    | 'tone_mismatch'
+    | 'factual_error'
+    | 'hallucination'
+    | 'cta_missing'
+    | 'unsafe_content'
+    | 'compliance_risk';
+  severity: 'low' | 'medium' | 'high' | 'critical';
   detail: string;
+  suggestion?: string;
   position?: number;
+  location?: {
+    start: number;
+    end: number;
+    snippet: string;
+  };
+}
+
+export interface KnowledgeCitation {
+  id?: string;
+  entryId: string;
+  claimSnippet: string;
+  matchScore: number;
+  sourceName?: string;
 }
 
 export interface QualityCheckResult {
   passed: boolean;
-  confidenceScore: number;
+  confidenceScore: number; // 0.0 to 1.0
+  overallGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  
+  complianceScore?: number;
+  factualScore?: number;
+  safetyScore?: number;
+  
   violations: QualityViolation[];
+  citations?: KnowledgeCitation[];
 }
+
 
 // ─── AI Providers (handled in constants) ──────────────────────────
 
@@ -86,6 +116,8 @@ export interface LLMConfig {
   maxTokens?: number;
   apiKey?: string;
   jsonMode?: boolean;
+  businessId?: string;
+  sanitizePII?: boolean;
 }
 
 // ─── AI Generation Request ────────────────────────────────────────
@@ -178,6 +210,85 @@ export interface BrandAnalysisBrandDraft {
     ctaPreferences: string[];
     requiredDisclaimer?: string | null;
   };
+  visualRules?: {
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
+    accentColor?: string | null;
+    fontFamily?: string | null;
+    headingFont?: string | null;
+    bodyFont?: string | null;
+    logoUrls?: Array<{ url?: string | null; type?: string | null; name?: string | null }> | null;
+  } | null;
+  identity?: {
+    mission?: string | null;
+    vision?: string | null;
+    values?: string[] | null;
+    promise?: string | null;
+    personality?: string | null;
+  } | null;
+  designTokens?: {
+    borderRadius?: string | null;
+    shadows?: string | null;
+    spacing?: string | null;
+  } | null;
+  strategy?: {
+    targetLocation?: string | null;
+    ageGroup?: string | null;
+    interests?: string | null;
+    postingFrequency?: 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | null;
+    festivalPosts?: boolean;
+    offerPosts?: boolean;
+    preferredTypes?: string[] | null;
+    contentLanguage?: 'tamil' | 'english' | 'mixed' | null;
+    ctaPreference?: 'Call Now' | 'DM' | 'Visit Website' | null;
+  } | null;
+  designPreferences?: {
+    preferredStyle?: 'Minimal' | 'Corporate' | '3D' | 'Modern' | 'Playful' | 'Luxury' | null;
+    referenceLinks?: string[] | null;
+    imageStyle?: 'Minimal' | 'Corporate' | '3D' | 'Modern' | null;
+    animationRequirement?: boolean;
+  } | null;
+  approvalWorkflow?: {
+    reviewerName?: string | null;
+    finalApproverName?: string | null;
+    processSteps?: string[] | null;
+    approvalTiming?: string | null;
+    revisionLimit?: number | null;
+  } | null;
+  campaignDetails?: {
+    marketingGoal?: 'Brand Awareness' | 'Leads' | 'Sales' | null;
+    monthlyBudget?: number | null;
+    duration?: string | null;
+    targetLeads?: number | null;
+    adPlatforms?: string[] | null;
+  } | null;
+  analyticsConfig?: {
+    monthlyReport?: boolean;
+    kpiExpectations?: string | null;
+    leadTracking?: boolean;
+    engagementTracking?: boolean;
+  } | null;
+  socialAccess?: {
+    metaBusinessManagerId?: string | null;
+    adAccountId?: string | null;
+    instagramHandle?: string | null;
+    facebookPage?: string | null;
+    linkedinPage?: string | null;
+    youtubeChannel?: string | null;
+    twitterHandle?: string | null;
+  } | null;
+  competitors?: Array<{
+    name: string;
+    website?: string | null;
+    strengths?: string | null;
+    weaknesses?: string | null;
+  }> | null;
+  contactInfo?: {
+    personName?: string | null;
+    phoneNumber?: string | null;
+    email?: string | null;
+    officeAddress?: string | null;
+  } | null;
 }
 
 export interface BrandAnalysisResult {
@@ -252,4 +363,51 @@ export interface AnalyticsEventPayload {
   occurredAt?: string | Date;
   meta?: Record<string, unknown>;
   payload?: Record<string, unknown>;
+}
+
+// ─── Knowledge Hub ────────────────────────────────────────────────
+export type KnowledgeEntryClassification =
+  | 'product'
+  | 'feature'
+  | 'faq'
+  | 'claim'
+  | 'pricing'
+  | 'testimonial'
+  | 'audience'
+  | 'objective'
+  | 'guideline'
+  | 'legal'
+  | 'fact';
+
+export interface KnowledgeEntryMetadata {
+  sourceUrl?: string;
+  sourceType: string;
+  author?: string;
+  extractionDate: string;
+  version: number;
+  tags?: string[];
+  governance?: {
+    approvedBy?: string;
+    approvedAt?: string;
+    reviewCycle?: 'monthly' | 'quarterly' | 'annual';
+  };
+  structuralInfo?: {
+    headerPath?: string[];
+    indexInSource?: number;
+  };
+}
+
+export interface KnowledgeAtom {
+  type: KnowledgeEntryClassification;
+  content: string;
+  confidence: number;
+  metadata?: Partial<KnowledgeEntryMetadata>;
+}
+
+export interface KnowledgeIngestionJob {
+  sourceId: string;
+  businessId: string;
+  type: 'url' | 'file' | 'text' | 'social' | 'campaign';
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  error?: string;
 }

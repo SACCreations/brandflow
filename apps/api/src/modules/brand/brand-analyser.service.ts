@@ -70,6 +70,80 @@ export class BrandAnalyserService {
             ctaPreferences: ['string'],
             requiredDisclaimer: 'string | null',
           },
+          visualRules: {
+            primaryColor: 'string | null',
+            secondaryColor: 'string | null',
+            accentColor: 'string | null',
+            fontFamily: 'string | null',
+            headingFont: 'string | null',
+            bodyFont: 'string | null',
+            logoUrls: [{ url: 'string | null', type: 'string | null', name: 'string | null' }],
+          },
+          identity: {
+            mission: 'string | null',
+            vision: 'string | null',
+            values: ['string'],
+            promise: 'string | null',
+            personality: 'string | null',
+          },
+          designTokens: {
+            borderRadius: 'string | null',
+            shadows: 'string | null',
+            spacing: 'string | null',
+          },
+          strategy: {
+            targetLocation: 'string | null',
+            ageGroup: 'string | null',
+            interests: 'string | null',
+            postingFrequency: 'daily | weekly | bi-weekly | monthly | null',
+            festivalPosts: 'boolean',
+            offerPosts: 'boolean',
+            preferredTypes: ['string'],
+            contentLanguage: 'tamil | english | mixed | null',
+            ctaPreference: 'Call Now | DM | Visit Website | null',
+          },
+          designPreferences: {
+            preferredStyle: 'Minimal | Corporate | 3D | Modern | Playful | Luxury | null',
+            referenceLinks: ['string'],
+            imageStyle: 'Minimal | Corporate | 3D | Modern | null',
+            animationRequirement: 'boolean',
+          },
+          approvalWorkflow: {
+            reviewerName: 'string | null',
+            finalApproverName: 'string | null',
+            processSteps: ['string'],
+            approvalTiming: 'string | null',
+            revisionLimit: 'number | null',
+          },
+          campaignDetails: {
+            marketingGoal: 'Brand Awareness | Leads | Sales | null',
+            monthlyBudget: 'number | null',
+            duration: 'string | null',
+            targetLeads: 'number | null',
+            adPlatforms: ['string'],
+          },
+          analyticsConfig: {
+            monthlyReport: 'boolean',
+            kpiExpectations: 'string | null',
+            leadTracking: 'boolean',
+            engagementTracking: 'boolean',
+          },
+          socialAccess: {
+            metaBusinessManagerId: 'string | null',
+            adAccountId: 'string | null',
+            instagramHandle: 'string | null',
+            facebookPage: 'string | null',
+            linkedinPage: 'string | null',
+            youtubeChannel: 'string | null',
+            twitterHandle: 'string | null',
+          },
+          competitors: [{ name: 'string', website: 'string | null', strengths: 'string | null', weaknesses: 'string | null' }],
+          contactInfo: {
+            personName: 'string | null',
+            phoneNumber: 'string | null',
+            email: 'string | null',
+            officeAddress: 'string | null',
+          },
         },
       }),
     ].join('\n');
@@ -249,7 +323,31 @@ export class BrandAnalyserService {
     }
 
     const rawContent = await response.text();
-    const text = this.limitText(this.extractReadableText(rawContent), 7_000);
+    
+    // Extract metadata before stripping tags
+    const logoMatches = [...rawContent.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi)];
+    const linkMatches = [...rawContent.matchAll(/<link[^>]+href=["']([^"']+)["'][^>]*>/gi)];
+    
+    const potentialLogos = [
+      ...logoMatches.filter(m => /logo/i.test(m[0]) || /brand/i.test(m[0])).map(m => m[1] || ''),
+      ...linkMatches.filter(m => /rel=["'].*icon.*["']/i.test(m[0])).map(m => m[1] || '')
+    ].filter(Boolean).map(url => {
+        try {
+           return new URL(url, normalizedUrl).toString();
+        } catch {
+           return url;
+        }
+      });
+      
+    const fontMatches = [...rawContent.matchAll(/font-family:\s*([^;"'}]+)/gi)];
+    const potentialFonts = Array.from(new Set(fontMatches.map(m => (m[1] || '').replace(/['"]/g, '').trim()))).filter(Boolean);
+    
+    const colorMatches = [...rawContent.matchAll(/(color|background-color):\s*(#[0-9a-fA-F]{3,6}|rgb\([^)]+\))/gi)];
+    const potentialColors = Array.from(new Set(colorMatches.map(m => (m[2] || '').trim()))).filter(Boolean);
+
+    const baseText = this.limitText(this.extractReadableText(rawContent), 6_000);
+    
+    const text = `${baseText}\n\n--- Metadata for AI Analysis ---\nPotential Logo URLs: ${potentialLogos.slice(0, 5).join(', ')}\nPotential Fonts: ${potentialFonts.slice(0, 10).join(', ')}\nPotential Brand Colors: ${potentialColors.slice(0, 10).join(', ')}`;
 
     if (text.length < 200) {
       throw new BadRequestException(`Source ${normalizedUrl} did not contain enough readable text to analyze.`);
@@ -302,6 +400,18 @@ export class BrandAnalyserService {
     const parsed = this.extractJsonObject(content);
     const rawBrand = this.asObject(parsed['brand']) ?? parsed;
     const governance = this.asObject(rawBrand['governance']);
+    const visualRules = this.asObject(rawBrand['visualRules']);
+    const identity = this.asObject(rawBrand['identity']);
+    const designTokens = this.asObject(rawBrand['designTokens']);
+    const strategy = this.asObject(rawBrand['strategy']);
+    const designPreferences = this.asObject(rawBrand['designPreferences']);
+    const approvalWorkflow = this.asObject(rawBrand['approvalWorkflow']);
+    const campaignDetails = this.asObject(rawBrand['campaignDetails']);
+    const analyticsConfig = this.asObject(rawBrand['analyticsConfig']);
+    const socialAccess = this.asObject(rawBrand['socialAccess']);
+    const competitors = Array.isArray(rawBrand['competitors']) ? rawBrand['competitors'] : [];
+    const contactInfo = this.asObject(rawBrand['contactInfo']);
+
     const warnings = Array.from(new Set([
       ...context.resolvedSources.flatMap((source) => source.warnings),
       ...(context.resolvedSources.length < 2
@@ -329,6 +439,89 @@ export class BrandAnalyserService {
         ctaPreferences: this.normalizeStringArray(governance?.['ctaPreferences'], 20, 100),
         requiredDisclaimer: this.normalizeString(governance?.['requiredDisclaimer'], 1000),
       },
+      visualRules: visualRules ? {
+        primaryColor: this.normalizeString(visualRules['primaryColor'], 20),
+        secondaryColor: this.normalizeString(visualRules['secondaryColor'], 20),
+        accentColor: this.normalizeString(visualRules['accentColor'], 20),
+        fontFamily: this.normalizeString(visualRules['fontFamily'], 100),
+        headingFont: this.normalizeString(visualRules['headingFont'], 100),
+        bodyFont: this.normalizeString(visualRules['bodyFont'], 100),
+        logoUrls: Array.isArray(visualRules['logoUrls']) ? visualRules['logoUrls'].map((l: any) => ({
+          url: this.normalizeString(l?.url, 1000),
+          type: this.normalizeString(l?.type, 50),
+          name: this.normalizeString(l?.name, 100),
+        })) : null,
+      } : null,
+      identity: identity ? {
+        mission: this.normalizeString(identity['mission'], 1000),
+        vision: this.normalizeString(identity['vision'], 1000),
+        values: this.normalizeStringArray(identity['values'], 10, 100),
+        promise: this.normalizeString(identity['promise'], 500),
+        personality: this.normalizeString(identity['personality'], 500),
+      } : null,
+      designTokens: designTokens ? {
+        borderRadius: this.normalizeString(designTokens['borderRadius'], 50),
+        shadows: this.normalizeString(designTokens['shadows'], 50),
+        spacing: this.normalizeString(designTokens['spacing'], 50),
+      } : null,
+      strategy: strategy ? {
+        targetLocation: this.normalizeString(strategy['targetLocation'], 255),
+        ageGroup: this.normalizeString(strategy['ageGroup'], 100),
+        interests: this.normalizeString(strategy['interests'], 1000),
+        postingFrequency: strategy['postingFrequency'] as any,
+        festivalPosts: strategy['festivalPosts'] === true || strategy['festivalPosts'] === 'true',
+        offerPosts: strategy['offerPosts'] === true || strategy['offerPosts'] === 'true',
+        preferredTypes: this.normalizeStringArray(strategy['preferredTypes'], 10, 100),
+        contentLanguage: strategy['contentLanguage'] as any || 'english',
+        ctaPreference: strategy['ctaPreference'] as any,
+      } : null,
+      designPreferences: designPreferences ? {
+        preferredStyle: designPreferences['preferredStyle'] as any,
+        referenceLinks: this.normalizeStringArray(designPreferences['referenceLinks'], 5, 1000),
+        imageStyle: designPreferences['imageStyle'] as any,
+        animationRequirement: designPreferences['animationRequirement'] === true || designPreferences['animationRequirement'] === 'true',
+      } : null,
+      approvalWorkflow: approvalWorkflow ? {
+        reviewerName: this.normalizeString(approvalWorkflow['reviewerName'], 255),
+        finalApproverName: this.normalizeString(approvalWorkflow['finalApproverName'], 255),
+        processSteps: this.normalizeStringArray(approvalWorkflow['processSteps'], 10, 100),
+        approvalTiming: this.normalizeString(approvalWorkflow['approvalTiming'], 100),
+        revisionLimit: typeof approvalWorkflow['revisionLimit'] === 'number' ? approvalWorkflow['revisionLimit'] : null,
+      } : null,
+      campaignDetails: campaignDetails ? {
+        marketingGoal: campaignDetails['marketingGoal'] as any,
+        monthlyBudget: typeof campaignDetails['monthlyBudget'] === 'number' ? campaignDetails['monthlyBudget'] : null,
+        duration: this.normalizeString(campaignDetails['duration'], 100),
+        targetLeads: typeof campaignDetails['targetLeads'] === 'number' ? campaignDetails['targetLeads'] : null,
+        adPlatforms: this.normalizeStringArray(campaignDetails['adPlatforms'], 10, 100),
+      } : null,
+      analyticsConfig: analyticsConfig ? {
+        monthlyReport: analyticsConfig['monthlyReport'] === true || analyticsConfig['monthlyReport'] === 'true',
+        kpiExpectations: this.normalizeString(analyticsConfig['kpiExpectations'], 1000),
+        leadTracking: analyticsConfig['leadTracking'] === true || analyticsConfig['leadTracking'] === 'true',
+        engagementTracking: analyticsConfig['engagementTracking'] !== false && analyticsConfig['engagementTracking'] !== 'false',
+      } : null,
+      socialAccess: socialAccess ? {
+        metaBusinessManagerId: this.normalizeString(socialAccess['metaBusinessManagerId'], 100),
+        adAccountId: this.normalizeString(socialAccess['adAccountId'], 100),
+        instagramHandle: this.normalizeString(socialAccess['instagramHandle'], 100),
+        facebookPage: this.normalizeString(socialAccess['facebookPage'], 255),
+        linkedinPage: this.normalizeString(socialAccess['linkedinPage'], 255),
+        youtubeChannel: this.normalizeString(socialAccess['youtubeChannel'], 255),
+        twitterHandle: this.normalizeString(socialAccess['twitterHandle'], 100),
+      } : null,
+      competitors: competitors.map((c: any) => ({
+        name: this.normalizeString(c?.name, 255) || 'Unknown',
+        website: this.normalizeUrl(this.normalizeString(c?.website, 500)),
+        strengths: this.normalizeString(c?.strengths, 1000),
+        weaknesses: this.normalizeString(c?.weaknesses, 1000),
+      })),
+      contactInfo: contactInfo ? {
+        personName: this.normalizeString(contactInfo['personName'], 255),
+        phoneNumber: this.normalizeString(contactInfo['phoneNumber'], 50),
+        email: this.normalizeString(contactInfo['email'], 255),
+        officeAddress: this.normalizeString(contactInfo['officeAddress'], 500),
+      } : null,
     };
 
     if (!brand.positioning) {

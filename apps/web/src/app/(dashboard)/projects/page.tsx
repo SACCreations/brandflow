@@ -91,7 +91,7 @@ export default function ProjectsPage() {
           customerId: customerFilter === 'all' ? undefined : customerFilter,
         },
       });
-      return res.data.data as Project[];
+      return res.data as Project[];
     },
   });
 
@@ -99,7 +99,7 @@ export default function ProjectsPage() {
     queryKey: ['customers-list'],
     queryFn: async () => {
       const res = await apiClient.get('/customers');
-      return res.data.data as Customer[];
+      return res.data as Customer[];
     },
   });
 

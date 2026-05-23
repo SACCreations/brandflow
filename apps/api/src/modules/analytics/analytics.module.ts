@@ -1,13 +1,19 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { AnalyticsController } from './analytics.controller';
-import { AnalyticsService } from './analytics.service';
 import { QUEUES } from '@brandflow/shared';
+import { AnalyticsService } from './analytics.service';
+import { AnalyticsController } from './analytics.controller';
+import { AnalyticsProcessor } from './analytics.processor';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { ReliabilityMonitorService } from './reliability-monitor.service';
 
 @Module({
-  imports: [BullModule.registerQueue({ name: QUEUES.ANALYTICS_COLLECTION })],
+  imports: [
+    BullModule.registerQueue({ name: QUEUES.ANALYTICS_COLLECTION }),
+    NotificationsModule
+  ],
   controllers: [AnalyticsController],
-  providers: [AnalyticsService],
+  providers: [AnalyticsService, AnalyticsProcessor, ReliabilityMonitorService],
   exports: [AnalyticsService],
 })
 export class AnalyticsModule {}

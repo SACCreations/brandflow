@@ -15,7 +15,6 @@ const NAV = [
     items: [
       { label: 'Brands', href: '/intelligence/brands', icon: '◈' },
       { label: 'Knowledge Hub', href: '/intelligence/knowledge', icon: '◉' },
-      { label: 'Sources', href: '/intelligence/sources', icon: '⌥' },
       { label: 'Review Queue', href: '/review', icon: '✓' },
       { label: 'Monitor', href: '/intelligence/monitor', icon: '◷' },
     ],
@@ -24,6 +23,7 @@ const NAV = [
     group: 'Create',
     items: [
       { label: 'Content', href: '/create/content', icon: '✦' },
+      { label: 'AI Image Generator', href: '/create/image', icon: '🎨' },
       { label: 'Campaigns', href: '/campaigns', icon: '◎' },
       { label: 'Projects', href: '/projects', icon: '⧉' },
     ],
@@ -45,7 +45,10 @@ const NAV = [
   },
   {
     group: 'Insights',
-    items: [{ label: 'Analytics', href: '/analytics', icon: '◉' }],
+    items: [
+      { label: 'Analytics', href: '/analytics', icon: '◉' },
+      { label: 'AI Diagnostics', href: '/ai-test', icon: '✦' },
+    ],
   },
   {
     group: 'Settings',
@@ -55,6 +58,7 @@ const NAV = [
       { label: 'Billing', href: '/settings/billing', icon: '＄' },
       { label: 'Team', href: '/settings/team', icon: '👥' },
       { label: 'Clients', href: '/settings/clients', icon: '💼' },
+      { label: 'Compliance', href: '/settings/compliance', icon: '🛡️' },
     ],
   },
 ];

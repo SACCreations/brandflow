@@ -61,7 +61,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     queryKey: ['campaign', id],
     queryFn: async () => {
       const res = await apiClient.get(`/campaigns/${id}`);
-      return res.data.data as CampaignDetail;
+      return res.data as CampaignDetail;
     },
   });
 

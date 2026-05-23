@@ -91,7 +91,7 @@ export const PUBLISH_JOB_STATUSES = [
   'failed',
   'retrying',
   'dead_letter',
-  'cancelled',
+  'canceled',
 ] as const;
 export type PublishJobStatus = (typeof PUBLISH_JOB_STATUSES)[number];
 
@@ -204,7 +204,7 @@ export type SystemRole = (typeof SYSTEM_ROLES)[number];
 
 export const PERMISSIONS = [
   'brand:read', 'brand:write', 'brand:delete',
-  'content:read', 'content:write', 'content:delete',
+  'content:read', 'content:create', 'content:edit', 'content:write', 'content:delete',
   'campaign:read', 'campaign:write', 'campaign:delete',
   'knowledge:read', 'knowledge:write',
   'approval:read', 'approval:write',
@@ -222,7 +222,7 @@ export const PERMISSIONS = [
 export type Permission = (typeof PERMISSIONS)[number];
 
 // ─── AI Providers ─────────────────────────────────────────────────
-export const AI_PROVIDERS = ['openai', 'anthropic', 'fallback'] as const;
+export const AI_PROVIDERS = ['openai', 'anthropic', 'google', 'fallback'] as const;
 export type AIProvider = (typeof AI_PROVIDERS)[number];
 
 // ─── Asset Types ─────────────────────────────────────────────────
@@ -242,7 +242,7 @@ export type ScheduleType = (typeof SCHEDULE_TYPES)[number];
 export const SCHEDULE_STATUSES = [
   'pending',
   'published',
-  'cancelled',
+  'canceled',
   'failed',
 ] as const;
 export type ScheduleStatus = (typeof SCHEDULE_STATUSES)[number];
@@ -252,9 +252,11 @@ export const QUEUES = {
   PUBLISH: 'publish',
   KNOWLEDGE_INGESTION: 'knowledge-ingestion',
   AI_GENERATION: 'ai-generation',
+  IMAGE_GENERATION: 'image-generation',
   ANALYTICS_COLLECTION: 'analytics-collection',
   NOTIFICATIONS: 'notifications',
   AUTOMATION: 'automation',
+  AUTOMATION_EXECUTION: 'automation-execution',
 } as const;
 
 // ─── Cache Keys ──────────────────────────────────────────────────
