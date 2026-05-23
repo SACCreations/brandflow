@@ -222,7 +222,7 @@ export const PERMISSIONS = [
 export type Permission = (typeof PERMISSIONS)[number];
 
 // ─── AI Providers ─────────────────────────────────────────────────
-export const AI_PROVIDERS = ['openai', 'anthropic', 'google', 'fallback'] as const;
+export const AI_PROVIDERS = ['openai', 'anthropic', 'google', 'fallback', 'nvidia'] as const;
 export type AIProvider = (typeof AI_PROVIDERS)[number];
 
 // ─── Asset Types ─────────────────────────────────────────────────

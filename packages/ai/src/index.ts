@@ -9,6 +9,7 @@ export { OpenAIProvider } from './providers/openai';
 export { AnthropicProvider } from './providers/anthropic';
 export { GoogleProvider } from './providers/google';
 export { FallbackProvider } from './providers/fallback';
+export { NvidiaProvider } from './providers/nvidia';
 import * as encryption from './utils/encryption.utils';
 export { encryption };
 export { TextSplitter } from './utils/chunking';

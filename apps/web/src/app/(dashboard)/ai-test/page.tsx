@@ -35,7 +35,7 @@ interface ChatTestResponse {
 
 export default function AiTestPage() {
   const [message, setMessage] = useState('Hello AI, please confirm your status and name the LLM provider you are currently running on.');
-  const [provider, setProvider] = useState<'openai' | 'anthropic' | 'google'>('openai');
+  const [provider, setProvider] = useState<'openai' | 'anthropic' | 'google' | 'nvidia'>('openai');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ChatTestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -103,7 +103,7 @@ export default function AiTestPage() {
               {/* PROVIDER SELECTOR */}
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Preferred Provider</label>
-                <div className="mt-2 grid grid-cols-3 gap-2">
+                <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
                   <button
                     type="button"
                     onClick={() => setProvider('openai')}
@@ -139,6 +139,18 @@ export default function AiTestPage() {
                   >
                     <span className={`h-2.5 w-2.5 rounded-full ${provider === 'google' ? 'bg-emerald-600 dark:bg-emerald-400' : 'bg-gray-300'}`} />
                     Google (gemini-2)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProvider('nvidia')}
+                    className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
+                      provider === 'nvidia'
+                        ? 'border-green-600 bg-green-50/40 text-green-700 dark:border-green-500 dark:bg-green-950/20 dark:text-green-400'
+                        : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
+                    }`}
+                  >
+                    <span className={`h-2.5 w-2.5 rounded-full ${provider === 'nvidia' ? 'bg-green-600 dark:bg-green-400' : 'bg-gray-300'}`} />
+                    Nvidia (nim)
                   </button>
                 </div>
               </div>
@@ -278,7 +290,9 @@ export default function AiTestPage() {
                               ? 'bg-indigo-600' 
                               : result.provider === 'anthropic' 
                                 ? 'bg-purple-600' 
-                                : 'bg-emerald-500'
+                                : result.provider === 'google'
+                                  ? 'bg-emerald-500'
+                                  : 'bg-green-600'
                           }`} />
                           <span className="text-sm font-bold text-gray-950 dark:text-white capitalize">{result.provider}</span>
                         </div>

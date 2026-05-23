@@ -108,6 +108,12 @@ export class LlmSettingsService {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
           return res.ok;
         }
+        case 'nvidia': {
+          const res = await fetch('https://integrate.api.nvidia.com/v1/models', {
+            headers: { Authorization: `Bearer ${apiKey}` },
+          });
+          return res.ok;
+        }
         default:
           return false;
       }

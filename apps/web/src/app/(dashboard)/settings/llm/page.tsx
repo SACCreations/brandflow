@@ -102,6 +102,7 @@ export default function LlmSettingsPage() {
                 <option value="openai">OpenAI (ChatGPT)</option>
                 <option value="anthropic">Anthropic (Claude)</option>
                 <option value="google">Google (Gemini)</option>
+                <option value="nvidia">Nvidia (NIM)</option>
               </select>
             </div>
 

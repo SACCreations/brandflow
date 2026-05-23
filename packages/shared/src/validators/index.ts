@@ -609,7 +609,7 @@ export type CreateApiKeyDto = z.infer<typeof createApiKeySchema>;
 
 // ─── LLM Settings ────────────────────────────────────────────────
 export const updateLlmSettingsSchema = z.object({
-  provider: z.enum(['openai', 'anthropic', 'google', 'fallback']).nullish(),
+  provider: z.enum(['openai', 'anthropic', 'google', 'fallback', 'nvidia']).nullish(),
   model: z.string().max(100).nullish(),
   temperature: z.number().min(0).max(2).nullish(),
   maxTokens: z.number().int().min(1).max(32000).nullish(),

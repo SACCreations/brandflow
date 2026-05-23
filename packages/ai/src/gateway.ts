@@ -4,6 +4,7 @@ import { AnthropicProvider } from './providers/anthropic';
 import { FallbackProvider } from './providers/fallback';
 import { OpenAIProvider } from './providers/openai';
 import { GoogleProvider } from './providers/google';
+import { NvidiaProvider } from './providers/nvidia';
 import { PIISanitizer } from './sanitizer';
 
 export class LLMGateway {
@@ -37,6 +38,11 @@ export class LLMGateway {
       this.providers.set('google', new GoogleProvider(googleKey));
     }
 
+    const nvidiaKey = process.env['NVIDIA_API_KEY'];
+    if (nvidiaKey) {
+      this.providers.set('nvidia', new NvidiaProvider(nvidiaKey));
+    }
+
     this.providers.set('fallback', new FallbackProvider());
   }
 
@@ -49,7 +55,7 @@ export class LLMGateway {
     const preferredProvider = options.provider ?? this.config.defaultProvider;
 
     // Validate that at least one way to reach an AI provider exists
-    const hasApiKey = options.apiKey || this.providers.size > 1 || process.env['OPENAI_API_KEY'] || process.env['ANTHROPIC_API_KEY'];
+    const hasApiKey = options.apiKey || this.providers.size > 1 || process.env['OPENAI_API_KEY'] || process.env['ANTHROPIC_API_KEY'] || process.env['NVIDIA_API_KEY'];
     if (!hasApiKey) {
       throw new Error(
         'No AI provider API key configured. Please add your API key in Settings → AI Provider.',
@@ -135,6 +141,8 @@ export class LLMGateway {
         return new AnthropicProvider(apiKey, model);
       case 'google':
         return new GoogleProvider(apiKey, model);
+      case 'nvidia':
+        return new NvidiaProvider(apiKey, model);
       default:
         return null;
     }
