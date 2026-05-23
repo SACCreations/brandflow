@@ -39,11 +39,15 @@ export function FileUploader({
   };
 
   const processUpload = (file: File) => {
-    const url = URL.createObjectURL(file);
-    setUploadedUrl(url);
-    if (onUpload) {
-      setTimeout(() => onUpload(url, file.name), 0);
-    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const url = reader.result as string;
+      setUploadedUrl(url);
+      if (onUpload) {
+        onUpload(url, file.name);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const reset = (e: React.MouseEvent) => {

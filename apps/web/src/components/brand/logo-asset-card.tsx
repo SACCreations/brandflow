@@ -31,9 +31,13 @@ export function LogoAssetCard({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const url = URL.createObjectURL(file);
-    onChange(url);
-    setMetrics(null);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const url = reader.result as string;
+      onChange(url);
+      setMetrics(null);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (

@@ -28,12 +28,17 @@ export class GoogleProvider implements LLMProvider {
         systemInstruction: {
           parts: [{ text: request.systemPrompt }]
         },
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: request.userPrompt }]
-          }
-        ],
+        contents: typeof request.userPrompt === 'string'
+          ? [
+              {
+                role: 'user',
+                parts: [{ text: request.userPrompt }]
+              }
+            ]
+          : request.userPrompt.map((m: any) => ({
+              role: m.role === 'assistant' ? 'model' : m.role,
+              parts: [{ text: m.content }]
+            })),
         generationConfig: {
           maxOutputTokens: request.maxTokens ?? 1024,
           temperature: request.temperature ?? 0.7,

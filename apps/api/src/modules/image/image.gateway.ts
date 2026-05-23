@@ -1,16 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-
-interface ImageGatewayClientLike {
-  handshake?: {
-    auth?: Record<string, unknown>;
-    headers?: Record<string, string | undefined>;
-  };
-  disconnect?: () => void;
-  join?: (room: string) => void;
-  data?: Record<string, unknown>;
-}
 
 export interface ImageJobProgressPayload {
   jobId: string;
@@ -22,8 +14,17 @@ export interface ImageJobProgressPayload {
   error?: string;
 }
 
+@WebSocketGateway({
+  namespace: '/ws/image',
+  cors: {
+    origin: '*',
+  },
+})
 @Injectable()
-export class ImageWebSocketGateway {
+export class ImageWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer()
+  server!: Server;
+
   private readonly logger = new Logger(ImageWebSocketGateway.name);
 
   constructor(
@@ -31,7 +32,7 @@ export class ImageWebSocketGateway {
     private readonly configService: ConfigService,
   ) {}
 
-  async handleConnection(client: ImageGatewayClientLike) {
+  async handleConnection(client: Socket) {
     try {
       const handshake = client.handshake;
       const token =
@@ -63,7 +64,7 @@ export class ImageWebSocketGateway {
     }
   }
 
-  handleDisconnect(client: ImageGatewayClientLike) {
+  handleDisconnect(client: Socket) {
     const userId = client.data?.['userId'];
     this.logger.debug(`[WS] Client disconnected: user=${userId}`);
   }
@@ -73,6 +74,9 @@ export class ImageWebSocketGateway {
    */
   emitJobProgress(businessId: string, payload: ImageJobProgressPayload) {
     this.logger.debug(`image:job-progress -> business=${businessId} job=${payload.jobId} progress=${payload.progress}`);
+    if (this.server) {
+      this.server.to(`business:${businessId}`).emit('image:job-progress', payload);
+    }
   }
 
   /**
@@ -80,6 +84,9 @@ export class ImageWebSocketGateway {
    */
   emitJobCompleted(businessId: string, payload: ImageJobProgressPayload) {
     this.logger.debug(`image:job-completed -> business=${businessId} job=${payload.jobId}`);
+    if (this.server) {
+      this.server.to(`business:${businessId}`).emit('image:job-completed', payload);
+    }
   }
 
   /**
@@ -87,5 +94,8 @@ export class ImageWebSocketGateway {
    */
   emitJobFailed(businessId: string, payload: ImageJobProgressPayload) {
     this.logger.warn(`image:job-failed -> business=${businessId} job=${payload.jobId} error=${payload.error ?? 'unknown'}`);
+    if (this.server) {
+      this.server.to(`business:${businessId}`).emit('image:job-failed', payload);
+    }
   }
 }

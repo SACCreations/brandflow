@@ -10,7 +10,7 @@ export interface LLMProvider {
 // ─── Provider Request/Response ────────────────────────────────────
 export interface ProviderRequest {
   systemPrompt: string;
-  userPrompt: string;
+  userPrompt: string | Array<{role: string, content: string}>;
   maxTokens?: number;
   temperature?: number;
   requestId: string;

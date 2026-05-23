@@ -21,8 +21,10 @@ export class OpenAIProvider implements LLMProvider {
     const response = await this.client.chat.completions.create({
       model: request.model ?? this.model,
       messages: [
-        { role: 'system', content: request.systemPrompt },
-        { role: 'user', content: request.userPrompt },
+        { role: 'system' as const, content: request.systemPrompt },
+        ...(typeof request.userPrompt === 'string' 
+          ? [{ role: 'user' as const, content: request.userPrompt }]
+          : request.userPrompt as any),
       ],
       max_tokens: request.maxTokens ?? 1024,
       temperature: request.temperature ?? 0.7,
