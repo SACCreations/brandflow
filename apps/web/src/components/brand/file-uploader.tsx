@@ -35,30 +35,15 @@ export function FileUploader({
     }
 
     setFile(selectedFile);
-    simulateUpload(selectedFile);
+    processUpload(selectedFile);
   };
 
-  const simulateUpload = (file: File) => {
-    setUploading(true);
-    setProgress(0);
-    
-    let currentProgress = 0;
-    const interval = setInterval(() => {
-      currentProgress += 10;
-      if (currentProgress >= 100) {
-        clearInterval(interval);
-        setProgress(100);
-        setUploading(false);
-        const mockUrl = URL.createObjectURL(file);
-        setUploadedUrl(mockUrl);
-        // Important: Call onUpload outside of any state update logic to avoid React warnings
-        if (onUpload) {
-          setTimeout(() => onUpload(mockUrl, file.name), 0);
-        }
-      } else {
-        setProgress(currentProgress);
-      }
-    }, 200);
+  const processUpload = (file: File) => {
+    const url = URL.createObjectURL(file);
+    setUploadedUrl(url);
+    if (onUpload) {
+      setTimeout(() => onUpload(url, file.name), 0);
+    }
   };
 
   const reset = (e: React.MouseEvent) => {

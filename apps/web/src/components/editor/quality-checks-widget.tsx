@@ -38,12 +38,7 @@ export default function QualityChecksWidget({
   remediation
 }: QualityChecksWidgetProps) {
   
-  // Mock violations if none provided for demo purposes
-  const displayViolations = violations.length > 0 ? violations : [
-    { type: 'tone_mismatch', severity: 'medium', detail: 'Informal language ("gonna") detected in professional brand voice.' },
-    { type: 'factual_error', severity: 'high', detail: 'Claimed 50% discount contradicts "Sales Deck V4" (15%).' }
-  ];
-
+  const displayViolations = violations;
   const chartData = [
     { name: 'Score', value: score },
     { name: 'Remaining', value: 100 - score }
@@ -106,7 +101,13 @@ export default function QualityChecksWidget({
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Findings ({displayViolations.length})</h4>
         
-        {displayViolations.map((v, i) => (
+        {displayViolations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-6 text-center border border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
+            <CheckCircle2 className="h-6 w-6 text-emerald-500 mb-2" />
+            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">No findings detected</p>
+          </div>
+        ) : (
+          displayViolations.map((v, i) => (
           <div key={i} className="group relative rounded-xl border border-gray-100 bg-white p-3 transition-all hover:border-brand-500 dark:border-gray-800 dark:bg-gray-900/50">
             <div className="flex items-start gap-3">
               <div className={`mt-0.5 rounded-lg p-1.5 ${
@@ -137,7 +138,7 @@ export default function QualityChecksWidget({
               </div>
             </div>
           </div>
-        ))}
+        )))}
       </div>
 
       {/* Footer / Remediation */}

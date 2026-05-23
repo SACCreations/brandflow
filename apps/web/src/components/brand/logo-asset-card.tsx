@@ -31,29 +31,9 @@ export function LogoAssetCard({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
-    let p = 0;
-    const interval = setInterval(() => {
-      p += 15;
-      if (p >= 100) {
-        clearInterval(interval);
-        const url = URL.createObjectURL(file);
-        
-        // Mock analysis
-        setMetrics({
-          width: 1024,
-          height: 1024,
-          contrast: '7.4:1',
-          transparency: true
-        });
-
-        onChange(url);
-        setIsUploading(false);
-        setProgress(0);
-      } else {
-        setProgress(p);
-      }
-    }, 150);
+    const url = URL.createObjectURL(file);
+    onChange(url);
+    setMetrics(null);
   };
 
   return (

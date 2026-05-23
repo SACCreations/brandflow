@@ -19,9 +19,7 @@ interface Message {
 }
 
 export function AICopilot({ brandData }: { brandData: any }) {
-  const [messages, setMessages] = React.useState<Message[]>([
-    { role: 'assistant', content: `Hello! I'm your Brand Intelligence Co-pilot. I've indexed **${brandData.name || 'your brand'}**'s identity. How can I help you today?` }
-  ]);
+  const [messages, setMessages] = React.useState<Message[]>([]);
   const [input, setInput] = React.useState('');
 
   const handleSend = () => {
@@ -29,14 +27,6 @@ export function AICopilot({ brandData }: { brandData: any }) {
     const newMessages: Message[] = [...messages, { role: 'user', content: input }];
     setMessages(newMessages);
     setInput('');
-    
-    // Mock response
-    setTimeout(() => {
-      setMessages([...newMessages, { 
-        role: 'assistant', 
-        content: `Based on your **Governance Rules**, you should avoid using the word "${input.includes('cheap') ? 'cheap' : 'basic'}" as it conflicts with your **Luxury** tone marker. Would you like me to suggest some alternatives?` 
-      }]);
-    }, 1000);
   };
 
   return (

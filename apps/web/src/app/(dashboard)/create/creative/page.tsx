@@ -137,50 +137,12 @@ export default function CreativeBuilderPage() {
   const [activeVariantIndex, setActiveVariantIndex] = useState(0);
   const [favoriteVariants, setFavoriteVariants] = useState<boolean[]>([false, false, false, false]);
 
-  const simulatedVariants = [
-    {
-      id: 'v1',
-      version: 'v0.1 (Base)',
-      desc: 'Balanced corporate with primary brand gradient overlay.',
-      url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
-      prompt: 'High fidelity illustration of floating multi-layered interface panels, rich indigo glow, brand blue color scheme, sleek product interface, minimalist 3D elements, ultra detailed',
-      cost: '2.4¢'
-    },
-    {
-      id: 'v2',
-      version: 'v0.2 (Creative)',
-      desc: 'Cyberpunk inspired futuristic layout with high visual strength.',
-      url: 'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&auto=format&fit=crop&q=80',
-      prompt: 'Hyper-futuristic holographic computer terminal with vibrant neon grids, corporate brand colors injected, dynamic ambient lighting, cinematic photography style',
-      cost: '2.8¢'
-    },
-    {
-      id: 'v3',
-      version: 'v0.3 (Minimalist)',
-      desc: 'Elegant editorial focus with high white space ratio.',
-      url: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&auto=format&fit=crop&q=80',
-      prompt: 'Minimalistic design, abstract volumetric shapes, brand typography layout placeholders, soft glassmorphism texture, studio white background, premium luxury tone',
-      cost: '2.1¢'
-    },
-    {
-      id: 'v4',
-      version: 'v0.4 (Warm Corporate)',
-      desc: 'High contrast corporate offering styling.',
-      url: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=80',
-      prompt: 'Clean visual banner, isometric 3D illustrations of marketing statistics growing charts, sleek modern blue elements, rich color saturation, professional marketing creative',
-      cost: '2.5¢'
-    }
-  ];
+  const simulatedVariants: any[] = [];
 
   // --- CANVAS EDITOR STATE (Step 7) ---
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>('layer-text');
   const [layersHistory, setLayersHistory] = useState<CanvasLayer[][]>([
-    [
-      { id: 'layer-bg', type: 'image', name: 'AI Generated Background', x: 0, y: 0, width: 800, height: 800, src: simulatedVariants[0]?.url || '', isLocked: true },
-      { id: 'layer-logo', type: 'logo', name: 'Brand Logo', x: 24, y: 24, width: 80, height: 28, src: brandLogos[1]?.url || '' },
-      { id: 'layer-text', type: 'text', name: 'Headline Text', x: 24, y: 260, width: 352, height: 80, content: 'ACCELERATE YOUR WORKFLOW', fontFamily: 'Outfit', fontSize: 24, fill: '#ffffff' },
-      { id: 'layer-cta', type: 'shape', name: 'CTA Banner Box', x: 24, y: 340, width: 120, height: 36, fill: '#6366f1' }
-    ]
+    []
   ]);
 
   // Hydrate actual image background once assets load
@@ -325,72 +287,14 @@ export default function CreativeBuilderPage() {
   const [approvalStage, setApprovalStage] = useState<'CREATIVE' | 'BRAND' | 'CLIENT' | 'APPROVED'>('CREATIVE');
   const [activeCommentId, setActiveCommentId] = useState<string | null>('c1');
 
-  const simulatedComments: CommentAnnotation[] = [
-    {
-      id: 'c1',
-      user: 'Sarah Jenkins',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-      role: 'Creative Director',
-      body: 'Make the typography pop a bit more. Maybe try switching the font to Outfit or Inter Bold.',
-      x: 24,
-      y: 250,
-      width: 352,
-      height: 60,
-      stage: 'CREATIVE',
-      time: '15 mins ago'
-    },
-    {
-      id: 'c2',
-      user: 'Marcus Vance',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
-      role: 'Brand Manager',
-      body: 'The brand logo needs to be slightly larger and align perfectly with our 24px margin rule.',
-      x: 20,
-      y: 20,
-      width: 90,
-      height: 36,
-      stage: 'BRAND',
-      time: 'Just now'
-    }
-  ];
+  const simulatedComments: CommentAnnotation[] = [];
 
   // --- TRIGGER MOCK QUEUE ENGINE GENERATION (Step 5 simulation) ---
   const triggerImageGeneration = () => {
     setIsGenerating(true);
-    setJobProgress(5);
-    setJobStage('PROMPT_BUILDER');
-
-    const stages = [
-      { p: 15, s: 'PROMPT_BUILDER', t: 'Augmenting brand style visualRules...' },
-      { p: 30, s: 'IMAGE_PROMPT_ENGINE', t: 'Compiling structural tokens and lighting rules...' },
-      { p: 55, s: 'AI_IMAGE_GENERATION', t: 'Invoking Stability AI Image Core Node...' },
-      { p: 75, s: 'BRAND_COMPLIANCE_CHECK', t: 'Validating color palette limits & contrast safety...' },
-      { p: 90, s: 'ASSET_OPTIMIZATION', t: 'Converting PNG streams to optimized WebP. Generating thumbnails...' },
-      { p: 100, s: 'COMPLETED', t: 'Saving generated draft variants into workspace DB...' }
-    ];
-
-    let currentIdx = 0;
-    const interval = setInterval(() => {
-      if (currentIdx < stages.length) {
-        const stage = stages[currentIdx];
-        if (stage) {
-          setJobProgress(stage.p);
-          setJobStage(stage.s);
-        }
-        currentIdx++;
-      } else {
-        clearInterval(interval);
-        setIsGenerating(false);
-        setGeneratedCount(prev => prev + 1);
-        // Switch background of editor to the newly generated asset
-        updateCurrentLayers(prev => prev.map(l => {
-          if (l.id === 'layer-bg') {
-            return { ...l, src: simulatedVariants[generatedCount % 4]?.url || '' };
-          }
-          return l;
-        }));
-      }
-    }, 1200);
+    setTimeout(() => {
+      setIsGenerating(false);
+    }, 500);
   };
 
   const getStageLabel = (stage: string) => {
