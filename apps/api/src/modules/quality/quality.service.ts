@@ -3,20 +3,24 @@ import { prisma } from '@brandflow/db';
 import { QualityControl, LLMGateway, VectorService } from '@brandflow/ai';
 import type { QualityCheckResult, BrandContext } from '@brandflow/shared';
 
+type QualityViolationLike = QualityCheckResult['violations'][number] & {
+  suggestion?: string;
+  location?: unknown;
+};
+
+type KnowledgeCitationLike = {
+  entryId: string;
+  claimSnippet: string;
+  matchScore: number;
+};
+
 type QualityCheckResultLike = QualityCheckResult & {
   overallGrade?: 'A' | 'B' | 'C' | 'D' | 'F';
   complianceScore?: number;
   factualScore?: number;
   safetyScore?: number;
-  citations?: Array<{
-    entryId: string;
-    claimSnippet: string;
-    matchScore: number;
-  }>;
-  violations: Array<QualityCheckResult['violations'][number] & {
-    suggestion?: string;
-    location?: unknown;
-  }>;
+  citations?: KnowledgeCitationLike[];
+  violations: QualityViolationLike[];
 };
 
 @Injectable()
@@ -77,6 +81,9 @@ export class QualityService {
     };
 
     const result = await this.qc.check(body, brandContext, facts as any) as QualityCheckResultLike;
+    const overallGrade = result.overallGrade ?? 'C';
+    const violations = result.violations as QualityViolationLike[];
+    const citations: KnowledgeCitationLike[] = result.citations ?? [];
 
 
     // 4. Persist Results (Atomic Transaction)
@@ -87,7 +94,7 @@ export class QualityService {
           contentId,
           passed: result.passed,
           confidenceScore: result.confidenceScore,
-          overallGrade: result.overallGrade,
+          overallGrade,
           complianceScore: result.complianceScore,
           factualScore: result.factualScore,
           safetyScore: result.safetyScore,
@@ -97,9 +104,9 @@ export class QualityService {
 
 
       // Create violations
-      if (result.violations.length > 0) {
+      if (violations.length > 0) {
         await tx.qualityViolation.createMany({
-          data: result.violations.map((v) => ({
+          data: violations.map((v) => ({
             qualityCheckId: qcRecord.id,
             type: v.type,
             severity: v.severity,
@@ -111,9 +118,9 @@ export class QualityService {
       }
 
       // Create citations
-      if (result.citations && result.citations.length > 0) {
+      if (citations.length > 0) {
         await tx.knowledgeCitation.createMany({
-          data: result.citations.map((c: QualityCheckResultLike['citations'][number]) => ({
+          data: citations.map((c) => ({
             qualityCheckId: qcRecord.id,
             entryId: c.entryId,
             claimSnippet: c.claimSnippet,
@@ -125,18 +132,18 @@ export class QualityService {
       // 5. Human Review Routing Logic (Enterprise Grade)
       const needsReview = 
         !result.passed || 
-        result.overallGrade === 'C' || 
-        result.overallGrade === 'D' || 
+        overallGrade === 'C' || 
+        overallGrade === 'D' || 
         (result.factualScore ?? 0) < 0.8 || 
         (result.complianceScore ?? 0) < 0.8 ||
         (result.safetyScore ?? 0) < 0.95;
 
       if (needsReview) {
         const priority = 
-          result.overallGrade === 'F' || (result.safetyScore ?? 0) < 0.9 ? 'critical' : 
-          result.overallGrade === 'D' || (result.factualScore ?? 0) < 0.6 ? 'high' : 'medium';
+          overallGrade === 'F' || (result.safetyScore ?? 0) < 0.9 ? 'critical' : 
+          overallGrade === 'D' || (result.factualScore ?? 0) < 0.6 ? 'high' : 'medium';
 
-        let reason = `Automated QC Grade: ${result.overallGrade}.`;
+        let reason = `Automated QC Grade: ${overallGrade}.`;
         if ((result.factualScore ?? 0) < 0.8) reason += ' Potential hallucination detected.';
         if ((result.complianceScore ?? 0) < 0.8) reason += ' Brand compliance risk.';
         if ((result.safetyScore ?? 0) < 0.95) reason += ' Content safety warning.';
@@ -154,7 +161,7 @@ export class QualityService {
 
         // 5b. Auto-route to approval queue if grade < B
         const gradesBelowB = ['C', 'D', 'F'];
-        if (gradesBelowB.includes(result.overallGrade)) {
+        if (gradesBelowB.includes(overallGrade)) {
           // Check no existing pending approval
           const existingApproval = await tx.approval.findFirst({
             where: { contentId, status: 'pending' },
@@ -167,7 +174,7 @@ export class QualityService {
                 contentId,
                 reviewType: 'internal',
                 status: 'pending',
-                routeReason: `Auto-routed: quality grade ${result.overallGrade}`,
+                routeReason: `Auto-routed: quality grade ${overallGrade}`,
                 slaDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
               } as any,
             });
@@ -178,7 +185,7 @@ export class QualityService {
             });
 
             this.logger.log(
-              `Auto-routed content ${contentId} to approval queue (grade: ${result.overallGrade})`,
+              `Auto-routed content ${contentId} to approval queue (grade: ${overallGrade})`,
             );
           }
         }
