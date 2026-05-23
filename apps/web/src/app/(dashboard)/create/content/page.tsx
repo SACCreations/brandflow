@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { Badge, Button, Card, useToast } from '@brandflow/ui';
+import { Badge, Button, Card, useToast, ErrorBoundary } from '@brandflow/ui';
 import { 
   ArrowLeft, 
   Loader2, 
@@ -23,7 +23,8 @@ import {
   Calendar,
   AlertTriangle,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  RotateCcw,
 } from 'lucide-react';
 
 interface BriefContext {
@@ -107,6 +108,7 @@ export default function ContentGeneratorPage() {
   const [contentCount, setContentCount] = useState<number>(1);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [customTopic, setCustomTopic] = useState<string>('');
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
   // Advanced options
   const [creativity, setCreativity] = useState<number>(0.75);
@@ -121,6 +123,12 @@ export default function ContentGeneratorPage() {
   const [jobProgress, setJobProgress] = useState<number>(0);
   const [jobStatus, setJobStatus] = useState<string>('idle');
   const [completedContents, setCompletedContents] = useState<any[]>([]);
+
+  // AbortController ref for cancelling stale topic suggestion fetches
+  const topicAbortRef = useRef<AbortController | null>(null);
+  // Job polling timeout tracking
+  const jobStartTime = useRef<number>(0);
+  const JOB_TIMEOUT_MS = 5 * 60 * 1000; // 5 minute max
 
   // --- Fetching Workspace Selections ---
   const { data: brands = [] } = useQuery<BrandOption[]>({
@@ -196,6 +204,18 @@ export default function ContentGeneratorPage() {
   useQuery({
     queryKey: ['bg-job-progress', activeJobId],
     queryFn: async () => {
+      // Check for timeout
+      if (Date.now() - jobStartTime.current > JOB_TIMEOUT_MS) {
+        setActiveJobId(null);
+        setJobStatus('failed');
+        toast({
+          title: 'Generation timed out',
+          description: 'The batch job took too long. Please try again with fewer items.',
+          variant: 'destructive',
+        });
+        return { status: 'failed' };
+      }
+
       const res = await apiClient.get(`/content/jobs/${activeJobId}`);
       const job = res.data;
       
@@ -210,6 +230,12 @@ export default function ContentGeneratorPage() {
             title: 'Batch completed!',
             description: `Successfully generated ${job.result?.results?.length} content items.`,
           });
+        } else {
+          toast({
+            title: 'Batch generation failed',
+            description: job.error || 'An error occurred during processing.',
+            variant: 'destructive',
+          });
         }
       }
       return job;
@@ -220,7 +246,11 @@ export default function ContentGeneratorPage() {
       if (job && (job.status === 'completed' || job.status === 'failed')) {
         return false;
       }
-      return 1500;
+      // Exponential backoff: 1.5s → 3s → 5s → 5s (cap)
+      const elapsed = Date.now() - jobStartTime.current;
+      if (elapsed < 10000) return 1500;
+      if (elapsed < 30000) return 3000;
+      return 5000;
     },
   });
 
@@ -243,6 +273,19 @@ export default function ContentGeneratorPage() {
 
   const generateMutation = useMutation({
     mutationFn: async () => {
+      // Client-side validation
+      const errors: Record<string, string> = {};
+      if (!selectedBrandId) errors.brand = 'Brand selection is required';
+      if (!selectedPlatform) errors.platform = 'Platform is required';
+      if (contentCount < 1 || contentCount > 50) errors.count = 'Batch count must be between 1-50';
+      if (creativity < 0.1 || creativity > 1.5) errors.creativity = 'Creativity must be between 0.1-1.5';
+      
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        throw new Error('Please fix validation errors before generating.');
+      }
+      setValidationErrors({});
+
       setCompletedContents([]);
       setJobProgress(0);
       setJobStatus('idle');
@@ -281,6 +324,7 @@ export default function ContentGeneratorPage() {
       if (data.async) {
         setActiveJobId(data.jobId);
         setJobStatus('generating');
+        jobStartTime.current = Date.now();
         toast({
           title: 'Batch queue started',
           description: 'Generating content in the background queue.',
@@ -311,6 +355,7 @@ export default function ContentGeneratorPage() {
   const loading = generateMutation.isPending || !!activeJobId;
 
   return (
+    <ErrorBoundary backHref={backHref}>
     <div className="mx-auto max-w-7xl px-2 py-4 space-y-8 animate-in fade-in duration-500">
       {/* Header Banner */}
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between border-b border-gray-100 pb-6 dark:border-gray-800">
@@ -371,6 +416,7 @@ export default function ContentGeneratorPage() {
                   ))}
                 </select>
                 {briefId && <span className="text-[10px] text-gray-400 font-medium">Locked to brief's designated brand.</span>}
+                {validationErrors.brand && <span className="text-[10px] font-semibold text-red-500">{validationErrors.brand}</span>}
               </div>
 
               <div className="space-y-2">

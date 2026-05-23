@@ -29,41 +29,53 @@ export class BrandService {
       strategy: 2,   // positioning, audience, strategy object
       visuals: 2,    // visualRules, tone
       competitors: 1,
-      contact: 1
+      contact: 1,
+      knowledge: 2   // has linked knowledge sources with entries
     };
 
     let totalPossible = 0;
 
     // Basic Details (5 points)
-    if (brand.name?.trim()) score += weights.basic; totalPossible += weights.basic;
-    if (brand.industry?.trim()) score += weights.basic; totalPossible += weights.basic;
-    if (brand.tagline?.trim()) score += weights.basic; totalPossible += weights.basic;
-    if (brand.description?.trim()) score += weights.basic; totalPossible += weights.basic;
-    if (brand.website?.trim()) score += weights.basic; totalPossible += weights.basic;
+    totalPossible += weights.basic;
+    if (brand.name?.trim()) score += weights.basic;
+    totalPossible += weights.basic;
+    if (brand.industry?.trim()) score += weights.basic;
+    totalPossible += weights.basic;
+    if (brand.tagline?.trim()) score += weights.basic;
+    totalPossible += weights.basic;
+    if (brand.description?.trim()) score += weights.basic;
+    totalPossible += weights.basic;
+    if (brand.website?.trim()) score += weights.basic;
 
     // Strategy & Intelligence (6 points)
-    if (brand.positioning?.trim()) score += weights.strategy; totalPossible += weights.strategy;
-    if (brand.audience?.trim()) score += weights.strategy; totalPossible += weights.strategy;
+    totalPossible += weights.strategy;
+    if (brand.positioning?.trim()) score += weights.strategy;
+    totalPossible += weights.strategy;
+    if (brand.audience?.trim()) score += weights.strategy;
     
     const strategy = typeof brand.strategy === 'object' ? brand.strategy : undefined;
-    if (strategy?.targetLocation || strategy?.interests) score += weights.strategy;
     totalPossible += weights.strategy;
+    if (strategy?.targetLocation || strategy?.interests) score += weights.strategy;
 
     // Visuals & Voice (4 points)
     const vr = typeof brand.visualRules === 'object' ? brand.visualRules : undefined;
+    totalPossible += weights.visuals;
     if (vr?.primaryColor && vr?.fontFamily) score += weights.visuals;
-    totalPossible += weights.visuals;
 
-    if (brand.tone && (Array.isArray(brand.tone) ? brand.tone.length > 0 : !!brand.tone)) score += weights.visuals;
     totalPossible += weights.visuals;
+    if (brand.tone && (Array.isArray(brand.tone) ? brand.tone.length > 0 : !!brand.tone)) score += weights.visuals;
 
     // Market context (1 point)
-    if (brand.competitors && Array.isArray(brand.competitors) && brand.competitors.length > 0) score += weights.competitors;
     totalPossible += weights.competitors;
+    if (brand.competitors && Array.isArray(brand.competitors) && brand.competitors.length > 0) score += weights.competitors;
 
     // Contact info (1 point)
-    if (brand.contactInfo?.personName || brand.contactInfo?.email) score += weights.contact;
     totalPossible += weights.contact;
+    if (brand.contactInfo?.personName || brand.contactInfo?.email) score += weights.contact;
+
+    // Knowledge dimension (2 points) — awarded if brand has linked knowledge
+    totalPossible += weights.knowledge;
+    if (brand._knowledgeEntryCount && brand._knowledgeEntryCount >= 5) score += weights.knowledge;
 
     return Math.round((score / totalPossible) * 100);
   }
@@ -71,12 +83,13 @@ export class BrandService {
   async create(businessId: string, dto: CreateBrandDto) {
     const healthScore = this.calculateHealthScore(dto);
     const slug = dto.slug?.trim() || dto.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const { slug: _slug, ...rest } = dto;
     const brand = await this.prisma.client.brand.create({
       data: {
-        ...dto,
+        ...rest,
         slug: slug || null,
         businessId,
-        healthScore
+        healthScore,
       } as any
     });
     await this.logActivity(businessId, 'brand.created', brand.id, null, brand);
@@ -85,7 +98,11 @@ export class BrandService {
 
   async update(id: string, businessId: string, dto: UpdateBrandDto) {
     const before = await this.findById(id, businessId);
-    const merged = { ...before, ...dto };
+    // Fetch knowledge entry count for health score calculation
+    const knowledgeEntryCount = await this.prisma.client.knowledgeEntry.count({
+      where: { source: { brandId: id, businessId }, isStale: false },
+    });
+    const merged = { ...before, ...dto, _knowledgeEntryCount: knowledgeEntryCount };
     const healthScore = this.calculateHealthScore(merged);
     
     const { ...updateDto } = dto;
@@ -120,7 +137,7 @@ export class BrandService {
   async restore(id: string, businessId: string) {
     const after = await this.prisma.client.brand.update({
       where: { id, businessId },
-      data: { deletedAt: undefined }, // Use undefined instead of null if schema allows
+      data: { deletedAt: null },
     });
     await this.logActivity(businessId, 'brand.restored', id, null, after);
     return after;

@@ -9,6 +9,10 @@ import {
   type BrandAnalysisResult,
 } from '@brandflow/shared';
 import { LlmSettingsService } from '../llm-settings/llm-settings.service';
+import * as dns from 'dns';
+import { promisify } from 'util';
+
+const dnsLookup = promisify(dns.lookup);
 
 interface ResolvedAnalysisSource {
   type: 'knowledge_source' | 'url' | 'text';
@@ -308,6 +312,9 @@ export class BrandAnalyserService {
     if (!normalizedUrl) {
       throw new BadRequestException(`Invalid source URL: ${urlValue}`);
     }
+
+    // SSRF protection: validate URL resolves to a public IP
+    await this.validateUrlSafety(normalizedUrl);
 
     const response = await fetch(normalizedUrl, {
       signal: AbortSignal.timeout(15_000),
@@ -626,6 +633,45 @@ export class BrandAnalyserService {
     } catch {
       return null;
     }
+  }
+
+  private async validateUrlSafety(url: string): Promise<void> {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new BadRequestException(`Non-HTTP protocol rejected: ${parsed.protocol}`);
+    }
+
+    try {
+      const lookupResult = await dnsLookup(parsed.hostname);
+      const address = typeof lookupResult === 'string' ? lookupResult : (lookupResult as any)?.address;
+      if (!address) {
+        throw new BadRequestException(`Cannot resolve host: ${parsed.hostname}`);
+      }
+      if (this.isPrivateIp(address)) {
+        throw new BadRequestException('Fetching private/reserved IP addresses is blocked.');
+      }
+    } catch (e: any) {
+      if (e instanceof BadRequestException) throw e;
+      throw new BadRequestException(`Cannot resolve host: ${parsed.hostname}`);
+    }
+  }
+
+  private isPrivateIp(ip: string): boolean {
+    const match = ip.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (match) {
+      const [o1, o2] = match.slice(1).map(Number);
+      if (o1 === 127) return true;
+      if (o1 === 10) return true;
+      if (o1 === 172 && o2 !== undefined && o2 >= 16 && o2 <= 31) return true;
+      if (o1 === 192 && o2 === 168) return true;
+      if (o1 === 169 && o2 === 254) return true;
+      if (ip === '0.0.0.0' || ip === '255.255.255.255') return true;
+    }
+    if (ip === '::1' || ip === '::' || ip.startsWith('fe80:') ||
+        ip.startsWith('fc00:') || ip.startsWith('fd00:')) {
+      return true;
+    }
+    return false;
   }
 
   private inferBrandName(sources: ResolvedAnalysisSource[]): string | null {

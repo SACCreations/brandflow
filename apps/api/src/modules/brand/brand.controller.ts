@@ -60,7 +60,6 @@ export class BrandController {
     @CurrentUser() user: JwtPayload,
     @Body(new ZodValidationPipe(updateBrandSchema)) dto: UpdateBrandDto,
   ) {
-    console.log('PATCH dto received:', JSON.stringify(dto, null, 2));
     return this.brandService.update(id, user.businessId, dto);
   }
 

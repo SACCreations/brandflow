@@ -4,6 +4,7 @@ import { Logger } from '@nestjs/common';
 import { QUEUES } from '@brandflow/shared';
 import { LLMGateway, ImageGateway, VectorService } from '@brandflow/ai';
 import { PrismaService } from '../../../common/database/prisma.service';
+import { ImageWebSocketGateway } from '../image.gateway';
 
 interface ImageJobData {
   jobId: string;
@@ -23,14 +24,17 @@ interface ImageJobData {
   };
 }
 
-@Processor(QUEUES.IMAGE_GENERATION)
+@Processor(QUEUES.IMAGE_GENERATION, { concurrency: 3 })
 export class ImageJobProcessor extends WorkerHost {
   private readonly logger = new Logger(ImageJobProcessor.name);
   private readonly llm: LLMGateway;
   private readonly imageGateway: ImageGateway;
   private readonly vectorService: VectorService;
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly wsGateway: ImageWebSocketGateway,
+  ) {
     super();
     this.llm = new LLMGateway({ defaultProvider: 'openai' });
     this.imageGateway = new ImageGateway({ defaultProvider: 'stability' });

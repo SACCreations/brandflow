@@ -57,7 +57,8 @@ export class IngestionService {
         attempts: 3,
         backoff: { type: 'exponential', delay: 2000 },
         removeOnComplete: 50,
-        removeOnFail: 200,
+        removeOnFail: { age: 604800 }, // 7 days retention for observability
+        timeout: 300_000, // 5 minute hard timeout per job
       },
     );
 
@@ -169,7 +170,13 @@ export class IngestionService {
         if (!text) throw new Error(`text (base64) is required for file type: ${type}`);
         // Strip data-URL prefix if present
         const b64 = text.includes('base64,') ? text.split('base64,')[1]! : text;
-        return Buffer.from(b64, 'base64');
+        const buffer = Buffer.from(b64, 'base64');
+        // Enforce 50MB file size limit
+        const MAX_FILE_SIZE = 50 * 1024 * 1024;
+        if (buffer.length > MAX_FILE_SIZE) {
+          throw new Error(`File exceeds maximum size of 50MB (received ${Math.round(buffer.length / 1024 / 1024)}MB)`);
+        }
+        return buffer;
 
       case 'text':
       case 'manual':
@@ -208,10 +215,16 @@ export class IngestionService {
         return records.map((row) => row.join(' | ')).join('\n');
       }
       if (effectiveType === 'pptx' || mimeType?.includes('presentationml')) {
-        // pptx: extract text from XML directly (no extra dep)
-        const text = raw.toString('utf-8');
-        const matches = text.match(/<a:t>(.*?)<\/a:t>/g) ?? [];
-        return matches.map((m: string) => m.replace(/<[^>]+>/g, '')).join(' ');
+        // pptx is a ZIP archive — extract XML slide content
+        try {
+          const { extractPptxText } = await import('./utils/pptx-extractor');
+          return await extractPptxText(raw);
+        } catch {
+          // Fallback: try reading as UTF-8 and extracting text nodes
+          const text = raw.toString('utf-8');
+          const matches = text.match(/<a:t>(.*?)<\/a:t>/g) ?? [];
+          return matches.map((m: string) => m.replace(/<[^>]+>/g, '')).join(' ');
+        }
       }
       // Generic: try to read as UTF-8 text
       return raw.toString('utf-8');
@@ -327,19 +340,20 @@ ${text}
   // INDEXING: dedup + persist KnowledgeEntry + embedding
   // -------------------------------------------------------------------------
   private async index(sourceId: string, businessId: string, atoms: KnowledgeAtom[]): Promise<number> {
-    const newAtoms: { atom: KnowledgeAtom, hash: string }[] = [];
+    // Batch dedup: compute all hashes upfront, then do a single DB query
+    const atomsWithHashes = atoms.map(atom => ({
+      atom,
+      hash: crypto.createHash('md5').update(atom.content).digest('hex'),
+    }));
 
-    // Filter out existing atoms sequentially (fast DB checks)
-    for (const atom of atoms) {
-      const hash = crypto.createHash('md5').update(atom.content).digest('hex');
-      const exists = await this.prisma.client.knowledgeEntry.findFirst({
-        where: { businessId, contentHash: hash },
-        select: { id: true },
-      });
-      if (!exists) {
-        newAtoms.push({ atom, hash });
-      }
-    }
+    const allHashes = atomsWithHashes.map(a => a.hash);
+    const existingEntries = await this.prisma.client.knowledgeEntry.findMany({
+      where: { businessId, contentHash: { in: allHashes } },
+      select: { contentHash: true },
+    });
+    const existingHashSet = new Set(existingEntries.map(e => e.contentHash));
+
+    const newAtoms = atomsWithHashes.filter(({ hash }) => !existingHashSet.has(hash));
 
     const rows: any[] = [];
     const CONCURRENCY = 10;

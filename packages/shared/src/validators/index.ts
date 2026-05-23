@@ -363,11 +363,22 @@ export type UpdateBrandDto = z.infer<typeof updateBrandSchema>;
 // ─── Knowledge ────────────────────────────────────────────────────
 export const createKnowledgeSourceSchema = z.object({
   brandId: z.string().uuid(),
-  type: z.enum(['pdf', 'docx', 'url', 'text', 'api', 'video_transcript']),
+  name: z.string().max(255).nullish(),
+  type: z.enum(['pdf', 'docx', 'xlsx', 'csv', 'pptx', 'txt', 'url', 'text', 'manual', 'api', 'video_transcript']),
   sourceUrl: z.string().url().nullish(),
-  text: z.string().max(100_000).nullish(),
+  text: z.string().max(70_000_000).nullish(), // ~50MB base64
+  trustLevel: z.enum(['high', 'medium', 'low']).default('high'),
+  syncFrequency: z.enum(['manual', 'daily', 'weekly', 'monthly']).default('manual'),
+  locale: z.string().max(10).default('en-US'),
+  metadata: z.record(z.unknown()).nullish(),
 });
 export type CreateKnowledgeSourceDto = z.infer<typeof createKnowledgeSourceSchema>;
+
+export const knowledgeReviewSchema = z.object({
+  status: z.enum(['approved', 'rejected', 'pending']),
+  note: z.string().max(2000).nullish(),
+});
+export type KnowledgeReviewDto = z.infer<typeof knowledgeReviewSchema>;
 
 // ─── Content ──────────────────────────────────────────────────────
 export const generateContentSchema = z.object({

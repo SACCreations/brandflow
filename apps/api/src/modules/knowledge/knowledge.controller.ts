@@ -17,7 +17,7 @@ import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
-import { createKnowledgeSourceSchema, type CreateKnowledgeSourceDto, type JwtPayload } from '@brandflow/shared';
+import { createKnowledgeSourceSchema, knowledgeReviewSchema, type CreateKnowledgeSourceDto, type KnowledgeReviewDto, type JwtPayload } from '@brandflow/shared';
 
 @ApiTags('knowledge')
 @ApiBearerAuth()
@@ -74,7 +74,7 @@ export class KnowledgeController {
   @ApiOperation({ summary: 'Add a knowledge source (triggers ingestion)' })
   createSource(
     @CurrentUser() user: JwtPayload,
-    @Body() dto: any, // Relaxing validation for prototype expansion
+    @Body(new ZodValidationPipe(createKnowledgeSourceSchema)) dto: CreateKnowledgeSourceDto,
   ) {
     return this.knowledgeService.createSource(user.businessId, dto);
   }
@@ -115,7 +115,7 @@ export class KnowledgeController {
   updateReview(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: JwtPayload,
-    @Body() dto: { status: string; note?: string },
+    @Body(new ZodValidationPipe(knowledgeReviewSchema)) dto: KnowledgeReviewDto,
   ) {
     return this.knowledgeService.updateEntryReview(id, user.businessId, dto.status, dto.note);
   }

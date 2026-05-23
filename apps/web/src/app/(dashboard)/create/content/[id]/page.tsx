@@ -1,11 +1,11 @@
 'use client';
 
-import React, { use, useEffect, useState } from 'react';
+import React, { use, useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { Button, Card, useToast } from '@brandflow/ui';
+import { Button, Card, useToast, ErrorBoundary } from '@brandflow/ui';
 import { 
   ArrowLeft, 
   Calendar,
@@ -26,8 +26,11 @@ import {
   Zap,
   Loader2,
   ShieldCheck,
+  Check,
+  AlertCircle,
 } from 'lucide-react';
 import QualityChecksWidget from '@/components/editor/quality-checks-widget';
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 
 interface ContentDetail {
   id: string;
@@ -103,6 +106,13 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
   const [content, setContent] = useState('');
   const [scheduleAt, setScheduleAt] = useState('');
   const [selectedSocialAccountId, setSelectedSocialAccountId] = useState('');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const lastSavedContent = useRef('');
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Track dirty state for unsaved changes guard
+  const isDirty = content !== lastSavedContent.current && lastSavedContent.current !== '';
+  const { confirmNavigation } = useUnsavedChanges(isDirty);
 
   // Safeguard: Redirect if the dynamic ID parameter is invalid or resolves as string literal 'undefined'
   useEffect(() => {
@@ -128,6 +138,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
   useEffect(() => {
     if (data?.body) {
       setContent(data.body);
+      lastSavedContent.current = data.body;
     }
   }, [data?.body]);
 
@@ -150,10 +161,14 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      setSaveStatus('saving');
       const res = await apiClient.patch(`/content/${id}`, { body: content });
       return res.data as ContentDetail;
     },
     onSuccess: () => {
+      lastSavedContent.current = content;
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 3000);
       queryClient.invalidateQueries({ queryKey: ['content-editor', id] });
       toast({
         title: 'Content saved',
@@ -161,6 +176,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
       });
     },
     onError: (error: any) => {
+      setSaveStatus('error');
       toast({
         title: 'Unable to save content',
         description: error?.response?.data?.message || 'Please try again.',
@@ -270,6 +286,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
           : 'Review & publish';
 
   return (
+    <ErrorBoundary backHref={backHref}>
     <div className="flex h-[calc(100vh-120px)] flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Strategy Brief Context Bar */}
       <div className="flex items-center gap-6 rounded-2xl bg-gray-900 px-6 py-3 text-white dark:bg-brand-500/10 dark:text-brand-400">
@@ -312,9 +329,26 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => saveMutation.mutate()} className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800">
-            {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save
+          <button
+            onClick={() => saveMutation.mutate()}
+            disabled={saveMutation.isPending || !isDirty}
+            aria-label="Save content"
+            className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            {saveMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : saveStatus === 'saved' ? (
+              <Check className="h-4 w-4 text-emerald-500" />
+            ) : saveStatus === 'error' ? (
+              <AlertCircle className="h-4 w-4 text-red-500" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Save'}
           </button>
+          {isDirty && (
+            <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400">Unsaved changes</span>
+          )}
           {canRequestApproval ? (
             <button
               onClick={() => requestApprovalMutation.mutate()}
@@ -357,17 +391,18 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
         <div className="lg:col-span-8 flex flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
           {/* Rich Text Toolbar Mockup */}
           <div className="flex items-center gap-2 border-b border-gray-100 p-3 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/30">
-            <select className="rounded-md border-gray-200 bg-white px-2 py-1 text-xs font-bold dark:border-gray-700 dark:bg-gray-800">
+            <select aria-label="Text format" className="rounded-md border-gray-200 bg-white px-2 py-1 text-xs font-bold dark:border-gray-700 dark:bg-gray-800">
               <option>Heading 2</option>
               <option>Body Text</option>
             </select>
             <div className="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-2"></div>
-            <button className="p-1.5 hover:bg-white rounded transition-colors font-serif font-bold">B</button>
-            <button className="p-1.5 hover:bg-white rounded transition-colors italic">I</button>
-            <button className="p-1.5 hover:bg-white rounded transition-colors underline">U</button>
+            <button aria-label="Bold" className="p-1.5 hover:bg-white rounded transition-colors font-serif font-bold">B</button>
+            <button aria-label="Italic" className="p-1.5 hover:bg-white rounded transition-colors italic">I</button>
+            <button aria-label="Underline" className="p-1.5 hover:bg-white rounded transition-colors underline">U</button>
           </div>
           
           <textarea 
+            aria-label="Content body editor"
             className="flex-1 w-full p-8 text-lg bg-transparent border-none focus:ring-0 text-gray-800 dark:text-gray-200 font-medium leading-relaxed resize-none"
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -453,11 +488,16 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                       type="datetime-local"
                       className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                       value={scheduleAt}
+                      min={new Date().toISOString().slice(0, 16)}
                       onChange={(event) => setScheduleAt(event.target.value)}
+                      aria-label="Schedule publish date and time"
                     />
+                    {scheduleAt && new Date(scheduleAt) <= new Date() && (
+                      <span className="text-[10px] font-semibold text-red-500">Date must be in the future</span>
+                    )}
                   </label>
 
-                  <Button onClick={() => scheduleMutation.mutate()} disabled={scheduleMutation.isPending || !scheduleAt || !selectedSocialAccountId} className="w-full gap-2">
+                  <Button onClick={() => scheduleMutation.mutate()} disabled={scheduleMutation.isPending || !scheduleAt || !selectedSocialAccountId || new Date(scheduleAt) <= new Date()} className="w-full gap-2">
                     {scheduleMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Calendar className="h-4 w-4" />}
                     Schedule publish
                   </Button>
@@ -501,6 +541,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   );
 }
 
