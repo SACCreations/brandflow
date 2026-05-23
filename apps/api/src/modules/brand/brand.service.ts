@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../common/database/prisma.service';
 import { AuditService } from '../business/audit.service';
 import type { CreateBrandDto, UpdateBrandDto } from '@brandflow/shared';
@@ -90,7 +91,7 @@ export class BrandService {
         slug: slug || null,
         businessId,
         healthScore,
-      } as any
+      } as Prisma.BrandUncheckedCreateInput
     });
     await this.logActivity(businessId, 'brand.created', brand.id, null, brand);
     return brand;
@@ -106,7 +107,11 @@ export class BrandService {
     const healthScore = this.calculateHealthScore(merged);
     
     const { ...updateDto } = dto;
-    Object.keys(updateDto).forEach(key => (updateDto as any)[key] === null && delete (updateDto as any)[key]);
+    Object.keys(updateDto).forEach(key => {
+      if ((updateDto as Record<string, unknown>)[key] === null) {
+        delete (updateDto as Record<string, unknown>)[key];
+      }
+    });
 
     if (updateDto.slug !== undefined) {
       const nameForSlug = updateDto.name || before.name;
@@ -118,7 +123,7 @@ export class BrandService {
 
     const after = await this.prisma.client.brand.update({
       where: { id },
-      data: { ...updateDto, healthScore, version: { increment: 1 } } as any,
+      data: { ...updateDto, healthScore, version: { increment: 1 } } as Prisma.BrandUncheckedUpdateInput,
     });
     await this.logActivity(businessId, 'brand.updated', id, before, after);
     return after;

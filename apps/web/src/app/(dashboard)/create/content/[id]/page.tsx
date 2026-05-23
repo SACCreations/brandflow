@@ -396,9 +396,9 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
               <option>Body Text</option>
             </select>
             <div className="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-2"></div>
-            <button aria-label="Bold" className="p-1.5 hover:bg-white rounded transition-colors font-serif font-bold">B</button>
-            <button aria-label="Italic" className="p-1.5 hover:bg-white rounded transition-colors italic">I</button>
-            <button aria-label="Underline" className="p-1.5 hover:bg-white rounded transition-colors underline">U</button>
+            <button aria-label="Bold" className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-white rounded transition-colors font-serif font-bold">B</button>
+            <button aria-label="Italic" className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-white rounded transition-colors italic">I</button>
+            <button aria-label="Underline" className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-white rounded transition-colors underline">U</button>
           </div>
           
           <textarea 
@@ -528,7 +528,14 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                         <div className="mt-1 text-xs text-gray-500">{new Date(schedule.scheduledAt).toLocaleString()} • {schedule.status}</div>
                       </div>
                       {schedule.status === 'pending' && (
-                        <button onClick={() => cancelScheduleMutation.mutate(schedule.id)} className="text-xs font-bold text-red-600 hover:underline">
+                        <button 
+                          onClick={() => {
+                            if (window.confirm('Cancel this scheduled post? It will be moved back to approved state.')) {
+                              cancelScheduleMutation.mutate(schedule.id);
+                            }
+                          }} 
+                          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
                           Cancel
                         </button>
                       )}

@@ -242,13 +242,13 @@ export default function VariantComparisonPage() {
                     onClick={(e) => { e.stopPropagation(); regenerateMutation.mutate(variant.id); }}
                     disabled={regenerateMutation.isPending}
                     aria-label="Regenerate this variant"
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+                    className="rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-4 w-4" />
                   </button>
                   <Link href={`/create/content/${variant.id}`} onClick={(e) => e.stopPropagation()}>
-                    <button aria-label="Open in editor" className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
-                      <ExternalLink className="h-3.5 w-3.5" />
+                    <button aria-label="Open in editor" className="rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
+                      <ExternalLink className="h-4 w-4" />
                     </button>
                   </Link>
                 </div>
@@ -261,7 +261,7 @@ export default function VariantComparisonPage() {
       {/* Word count comparison row */}
       <Card className="p-5">
         <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Quick Metrics Comparison</h3>
-        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Math.min(variants.length, 3)}, 1fr)` }}>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {variants.map((variant, idx) => (
             <div key={variant.id} className="space-y-2 text-center">
               <span className="text-[10px] font-bold text-gray-400 uppercase">Variant {idx + 1}</span>

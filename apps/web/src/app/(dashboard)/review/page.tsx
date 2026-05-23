@@ -85,11 +85,19 @@ export default function ReviewQueuePage() {
       const res = await apiClient.post(`/approvals/${id}/decide`, { status, note });
       return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['approvals'] });
-      toast({ title: 'Decision Recorded', description: 'The content has been reviewed.' });
+      const actionMap: Record<string, string> = { approved: 'approved', rejected: 'rejected', revision_requested: 'sent back for revisions' };
+      toast({ title: 'Decision Recorded', description: `Content has been ${actionMap[variables.status] || 'reviewed'}.` });
       setActiveReview(null);
       setReviewNote('');
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Review action failed',
+        description: error?.response?.data?.message || 'Unable to submit decision. Please try again.',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -104,7 +112,14 @@ export default function ReviewQueuePage() {
       setSelectedItems([]);
       setShowBulkConfirm(false);
       setActiveReview(null);
-      setSelectedItems([]);
+    },
+    onError: (error: any) => {
+      setShowBulkConfirm(false);
+      toast({
+        title: 'Bulk approve failed',
+        description: error?.response?.data?.message || 'Some items could not be approved. Please try again.',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -201,7 +216,7 @@ export default function ReviewQueuePage() {
                 onClick={() => setActiveTab('pending')}
                 role="tab"
                 aria-selected={activeTab === 'pending'}
-                className={`${activeTab === 'pending' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4`}
+                className={`${activeTab === 'pending' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4 px-2 min-h-[44px]`}
               >
                 Awaiting Review ({queue?.length || 0})
               </button>
@@ -209,7 +224,7 @@ export default function ReviewQueuePage() {
                 onClick={() => setActiveTab('approved')}
                 role="tab"
                 aria-selected={activeTab === 'approved'}
-                className={`${activeTab === 'approved' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4`}
+                className={`${activeTab === 'approved' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4 px-2 min-h-[44px]`}
               >
                 Approved
               </button>
@@ -217,7 +232,7 @@ export default function ReviewQueuePage() {
                 onClick={() => setActiveTab('revision_requested')}
                 role="tab"
                 aria-selected={activeTab === 'revision_requested'}
-                className={`${activeTab === 'revision_requested' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4`}
+                className={`${activeTab === 'revision_requested' ? 'text-brand-600 border-b-2 border-brand-600' : ''} pb-4 -mb-4 px-2 min-h-[44px]`}
               >
                 Revisions
               </button>
@@ -234,7 +249,7 @@ export default function ReviewQueuePage() {
                   className="rounded-lg border border-gray-100 bg-white pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
                 />
               </div>
-              <button aria-label="Advanced filters" className="rounded-lg border border-gray-100 p-1.5 text-gray-500 dark:border-gray-800"><Filter className="h-4 w-4" /></button>
+              <button aria-label="Advanced filters" className="rounded-lg border border-gray-100 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 dark:border-gray-800"><Filter className="h-4 w-4" /></button>
             </div>
           </div>
 
@@ -301,7 +316,7 @@ export default function ReviewQueuePage() {
               <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-800 dark:bg-gray-900">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest">Quality Guard Report</h3>
-                  <button onClick={() => setActiveReview(null)} className="text-gray-400 hover:text-gray-600"><XCircle className="h-5 w-5" /></button>
+                  <button onClick={() => setActiveReview(null)} aria-label="Close review panel" className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"><XCircle className="h-5 w-5" /></button>
                 </div>
 
                 <div className="space-y-6">
@@ -368,7 +383,7 @@ export default function ReviewQueuePage() {
                       onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'rejected', note: reviewNote })}
                       disabled={decideMutation.isPending}
                       aria-label="Reject content"
-                      className="flex items-center justify-center gap-2 rounded-xl border border-red-200 py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-all dark:border-red-900 dark:hover:bg-red-900/20"
+                      className="flex items-center justify-center gap-2 rounded-xl border border-red-200 min-h-[44px] py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-all dark:border-red-900 dark:hover:bg-red-900/20"
                     >
                       {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
                       Reject
@@ -377,7 +392,7 @@ export default function ReviewQueuePage() {
                       onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'revision_requested', note: reviewNote })}
                       disabled={decideMutation.isPending}
                       aria-label="Request changes on content"
-                      className="flex items-center justify-center gap-2 rounded-xl border border-amber-200 py-3 text-sm font-bold text-amber-700 hover:bg-amber-50 transition-all dark:border-amber-900 dark:hover:bg-amber-900/20"
+                      className="flex items-center justify-center gap-2 rounded-xl border border-amber-200 min-h-[44px] py-3 text-sm font-bold text-amber-700 hover:bg-amber-50 transition-all dark:border-amber-900 dark:hover:bg-amber-900/20"
                     >
                       {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
                       Changes
@@ -386,7 +401,7 @@ export default function ReviewQueuePage() {
                       onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'approved', note: reviewNote })}
                       disabled={decideMutation.isPending}
                       aria-label="Approve content"
-                      className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
+                      className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 min-h-[44px] py-3 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
                     >
                       {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                       Approve
