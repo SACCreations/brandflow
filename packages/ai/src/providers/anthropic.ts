@@ -19,9 +19,9 @@ export class AnthropicProvider implements LLMProvider {
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
     // For JSON mode, prefill the assistant response to force JSON output
-    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
-      { role: 'user', content: request.userPrompt },
-    ];
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = typeof request.userPrompt === 'string'
+      ? [{ role: 'user', content: request.userPrompt }]
+      : request.userPrompt as Array<{ role: 'user' | 'assistant'; content: string }>;
     if (request.jsonMode) {
       messages.push({ role: 'assistant', content: '{' });
     }

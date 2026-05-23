@@ -236,7 +236,7 @@ export class ImageJobProcessor extends WorkerHost {
     let knowledgeBlock = '';
     if (businessId) {
       try {
-        const apiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
+        const apiKey = (await this.llmSettingsService.getDecryptedApiKey(businessId)) ?? undefined;
         const relevantFacts = await this.vectorService.findRelevantContext(
           this.prismaService.client,
           businessId,
@@ -264,7 +264,7 @@ Brand Design Tokens & Rules: Style = "${baseStyle}"; ${colors}
 Output only the finished enhanced prompt string. No chat, no intros. Focus on layout, lighting detail, texture depth, and brand consistency.`;
 
     try {
-      const apiKey = await this.llmSettingsService.getDecryptedApiKey(businessId) ?? undefined;
+      const apiKey = (businessId ? await this.llmSettingsService.getDecryptedApiKey(businessId) : undefined) ?? undefined;
       const { response } = await this.llm.complete(systemPrompt, userMessage, {
         model: 'gpt-4o-mini',
         temperature: 0.7,

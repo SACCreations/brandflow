@@ -14,7 +14,7 @@ export class FallbackProvider implements LLMProvider {
   }
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {
-    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    if (process.env['NODE_ENV'] === 'development' || process.env['NODE_ENV'] === 'test') {
       return {
         content: `api key is not integrated`,
         model: 'mock-fallback-model',

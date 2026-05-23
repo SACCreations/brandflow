@@ -42,7 +42,7 @@ export class LLMGateway {
 
   async complete(
     systemPrompt: string,
-    userPrompt: string,
+    userPrompt: string | Array<{role: string, content: string}>,
     options: LLMConfig = {},
   ): Promise<{ response: ProviderResponse; requestId: string; provider: string }> {
     const requestId = uuidv4();
@@ -59,8 +59,15 @@ export class LLMGateway {
     // ─── PII Sanitization (Optional) ─────────────────────────────
     let finalUserPrompt = userPrompt;
     if (options.sanitizePII) {
-      const { text } = PIISanitizer.sanitize(userPrompt);
-      finalUserPrompt = text;
+      if (typeof userPrompt === 'string') {
+        const { text } = PIISanitizer.sanitize(userPrompt);
+        finalUserPrompt = text;
+      } else {
+        finalUserPrompt = userPrompt.map(m => ({
+          ...m,
+          content: PIISanitizer.sanitize(m.content).text,
+        }));
+      }
     }
 
     // ─── Pre-flight check (e.g. Budget/Quota) ─────────────────────
