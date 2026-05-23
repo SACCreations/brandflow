@@ -137,21 +137,8 @@ export class PublishService {
     const { accessToken } = await this.socialService.getDecryptedTokens(account.id, businessId);
     const authorType = account.accountType === 'organization' ? 'organization' : 'person';
 
-    const isMock = accessToken.startsWith('mock') || accessToken.startsWith('sk-mock') || process.env['NODE_ENV'] !== 'production';
-    if (isMock) {
-      this.logger.log(`[LinkedIn Sandbox] Simulating publish for external ID ${account.externalId}`);
-      const externalPostId = `linkedin:${account.externalId}:${Date.now()}`;
-      await prisma.auditLog.create({
-        data: {
-          businessId,
-          action: 'publish',
-          entityType: 'content',
-          entityId: contentId,
-          after: { platform: 'linkedin', externalPostId },
-          hash: `pub-${crypto.randomUUID()}`,
-        }
-      });
-      return { externalPostId };
+    if (!accessToken) {
+      throw new BadRequestException('No access token available for LinkedIn account. Please re-authenticate.');
     }
 
     const response = await fetch('https://api.linkedin.com/rest/posts', {
@@ -218,21 +205,8 @@ export class PublishService {
   ) {
     const { accessToken } = await this.socialService.getDecryptedTokens(account.id, businessId);
     
-    const isMock = accessToken.startsWith('mock') || accessToken.startsWith('sk-mock') || process.env['NODE_ENV'] !== 'production';
-    if (isMock) {
-      this.logger.log(`[Facebook Sandbox] Simulating post for page external ID ${account.externalId}`);
-      const externalPostId = `facebook:${account.externalId}:${Date.now()}`;
-      await prisma.auditLog.create({
-        data: {
-          businessId,
-          action: 'publish',
-          entityType: 'content',
-          entityId: contentId,
-          after: { platform: 'facebook', externalPostId },
-          hash: `pub-${crypto.randomUUID()}`,
-        }
-      });
-      return { externalPostId };
+    if (!accessToken) {
+      throw new BadRequestException('No access token available for Facebook account. Please re-authenticate.');
     }
 
     const response = await fetch(`https://graph.facebook.com/v20.0/${account.externalId}/feed`, {

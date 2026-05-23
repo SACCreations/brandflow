@@ -676,8 +676,11 @@ export class SocialService {
     const { refreshToken } = await this.getDecryptedTokens(accountId, businessId);
     if (!refreshToken) throw new BadRequestException('No YouTube refresh token available.');
 
-    const clientId = process.env['GOOGLE_CLIENT_ID'] || 'mock-client-id';
-    const clientSecret = process.env['GOOGLE_CLIENT_SECRET'] || 'mock-client-secret';
+    const clientId = process.env['GOOGLE_CLIENT_ID'];
+    const clientSecret = process.env['GOOGLE_CLIENT_SECRET'];
+    if (!clientId || !clientSecret) {
+      throw new BadRequestException('Google OAuth credentials not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.');
+    }
 
     const response = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
