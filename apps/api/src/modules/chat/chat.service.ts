@@ -210,6 +210,7 @@ export class ChatService {
     try {
       const result = await this.gateway.complete(systemPrompt, llmMessages as any, {
         provider: llmSettings.provider as any,
+        model: llmSettings.model,
         maxTokens: llmSettings.maxTokens,
         temperature: llmSettings.temperature,
         apiKey: llmSettings.apiKey,
@@ -331,6 +332,7 @@ export class ChatService {
     try {
       const result = await this.gateway.complete(refinePrompt, chatMessage.content, {
         provider: (llmSettings?.provider || 'openai') as any,
+        model: llmSettings?.model || undefined,
         maxTokens: llmSettings?.maxTokens || 1000,
         temperature: 0.6,
         apiKey: llmSettings?.apiKey,
@@ -397,6 +399,7 @@ export class ChatService {
         dto.message,
         {
           provider: primaryProvider as any,
+          model: llmSettings?.model || undefined,
           maxTokens: 500,
           temperature: 0.7,
           apiKey: llmSettings?.apiKey,

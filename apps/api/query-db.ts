@@ -1,10 +1,13 @@
 import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 async function main() {
-  const entries = await prisma.knowledgeEntry.findMany({
-    select: { content: true }
+  const logs = await prisma.aIRequestLog.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 5
   });
-  console.log("Unique contents:", Array.from(new Set(entries.map(e => e.content))));
+  console.log(JSON.stringify(logs, null, 2));
 }
-main().finally(() => prisma.$disconnect());
+
+main().catch(console.error).finally(() => prisma.$disconnect());
