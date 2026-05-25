@@ -210,13 +210,13 @@ export default function BrandsPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link href="/intelligence/brands/analyse">
-            <Button variant="outline" className="h-12 px-6 gap-2 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 font-bold rounded-xl shadow-sm">
+            <Button variant="outline" className="h-12 px-6 gap-2 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-950 font-bold rounded-xl shadow-sm">
               <Sparkles className="w-4 h-4 text-brand-500" />
               AI Analysis
             </Button>
           </Link>
           <Link href="/intelligence/brands/new">
-            <Button className="h-12 px-8 gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 font-black uppercase tracking-tight rounded-xl shadow-xl shadow-gray-200 dark:shadow-none">
+            <Button className="h-12 px-8 gap-2 bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white hover:bg-gray-800 dark:hover:bg-gray-100 font-black uppercase tracking-tight rounded-xl shadow-xl shadow-gray-200 dark:shadow-none">
               <Plus className="w-4 h-4" />
               Create Brand
             </Button>
@@ -306,7 +306,7 @@ export default function BrandsPage() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-brand-500 transition-colors" />
             <Input 
               placeholder="Search brands by name or industry..." 
-              className="pl-10 h-11 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 focus-visible:ring-brand-500 rounded-xl"
+              className="pl-10 h-11 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 focus-visible:ring-brand-500 rounded-xl"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -388,16 +388,16 @@ export default function BrandsPage() {
                   }}
                 >
                   {/* Decorative Glassmorphism Element */}
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-white dark:bg-gray-900/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
                   
                   <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 bg-white/20 hover:bg-white/40 text-white rounded-full backdrop-blur-md border border-white/20 shadow-xl">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 bg-white dark:bg-gray-900/20 hover:bg-white dark:bg-gray-900/40 text-white rounded-full backdrop-blur-md border border-white/20 shadow-xl">
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl border-gray-100 dark:border-gray-800 space-y-1 backdrop-blur-xl bg-white/90 dark:bg-gray-900/90">
+                      <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl border-gray-100 dark:border-gray-800 space-y-1 backdrop-blur-xl bg-white dark:bg-gray-900/90 dark:bg-gray-900/90">
                         <Link href={`/intelligence/brands/${brand.id}`}>
                           <DropdownMenuItem className="gap-2 cursor-pointer rounded-lg font-bold text-xs uppercase tracking-tight">
                             <Edit className="w-4 h-4" /> Edit Identity
@@ -414,7 +414,7 @@ export default function BrandsPage() {
                     </DropdownMenu>
                   </div>
 
-                  <div className="w-16 h-16 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl border border-white/20 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 relative z-10 p-3">
+                  <div className="w-16 h-16 bg-white dark:bg-gray-900/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl border border-white/20 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 relative z-10 p-3">
                     {brand.visualRules?.logoUrls?.[0]?.url ? (
                       <img src={brand.visualRules.logoUrls[0].url} alt={brand.name} className="w-full h-full object-contain drop-shadow-sm" />
                     ) : (
@@ -500,7 +500,7 @@ export default function BrandsPage() {
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {filteredBrands.map((brand: any) => (
-                  <tr key={brand.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors group">
+                  <tr key={brand.id} className="hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800/30 transition-colors group">
                     <td className="px-6 py-4">
                       <Link href={`/intelligence/brands/${brand.id}`} className="flex items-center gap-3">
                         <div 
@@ -570,7 +570,7 @@ export default function BrandsPage() {
           </Card>
         )
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 p-20 text-center dark:border-gray-800 bg-gray-50/30">
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-20 text-center dark:border-gray-800 bg-gray-50 dark:bg-gray-950/30">
           <div className="p-6 bg-brand-50 rounded-full mb-6 ring-8 ring-brand-50/50">
             <Building2 className="w-12 h-12 text-brand-600 opacity-40" />
           </div>

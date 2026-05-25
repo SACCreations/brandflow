@@ -156,7 +156,7 @@ export default function PublishQueuePage() {
           <p className="mt-2 text-gray-500 dark:text-gray-400">Manage, tailor, and schedule your global content distribution.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/publish/calendar" className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800">
+          <Link href="/publish/calendar" className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800">
             <Calendar className="h-4 w-4" /> Calendar View
           </Link>
           <Link href="/publish/social" className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700">
@@ -190,14 +190,14 @@ export default function PublishQueuePage() {
                   placeholder="Search posts..." 
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  className="rounded-lg border border-gray-200 bg-white pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
+                  className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
                 />
               </div>
             </div>
           </div>
 
           {filteredSchedules.length === 0 ? (
-            <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 text-sm font-medium text-gray-400 dark:border-gray-800">
+            <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800 text-sm font-medium text-gray-400 dark:border-gray-800">
               No schedules found for this view.
             </div>
           ) : filteredSchedules.map((schedule) => {
@@ -205,7 +205,7 @@ export default function PublishQueuePage() {
             const platform = schedule.socialAccount.platform;
             const latestPublishJob = schedule.publishJobs[0];
             return (
-            <div key={schedule.id} className="group relative rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
+            <div key={schedule.id} className="group relative rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 transition-all hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-gray-600 dark:border-gray-900 dark:bg-gray-800">
@@ -295,7 +295,7 @@ export default function PublishQueuePage() {
             <p className="text-xs text-brand-700/70 dark:text-brand-400/70 mb-6 leading-relaxed">
               The scheduler is now live: approved content can be queued from the editor and tracked here by connected destination account.
             </p>
-            <div className="rounded-xl bg-white p-4 text-center border border-brand-200 shadow-sm dark:bg-gray-900 dark:border-gray-800">
+            <div className="rounded-xl bg-white dark:bg-gray-900 p-4 text-center border border-brand-200 shadow-sm dark:bg-gray-900 dark:border-gray-800">
               <div className="text-2xl font-black text-brand-600">{socialAccounts.length}</div>
               <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Connected Accounts</div>
             </div>
@@ -304,7 +304,7 @@ export default function PublishQueuePage() {
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Layout className="h-4 w-4 text-purple-500" />
               Platform Limits
@@ -324,9 +324,9 @@ export default function PublishQueuePage() {
 
 function PublishStat({ label, value, icon }: any) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-gray-50 p-2 dark:bg-gray-800">{icon}</div>
+        <div className="rounded-lg bg-gray-50 dark:bg-gray-950 p-2 dark:bg-gray-800">{icon}</div>
         <div>
           <div className="text-lg font-black text-gray-900 dark:text-white">{value}</div>
           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</div>

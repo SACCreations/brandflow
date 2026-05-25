@@ -81,7 +81,7 @@ export function CommandPalette({ onJump, onSave, open, setOpen }: CommandPalette
     <>
       <button 
         onClick={() => updateOpen(true)}
-        className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-brand-600 transition-all hover:scale-105 group"
+        className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-white dark:bg-gray-900/80 dark:bg-gray-900/80 backdrop-blur-md border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-brand-600 transition-all hover:scale-105 group"
       >
         <Command className="w-3.5 h-3.5" />
         <span>Press <kbd className="font-sans font-bold text-gray-900 dark:text-gray-100 group-hover:text-brand-600">⌘K</kbd> to open Command Palette</span>
@@ -120,7 +120,7 @@ export function CommandPalette({ onJump, onSave, open, setOpen }: CommandPalette
                             className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300 transition-all text-left"
                           >
                             <div className="flex items-center gap-3">
-                              <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-md group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors">
+                              <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-md group-hover:bg-white dark:bg-gray-900 dark:group-hover:bg-gray-700 transition-colors">
                                 <Icon className="w-4 h-4" />
                               </div>
                               {cmd.label}

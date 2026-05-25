@@ -144,7 +144,7 @@ export default function VariantComparisonPage() {
     <ErrorBoundary backHref="/create/content">
     <div className="mx-auto max-w-7xl px-2 py-4 space-y-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-6 dark:border-gray-800">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 dark:border-gray-800 pb-6 dark:border-gray-800">
         <div className="space-y-2">
           <Link href="/create/content" className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500 hover:text-brand-600 transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back to Generator
@@ -194,7 +194,7 @@ export default function VariantComparisonPage() {
               className={`relative flex flex-col overflow-hidden transition-all cursor-pointer ${
                 isWinner
                   ? 'ring-2 ring-brand-500 border-brand-500 shadow-lg shadow-brand-500/10'
-                  : 'border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700'
+                  : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700'
               }`}
               onClick={() => setSelectedWinner(variant.id)}
             >
@@ -208,9 +208,9 @@ export default function VariantComparisonPage() {
               )}
 
               {/* Score Header */}
-              <div className="flex items-center justify-between border-b border-gray-100 p-4 dark:border-gray-800">
+              <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isWinner ? 'bg-brand-600 text-white' : 'border-2 border-gray-200 text-gray-400'}`}>
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isWinner ? 'bg-brand-600 text-white' : 'border-2 border-gray-200 dark:border-gray-800 text-gray-400'}`}>
                     {isWinner ? <CheckCircle2 className="h-4 w-4" /> : <span className="text-xs font-bold">{variants.indexOf(variant) + 1}</span>}
                   </div>
                   <div>
@@ -231,7 +231,7 @@ export default function VariantComparisonPage() {
               </div>
 
               {/* Footer Actions */}
-              <div className="flex items-center justify-between border-t border-gray-100 p-3 dark:border-gray-800">
+              <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 p-3 dark:border-gray-800">
                 <div className="flex items-center gap-2">
                   <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${qc?.passed ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
                     {qc?.passed ? 'QC Passed' : 'Needs Review'}

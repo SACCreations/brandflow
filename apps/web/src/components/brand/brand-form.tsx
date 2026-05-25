@@ -462,7 +462,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="basics" className="space-y-6 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">01</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">01</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Brand Foundation</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Company identity & core business details</p>
@@ -470,16 +470,16 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
         
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-6 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Brand Name</label>
-              <Input {...register('name')} placeholder="e.g. Acme Corp" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
+              <Input {...register('name')} placeholder="e.g. Acme Corp" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-800/60 dark:border-gray-700/50 rounded-2xl shadow-inner text-gray-900 dark:text-white" />
               {errors['name'] && <p className="text-xs text-red-500 font-bold">{errors['name'].message as string}</p>}
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Industry</label>
-              <Input {...register('industry')} placeholder="e.g. Technology" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
+              <Input {...register('industry')} placeholder="e.g. Technology" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-800/60 dark:border-gray-700/50 rounded-2xl shadow-inner text-gray-900 dark:text-white" />
               {errors['industry'] && <p className="text-xs text-red-500 font-bold">{errors['industry']?.message as string}</p>}
             </div>
           </div>
@@ -505,19 +505,19 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                 <Sparkles className="w-3 h-3 mr-1" /> Generate with AI
               </Button>
             </div>
-            <Input {...register('tagline')} placeholder="The future of branding..." className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
+            <Input {...register('tagline')} placeholder="The future of branding..." className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-800/60 dark:border-gray-700/50 rounded-2xl shadow-inner text-gray-900 dark:text-white" />
             {errors['tagline'] && <p className="text-xs text-red-500 font-bold">{errors['tagline']?.message as string}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Website</label>
-              <Input {...register('website')} placeholder="https://acme.com" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
+              <Input {...register('website')} placeholder="https://acme.com" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-800/60 dark:border-gray-700/50 rounded-2xl shadow-inner text-gray-900 dark:text-white" />
               {errors['website'] && <p className="text-xs text-red-500 font-bold">{errors['website']?.message as string}</p>}
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Slug</label>
-              <Input {...register('slug')} placeholder="acme-corp" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white" />
+              <Input {...register('slug')} placeholder="acme-corp" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-800/60 dark:border-gray-700/50 rounded-2xl shadow-inner text-gray-900 dark:text-white" />
               {errors['slug'] && <p className="text-xs text-red-500 font-bold">{errors['slug']?.message as string}</p>}
             </div>
           </div>
@@ -546,7 +546,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
             <Textarea 
               {...register('description')} 
               placeholder="Tell us about your brand..." 
-              className="min-h-[100px] bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl"
+              className="min-h-[100px] bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-800/60 dark:border-gray-700/50 rounded-2xl shadow-inner"
             />
             {errors['description'] && <p className="text-xs text-red-500 font-bold">{errors['description']?.message as string}</p>}
           </div>
@@ -556,23 +556,23 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                  <div className="space-y-1.5">
                    <label className="text-[9px] font-bold text-gray-500 ml-1">Contact Person</label>
-                   <Input {...register('contactInfo.personName')} placeholder="Full Name" className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                   <Input {...register('contactInfo.personName')} placeholder="Full Name" className="h-10 bg-gray-50 dark:bg-gray-950/30 dark:bg-gray-800/30 rounded-xl" />
                    {(errors['contactInfo'] as any)?.personName && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).personName.message as string}</p>}
                 </div>
                 <div className="space-y-1.5">
                    <label className="text-[9px] font-bold text-gray-500 ml-1">Phone</label>
-                   <Input {...register('contactInfo.phoneNumber')} placeholder="+1..." className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                   <Input {...register('contactInfo.phoneNumber')} placeholder="+1..." className="h-10 bg-gray-50 dark:bg-gray-950/30 dark:bg-gray-800/30 rounded-xl" />
                    {(errors['contactInfo'] as any)?.phoneNumber && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).phoneNumber.message as string}</p>}
                 </div>
                 <div className="space-y-1.5">
                    <label className="text-[9px] font-bold text-gray-500 ml-1">Email</label>
-                   <Input {...register('contactInfo.email')} placeholder="contact@brand.com" className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                   <Input {...register('contactInfo.email')} placeholder="contact@brand.com" className="h-10 bg-gray-50 dark:bg-gray-950/30 dark:bg-gray-800/30 rounded-xl" />
                    {(errors['contactInfo'] as any)?.email && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).email.message as string}</p>}
                 </div>
              </div>
              <div className="space-y-1.5 mt-4">
                 <label className="text-[9px] font-bold text-gray-500 ml-1">Office Address</label>
-                <Input {...register('contactInfo.officeAddress')} placeholder="123 Business St, Suite 400..." className="h-10 bg-gray-50/30 dark:bg-gray-800/30 rounded-xl" />
+                <Input {...register('contactInfo.officeAddress')} placeholder="123 Business St, Suite 400..." className="h-10 bg-gray-50 dark:bg-gray-950/30 dark:bg-gray-800/30 rounded-xl" />
                 {(errors['contactInfo'] as any)?.officeAddress && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).officeAddress.message as string}</p>}
              </div>
           </div>
@@ -584,7 +584,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="visuals" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">02</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">02</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Visual Identity</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Production-grade logo management & assets</p>
@@ -592,7 +592,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Primary Logo Variant</label>
@@ -656,7 +656,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {values.visualRules?.logoUrls?.slice(2).map((logo: any, idx: number) => (
-                  <div key={idx + 2} className="space-y-4 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-800 group relative">
+                  <div key={idx + 2} className="space-y-4 p-5 rounded-2xl bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-800 group relative">
                     <div className="flex items-center justify-between mb-2">
                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-400">Slot #{idx + 3}</label>
                        <Button 
@@ -724,7 +724,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="typography" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">03</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">03</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Typography System</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Global font scales & primary typefaces</p>
@@ -746,7 +746,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="colors" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">04</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">04</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Color Governance</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Enterprise tokens with accessibility validation</p>
@@ -766,7 +766,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="voice" className="space-y-8 scroll-mt-24">
          <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">05</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">05</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Voice & Intelligence</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Linguistic DNA & brand personality rules</p>
@@ -774,7 +774,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="space-y-4">
               <label className="text-sm font-black uppercase tracking-widest text-gray-400">Voice Keywords</label>
               <div className="flex flex-wrap gap-2 mb-4">
@@ -799,7 +799,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       setNewTone('');
                     }
                   }}
-                  className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white px-4"
+                  className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-800/60 dark:border-gray-700/50 rounded-2xl shadow-inner text-gray-900 dark:text-white px-4"
                 />
                 <Button type="button" variant="outline" className="rounded-xl h-12 px-6 font-bold" onClick={() => { addToArray('tone', newTone); setNewTone(''); }}>Add</Button>
               </div>
@@ -811,7 +811,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                 <Textarea 
                   {...register('positioning')} 
                   placeholder="Unique value proposition..." 
-                  className="min-h-[120px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
+                  className="min-h-[120px] rounded-2xl bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
                 />
               </div>
               <div className="space-y-2">
@@ -819,7 +819,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                 <Textarea 
                   {...register('identity.mission')} 
                   placeholder="Why do you exist?" 
-                  className="min-h-[120px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
+                  className="min-h-[120px] rounded-2xl bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
                 />
               </div>
            </div>
@@ -832,7 +832,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="audience" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">06</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">06</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Target Audience</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Demographics, psychographics & market reach</p>
@@ -840,30 +840,30 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-6 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="space-y-2">
              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Target Customers</label>
              <Textarea 
                {...register('audience')} 
                placeholder="Describe your ideal customers, demographics, and pain points..." 
-               className="min-h-[120px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
+               className="min-h-[120px] rounded-2xl bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
              />
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Target Location</label>
-                <Input {...register('strategy.targetLocation')} placeholder="e.g. Global, USA, Tamil Nadu" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+                <Input {...register('strategy.targetLocation')} placeholder="e.g. Global, USA, Tamil Nadu" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Age Group</label>
-                <Input {...register('strategy.ageGroup')} placeholder="e.g. 18-35, Professionals" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+                <Input {...register('strategy.ageGroup')} placeholder="e.g. 18-35, Professionals" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
               </div>
            </div>
 
            <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Interests & Behaviors</label>
-              <Input {...register('strategy.interests')} placeholder="e.g. Tech enthusiasts, sustainable living, remote workers" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+              <Input {...register('strategy.interests')} placeholder="e.g. Tech enthusiasts, sustainable living, remote workers" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
            </div>
         </Card>
       </section>
@@ -874,7 +874,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="competitors" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">07</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">07</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Market Intelligence</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Competitor benchmarking & differentiators</p>
@@ -882,7 +882,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-6 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-black uppercase tracking-widest text-gray-400">Main Competitors</label>
@@ -901,7 +901,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
               </div>
 
               {values.competitors?.map((comp: any, idx: number) => (
-                <div key={idx} className="p-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/30 space-y-4 relative group">
+                <div key={idx} className="p-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/30 space-y-4 relative group">
                   <button 
                     type="button"
                     onClick={() => {
@@ -961,18 +961,18 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
               ))}
 
               {(!values.competitors || values.competitors.length === 0) && (
-                <div className="py-12 border-2 border-dashed border-gray-100 rounded-3xl text-center">
+                <div className="py-12 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-3xl text-center">
                   <p className="text-xs text-gray-400 font-medium">No competitors added. Listing competitors helps AI analyze your market positioning.</p>
                 </div>
               )}
            </div>
            
-           <div className="space-y-4 pt-6 border-t border-gray-100">
+           <div className="space-y-4 pt-6 border-t border-gray-100 dark:border-gray-800">
               <label className="text-sm font-black uppercase tracking-widest text-gray-400">Market Differentiators</label>
               <Textarea 
                 {...register('differentiators')} 
                 placeholder="What makes you stand out from the crowd?" 
-                className="min-h-[100px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
+                className="min-h-[100px] rounded-2xl bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
               />
            </div>
         </Card>
@@ -984,7 +984,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="content-strategy" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">08</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">08</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Content Strategy</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Scheduling, formats & delivery preferences</p>
@@ -992,7 +992,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -1001,7 +1001,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                     value={values.strategy?.postingFrequency} 
                     onValueChange={(val) => setValue('strategy.postingFrequency', val, { shouldDirty: true })}
                   >
-                    <SelectTrigger className="h-12 bg-gray-50/50 border-gray-100 rounded-xl">
+                    <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-950/50 border-gray-100 dark:border-gray-800 rounded-xl">
                       <SelectValue placeholder="Select frequency" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1019,7 +1019,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                     value={values.strategy?.contentLanguage} 
                     onValueChange={(val) => setValue('strategy.contentLanguage', val, { shouldDirty: true })}
                   >
-                    <SelectTrigger className="h-12 bg-gray-50/50 border-gray-100 rounded-xl">
+                    <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-950/50 border-gray-100 dark:border-gray-800 rounded-xl">
                       <SelectValue placeholder="Select language" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1093,7 +1093,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="knowledge" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">09</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">09</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Knowledge Ingestion</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Training AI on deep brand expertise</p>
@@ -1101,7 +1101,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl text-center py-12">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="max-w-xs mx-auto space-y-4">
               <div className="w-16 h-16 rounded-3xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600 mx-auto">
                 <Globe className="w-8 h-8" />
@@ -1144,7 +1144,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="compliance" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">10</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">10</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Legal & Compliance</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Disclaimers & regulatory guardrails</p>
@@ -1152,7 +1152,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <Textarea 
             {...register('governance.requiredDisclaimer')} 
             placeholder="Legal footer, copyright info, or required disclosures..." 
@@ -1167,7 +1167,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="logos" className="space-y-8 scroll-mt-24">
          <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">11</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">11</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Asset Catalog</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Quick access to all visual identity files</p>
@@ -1175,12 +1175,12 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
         
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {values.visualRules?.logoUrls?.filter((l: any) => l.url).map((logo: any, i: number) => (
                 <div key={i} className="aspect-square rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800/30 relative group overflow-hidden">
                    <img src={logo.url} className="max-w-full max-h-full object-contain z-10" />
-                   <div className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 opacity-0 group-hover:opacity-100 transition-all rounded-2xl flex flex-col items-center justify-center gap-2 backdrop-blur-sm z-20">
+                   <div className="absolute inset-0 bg-white dark:bg-gray-900/90 dark:bg-gray-900/90 opacity-0 group-hover:opacity-100 transition-all rounded-2xl flex flex-col items-center justify-center gap-2 backdrop-blur-sm z-20">
                       <span className="text-[8px] font-black uppercase text-gray-400">{logo.type}</span>
                       <Button type="button" variant="ghost" size="sm" className="h-7 text-[8px] font-black uppercase tracking-widest" asChild>
                         <a href={logo.url} download>Download</a>
@@ -1203,7 +1203,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <section id="documents" className="space-y-8 scroll-mt-24">
          <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">12</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">12</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Guidelines & Docs</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Internal brand strategy & design guidelines</p>
@@ -1211,7 +1211,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-6 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
           <div className="space-y-4">
             <FileUploader 
               label="Upload Brand Document"
@@ -1266,7 +1266,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       <section id="design-prefs" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">09</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">09</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Design Preferences</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Visual direction for AI-generated creatives</p>
@@ -1274,7 +1274,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-6 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Preferred Design Style</label>
@@ -1313,7 +1313,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                     value={values.designPreferences?.imageStyle} 
                     onValueChange={(val) => setValue('designPreferences.imageStyle', val, { shouldDirty: true })}
                   >
-                    <SelectTrigger className="h-12 bg-gray-50/50 border-gray-100 rounded-xl">
+                    <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-950/50 border-gray-100 dark:border-gray-800 rounded-xl">
                       <SelectValue placeholder="Select image style" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1365,7 +1365,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       newLinks[idx] = e.target.value;
                       setValue('designPreferences.referenceLinks', newLinks);
                     }}
-                    className="h-10 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl"
+                    className="h-10 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 rounded-xl"
                   />
                   <Button 
                     type="button" 
@@ -1392,7 +1392,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       <section id="rules" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">10</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">10</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Approval Workflow</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Review cycles & stakeholder sign-off process</p>
@@ -1400,26 +1400,26 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Content Reviewer</label>
-              <Input {...register('approvalWorkflow.reviewerName')} placeholder="e.g. Marketing Manager" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+              <Input {...register('approvalWorkflow.reviewerName')} placeholder="e.g. Marketing Manager" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Final Approver</label>
-              <Input {...register('approvalWorkflow.finalApproverName')} placeholder="e.g. Business Owner / CEO" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+              <Input {...register('approvalWorkflow.finalApproverName')} placeholder="e.g. Business Owner / CEO" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Approval Timing</label>
-              <Input {...register('approvalWorkflow.approvalTiming')} placeholder="e.g. Within 24 hours of posting" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+              <Input {...register('approvalWorkflow.approvalTiming')} placeholder="e.g. Within 24 hours of posting" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Revision Limit (per post)</label>
-              <Input type="number" {...register('approvalWorkflow.revisionLimit', { valueAsNumber: true })} className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+              <Input type="number" {...register('approvalWorkflow.revisionLimit', { valueAsNumber: true })} className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
             </div>
           </div>
 
@@ -1441,7 +1441,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
              </div>
              <div className="space-y-3">
                 {values.approvalWorkflow?.processSteps?.map((step: string, idx: number) => (
-                  <div key={idx} className="flex items-center gap-3 bg-gray-50/50 dark:bg-gray-800/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800">
+                  <div key={idx} className="flex items-center gap-3 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800">
                     <div className="w-6 h-6 rounded-lg bg-brand-500 text-white flex items-center justify-center text-[10px] font-bold">{idx + 1}</div>
                     <Input 
                       placeholder={`Step ${idx + 1} description...`} 
@@ -1478,7 +1478,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       <section id="campaigns" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">11</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">11</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Campaign Defaults</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Standard parameters for marketing execution</p>
@@ -1486,7 +1486,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Marketing Goal</label>
@@ -1494,7 +1494,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                   value={values.campaignDetails?.marketingGoal} 
                   onValueChange={(val) => setValue('campaignDetails.marketingGoal', val, { shouldDirty: true })}
                 >
-                  <SelectTrigger className="h-12 bg-gray-50/50 border-gray-100 rounded-xl">
+                  <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-950/50 border-gray-100 dark:border-gray-800 rounded-xl">
                     <SelectValue placeholder="Select primary goal" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1506,18 +1506,18 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Monthly Budget (USD)</label>
-                <Input type="number" {...register('campaignDetails.monthlyBudget', { valueAsNumber: true })} className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+                <Input type="number" {...register('campaignDetails.monthlyBudget', { valueAsNumber: true })} className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
               </div>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Campaign Duration</label>
-                <Input {...register('campaignDetails.duration')} placeholder="e.g. 3 Months, On-going" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+                <Input {...register('campaignDetails.duration')} placeholder="e.g. 3 Months, On-going" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Target Leads / Reach (Monthly)</label>
-                <Input type="number" {...register('campaignDetails.targetLeads', { valueAsNumber: true })} className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+                <Input type="number" {...register('campaignDetails.targetLeads', { valueAsNumber: true })} className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
               </div>
            </div>
 
@@ -1557,7 +1557,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       <section id="analytics" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">12</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">12</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Analytics & Reporting</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">KPI tracking & automated performance insights</p>
@@ -1565,7 +1565,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm space-y-8 bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
              <div className="space-y-6">
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
@@ -1605,7 +1605,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                 <Textarea 
                   {...register('analyticsConfig.kpiExpectations')} 
                   placeholder="e.g. 20% increase in engagement, 50 new leads per month..." 
-                  className="min-h-[160px] rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
+                  className="min-h-[160px] rounded-2xl bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-4 py-3" 
                 />
              </div>
           </div>
@@ -1618,7 +1618,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       <section id="social" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">13</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">13</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Social Presence</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Account connectivity & handle management</p>
@@ -1626,7 +1626,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 { name: 'LinkedIn', handleField: 'socialAccess.linkedinPage', placeholder: 'LinkedIn Page URL' },
@@ -1658,7 +1658,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                    <Input 
                       {...register(plat.handleField as any)} 
                       placeholder={plat.placeholder} 
-                      className="h-9 text-[10px] bg-white dark:bg-gray-950 border-gray-100 rounded-xl" 
+                      className="h-9 text-[10px] bg-white dark:bg-gray-950 border-gray-100 dark:border-gray-800 rounded-xl" 
                    />
                 </div>
               ))}
@@ -1672,11 +1672,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Meta Business Manager ID</label>
-                  <Input {...register('socialAccess.metaBusinessManagerId')} placeholder="e.g. 123456789012345" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+                  <Input {...register('socialAccess.metaBusinessManagerId')} placeholder="e.g. 123456789012345" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Ad Account ID</label>
-                  <Input {...register('socialAccess.adAccountId')} placeholder="e.g. act_123456789" className="h-12 bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 rounded-xl" />
+                  <Input {...register('socialAccess.adAccountId')} placeholder="e.g. act_123456789" className="h-12 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 rounded-xl" />
                 </div>
               </div>
            </div>
@@ -1690,7 +1690,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       <section id="health" className="space-y-8 scroll-mt-24">
         <div className="space-y-3 mb-6 px-1">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">14</div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white flex items-center justify-center font-black text-sm shadow-2xl shadow-gray-900/20 dark:shadow-white/10">14</div>
             <div className="space-y-0.5">
               <h2 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none">Brand Health</h2>
               <p className="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-widest">Identity robustness & governance compliance</p>
@@ -1698,7 +1698,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl overflow-hidden relative">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="flex items-center justify-between relative z-10">
               <div className="space-y-2">
                  <h4 className="text-4xl font-black tracking-tighter text-gray-900 dark:text-white">94.2%</h4>
@@ -1726,7 +1726,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
           <p className="text-gray-500 font-medium px-10">Centralized repository for images, icons, and videos.</p>
         </div>
-        <Card className="p-12 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl text-center">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="max-w-xs mx-auto space-y-4">
               <Globe className="w-12 h-12 text-gray-300 mx-auto" />
               <p className="text-xs text-gray-500">The Media Library DAM (Digital Asset Management) is coming soon. Use the Logo Library for now.</p>
@@ -1745,7 +1745,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
           <p className="text-gray-500 font-medium px-10">AI-driven marketing workflows and content scheduling.</p>
         </div>
-        <Card className="p-12 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl text-center">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="max-w-xs mx-auto space-y-4">
               <Settings className="w-12 h-12 text-gray-300 mx-auto" />
               <p className="text-xs text-gray-500">Configure AI content engines and automated social posting rules.</p>
@@ -1772,7 +1772,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
           <p className="text-gray-500 font-medium px-10">Marketing ROI and brand reach metrics.</p>
         </div>
-        <Card className="p-12 border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 rounded-3xl text-center">
+        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
            <div className="max-w-xs mx-auto space-y-4">
               <Sparkles className="w-12 h-12 text-gray-300 mx-auto" />
               <p className="text-xs text-gray-500">Performance tracking will be available after connecting social and web properties.</p>
@@ -1783,7 +1783,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
 
       {/* Sticky Action Bar */}
       {!wizardMode && (
-        <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 px-6 py-4 lg:pl-64 xl:pr-96 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] print:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-900/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800 px-6 py-4 lg:pl-64 xl:pr-96 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] print:hidden">
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">

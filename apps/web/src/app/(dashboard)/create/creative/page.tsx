@@ -616,7 +616,7 @@ export default function CreativeBuilderPage() {
                     onClick={() => setSafeMode(!safeMode)}
                     className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors ${safeMode ? 'bg-brand-500' : 'bg-slate-800'}`}
                   >
-                    <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${safeMode ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                    <span className={`inline-block h-3 w-3 transform rounded-full bg-white dark:bg-gray-900 transition-transform ${safeMode ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
                   </button>
                 </div>
 

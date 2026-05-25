@@ -153,7 +153,7 @@ export default function CompliancePage() {
                 </tr>
               ) : (
                 filteredLogs?.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+                  <tr key={log.id} className="hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800/50 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {format(new Date(log.createdAt), 'MMM d, yyyy HH:mm:ss')}
                     </td>

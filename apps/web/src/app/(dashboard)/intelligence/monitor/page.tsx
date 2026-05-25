@@ -93,10 +93,10 @@ export default function ProcessingMonitorPage() {
 
       <Tabs defaultValue="ingestion" className="w-full">
         <TabsList className="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mb-6">
-          <TabsTrigger value="ingestion" className="rounded-lg px-6 py-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900">
+          <TabsTrigger value="ingestion" className="rounded-lg px-6 py-2 text-sm font-bold data-[state=active]:bg-white dark:bg-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900">
             Knowledge Ingestion
           </TabsTrigger>
-          <TabsTrigger value="publishing" className="rounded-lg px-6 py-2 text-sm font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900">
+          <TabsTrigger value="publishing" className="rounded-lg px-6 py-2 text-sm font-bold data-[state=active]:bg-white dark:bg-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900">
             Social Publishing
           </TabsTrigger>
         </TabsList>
@@ -129,7 +129,7 @@ export default function ProcessingMonitorPage() {
 function ActiveJobsSection({ title, jobs, type = 'ingestion' }: any) {
   if (jobs.length === 0) return null;
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
       <div className="mb-6 flex items-center justify-between">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Activity className="h-5 w-5 text-brand-500" />
@@ -170,7 +170,7 @@ function ActiveJobsSection({ title, jobs, type = 'ingestion' }: any) {
 
 function HistoryTableSection({ title, jobs, onRetry, retryLoading, type = 'ingestion' }: any) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
       <div className="mb-6 flex items-center justify-between">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Terminal className="h-5 w-5 text-blue-500" />
@@ -190,7 +190,7 @@ function HistoryTableSection({ title, jobs, onRetry, retryLoading, type = 'inges
           </thead>
           <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
             {jobs.map((job: any) => (
-              <tr key={job.id} className="text-sm transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+              <tr key={job.id} className="text-sm transition-colors hover:bg-gray-50 dark:bg-gray-950/50 dark:hover:bg-gray-800/30">
                 <td className="px-4 py-4 font-mono text-xs text-gray-400">{job.id.slice(0, 8)}</td>
                 <td className="px-4 py-4 font-medium text-gray-900 dark:text-white">
                   {type === 'ingestion' ? (job.source.name || job.source.type) : job.socialAccount.name}
@@ -237,9 +237,9 @@ function HistoryTableSection({ title, jobs, onRetry, retryLoading, type = 'inges
 
 function MetricCard({ label, value, subValue, icon }: any) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-center gap-4">
-        <div className="rounded-xl bg-gray-50 p-3 dark:bg-gray-800">
+        <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-3 dark:bg-gray-800">
           {icon}
         </div>
         <div>

@@ -130,7 +130,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/campaigns" className="rounded-xl border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800">
+          <Link href="/campaigns" className="rounded-xl border border-gray-200 dark:border-gray-800 p-2 text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
@@ -148,7 +148,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
         <div className="flex items-center gap-3">
           <button 
             onClick={() => toast({ title: 'Campaign Settings', description: 'Settings module is loading...' })}
-            className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             <Settings className="h-4 w-4" /> Campaign Settings
           </button>
@@ -165,14 +165,14 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
         
         {/* Left Column: Health & Diagnostics */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2 uppercase tracking-widest">
               <Zap className="h-4 w-4 text-amber-500" /> Campaign Health
             </h3>
             <div className="flex flex-col items-center justify-center py-4">
               <div className="relative flex h-32 w-32 items-center justify-center">
                 <svg className="h-full w-full" viewBox="0 0 36 36">
-                  <path className="text-gray-100 dark:text-gray-800" strokeDasharray="100, 100" strokeWidth="3" fill="none" stroke="currentColor" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path className="text-gray-100 dark:text-gray-800 dark:text-gray-100" strokeDasharray="100, 100" strokeWidth="3" fill="none" stroke="currentColor" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                   <path className="text-brand-600" strokeDasharray={`${campaign.healthScore}, 100`} strokeWidth="3" strokeLinecap="round" fill="none" stroke="currentColor" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                 </svg>
                 <div className="absolute flex flex-col items-center">
@@ -196,7 +196,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
             )}
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest">Campaign Briefs</h3>
               <Link href={`/create/brief?campaignId=${id}`} className="text-[10px] font-bold text-brand-600">+ Add</Link>
@@ -206,7 +206,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 <p className="text-xs text-gray-400 italic">No briefs created yet.</p>
               ) : (
                 campaign.briefs?.map(brief => (
-                  <Link key={brief.id} href={`/create/brief?campaignId=${id}&briefId=${brief.id}`} className="flex w-full items-center justify-between rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-left transition-all hover:border-brand-500 dark:border-gray-800 dark:bg-gray-800/30">
+                  <Link key={brief.id} href={`/create/brief?campaignId=${id}&briefId=${brief.id}`} className="flex w-full items-center justify-between rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 p-4 text-left transition-all hover:border-brand-500 dark:border-gray-800 dark:bg-gray-800/30">
                     <div className="flex items-center gap-3">
                       <Target className="h-4 w-4 text-brand-600" />
                       <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{brief.platform} {brief.contentType} Strategy</span>
@@ -221,7 +221,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
         {/* Right Column: Timeline & Execution */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
             <div className="mb-6 flex items-center justify-between">
               <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-brand-600" /> Content Timeline
@@ -238,7 +238,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
             
             <div className="space-y-6">
               {timeline.length === 0 ? (
-                <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 text-sm font-medium text-gray-400 dark:border-gray-800">
+                <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800 text-sm font-medium text-gray-400 dark:border-gray-800">
                   No content items created for this campaign yet.
                 </div>
               ) : (
@@ -251,11 +251,11 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                       item.status === 'published' ? 'border-emerald-500 text-emerald-500' :
                       item.status === 'approved' ? 'border-blue-500 text-blue-500' :
                       item.status === 'pending' ? 'border-amber-500 text-amber-500' :
-                      'border-gray-200 text-gray-300'
+                      'border-gray-200 dark:border-gray-800 text-gray-300'
                     }`}>
                       {item.status === 'published' ? <CheckCircle2 className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
                     </div>
-                    <div className="flex-1 rounded-xl border border-gray-50 bg-gray-50/30 p-4 dark:border-gray-800 dark:bg-gray-800/30 transition-all hover:bg-white hover:shadow-md dark:hover:bg-gray-800">
+                    <div className="flex-1 rounded-xl border border-gray-50 bg-gray-50 dark:bg-gray-950/30 p-4 dark:border-gray-800 dark:bg-gray-800/30 transition-all hover:bg-white dark:bg-gray-900 hover:shadow-md dark:hover:bg-gray-800">
                       <div className="flex items-center justify-between">
                         <h4 className="text-sm font-bold text-gray-900 dark:text-white">{item.title}</h4>
                         <span className="text-[10px] font-bold text-gray-400 uppercase">{item.platform}</span>
@@ -272,7 +272,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
               <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 uppercase tracking-widest flex items-center gap-2">
                 <ImageIcon className="h-4 w-4 text-purple-500" /> Campaign Assets
               </h3>
@@ -288,7 +288,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 ))}
                 <button 
                   onClick={handleAddAsset}
-                  className="aspect-square rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400 hover:border-brand-500 hover:text-brand-500 transition-all"
+                  className="aspect-square rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-800 flex items-center justify-center text-gray-400 hover:border-brand-500 hover:text-brand-500 transition-all"
                 >
                   <Plus className="h-4 w-4" />
                 </button>

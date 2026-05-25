@@ -227,7 +227,7 @@ export default function BriefBuilderPage() {
     <div className="mx-auto max-w-7xl space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
-          <Link href={backHref} className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white">
+          <Link href={backHref} className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-white dark:hover:text-white">
             <ArrowLeft className="h-4 w-4" /> Back
           </Link>
           <div>
@@ -259,7 +259,7 @@ export default function BriefBuilderPage() {
           <div className="grid gap-6 md:grid-cols-2">
             <Field label="Objective" required>
               <textarea
-                className="min-h-[120px] w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="min-h-[120px] w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.objective}
                 onChange={(event) => updateField(setFormData, 'objective', event.target.value)}
                 placeholder="What business outcome should this brief drive?"
@@ -268,7 +268,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Audience" required>
               <textarea
-                className="min-h-[120px] w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="min-h-[120px] w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.audience}
                 onChange={(event) => updateField(setFormData, 'audience', event.target.value)}
                 placeholder="Who should this message persuade or activate?"
@@ -277,7 +277,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Platform" required>
               <select
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.platform}
                 onChange={(event) => updateField(setFormData, 'platform', event.target.value as BriefPlatform)}
               >
@@ -291,7 +291,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Format">
               <select
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.format}
                 onChange={(event) => updateField(setFormData, 'format', event.target.value as BriefFormat)}
               >
@@ -306,7 +306,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Primary CTA" required>
               <input
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.cta}
                 onChange={(event) => updateField(setFormData, 'cta', event.target.value)}
                 placeholder="Book a discovery call"
@@ -315,7 +315,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Business goal" required>
               <input
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.businessGoal}
                 onChange={(event) => updateField(setFormData, 'businessGoal', event.target.value)}
                 placeholder="Generate qualified pipeline"
@@ -324,7 +324,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Tone">
               <input
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.tone}
                 onChange={(event) => updateField(setFormData, 'tone', event.target.value)}
                 placeholder="Confident, sharp, human"
@@ -333,7 +333,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Content type" required>
               <select
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.contentType}
                 onChange={(event) => updateField(setFormData, 'contentType', event.target.value as BriefContentType)}
               >
@@ -345,7 +345,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Campaign theme">
               <input
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.campaignTheme}
                 onChange={(event) => updateField(setFormData, 'campaignTheme', event.target.value)}
                 placeholder="Authority through measurable brand systems"
@@ -354,7 +354,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Workflow status">
               <select
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.status}
                 onChange={(event) => updateField(setFormData, 'status', event.target.value as BriefStatus)}
               >
@@ -366,7 +366,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Deliverables">
               <textarea
-                className="min-h-[120px] w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="min-h-[120px] w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.deliverablesText}
                 onChange={(event) => updateField(setFormData, 'deliverablesText', event.target.value)}
                 placeholder={'One deliverable per line\nLinkedIn thought-leadership post\nExecutive carousel'}
@@ -375,7 +375,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Constraints">
               <textarea
-                className="min-h-[120px] w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="min-h-[120px] w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={formData.constraintsText}
                 onChange={(event) => updateField(setFormData, 'constraintsText', event.target.value)}
                 placeholder={'One constraint per line\nAvoid unsupported claims\nMention implementation timeline'}
@@ -401,13 +401,13 @@ export default function BriefBuilderPage() {
             </div>
             <div className="mt-4 space-y-3">
               {completionItems.map((item) => (
-                <div key={item.label} className="flex items-center justify-between rounded-xl border border-gray-100 px-4 py-3 dark:border-gray-800">
+                <div key={item.label} className="flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-3 dark:border-gray-800">
                   <span className="text-sm text-gray-700 dark:text-gray-300">{item.label}</span>
                   {item.ready ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <span className="text-xs font-bold uppercase tracking-widest text-amber-500">Needed</span>}
                 </div>
               ))}
             </div>
-            <div className="mt-4 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300">
+            <div className="mt-4 rounded-xl bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300">
               {readyCount}/{completionItems.length} delivery inputs ready.
             </div>
           </Card>
@@ -528,7 +528,7 @@ function ContextRow({
   href?: string;
 }) {
   const content = (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 px-4 py-3 dark:border-gray-800">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-3 dark:border-gray-800">
       <div className="flex items-center gap-3">
         <div className="text-brand-600">{icon}</div>
         <div>

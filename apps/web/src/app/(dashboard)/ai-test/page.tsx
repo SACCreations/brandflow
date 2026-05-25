@@ -90,7 +90,7 @@ export default function AiTestPage() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         {/* LEFT COLUMN: CONTROL & REQUEST INPUTS */}
         <div className="space-y-6 lg:col-span-5">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <h2 className="text-md flex items-center gap-2 font-bold text-gray-900 dark:text-white">
               <Activity className="h-4.5 w-4.5 text-indigo-500" />
               Configure Diagnostic Payload
@@ -110,7 +110,7 @@ export default function AiTestPage() {
                     className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                       provider === 'openai'
                         ? 'border-indigo-600 bg-indigo-50/40 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-950/20 dark:text-indigo-400'
-                        : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
+                        : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
                     }`}
                   >
                     <span className={`h-2.5 w-2.5 rounded-full ${provider === 'openai' ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-gray-300'}`} />
@@ -122,7 +122,7 @@ export default function AiTestPage() {
                     className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                       provider === 'anthropic'
                         ? 'border-purple-600 bg-purple-50/40 text-purple-700 dark:border-purple-500 dark:bg-purple-950/20 dark:text-purple-400'
-                        : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
+                        : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
                     }`}
                   >
                     <span className={`h-2.5 w-2.5 rounded-full ${provider === 'anthropic' ? 'bg-purple-600 dark:bg-purple-400' : 'bg-gray-300'}`} />
@@ -134,7 +134,7 @@ export default function AiTestPage() {
                     className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                       provider === 'google'
                         ? 'border-emerald-600 bg-emerald-50/40 text-emerald-700 dark:border-emerald-500 dark:bg-emerald-950/20 dark:text-emerald-400'
-                        : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
+                        : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
                     }`}
                   >
                     <span className={`h-2.5 w-2.5 rounded-full ${provider === 'google' ? 'bg-emerald-600 dark:bg-emerald-400' : 'bg-gray-300'}`} />
@@ -146,7 +146,7 @@ export default function AiTestPage() {
                     className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                       provider === 'nvidia'
                         ? 'border-green-600 bg-green-50/40 text-green-700 dark:border-green-500 dark:bg-green-950/20 dark:text-green-400'
-                        : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
+                        : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
                     }`}
                   >
                     <span className={`h-2.5 w-2.5 rounded-full ${provider === 'nvidia' ? 'bg-green-600 dark:bg-green-400' : 'bg-gray-300'}`} />
@@ -163,7 +163,7 @@ export default function AiTestPage() {
                   onChange={(e) => setMessage(e.target.value)}
                   rows={4}
                   placeholder="Enter message for AI infrastructure validation..."
-                  className="mt-2 w-full rounded-xl border border-gray-200 bg-gray-50/50 p-4 text-sm text-gray-900 focus:border-indigo-500 focus:bg-white focus:outline-none dark:border-gray-800 dark:bg-gray-950/50 dark:text-white dark:focus:border-indigo-500 dark:focus:bg-gray-900"
+                  className="mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 p-4 text-sm text-gray-900 dark:text-white focus:border-indigo-500 focus:bg-white dark:bg-gray-900 focus:outline-none dark:border-gray-800 dark:bg-gray-950/50 dark:text-white dark:focus:border-indigo-500 dark:focus:bg-gray-900"
                 />
               </div>
 
@@ -190,7 +190,7 @@ export default function AiTestPage() {
           </div>
 
           {/* TELEMETRY METRIC SNAPSHOT */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Validation Objectives Covered</h3>
             <ul className="mt-3 space-y-2 text-xs text-gray-500 dark:text-gray-400">
               <li className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
@@ -215,9 +215,9 @@ export default function AiTestPage() {
 
         {/* RIGHT COLUMN: TELEMETRY & CHAT RESPONSE FEED */}
         <div className="lg:col-span-7">
-          <div className="flex h-full min-h-[480px] flex-col rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+          <div className="flex h-full min-h-[480px] flex-col rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
             {/* PANEL HEADER */}
-            <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50/50 px-6 py-4 dark:border-gray-800 dark:bg-gray-950/20">
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 px-6 py-4 dark:border-gray-800 dark:bg-gray-950/20">
               <div className="flex items-center gap-2">
                 <Cpu className="h-4.5 w-4.5 text-indigo-500" />
                 <span className="text-sm font-bold text-gray-900 dark:text-white">Telemetry & Live Response</span>
@@ -282,7 +282,7 @@ export default function AiTestPage() {
                   >
                     {/* METRIC GRID */}
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                      <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800/40">
+                      <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/40">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Used Provider</span>
                         <div className="mt-1 flex items-center gap-1.5">
                           <span className={`h-2.5 w-2.5 rounded-full ${
@@ -298,14 +298,14 @@ export default function AiTestPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800/40">
+                      <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/40">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Resolved Model</span>
                         <div className="mt-1 text-sm font-bold text-gray-950 dark:text-white overflow-hidden text-ellipsis whitespace-nowrap">
                           {result.model}
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800/40">
+                      <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/40">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Latency</span>
                         <div className="mt-1 flex items-center gap-1 text-sm font-bold text-gray-950 dark:text-white">
                           <Clock className="h-4 w-4 text-indigo-500" />
@@ -313,7 +313,7 @@ export default function AiTestPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800/40">
+                      <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/40">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Tokens Accrued</span>
                         <div className="mt-1 text-sm font-bold text-gray-950 dark:text-white">
                           In: {result.tokens.input} | Out: {result.tokens.output}
@@ -345,13 +345,13 @@ export default function AiTestPage() {
                         <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
                         AI Response Content
                       </span>
-                      <div className="rounded-2xl border border-indigo-100 bg-indigo-50/20 p-5 text-sm leading-relaxed text-gray-800 dark:border-indigo-950/30 dark:bg-indigo-950/10 dark:text-gray-200 whitespace-pre-wrap font-sans">
+                      <div className="rounded-2xl border border-indigo-100 bg-indigo-50/20 p-5 text-sm leading-relaxed text-gray-800 dark:text-gray-100 dark:border-indigo-950/30 dark:bg-indigo-950/10 dark:text-gray-200 whitespace-pre-wrap font-sans">
                         {result.response}
                       </div>
                     </div>
 
                     {/* DB PERSISTENCE DETAILS */}
-                    <div className="flex items-center gap-2 rounded-xl bg-gray-50 px-4 py-3 text-xs text-gray-500 dark:bg-gray-800/40">
+                    <div className="flex items-center gap-2 rounded-xl bg-gray-50 dark:bg-gray-950 px-4 py-3 text-xs text-gray-500 dark:bg-gray-800/40">
                       <Database className="h-4 w-4 text-gray-400" />
                       <span>
                         AIRequestLog row created: <strong className="font-mono text-gray-700 dark:text-gray-300">Success</strong>. Latency and token values successfully committed to DB.

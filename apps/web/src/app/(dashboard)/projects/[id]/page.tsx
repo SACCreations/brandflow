@@ -136,7 +136,7 @@ export default function ProjectDetailPage() {
   if (isError || !project) {
     return (
       <div className="space-y-6">
-        <Link href="/projects" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900">
+        <Link href="/projects" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-white">
           <ArrowLeft className="h-4 w-4" /> Back to projects
         </Link>
         <Card className="p-10 text-center">
@@ -155,7 +155,7 @@ export default function ProjectDetailPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
-          <Link href="/projects" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white">
+          <Link href="/projects" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-white dark:hover:text-white">
             <ArrowLeft className="h-4 w-4" /> Back to projects
           </Link>
           <div>
@@ -225,7 +225,7 @@ export default function ProjectDetailPage() {
             <InfoRow icon={<FolderKanban className="h-4 w-4" />} label="Created" value={format(new Date(project.createdAt), 'MMM d, yyyy')} />
           </div>
 
-          <div className="mt-6 rounded-xl border border-gray-100 p-5 text-sm text-gray-600 dark:border-gray-800 dark:text-gray-300">
+          <div className="mt-6 rounded-xl border border-gray-100 dark:border-gray-800 p-5 text-sm text-gray-600 dark:border-gray-800 dark:text-gray-300">
             {project.description || 'No project description yet. Add objectives, deliverables, and constraints to make this workflow smarter.'}
           </div>
         </Card>
@@ -239,7 +239,7 @@ export default function ProjectDetailPage() {
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">{linkedBrand.name}</p>
                   <p className="text-xs text-gray-500">{linkedBrand.industry || 'Industry not set'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-100 p-4 dark:border-gray-800">
+                <div className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
                   <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Health score</div>
                   <div className="mt-2 text-2xl font-black text-brand-600">{linkedBrand.healthScore}%</div>
                 </div>
@@ -248,7 +248,7 @@ export default function ProjectDetailPage() {
                 </Link>
               </div>
             ) : (
-              <div className="mt-4 rounded-xl border border-dashed border-gray-200 p-5 text-sm text-gray-500 dark:border-gray-800">
+              <div className="mt-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 p-5 text-sm text-gray-500 dark:border-gray-800">
                 This project does not have a linked brand yet. Run the analyzer to create one from client or project sources.
               </div>
             )}
@@ -272,12 +272,12 @@ export default function ProjectDetailPage() {
                 </div>
 
                 {latestBrief.campaignTheme && (
-                  <div className="rounded-xl border border-gray-100 p-4 text-sm text-gray-600 dark:border-gray-800 dark:text-gray-300">
+                  <div className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 text-sm text-gray-600 dark:border-gray-800 dark:text-gray-300">
                     {latestBrief.campaignTheme}
                   </div>
                 )}
 
-                <div className="flex items-center justify-between rounded-xl border border-gray-100 p-4 dark:border-gray-800">
+                <div className="flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
                   <div>
                     <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Readiness</div>
                     <div className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
@@ -321,7 +321,7 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
             ) : (
-              <div className="mt-4 space-y-4 rounded-xl border border-dashed border-gray-200 p-5 text-sm text-gray-500 dark:border-gray-800">
+              <div className="mt-4 space-y-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 p-5 text-sm text-gray-500 dark:border-gray-800">
                 <p>No brief exists for this project yet. Create one to define goals, audience, tone, and delivery constraints.</p>
                 <Link href={`/create/brief?projectId=${project.id}`}>
                   <Button className="w-full gap-2">
@@ -339,7 +339,7 @@ export default function ProjectDetailPage() {
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-gray-100 p-4 dark:border-gray-800">
+    <div className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400">
         {icon}
         {label}

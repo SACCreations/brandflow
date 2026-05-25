@@ -76,9 +76,9 @@ export function FontPicker({ value, onChange, label, description }: FontPickerPr
       {label && <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">{label}</label>}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-full justify-between font-bold hover:bg-gray-50 h-12 border-gray-100 rounded-xl shadow-sm transition-all active:scale-[0.98]">
+          <Button variant="outline" className="w-full justify-between font-bold hover:bg-gray-50 dark:bg-gray-950 h-12 border-gray-100 dark:border-gray-800 rounded-xl shadow-sm transition-all active:scale-[0.98]">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gray-50 text-gray-400">
+              <div className="p-2 rounded-lg bg-gray-50 dark:bg-gray-950 text-gray-400">
                 <Type className="w-4 h-4" />
               </div>
               <span style={{ fontFamily: value }} className="text-sm">{value || 'Select a font'}</span>
@@ -86,13 +86,13 @@ export function FontPicker({ value, onChange, label, description }: FontPickerPr
             <Badge variant="secondary" className="bg-brand-50 text-brand-600 border-brand-100 text-[8px] font-black uppercase tracking-widest">Google Fonts</Badge>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[320px] p-0 rounded-2xl border-gray-100 shadow-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl" align="start">
-          <div className="p-4 border-b border-gray-100">
+        <DropdownMenuContent className="w-[320px] p-0 rounded-2xl border-gray-100 dark:border-gray-800 shadow-2xl bg-white dark:bg-gray-900/95 dark:bg-gray-900/95 backdrop-blur-xl" align="start">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-800">
             <div className="relative group">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-brand-500 transition-colors" />
               <Input 
                 placeholder="Search 1000+ fonts..." 
-                className="pl-10 h-10 text-sm bg-gray-50/50 border-gray-100 rounded-xl focus-visible:ring-brand-500"
+                className="pl-10 h-10 text-sm bg-gray-50 dark:bg-gray-950/50 border-gray-100 dark:border-gray-800 rounded-xl focus-visible:ring-brand-500"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -117,7 +117,7 @@ export function FontPicker({ value, onChange, label, description }: FontPickerPr
               <div className="p-8 text-center text-sm text-gray-400 font-medium italic">No matches found</div>
             )}
           </div>
-          <div className="p-3 border-t border-gray-100 bg-gray-50/50 dark:bg-gray-800/50 text-[9px] font-black text-gray-400 text-center uppercase tracking-widest rounded-b-2xl">
+          <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 text-[9px] font-black text-gray-400 text-center uppercase tracking-widest rounded-b-2xl">
             Powered by Brandflow Intelligence
           </div>
         </DropdownMenuContent>

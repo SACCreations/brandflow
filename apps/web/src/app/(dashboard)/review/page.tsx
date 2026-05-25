@@ -191,7 +191,7 @@ export default function ReviewQueuePage() {
           <p className="mt-2 text-gray-500 dark:text-gray-400">Validate AI-generated content against brand standards and quality benchmarks.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800">
+          <button className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800">
             <Clock className="h-4 w-4" /> History
           </button>
           <button 
@@ -211,7 +211,7 @@ export default function ReviewQueuePage() {
         
         {/* Queue List */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
             <div className="flex items-center gap-4 text-sm font-bold text-gray-400">
               <button 
                 onClick={() => setActiveTab('pending')}
@@ -247,16 +247,16 @@ export default function ReviewQueuePage() {
                   onChange={(e) => setSearchFilter(e.target.value)}
                   placeholder="Filter queue..." 
                   aria-label="Filter review queue"
-                  className="rounded-lg border border-gray-100 bg-white pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
+                  className="rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
                 />
               </div>
-              <button aria-label="Advanced filters" className="rounded-lg border border-gray-100 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 dark:border-gray-800"><Filter className="h-4 w-4" /></button>
+              <button aria-label="Advanced filters" className="rounded-lg border border-gray-100 dark:border-gray-800 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 dark:border-gray-800"><Filter className="h-4 w-4" /></button>
             </div>
           </div>
 
           <div className="space-y-4">
             {filteredQueue?.length === 0 ? (
-              <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 text-sm font-medium text-gray-400 dark:border-gray-800">
+              <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800 text-sm font-medium text-gray-400 dark:border-gray-800">
                 {searchFilter ? 'No items match your filter.' : 'All caught up — queue is empty!'}
               </div>
             ) : (
@@ -265,7 +265,7 @@ export default function ReviewQueuePage() {
                   key={review.id} 
                   onClick={() => handleSelectReview(review)}
                   className={`group relative overflow-hidden rounded-2xl border transition-all hover:shadow-lg cursor-pointer ${
-                    activeReview?.id === review.id ? 'border-brand-500 bg-brand-50/20 ring-1 ring-brand-500 dark:bg-brand-500/5' : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 hover:border-gray-300'
+                    activeReview?.id === review.id ? 'border-brand-500 bg-brand-50/20 ring-1 ring-brand-500 dark:bg-brand-500/5' : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900 hover:border-gray-300'
                   }`}
                 >
                   <div className="p-5">
@@ -320,7 +320,7 @@ export default function ReviewQueuePage() {
         <div className="lg:col-span-5">
           {activeReview ? (
             <div className="sticky top-24 space-y-6 animate-in fade-in zoom-in-95 duration-300">
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-800 dark:bg-gray-900">
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-2xl dark:border-gray-800 dark:bg-gray-900">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest">Quality Guard Report</h3>
                   <button onClick={() => setActiveReview(null)} aria-label="Close review panel" className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"><XCircle className="h-5 w-5" /></button>
@@ -329,13 +329,13 @@ export default function ReviewQueuePage() {
                 <div className="space-y-6">
                   {/* Scores */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
+                    <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800">
                       <span className="text-[10px] font-bold text-gray-400 uppercase">Brand Voice</span>
                       <div className="text-xl font-black text-emerald-500">
                         {Math.round((activeReview.content.qualityScore ?? 0) * 100)}%
                       </div>
                     </div>
-                    <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
+                    <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800">
                       <span className="text-[10px] font-bold text-gray-400 uppercase">Fact Accuracy</span>
                       <div className={`text-xl font-black ${(activeReview.content.qualityScore ?? 0) < 0.7 ? 'text-amber-500' : 'text-emerald-500'}`}>
                         {(activeReview.content.qualityScore ?? 0) < 0.7 ? 'Review Needed' : 'Verified'}
@@ -344,7 +344,7 @@ export default function ReviewQueuePage() {
                   </div>
 
                   {activeReview.content.brief && (
-                    <div className="rounded-xl border border-gray-100 bg-gray-50/40 p-4 text-sm dark:border-gray-800 dark:bg-gray-800/20">
+                    <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/40 p-4 text-sm dark:border-gray-800 dark:bg-gray-800/20">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Brief context</div>
                       <div className="mt-2 font-medium text-gray-900 dark:text-white">{activeReview.content.brief.objective}</div>
                       {activeReview.content.brief.cta && (
@@ -356,7 +356,7 @@ export default function ReviewQueuePage() {
                   {/* Content Preview */}
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Content Body</label>
-                    <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-sm text-gray-700 leading-relaxed dark:border-gray-800 dark:bg-gray-800/30 dark:text-gray-300">
+                    <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 p-4 text-sm text-gray-700 leading-relaxed dark:border-gray-800 dark:bg-gray-800/30 dark:text-gray-300">
                       {activeReview.content.body}
                     </div>
                   </div>
@@ -379,7 +379,7 @@ export default function ReviewQueuePage() {
                     <textarea
                       value={reviewNote}
                       onChange={(event) => setReviewNote(event.target.value)}
-                      className="min-h-[96px] w-full rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-sm text-gray-700 outline-none focus:border-brand-500 dark:border-gray-800 dark:bg-gray-800/30 dark:text-gray-300"
+                      className="min-h-[96px] w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 p-4 text-sm text-gray-700 outline-none focus:border-brand-500 dark:border-gray-800 dark:bg-gray-800/30 dark:text-gray-300"
                       placeholder="Add revision guidance, risk notes, or approval context..."
                     />
                   </div>
@@ -436,8 +436,8 @@ export default function ReviewQueuePage() {
               </div>
             </div>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 p-12 text-center dark:border-gray-800">
-              <div className="rounded-full bg-gray-50 p-4 dark:bg-gray-800 mb-4">
+            <div className="flex h-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-12 text-center dark:border-gray-800">
+              <div className="rounded-full bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800 mb-4">
                 <Eye className="h-8 w-8 text-gray-300" />
               </div>
               <h3 className="text-lg font-bold text-gray-400">Select an item to review</h3>

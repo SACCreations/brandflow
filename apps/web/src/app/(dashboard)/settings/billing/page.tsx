@@ -85,7 +85,7 @@ export default function BillingSettingsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Billing & Subscription</h1>
           <p className="mt-2 text-gray-500 dark:text-gray-400">Manage your subscription, tokens, and payment methods.</p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+        <button className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
           <BarChart3 className="h-4 w-4" />
           View Usage History
         </button>
@@ -93,7 +93,7 @@ export default function BillingSettingsPage() {
 
       {/* Usage Stats */}
       <div className="grid gap-6 md:grid-cols-3">
-        <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-10 w-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 dark:bg-brand-500/10">
               <Zap className="h-5 w-5" />
@@ -110,7 +110,7 @@ export default function BillingSettingsPage() {
           <p className="mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Resets in {Math.max(1, 30 - new Date().getDate())} days</p>
         </div>
 
-        <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 dark:bg-blue-500/10">
               <ShieldCheck className="h-5 w-5" />
@@ -127,7 +127,7 @@ export default function BillingSettingsPage() {
           <p className="mt-4 text-[10px] font-bold text-amber-600 uppercase tracking-widest">{usage.brandsUsed >= usage.brandLimit ? 'Limit reached' : 'Available'}</p>
         </div>
 
-        <div className="rounded-3xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 dark:bg-emerald-500/10">
               <CreditCard className="h-5 w-5" />
@@ -160,7 +160,7 @@ export default function BillingSettingsPage() {
                 "relative flex flex-col rounded-[2.5rem] border p-8 transition-all duration-300 hover:shadow-2xl",
                 plan.highlight 
                   ? "border-brand-200 bg-brand-50/30 dark:border-brand-500/20 dark:bg-brand-500/5 shadow-xl scale-105 z-10" 
-                  : "border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900"
+                  : "border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900"
               )}
             >
               {plan.highlight && (
@@ -198,7 +198,7 @@ export default function BillingSettingsPage() {
                     ? "bg-gray-100 text-gray-500 cursor-default dark:bg-gray-800"
                     : plan.highlight
                       ? "bg-brand-600 text-white shadow-lg shadow-brand-500/25 hover:bg-brand-700 hover:-translate-y-1"
-                      : "bg-gray-900 text-white hover:bg-black dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+                      : "bg-gray-900 text-white hover:bg-black dark:bg-white dark:bg-gray-900 dark:text-gray-900 dark:text-white dark:hover:bg-gray-200"
                 )}
               >
                 {checkoutMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : currentPlan === plan.name ? 'Current Plan' : 'Switch Plan'}
@@ -210,7 +210,7 @@ export default function BillingSettingsPage() {
       </div>
 
       {/* Payment Method */}
-      <div className="rounded-[2.5rem] border border-gray-100 bg-white p-8 dark:border-gray-800 dark:bg-gray-900 overflow-hidden relative">
+      <div className="rounded-[2.5rem] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 dark:border-gray-800 dark:bg-gray-900 overflow-hidden relative">
         <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
           <CreditCard className="w-64 h-64 -rotate-12" />
         </div>
@@ -236,9 +236,9 @@ export default function BillingSettingsPage() {
 
 function UsageCard({ title, value, helper, icon }: { title: string; value: string; helper: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
       <div className="mb-3 flex items-center justify-between">
-        <div className="rounded-xl bg-gray-50 p-2.5 dark:bg-gray-800">{icon}</div>
+        <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-2.5 dark:bg-gray-800">{icon}</div>
       </div>
       <div className="text-2xl font-black text-gray-900 dark:text-white">{value}</div>
       <div className="text-xs font-medium text-gray-500">{title}</div>
@@ -249,7 +249,7 @@ function UsageCard({ title, value, helper, icon }: { title: string; value: strin
 
 function ProgressPanel({ title, current, limit, percentage, description }: { title: string; current: number; limit: number; percentage: number; description: string }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h2>
@@ -269,9 +269,9 @@ function ProgressPanel({ title, current, limit, percentage, description }: { tit
 
 function FootprintCard({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className="rounded-2xl bg-gray-50 p-5 dark:bg-gray-800/60">
+    <div className="rounded-2xl bg-gray-50 dark:bg-gray-950 p-5 dark:bg-gray-800/60">
       <div className="flex items-center justify-between">
-        <div className="rounded-xl bg-white p-2 dark:bg-gray-900">{icon}</div>
+        <div className="rounded-xl bg-white dark:bg-gray-900 p-2 dark:bg-gray-900">{icon}</div>
         <div className="text-2xl font-black text-gray-900 dark:text-white">{value}</div>
       </div>
       <div className="mt-3 text-xs font-bold uppercase tracking-widest text-gray-400">{label}</div>

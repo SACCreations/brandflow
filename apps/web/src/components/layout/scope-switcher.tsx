@@ -20,7 +20,7 @@ export function ScopeSwitcher() {
   const hasScope = customer || project || brand;
 
   return (
-    <div className="flex items-center gap-1 border-b border-gray-200 bg-white px-6 py-2 dark:border-gray-800 dark:bg-gray-900">
+    <div className="flex items-center gap-1 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-2 dark:border-gray-800 dark:bg-gray-900">
       <span className="mr-2 text-xs font-medium uppercase tracking-wide text-gray-400">
         Scope
       </span>
@@ -157,14 +157,14 @@ function ScopeSegment({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+        <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg dark:border-gray-700 dark:bg-gray-900">
           <div className="p-2">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search…"
-              className="w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              className="w-full rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-1.5 text-xs outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               autoFocus
             />
           </div>

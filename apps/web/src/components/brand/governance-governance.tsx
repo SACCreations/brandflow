@@ -107,7 +107,7 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
         </div>
 
         <div className="w-full lg:w-80 space-y-6">
-          <div className="p-6 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-2xl space-y-4">
+          <div className="p-6 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
               <Scale className="w-5 h-5 text-brand-400" />
               <h3 className="text-xs font-black uppercase tracking-widest">Compliance Health</h3>
@@ -116,7 +116,7 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
               <span className="text-4xl font-black">92%</span>
               <span className="text-[10px] font-black text-emerald-400 uppercase pb-1">Excellent</span>
             </div>
-            <div className="h-1.5 w-full bg-white/10 dark:bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-white dark:bg-gray-900/10 dark:bg-gray-100 rounded-full overflow-hidden">
               <div className="h-full bg-brand-500 w-[92%]" />
             </div>
             <p className="text-[10px] font-medium opacity-60 leading-relaxed">

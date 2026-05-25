@@ -75,7 +75,7 @@ export function FileUploader({
         onClick={() => document.getElementById(`file-input-${label}`)?.click()}
         className={cn(
           "relative border-2 border-dashed rounded-2xl p-8 transition-all cursor-pointer flex flex-col items-center justify-center gap-4 text-center group",
-          isDragging ? "border-brand-500 bg-brand-50/50 dark:bg-brand-900/20" : "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-gray-50/30 dark:bg-gray-900/30",
+          isDragging ? "border-brand-500 bg-brand-50/50 dark:bg-brand-900/20" : "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-gray-50 dark:bg-gray-950/30 dark:bg-gray-900/30",
           uploadedUrl && "border-emerald-200 bg-emerald-50/30 dark:border-emerald-900/50 dark:bg-emerald-900/10"
         )}
       >

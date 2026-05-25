@@ -132,7 +132,7 @@ export function Sidebar() {
   });
 
   return (
-    <aside className="flex h-full w-56 flex-shrink-0 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+    <aside className="flex h-full w-56 flex-shrink-0 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900">
       {/* Logo */}
       <div className="flex h-16 items-center px-5 border-b border-gray-200 dark:border-gray-800">
         <span className="text-lg font-bold text-brand-600">BrandFlow</span>

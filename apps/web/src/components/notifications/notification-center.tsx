@@ -53,7 +53,7 @@ export function NotificationCenter() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100 transition-all"
+        className="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-white dark:hover:bg-gray-800 dark:hover:text-gray-100 transition-all"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
@@ -66,8 +66,8 @@ export function NotificationCenter() {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 mt-2 z-40 w-80 max-h-[480px] flex flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 dark:border-gray-800 dark:bg-gray-950">
-            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+          <div className="absolute right-0 mt-2 z-40 w-80 max-h-[480px] flex flex-col rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200 dark:border-gray-800 dark:bg-gray-950">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4 py-3 dark:border-gray-800">
               <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Notifications</h3>
               {unreadCount > 0 && (
                 <button
@@ -86,7 +86,7 @@ export function NotificationCenter() {
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-                  <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 dark:bg-gray-900">
+                  <div className="h-10 w-10 rounded-full bg-gray-50 dark:bg-gray-950 flex items-center justify-center text-gray-300 dark:bg-gray-900">
                     <Bell className="h-5 w-5" />
                   </div>
                   <p className="text-xs text-gray-500">All caught up!</p>
@@ -97,7 +97,7 @@ export function NotificationCenter() {
                     <div
                       key={n.id}
                       className={cn(
-                        "group relative flex gap-3 px-4 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900/50",
+                        "group relative flex gap-3 px-4 py-4 transition-colors hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-900/50",
                         !n.isRead && "bg-brand-50/30 dark:bg-brand-500/5"
                       )}
                     >
@@ -133,7 +133,7 @@ export function NotificationCenter() {
                       {!n.isRead && (
                         <button
                           onClick={() => markAsRead.mutate(n.id)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-gray-300 opacity-0 group-hover:opacity-100 hover:bg-white hover:text-brand-600 shadow-sm transition-all"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-gray-300 opacity-0 group-hover:opacity-100 hover:bg-white dark:bg-gray-900 hover:text-brand-600 shadow-sm transition-all"
                         >
                           <Check className="h-3 w-3" />
                         </button>
@@ -144,7 +144,7 @@ export function NotificationCenter() {
               )}
             </div>
 
-            <div className="border-t border-gray-100 bg-gray-50/50 px-4 py-2 text-center dark:border-gray-800 dark:bg-gray-900/50">
+            <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 px-4 py-2 text-center dark:border-gray-800 dark:bg-gray-900/50">
               <button className="text-[10px] font-bold text-gray-400 hover:text-gray-600 uppercase tracking-widest">
                 Notification Settings
               </button>

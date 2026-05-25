@@ -279,7 +279,7 @@ export default function BrandAnalysePage() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
                         transition={{ delay: i * 0.1 }}
-                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg group border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all"
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg group border border-transparent hover:border-gray-200 dark:border-gray-800 dark:hover:border-gray-700 transition-all"
                       >
                         <div className="flex items-center gap-3">
                           <Globe className="w-4 h-4 text-gray-400" />
@@ -428,7 +428,7 @@ export default function BrandAnalysePage() {
                 We've extracted a comprehensive profile including Strategy, Identity, and Visuals. Continue to the wizard to review and fine-tune your brand before saving.
               </p>
               <Button
-                className="w-full bg-white text-brand-600 hover:bg-brand-50 border-none h-12 text-lg font-bold shadow-lg"
+                className="w-full bg-white dark:bg-gray-900 text-brand-600 hover:bg-brand-50 border-none h-12 text-lg font-bold shadow-lg"
                 onClick={() => {
                   if (extractedData?.brand) {
                     localStorage.setItem('brand_draft_new', JSON.stringify(extractedData.brand));

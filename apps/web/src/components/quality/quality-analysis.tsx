@@ -92,7 +92,7 @@ export function QualityAnalysis({ checkResult, isLoading }: QualityAnalysisProps
           { label: 'Factuality', score: checkResult.factualScore, icon: BookOpen, color: 'text-blue-500' },
           { label: 'Safety', score: checkResult.safetyScore, icon: ShieldCheck, color: 'text-purple-500' },
         ].map((m) => (
-          <div key={m.label} className="p-3 rounded-2xl border border-gray-50 dark:border-gray-900 bg-gray-50/50 dark:bg-gray-900/50 space-y-2">
+          <div key={m.label} className="p-3 rounded-2xl border border-gray-50 dark:border-gray-900 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-900/50 space-y-2">
             <div className="flex items-center gap-1.5">
               <m.icon className={cn("w-3 h-3", m.color)} />
               <span className="text-[10px] font-black uppercase tracking-tight text-gray-500">{m.label}</span>
@@ -149,7 +149,7 @@ export function QualityAnalysis({ checkResult, isLoading }: QualityAnalysisProps
           <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Knowledge Grounding</h4>
           <div className="space-y-2">
             {checkResult.citations.map((c, i) => (
-              <div key={i} className="p-3 rounded-xl border border-gray-50 dark:border-gray-900 bg-gray-50/30 dark:bg-gray-900/30 flex items-center justify-between group">
+              <div key={i} className="p-3 rounded-xl border border-gray-50 dark:border-gray-900 bg-gray-50 dark:bg-gray-950/30 dark:bg-gray-900/30 flex items-center justify-between group">
                 <div className="flex items-center gap-3">
                   <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500">
                     <BookOpen className="w-3.5 h-3.5" />

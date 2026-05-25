@@ -131,23 +131,23 @@ export default function AutomationsPage() {
                 <input 
                   type="text" 
                   placeholder="Search rules..." 
-                  className="rounded-lg border border-gray-200 bg-white pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
+                  className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
                 />
               </div>
-              <button className="rounded-lg border border-gray-200 p-1.5 text-gray-500 dark:border-gray-800"><Filter className="h-4 w-4" /></button>
+              <button className="rounded-lg border border-gray-200 dark:border-gray-800 p-1.5 text-gray-500 dark:border-gray-800"><Filter className="h-4 w-4" /></button>
             </div>
           </div>
 
           {automations?.length === 0 ? (
-            <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 text-sm font-medium text-gray-400 dark:border-gray-800">
+            <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800 text-sm font-medium text-gray-400 dark:border-gray-800">
               No automations created yet.
             </div>
           ) : (
             automations?.map((auto) => (
-              <div key={auto.id} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
+              <div key={auto.id} className="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
                 <div className="flex items-start justify-between">
                   <div className="flex gap-4">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${auto.isActive ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10' : 'bg-gray-50 text-gray-400 dark:bg-gray-800'}`}>
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${auto.isActive ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10' : 'bg-gray-50 dark:bg-gray-950 text-gray-400 dark:bg-gray-800'}`}>
                       <Zap className="h-6 w-6" />
                     </div>
                     <div>
@@ -173,7 +173,7 @@ export default function AutomationsPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex items-center gap-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
+                <div className="mt-6 flex items-center gap-4 rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/50">
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">When</span>
                     <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{auto.triggerType}</span>
@@ -183,7 +183,7 @@ export default function AutomationsPage() {
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Then</span>
                     <div className="flex gap-2">
                       {auto.steps.map((step, i) => (
-                        <span key={i} className="rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-brand-600 shadow-sm dark:bg-gray-700 dark:text-brand-400">
+                        <span key={i} className="rounded-md bg-white dark:bg-gray-900 px-2 py-0.5 text-[10px] font-bold text-brand-600 shadow-sm dark:bg-gray-700 dark:text-brand-400">
                           {step.type}
                         </span>
                       ))}
@@ -197,7 +197,7 @@ export default function AutomationsPage() {
 
         {/* Sidebar Activity Feed */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Activity className="h-4 w-4 text-emerald-500" />
               Automation Activity
@@ -222,7 +222,7 @@ export default function AutomationsPage() {
                 status="failed" 
               />
             </div>
-            <button className="mt-6 w-full rounded-xl border border-gray-100 py-2 text-xs font-bold text-gray-500 hover:bg-gray-50 dark:border-gray-800">
+            <button className="mt-6 w-full rounded-xl border border-gray-100 dark:border-gray-800 py-2 text-xs font-bold text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800">
               View All Logs
             </button>
           </div>
@@ -260,9 +260,9 @@ export default function AutomationsPage() {
 
 function AutoStat({ label, value, icon }: any) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-gray-50 p-2 dark:bg-gray-800">{icon}</div>
+        <div className="rounded-lg bg-gray-50 dark:bg-gray-950 p-2 dark:bg-gray-800">{icon}</div>
         <div>
           <div className="text-lg font-black text-gray-900 dark:text-white">{value}</div>
           <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</div>
@@ -328,7 +328,7 @@ function CreateAutomationModal({ onClose, onCreated }: { onClose: () => void; on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
+      <div className="w-full max-w-lg rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Create Automation</h2>
           <button onClick={onClose} className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
@@ -359,7 +359,7 @@ function CreateAutomationModal({ onClose, onCreated }: { onClose: () => void; on
                 className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-all ${
                   triggerType === trigger.id
                     ? 'border-brand-500 bg-brand-50/50 ring-2 ring-brand-500/20 dark:bg-brand-500/10'
-                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
                 }`}
               >
                 <div className={`rounded-lg p-2 ${triggerType === trigger.id ? 'bg-brand-100 dark:bg-brand-500/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
@@ -394,7 +394,7 @@ function CreateAutomationModal({ onClose, onCreated }: { onClose: () => void; on
                 className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-all ${
                   actions.includes(action.id)
                     ? 'border-brand-500 bg-brand-50/50 ring-2 ring-brand-500/20 dark:bg-brand-500/10'
-                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
                 }`}
               >
                 <div className={`rounded-lg p-2 ${actions.includes(action.id) ? 'bg-brand-100 dark:bg-brand-500/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
@@ -405,7 +405,7 @@ function CreateAutomationModal({ onClose, onCreated }: { onClose: () => void; on
               </button>
             ))}
             <div className="mt-6 flex justify-between">
-              <button onClick={() => setStep('trigger')} className="rounded-xl border border-gray-200 px-6 py-2.5 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:text-gray-300">
+              <button onClick={() => setStep('trigger')} className="rounded-xl border border-gray-200 dark:border-gray-800 px-6 py-2.5 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:text-gray-300">
                 Back
               </button>
               <button
@@ -428,10 +428,10 @@ function CreateAutomationModal({ onClose, onCreated }: { onClose: () => void; on
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Auto-publish approved content"
-              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               autoFocus
             />
-            <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
+            <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/50">
               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Summary</p>
               <p className="text-sm text-gray-700 dark:text-gray-300">
                 <span className="font-semibold">When</span> {TRIGGER_TYPES.find(t => t.id === triggerType)?.label} → {' '}
@@ -439,7 +439,7 @@ function CreateAutomationModal({ onClose, onCreated }: { onClose: () => void; on
               </p>
             </div>
             <div className="mt-6 flex justify-between">
-              <button onClick={() => setStep('actions')} className="rounded-xl border border-gray-200 px-6 py-2.5 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:text-gray-300">
+              <button onClick={() => setStep('actions')} className="rounded-xl border border-gray-200 dark:border-gray-800 px-6 py-2.5 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:text-gray-300">
                 Back
               </button>
               <button

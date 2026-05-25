@@ -84,7 +84,7 @@ export default function DashboardPage() {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+            className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 dark:border-gray-800 dark:bg-gray-900"
           >
             <div className="flex items-center justify-between">
               <p className="text-sm text-gray-500">{stat.label}</p>
@@ -98,7 +98,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <KnowledgeFreshnessWidget />
-        <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
             <h2 className="font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
           </div>
@@ -122,7 +122,7 @@ export default function DashboardPage() {
                 <Link
                   key={activity.id}
                   href={activity.href}
-                  className="block px-6 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  className="block px-6 py-4 transition-colors hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800/50"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -142,7 +142,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">Workspace Snapshot</h2>
             </div>
@@ -153,7 +153,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">Quick Actions</h2>
             </div>
@@ -184,7 +184,7 @@ export default function DashboardPage() {
 
 function MetricTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800/60">
+    <div className="rounded-lg bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/60">
       <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{value}</p>
     </div>

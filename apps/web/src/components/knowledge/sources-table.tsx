@@ -85,7 +85,7 @@ export default function SourcesTable() {
   }
 
   return (
-    <div className="mt-8 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+    <div className="mt-8 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900">
       <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white">Active Knowledge Sources</h3>
         <div className="flex gap-2">
@@ -110,7 +110,7 @@ export default function SourcesTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20">
+            <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/20">
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Source</th>
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Status</th>
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Entries</th>
@@ -122,7 +122,7 @@ export default function SourcesTable() {
           </thead>
           <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
             {sources.map((source: any) => (
-              <tr key={source.id} className="group transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+              <tr key={source.id} className="group transition-colors hover:bg-gray-50 dark:bg-gray-950/50 dark:hover:bg-gray-800/30">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">

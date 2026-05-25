@@ -88,7 +88,7 @@ export default function ClientDetailPage() {
   if (isError || !client) {
     return (
       <div className="space-y-6">
-        <Link href="/settings/clients" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900">
+        <Link href="/settings/clients" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-white">
           <ArrowLeft className="h-4 w-4" /> Back to clients
         </Link>
         <Card className="p-10 text-center">
@@ -105,7 +105,7 @@ export default function ClientDetailPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
-          <Link href="/settings/clients" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white">
+          <Link href="/settings/clients" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-white dark:hover:text-white">
             <ArrowLeft className="h-4 w-4" /> Back to clients
           </Link>
           <div>
@@ -164,7 +164,7 @@ export default function ClientDetailPage() {
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">{linkedBrand.name}</p>
                 <p className="text-xs text-gray-500">{linkedBrand.industry || 'Industry not set'}</p>
               </div>
-              <div className="rounded-xl border border-gray-100 p-4 dark:border-gray-800">
+              <div className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
                 <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Health score</div>
                 <div className="mt-2 text-2xl font-black text-brand-600">{linkedBrand.healthScore}%</div>
               </div>
@@ -173,7 +173,7 @@ export default function ClientDetailPage() {
               </Link>
             </div>
           ) : (
-            <div className="mt-4 rounded-xl border border-dashed border-gray-200 p-5 text-sm text-gray-500 dark:border-gray-800">
+            <div className="mt-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 p-5 text-sm text-gray-500 dark:border-gray-800">
               No brand linked yet. Launch the analyzer to create a primary brand profile for this client.
             </div>
           )}
@@ -194,7 +194,7 @@ export default function ClientDetailPage() {
               <Link
                 key={project.id}
                 href={`/projects/${project.id}`}
-                className="rounded-2xl border border-gray-100 p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg dark:border-gray-800"
+                className="rounded-2xl border border-gray-100 dark:border-gray-800 p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg dark:border-gray-800"
               >
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-semibold text-gray-900 dark:text-white">{project.name}</p>
@@ -212,7 +212,7 @@ export default function ClientDetailPage() {
             ))}
           </div>
         ) : (
-          <div className="mt-6 rounded-2xl border border-dashed border-gray-200 p-8 text-center text-sm text-gray-500 dark:border-gray-800">
+          <div className="mt-6 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800 p-8 text-center text-sm text-gray-500 dark:border-gray-800">
             No projects yet for this client.
           </div>
         )}
@@ -223,7 +223,7 @@ export default function ClientDetailPage() {
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-gray-100 p-4 dark:border-gray-800">
+    <div className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400">
         {icon}
         {label}

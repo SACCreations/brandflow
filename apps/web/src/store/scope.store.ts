@@ -55,9 +55,9 @@ export const useScopeStore = create<ScopeState>()(
       scopeParams: () => {
         const { customer, project, brand } = get();
         const params: Record<string, string> = {};
-        if (customer) params.customerId = customer.id;
-        if (project) params.projectId = project.id;
-        if (brand) params.brandId = brand.id;
+        if (customer) params['customerId'] = customer.id;
+        if (project) params['projectId'] = project.id;
+        if (brand) params['brandId'] = brand.id;
         return params;
       },
     }),

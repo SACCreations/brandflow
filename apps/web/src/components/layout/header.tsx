@@ -39,7 +39,7 @@ export function Header() {
     : user?.email ?? '';
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-gray-800 dark:bg-gray-900">
+    <header className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-center gap-3">
         {business && (
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -51,11 +51,11 @@ export function Header() {
             const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true });
             document.dispatchEvent(event);
           }}
-          className="ml-4 hidden items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs text-gray-500 transition-colors hover:border-gray-300 sm:flex dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+          className="ml-4 hidden items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-1.5 text-xs text-gray-500 transition-colors hover:border-gray-300 sm:flex dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
         >
           <Search className="h-3 w-3" />
           Search...
-          <kbd className="ml-2 rounded border border-gray-200 bg-white px-1 py-0.5 text-[10px] font-medium dark:border-gray-600 dark:bg-gray-700">⌘K</kbd>
+          <kbd className="ml-2 rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-1 py-0.5 text-[10px] font-medium dark:border-gray-600 dark:bg-gray-700">⌘K</kbd>
         </button>
       </div>
       <div className="flex items-center gap-3">

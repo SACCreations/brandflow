@@ -39,7 +39,7 @@ export function CostAnalysisDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center rounded-2xl border border-gray-100 bg-white/50 dark:border-gray-800 dark:bg-gray-900/50">
+      <div className="flex h-96 items-center justify-center rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/50 dark:border-gray-800 dark:bg-gray-900/50">
         <div className="flex flex-col items-center gap-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
           <p className="text-sm font-bold text-gray-400">Analyzing AI compute costs...</p>
@@ -86,7 +86,7 @@ export function CostAnalysisDashboard() {
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Cost Trend */}
-        <div className="lg:col-span-8 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="lg:col-span-8 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-brand-600" />
@@ -134,7 +134,7 @@ export function CostAnalysisDashboard() {
         </div>
 
         {/* Breakdown */}
-        <div className="lg:col-span-4 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="lg:col-span-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <Layers className="h-5 w-5 text-brand-600" />
             Module Allocation
@@ -168,9 +168,9 @@ export function CostAnalysisDashboard() {
 
 function CostStat({ title, value, subtitle, icon }: any) {
   return (
-    <div className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
+    <div className="group rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm transition-all hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-center justify-between mb-4">
-        <div className="rounded-xl bg-gray-50 p-2.5 dark:bg-gray-800 group-hover:scale-110 transition-transform">{icon}</div>
+        <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-2.5 dark:bg-gray-800 group-hover:scale-110 transition-transform">{icon}</div>
         <ArrowUpRight className="h-4 w-4 text-gray-300" />
       </div>
       <div className="text-3xl font-black text-gray-900 dark:text-white">{value}</div>

@@ -98,14 +98,14 @@ export default function CalendarPage() {
         }).length)} />
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 px-6 py-4 dark:border-gray-800">
           <h2 className="font-semibold text-gray-900 dark:text-white">{monthName} {year}</h2>
           <div className="flex gap-2">
-            <button onClick={() => setMonthOffset((value) => value - 1)} className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+            <button onClick={() => setMonthOffset((value) => value - 1)} className="rounded-lg border border-gray-200 dark:border-gray-800 px-3 py-1.5 text-sm hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-700 dark:hover:bg-gray-800">
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <button onClick={() => setMonthOffset((value) => value + 1)} className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+            <button onClick={() => setMonthOffset((value) => value + 1)} className="rounded-lg border border-gray-200 dark:border-gray-800 px-3 py-1.5 text-sm hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-700 dark:hover:bg-gray-800">
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
@@ -113,7 +113,7 @@ export default function CalendarPage() {
 
         <div className="grid grid-cols-7 divide-x divide-y divide-gray-100 dark:divide-gray-800">
           {days.map((day) => (
-            <div key={day} className="bg-gray-50 px-3 py-3 text-center text-xs font-semibold uppercase tracking-widest text-gray-400 dark:bg-gray-800/50">
+            <div key={day} className="bg-gray-50 dark:bg-gray-950 px-3 py-3 text-center text-xs font-semibold uppercase tracking-widest text-gray-400 dark:bg-gray-800/50">
               {day}
             </div>
           ))}
@@ -125,7 +125,7 @@ export default function CalendarPage() {
             return (
               <div
                 key={index}
-                className={`min-h-[150px] p-3 align-top ${isToday ? 'bg-brand-50/40 dark:bg-brand-900/10' : 'hover:bg-gray-50/60 dark:hover:bg-gray-800/20'}`}
+                className={`min-h-[150px] p-3 align-top ${isToday ? 'bg-brand-50/40 dark:bg-brand-900/10' : 'hover:bg-gray-50 dark:bg-gray-950/60 dark:hover:bg-gray-800/20'}`}
               >
                 {day !== null ? (
                   <>
@@ -135,7 +135,7 @@ export default function CalendarPage() {
 
                     <div className="mt-3 space-y-2">
                       {daySchedules.slice(0, 3).map((schedule) => (
-                        <div key={schedule.id} className="rounded-xl border border-gray-100 bg-white/80 p-2 text-xs dark:border-gray-800 dark:bg-gray-950/40">
+                        <div key={schedule.id} className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/80 p-2 text-xs dark:border-gray-800 dark:bg-gray-950/40">
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-semibold text-gray-900 dark:text-white">{schedule.socialAccount.name}</span>
                             <span className={`rounded-full px-2 py-0.5 font-bold uppercase tracking-widest ${schedule.status === 'published' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : schedule.status === 'failed' ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'}`}>
@@ -171,7 +171,7 @@ export default function CalendarPage() {
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 dark:border-gray-800 dark:bg-gray-900">
       <div className="text-2xl font-black text-gray-900 dark:text-white">{value}</div>
       <div className="mt-1 text-xs font-bold uppercase tracking-widest text-gray-400">{label}</div>
     </div>

@@ -141,7 +141,7 @@ export default function TeamSettingsPage() {
 
       {/* Stats Mini-Bar */}
       <div className="grid gap-6 md:grid-cols-4">
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-2 dark:bg-blue-500/10"><Users className="h-5 w-5 text-blue-600" /></div>
             <div>
@@ -150,7 +150,7 @@ export default function TeamSettingsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-purple-50 p-2 dark:bg-purple-500/10"><Shield className="h-5 w-5 text-purple-600" /></div>
             <div>
@@ -159,7 +159,7 @@ export default function TeamSettingsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-emerald-50 p-2 dark:bg-emerald-500/10"><CheckCircle2 className="h-5 w-5 text-emerald-600" /></div>
             <div>
@@ -180,18 +180,18 @@ export default function TeamSettingsPage() {
       </div>
 
       {/* Members Table */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex items-center justify-between border-b border-gray-100 p-6 dark:border-gray-800">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 p-6 dark:border-gray-800">
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <input 
                 type="text" 
                 placeholder="Search team..." 
-                className="rounded-xl border border-gray-100 bg-gray-50/50 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
               />
             </div>
-            <button className="rounded-xl border border-gray-100 p-2 text-gray-500 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <button className="rounded-xl border border-gray-100 dark:border-gray-800 p-2 text-gray-500 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800">
               <Filter className="h-5 w-5" />
             </button>
           </div>
@@ -200,7 +200,7 @@ export default function TeamSettingsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-gray-50 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/30">
+              <tr className="border-b border-gray-50 bg-gray-50 dark:bg-gray-950/50 dark:border-gray-800 dark:bg-gray-800/30">
                 <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">User</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Role</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Joined</th>
@@ -209,7 +209,7 @@ export default function TeamSettingsPage() {
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {members?.map((member) => (
-                <tr key={member.id} className="group transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                <tr key={member.id} className="group transition-colors hover:bg-gray-50 dark:bg-gray-950/50 dark:hover:bg-gray-800/30">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
@@ -267,13 +267,13 @@ export default function TeamSettingsPage() {
       {/* Invite Modal */}
       {isInviteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full max-w-xl rounded-3xl border border-gray-100 bg-white p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
+          <div className="w-full max-w-xl rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add Team Members</h2>
                 <p className="text-sm text-gray-500">Collaborate with your team by adding them here.</p>
               </div>
-              <button onClick={() => setIsInviteModalOpen(false)} className="rounded-full bg-gray-50 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
+              <button onClick={() => setIsInviteModalOpen(false)} className="rounded-full bg-gray-50 dark:bg-gray-950 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -292,7 +292,7 @@ export default function TeamSettingsPage() {
                         <input 
                           type="email" 
                           placeholder="coworker@company.com"
-                          className="w-full rounded-xl border border-gray-100 bg-gray-50 px-10 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                          className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-10 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                           value={email}
                           onChange={(e) => handleEmailChange(index, e.target.value)}
                         />
@@ -300,7 +300,7 @@ export default function TeamSettingsPage() {
                       {inviteEmails.length > 1 && (
                         <button 
                           onClick={() => handleRemoveEmailRow(index)}
-                          className="rounded-xl border border-gray-100 p-3 text-gray-400 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800"
+                          className="rounded-xl border border-gray-100 dark:border-gray-800 p-3 text-gray-400 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800"
                         >
                           <X className="h-5 w-5" />
                         </button>
@@ -320,7 +320,7 @@ export default function TeamSettingsPage() {
                       className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
                         selectedRole === role 
                           ? 'border-brand-500 bg-brand-50/50 text-brand-600 dark:bg-brand-500/10' 
-                          : 'border-gray-100 bg-gray-50 text-gray-500 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-800'
+                          : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-500 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-800'
                       }`}
                     >
                       <Shield className="h-5 w-5" />
@@ -333,7 +333,7 @@ export default function TeamSettingsPage() {
               <div className="pt-4 flex gap-4">
                 <button 
                   onClick={() => setIsInviteModalOpen(false)}
-                  className="flex-1 rounded-xl border border-gray-100 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:border-gray-800"
+                  className="flex-1 rounded-xl border border-gray-100 dark:border-gray-800 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800"
                 >
                   Cancel
                 </button>

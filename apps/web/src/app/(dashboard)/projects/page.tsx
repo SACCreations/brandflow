@@ -212,7 +212,7 @@ export default function ProjectsPage() {
         <p className="text-sm text-gray-500">We couldn't load your projects right now. Please try again in a moment.</p>
         <button
           onClick={() => queryClient.invalidateQueries({ queryKey: ['projects'] })}
-          className="rounded-xl bg-gray-100 px-6 py-2 text-sm font-bold text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white"
+          className="rounded-xl bg-gray-100 px-6 py-2 text-sm font-bold text-gray-900 dark:text-white hover:bg-gray-200 dark:bg-gray-800 dark:text-white"
         >
           Try Again
         </button>
@@ -235,7 +235,7 @@ export default function ProjectsPage() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900 md:flex-row md:items-center md:justify-between">
         <div className="relative w-full md:max-w-sm">
           <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
@@ -243,14 +243,14 @@ export default function ProjectsPage() {
             placeholder="Search projects or clients..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full rounded-xl border border-gray-100 bg-gray-50 py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+            className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
           />
         </div>
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
-            className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+            className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
           >
             <option value="all">All statuses</option>
             <option value="active">Active</option>
@@ -260,7 +260,7 @@ export default function ProjectsPage() {
           <select
             value={customerFilter}
             onChange={(event) => setCustomerFilter(event.target.value)}
-            className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+            className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
           >
             <option value="all">All clients</option>
             {customers?.map((customer) => (
@@ -272,7 +272,7 @@ export default function ProjectsPage() {
 
       {/* Stats Mini-Bar */}
       <div className="grid gap-6 md:grid-cols-4">
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-2 dark:bg-blue-500/10"><LayoutIcon className="h-5 w-5 text-blue-600" /></div>
             <div>
@@ -281,7 +281,7 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-emerald-50 p-2 dark:bg-emerald-500/10"><CheckIcon className="h-5 w-5 text-emerald-600" /></div>
             <div>
@@ -290,7 +290,7 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-amber-50 p-2 dark:bg-amber-500/10"><DollarIcon className="h-5 w-5 text-amber-600" /></div>
             <div>
@@ -301,7 +301,7 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-purple-50 p-2 dark:bg-purple-500/10"><UsersIcon className="h-5 w-5 text-purple-600" /></div>
             <div>
@@ -315,7 +315,7 @@ export default function ProjectsPage() {
       {/* Projects Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {projects?.map((project) => (
-          <div key={project.id} className="group relative overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 transition-all hover:shadow-2xl dark:border-gray-800 dark:bg-gray-900 hover:-translate-y-1">
+          <div key={project.id} className="group relative overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all hover:shadow-2xl dark:border-gray-800 dark:bg-gray-900 hover:-translate-y-1">
             <div className="flex items-start justify-between">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-brand-500/10">
                 <ProjectIcon className="h-6 w-6" />
@@ -323,7 +323,7 @@ export default function ProjectsPage() {
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button 
                   onClick={() => handleEdit(project)}
-                  className="rounded-lg p-2 text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="rounded-lg p-2 text-gray-400 hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800"
                 >
                   <EditIcon className="h-4 w-4" />
                 </button>
@@ -392,8 +392,8 @@ export default function ProjectsPage() {
         ))}
 
         {projects?.length === 0 && (
-          <div className="col-span-full rounded-3xl border border-dashed border-gray-200 bg-white/60 p-12 text-center dark:border-gray-800 dark:bg-gray-900/70">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-gray-300 dark:bg-gray-800">
+          <div className="col-span-full rounded-3xl border border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/60 p-12 text-center dark:border-gray-800 dark:bg-gray-900/70">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-950 text-gray-300 dark:bg-gray-800">
               <ProjectIcon className="h-8 w-8" />
             </div>
             <h3 className="mt-4 text-lg font-bold text-gray-900 dark:text-white">No projects match these filters</h3>
@@ -405,13 +405,13 @@ export default function ProjectsPage() {
       {/* Project Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full max-w-xl rounded-3xl border border-gray-100 bg-white p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
+          <div className="w-full max-w-xl rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{editingProject ? 'Edit Project' : 'Initiate New Project'}</h2>
                 <p className="text-sm text-gray-500">Configure your project parameters and timeline.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-gray-50 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
+              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-gray-50 dark:bg-gray-950 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
                 <XIcon className="h-5 w-5" />
               </button>
             </div>
@@ -423,7 +423,7 @@ export default function ProjectsPage() {
                   <input 
                     type="text" 
                     placeholder="e.g. Q3 Marketing Blitz"
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
@@ -431,7 +431,7 @@ export default function ProjectsPage() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assign Client</label>
                   <select 
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={formData.customerId}
                     onChange={(e) => setFormData({...formData, customerId: e.target.value})}
                   >
@@ -448,7 +448,7 @@ export default function ProjectsPage() {
                 <textarea 
                   rows={3}
                   placeholder="What are the main objectives?"
-                  className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                  className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
@@ -459,7 +459,7 @@ export default function ProjectsPage() {
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Start Date</label>
                   <input 
                     type="date" 
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={formData.startDate}
                     onChange={(e) => setFormData({...formData, startDate: e.target.value})}
                   />
@@ -468,7 +468,7 @@ export default function ProjectsPage() {
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">End Date</label>
                   <input 
                     type="date" 
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={formData.endDate}
                     onChange={(e) => setFormData({...formData, endDate: e.target.value})}
                   />
@@ -481,7 +481,7 @@ export default function ProjectsPage() {
                   <input 
                     type="number" 
                     placeholder="0.00"
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={formData.budget}
                     onChange={(e) => setFormData({...formData, budget: e.target.value})}
                   />
@@ -489,7 +489,7 @@ export default function ProjectsPage() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</label>
                   <select 
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={formData.status}
                     onChange={(e) => setFormData({...formData, status: e.target.value})}
                   >
@@ -503,7 +503,7 @@ export default function ProjectsPage() {
               <div className="pt-6 flex gap-4">
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl border border-gray-100 py-3.5 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:border-gray-800"
+                  className="flex-1 rounded-xl border border-gray-100 dark:border-gray-800 py-3.5 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800"
                 >
                   Cancel
                 </button>

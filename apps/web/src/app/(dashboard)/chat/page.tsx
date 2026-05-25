@@ -124,7 +124,7 @@ export default function ChatPage() {
     <div className="flex h-[calc(100vh-6rem)] animate-in fade-in duration-500">
       {/* Sidebar — Conversations */}
       <div className="hidden w-72 flex-shrink-0 flex-col border-r border-gray-100 dark:border-gray-800 md:flex">
-        <div className="flex items-center justify-between border-b border-gray-100 p-4 dark:border-gray-800">
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Conversations</h2>
           <button
             onClick={handleNewChat}
@@ -137,14 +137,14 @@ export default function ChatPage() {
 
         {/* Brand filter */}
         {brands && brands.length > 0 && (
-          <div className="border-b border-gray-100 p-3 dark:border-gray-800">
+          <div className="border-b border-gray-100 dark:border-gray-800 p-3 dark:border-gray-800">
             <select
               value={selectedBrandId || ''}
               onChange={(e) => {
                 setSelectedBrandId(e.target.value || undefined);
                 fetchConversations(e.target.value || undefined);
               }}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+              className="w-full rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
             >
               <option value="">All brands</option>
               {brands.map((b) => (
@@ -162,7 +162,7 @@ export default function ChatPage() {
             conversations.map((conv) => (
               <div
                 key={conv.id}
-                className={`group flex cursor-pointer items-start gap-2 border-b border-gray-50 px-4 py-3 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 ${
+                className={`group flex cursor-pointer items-start gap-2 border-b border-gray-50 px-4 py-3 transition-colors hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800/50 ${
                   conv.id === activeConversationId ? 'bg-brand-50 dark:bg-brand-500/10' : ''
                 }`}
                 onClick={() => selectConversation(conv.id)}
@@ -197,7 +197,7 @@ export default function ChatPage() {
       {/* Main Chat Area */}
       <div className="flex flex-1 flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-3 dark:border-gray-800">
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-3 dark:border-gray-800">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 text-white">
               <Sparkles className="h-4 w-4" />
@@ -214,7 +214,7 @@ export default function ChatPage() {
               <select
                 value={selectedBrandId || ''}
                 onChange={(e) => setSelectedBrandId(e.target.value || undefined)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
               >
                 <option value="">No brand context</option>
                 {brands.map((b) => (
@@ -225,7 +225,7 @@ export default function ChatPage() {
             {activeConversationId && (
               <button
                 onClick={handleNewChat}
-                className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-800 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
               >
                 <RotateCcw className="h-3 w-3" />
                 New Chat
@@ -254,7 +254,7 @@ export default function ChatPage() {
                   <button
                     key={i}
                     onClick={() => handleSend(suggestion.text)}
-                    className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 text-left transition-all hover:border-brand-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-900 dark:hover:border-brand-600"
+                    className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-left transition-all hover:border-brand-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-900 dark:hover:border-brand-600"
                   >
                     <suggestion.icon className="h-5 w-5 shrink-0 text-brand-500" />
                     <span className="text-sm text-gray-700 dark:text-gray-300">{suggestion.text}</span>
@@ -283,7 +283,7 @@ export default function ChatPage() {
                         className={`rounded-2xl px-4 py-3 ${
                           msg.role === 'user'
                             ? 'bg-brand-600 text-white'
-                            : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                            : 'bg-gray-100 text-gray-900 dark:text-white dark:bg-gray-800 dark:text-gray-100'
                         }`}
                       >
                         <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
@@ -330,9 +330,9 @@ export default function ChatPage() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-gray-100 px-6 py-4 dark:border-gray-800">
+        <div className="border-t border-gray-100 dark:border-gray-800 px-6 py-4 dark:border-gray-800">
           <div className="mx-auto max-w-3xl">
-            <div className="flex items-end gap-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <div className="flex items-end gap-3 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 shadow-sm dark:border-gray-700 dark:bg-gray-900">
               <textarea
                 ref={inputRef}
                 value={input}
@@ -340,7 +340,7 @@ export default function ChatPage() {
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about your brand, request content ideas, or get writing help..."
                 rows={1}
-                className="flex-1 resize-none bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white"
+                className="flex-1 resize-none bg-transparent text-sm text-gray-900 dark:text-white outline-none placeholder:text-gray-400 dark:text-white"
                 style={{ maxHeight: '120px' }}
                 disabled={isSending}
               />
@@ -374,7 +374,7 @@ export default function ChatPage() {
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900"
+              className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-xl dark:bg-gray-900"
             >
               {convertSuccess ? (
                 <div className="flex flex-col items-center gap-3 py-4">
@@ -396,7 +396,7 @@ export default function ChatPage() {
                     </button>
                   </div>
 
-                  <div className="mb-4 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                  <div className="mb-4 rounded-lg bg-gray-50 dark:bg-gray-950 p-3 dark:bg-gray-800">
                     <p className="line-clamp-3 text-xs text-gray-600 dark:text-gray-400">
                       {convertModal.content}
                     </p>
@@ -410,7 +410,7 @@ export default function ChatPage() {
                       <select
                         value={convertPlatform}
                         onChange={(e) => setConvertPlatform(e.target.value)}
-                        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        className="w-full rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                       >
                         {PLATFORMS.map((p) => (
                           <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
@@ -424,7 +424,7 @@ export default function ChatPage() {
                       <select
                         value={convertType}
                         onChange={(e) => setConvertType(e.target.value)}
-                        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        className="w-full rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                       >
                         {CONTENT_TYPES.map((t) => (
                           <option key={t} value={t}>

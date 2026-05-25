@@ -315,9 +315,9 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Editor Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 bg-white pb-6 dark:border-gray-800 dark:bg-transparent">
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pb-6 dark:border-gray-800 dark:bg-transparent">
         <div className="flex items-center gap-4">
-          <Link href={backHref} className="rounded-xl border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800">
+          <Link href={backHref} className="rounded-xl border border-gray-200 dark:border-gray-800 p-2 text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
@@ -333,7 +333,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending || !isDirty}
             aria-label="Save content"
-            className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:bg-gray-950 disabled:opacity-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             {saveMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -367,7 +367,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
               <Calendar className="h-4 w-4" /> {workflowButtonLabel}
             </Link>
           )}
-          <button className="rounded-xl border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800">
+          <button className="rounded-xl border border-gray-200 dark:border-gray-800 p-2 text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800">
             <MoreVertical className="h-5 w-5" />
           </button>
         </div>
@@ -379,7 +379,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
 
 
         {/* Editor Area */}
-        <div className="lg:col-span-8 flex flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+        <div className="lg:col-span-8 flex flex-col rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
 
           
           <textarea 
@@ -389,7 +389,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
             onChange={(e) => setContent(e.target.value)}
           />
 
-          <div className="p-4 border-t border-gray-100 bg-gray-50/30 flex items-center justify-between dark:border-gray-800">
+          <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/30 flex items-center justify-between dark:border-gray-800">
             <div className="flex gap-4 text-xs font-bold text-gray-400">
               <span>Words: {content.trim() ? content.trim().split(/\s+/).length : 0}</span>
               <span>Reading time: {Math.max(1, Math.ceil((content.trim() ? content.trim().split(/\s+/).length : 0) / 200))}m</span>
@@ -451,7 +451,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                   <label className="block space-y-2">
                     <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Social account</span>
                     <select
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                      className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                       value={selectedSocialAccountId}
                       onChange={(event) => setSelectedSocialAccountId(event.target.value)}
                     >
@@ -467,7 +467,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                     <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Publish at</span>
                     <input
                       type="datetime-local"
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                      className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                       value={scheduleAt}
                       min={new Date().toISOString().slice(0, 16)}
                       onChange={(event) => setScheduleAt(event.target.value)}
@@ -484,7 +484,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                   </Button>
                 </div>
               ) : (
-                <div className="mt-4 space-y-4 rounded-xl border border-dashed border-gray-200 p-4 text-sm text-gray-500 dark:border-gray-800">
+                <div className="mt-4 space-y-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 p-4 text-sm text-gray-500 dark:border-gray-800">
                   <p>Connect a social account before scheduling approved content.</p>
                   <Link href="/publish/social">
                     <Button variant="outline" className="w-full">Connect account</Button>
@@ -492,7 +492,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                 </div>
               )
             ) : (
-              <div className="mt-4 rounded-xl border border-dashed border-gray-200 p-4 text-sm text-gray-500 dark:border-gray-800">
+              <div className="mt-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 p-4 text-sm text-gray-500 dark:border-gray-800">
                 {data.status === 'scheduled'
                   ? 'This content is already queued for publishing.'
                   : 'Approve the content before it can move into the scheduler.'}
@@ -500,9 +500,9 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
             )}
 
             {hasSchedules && (
-              <div className="mt-4 space-y-3 border-t border-gray-100 pt-4 dark:border-gray-800">
+              <div className="mt-4 space-y-3 border-t border-gray-100 dark:border-gray-800 pt-4 dark:border-gray-800">
                 {data.schedules.map((schedule) => (
-                  <div key={schedule.id} className="rounded-xl border border-gray-100 p-4 dark:border-gray-800">
+                  <div key={schedule.id} className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="text-sm font-semibold text-gray-900 dark:text-white">{schedule.socialAccount.name}</div>
@@ -545,7 +545,7 @@ function ToolbarButton({ icon, active }: any) {
 
 function WorkflowRow({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 px-4 py-3 dark:border-gray-800">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-3 dark:border-gray-800">
       <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
         <span className="text-brand-600">{icon}</span>
         <span>{label}</span>

@@ -104,7 +104,7 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" role="dialog" aria-modal="true" aria-labelledby="add-source-title">
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-gray-900 border border-gray-200 dark:border-gray-800 animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-white dark:bg-gray-900 shadow-2xl dark:bg-gray-900 border border-gray-200 dark:border-gray-800 animate-in zoom-in-95 duration-300">
         
         {/* Close Button */}
         <button 
@@ -130,7 +130,7 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
               <p className="mt-2 text-gray-500 dark:text-gray-400">Select how you want to ingest knowledge into your brand brain.</p>
 
               {/* Tabs */}
-              <div className="mt-6 flex gap-2 border-b border-gray-200 pb-2 dark:border-gray-800 overflow-x-auto scrollbar-none">
+              <div className="mt-6 flex gap-2 border-b border-gray-200 dark:border-gray-800 pb-2 dark:border-gray-800 overflow-x-auto scrollbar-none">
                 {[
                   { id: 'web', label: 'Website URL', icon: Globe },
                   { id: 'file', label: 'File Upload', icon: Upload },
@@ -143,7 +143,7 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
                     className={`flex shrink-0 items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all border-b-2 -mb-[9px] ${
                       selectedType === tab.id
                         ? 'border-brand-500 text-brand-600 dark:text-brand-500'
-                        : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
+                        : 'border-transparent text-gray-500 hover:text-gray-900 dark:text-white dark:hover:text-gray-300'
                     }`}
                   >
                     <tab.icon className="h-4 w-4" />
@@ -184,7 +184,7 @@ function BrandSelector({ brandId, brands, isBrandsLoading, setBrandId }: SourceF
       <select
         value={brandId}
         onChange={(event) => setBrandId(event.target.value)}
-        className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800 dark:text-white"
+        className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800 dark:text-white"
       >
         <option value="">{isBrandsLoading ? 'Loading brands…' : 'Select a brand'}</option>
         {brands.map((brand) => (
@@ -206,9 +206,9 @@ function SourceOption({ icon, title, description, onClick }: any) {
   return (
     <button 
       onClick={onClick}
-      className="group flex flex-col items-start rounded-2xl border border-gray-200 bg-white p-6 text-left transition-all hover:border-brand-500 hover:shadow-xl hover:shadow-brand-500/5 dark:border-gray-800 dark:bg-gray-900/50 dark:hover:border-brand-500"
+      className="group flex flex-col items-start rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 text-left transition-all hover:border-brand-500 hover:shadow-xl hover:shadow-brand-500/5 dark:border-gray-800 dark:bg-gray-900/50 dark:hover:border-brand-500"
     >
-      <div className="mb-4 rounded-xl bg-gray-50 p-3 transition-colors group-hover:bg-brand-50 dark:bg-gray-800 dark:group-hover:bg-brand-500/10">
+      <div className="mb-4 rounded-xl bg-gray-50 dark:bg-gray-950 p-3 transition-colors group-hover:bg-brand-50 dark:bg-gray-800 dark:group-hover:bg-brand-500/10">
         {icon}
       </div>
       <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
@@ -263,7 +263,7 @@ function WebSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId
           <button 
             key={m}
             onClick={() => setMethod(m)}
-            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all capitalize ${method === m ? 'bg-white text-brand-600 shadow-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500'}`}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all capitalize ${method === m ? 'bg-white dark:bg-gray-900 text-brand-600 shadow-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500'}`}
           >
             {m}
           </button>
@@ -281,7 +281,7 @@ function WebSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://example.com/..." 
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800 dark:text-white"
           />
         </div>
       </div>
@@ -418,10 +418,10 @@ function FileSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandI
         className={`mt-6 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-all group cursor-pointer ${
           isDragging 
             ? 'border-brand-500 bg-brand-50/20 dark:bg-brand-900/20' 
-            : 'border-gray-200 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/30 hover:border-brand-500 hover:bg-brand-50/10'
+            : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 dark:border-gray-800 dark:bg-gray-800/30 hover:border-brand-500 hover:bg-brand-50/10'
         }`}
       >
-        <div className="rounded-full bg-white p-4 shadow-sm dark:bg-gray-800 group-hover:scale-110 transition-transform">
+        <div className="rounded-full bg-white dark:bg-gray-900 p-4 shadow-sm dark:bg-gray-800 group-hover:scale-110 transition-transform">
           <Upload className="h-8 w-8 text-brand-600" />
         </div>
         <p className="mt-6 text-sm font-bold text-gray-900 dark:text-white">
@@ -497,7 +497,7 @@ function ApiSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Q4 Competitor Analysis" 
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm dark:border-gray-800 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm dark:border-gray-800 dark:bg-gray-800 dark:text-white"
           />
         </div>
         <div>
@@ -507,7 +507,7 @@ function ApiSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Paste text here..." 
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm dark:border-gray-800 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm dark:border-gray-800 dark:bg-gray-800 dark:text-white"
           />
         </div>
       </div>
@@ -551,12 +551,12 @@ function IntegrationSourceForm({ onSuccess }: any) {
             key={app.name}
             disabled={app.status === 'coming soon'}
             onClick={() => app.status !== 'coming soon' && onSuccess()}
-            className={`flex w-full items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 transition-all dark:border-gray-800 dark:bg-gray-900/50 ${
+            className={`flex w-full items-center justify-between rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 transition-all dark:border-gray-800 dark:bg-gray-900/50 ${
               app.status === 'coming soon' ? 'opacity-50 grayscale' : 'hover:border-brand-500 hover:shadow-md'
             }`}
           >
             <div className="flex items-center gap-4">
-              <div className="rounded-lg bg-gray-50 p-2.5 dark:bg-gray-800">{app.icon}</div>
+              <div className="rounded-lg bg-gray-50 dark:bg-gray-950 p-2.5 dark:bg-gray-800">{app.icon}</div>
               <span className="font-bold text-gray-900 dark:text-white">{app.name}</span>
             </div>
             <div className="flex items-center gap-2">

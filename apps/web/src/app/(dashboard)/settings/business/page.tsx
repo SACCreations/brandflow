@@ -77,7 +77,7 @@ export default function BusinessSettingsPage() {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Profile Section */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
           <div className="mb-6 flex items-center gap-3">
             <div className="rounded-xl bg-brand-50 p-2.5 dark:bg-brand-900/20">
               <Building2 className="h-5 w-5 text-brand-600" />
@@ -95,7 +95,7 @@ export default function BusinessSettingsPage() {
                 type="text"
                 value={currentValues.name ?? ''}
                 onChange={(e) => updateField('name', e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 placeholder="Your business name"
               />
             </div>
@@ -105,7 +105,7 @@ export default function BusinessSettingsPage() {
               <select
                 value={currentValues.industry ?? ''}
                 onChange={(e) => updateField('industry', e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               >
                 <option value="">Select industry</option>
                 <option value="technology">Technology</option>
@@ -129,7 +129,7 @@ export default function BusinessSettingsPage() {
                   type="url"
                   value={currentValues.website ?? ''}
                   onChange={(e) => updateField('website', e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                   placeholder="https://example.com"
                 />
               </div>
@@ -142,7 +142,7 @@ export default function BusinessSettingsPage() {
                 <select
                   value={currentValues.timezone ?? 'UTC'}
                   onChange={(e) => updateField('timezone', e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 >
                   <option value="UTC">UTC</option>
                   <option value="America/New_York">Eastern Time (US)</option>
@@ -164,7 +164,7 @@ export default function BusinessSettingsPage() {
                 value={currentValues.description ?? ''}
                 onChange={(e) => updateField('description', e.target.value)}
                 rows={3}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 placeholder="Brief description of your business"
               />
             </div>
@@ -172,7 +172,7 @@ export default function BusinessSettingsPage() {
         </div>
 
         {/* Preferences Section */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
           <div className="mb-6 flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-2.5 dark:bg-blue-900/20">
               <Shield className="h-5 w-5 text-blue-600" />
@@ -189,7 +189,7 @@ export default function BusinessSettingsPage() {
               <select
                 value={currentValues.defaultLanguage ?? 'en'}
                 onChange={(e) => updateField('defaultLanguage', e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               >
                 <option value="en">English</option>
                 <option value="ar">Arabic</option>
@@ -205,7 +205,7 @@ export default function BusinessSettingsPage() {
                 type="text"
                 value={currentValues.slug ?? ''}
                 disabled
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-2.5 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400"
               />
               <p className="text-xs text-gray-400">Used in URLs. Cannot be changed.</p>
             </div>
@@ -247,7 +247,7 @@ export default function BusinessSettingsPage() {
         </p>
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-xl border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30"
+          className="inline-flex items-center gap-2 rounded-xl border border-red-300 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30"
           onClick={() => {
             if (window.confirm('Are you sure you want to delete this workspace? This action cannot be undone.')) {
               // Handle workspace deletion

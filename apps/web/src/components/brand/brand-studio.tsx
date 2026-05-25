@@ -171,7 +171,7 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
   return (
     <div className="fixed inset-0 z-50 flex bg-white dark:bg-gray-950 overflow-hidden text-gray-900 dark:text-gray-100 print:relative print:overflow-visible">
       {/* 1. Left Navigation Sidebar (Fixed) */}
-      <aside className="w-64 border-r border-gray-100 dark:border-gray-800 hidden lg:flex flex-col fixed h-screen bg-white/50 dark:bg-gray-950/50 backdrop-blur-xl z-20 print:hidden">
+      <aside className="w-64 border-r border-gray-100 dark:border-gray-800 hidden lg:flex flex-col fixed h-screen bg-white dark:bg-gray-900/50 dark:bg-gray-950/50 backdrop-blur-xl z-20 print:hidden">
         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 bg-white dark:bg-gray-950">
           <Link href="/intelligence/brands">
             <button className="p-2 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-xl transition-all border border-gray-100 dark:border-gray-800 active:scale-95 shadow-sm group">
@@ -208,13 +208,13 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
                       className={cn(
                         "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-tight transition-all group",
                         isActive 
-                          ? "bg-gray-900 text-white shadow-xl shadow-gray-900/20 dark:bg-white dark:text-gray-900" 
-                          : "text-gray-500 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100"
+                          ? "bg-gray-900 text-white shadow-xl shadow-gray-900/20 dark:bg-white dark:bg-gray-900 dark:text-gray-900 dark:text-white" 
+                          : "text-gray-500 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:text-white dark:hover:text-gray-100"
                       )}
                     >
                       <div className={cn(
                         "w-6 h-6 rounded-lg flex items-center justify-center text-[10px] transition-all duration-300",
-                        isActive ? "bg-white/10 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-400"
+                        isActive ? "bg-white dark:bg-gray-900/10 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-400"
                       )}>
                         {absoluteStep}
                       </div>
@@ -236,11 +236,11 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
         </nav>
         
         <div className="p-6">
-          <div className="p-5 rounded-3xl bg-gray-900 dark:bg-white shadow-2xl space-y-4 overflow-hidden relative group">
+          <div className="p-5 rounded-3xl bg-gray-900 dark:bg-white dark:bg-gray-900 shadow-2xl space-y-4 overflow-hidden relative group">
             <div className="relative z-10 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-gray-300 transition-colors">Identity Score</span>
-                <span className="text-xl font-black text-white dark:text-gray-900 tracking-tighter">
+                <span className="text-xl font-black text-white dark:text-gray-900 dark:text-white tracking-tighter">
                   {Math.round((SECTIONS.indexOf(SECTIONS.find(s => s.id === activeSection)!) + 1) / SECTIONS.length * 100)}%
                 </span>
               </div>
@@ -281,9 +281,9 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
       {/* 2. Main Content Area (Scrollable) */}
       <main className="flex-1 lg:pl-64 xl:pr-96 h-screen overflow-y-auto scroll-smooth print:pl-0 print:pr-0 print:overflow-visible print:h-auto custom-scrollbar">
         {/* Top Workflow Bar */}
-        <div className="sticky top-0 z-20 bg-white/50 dark:bg-gray-950/50 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between">
+        <div className="sticky top-0 z-20 bg-white dark:bg-gray-900/50 dark:bg-gray-950/50 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <div className="flex bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-2xl border border-gray-100/50 dark:border-gray-800/50 shadow-inner">
+            <div className="flex bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-2xl border border-gray-100 dark:border-gray-800/50 dark:border-gray-800/50 shadow-inner">
               <button 
                 type="button"
                 className={cn(
@@ -299,7 +299,7 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
                 onClick={() => toast({ title: 'Content Lab', description: 'Redirecting to generation engine...' })}
                 className={cn(
                   "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all flex items-center gap-2",
-                  "text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                  "text-gray-400 hover:text-gray-900 dark:text-white dark:hover:text-gray-100"
                 )}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -322,7 +322,7 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
             <button 
               type="button"
               onClick={() => toast({ title: 'Collaboration', description: 'Invite your team members to this brand.' })}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-[10px] font-black uppercase tracking-widest text-gray-500 transition-all active:scale-95 shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800 text-[10px] font-black uppercase tracking-widest text-gray-500 transition-all active:scale-95 shadow-sm"
             >
               <Users className="w-4 h-4" />
               Collaborators
@@ -368,8 +368,8 @@ export function BrandStudio({ initialData, onSubmit, isLoading, title, onSuccess
         <Tabs defaultValue="preview" className="h-full flex flex-col">
           <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
             <TabsList className="bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-xl">
-              <TabsTrigger value="preview" className="rounded-lg text-[10px] font-black uppercase tracking-widest px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">Preview</TabsTrigger>
-              <TabsTrigger value="copilot" className="rounded-lg text-[10px] font-black uppercase tracking-widest px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">Co-pilot</TabsTrigger>
+              <TabsTrigger value="preview" className="rounded-lg text-[10px] font-black uppercase tracking-widest px-4 data-[state=active]:bg-white dark:bg-gray-900 data-[state=active]:shadow-sm">Preview</TabsTrigger>
+              <TabsTrigger value="copilot" className="rounded-lg text-[10px] font-black uppercase tracking-widest px-4 data-[state=active]:bg-white dark:bg-gray-900 data-[state=active]:shadow-sm">Co-pilot</TabsTrigger>
             </TabsList>
             <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 text-[9px] font-black">Sync On</Badge>
           </div>

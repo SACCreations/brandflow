@@ -32,7 +32,7 @@ export function ColorPicker({ value = '#000000', onChange, label, description }:
             type="color"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="w-12 h-12 rounded-lg border border-gray-200 cursor-pointer p-0 overflow-hidden"
+            className="w-12 h-12 rounded-lg border border-gray-200 dark:border-gray-800 cursor-pointer p-0 overflow-hidden"
           />
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
             <Pipette className="w-4 h-4 text-white drop-shadow-md mix-blend-difference" />

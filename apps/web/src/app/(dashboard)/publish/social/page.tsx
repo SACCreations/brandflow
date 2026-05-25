@@ -173,7 +173,7 @@ export default function SocialAccountsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {platforms.map((platform) => (
-          <div key={platform.id} className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+          <div key={platform.id} className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center gap-4">
               <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${platform.color} text-sm font-black text-white`}>
                 {platform.icon}
@@ -215,7 +215,7 @@ export default function SocialAccountsPage() {
       </div>
 
       <div className="grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <ShieldCheck className="h-5 w-5 text-brand-600" />
             <div>
@@ -229,7 +229,7 @@ export default function SocialAccountsPage() {
               <select
                 value={form.platform}
                 onChange={(event) => setForm((current) => ({ ...current, platform: event.target.value }))}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
               >
                 {platforms.map((platform) => (
                   <option key={platform.id} value={platform.id}>{platform.label}</option>
@@ -242,7 +242,7 @@ export default function SocialAccountsPage() {
                 value={form.accountType}
                 onChange={(event) => setForm((current) => ({ ...current, accountType: event.target.value }))}
                 placeholder="company"
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
               />
             </Field>
 
@@ -251,7 +251,7 @@ export default function SocialAccountsPage() {
                 value={form.name}
                 onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
                 placeholder="BrandFlow LinkedIn"
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
               />
             </Field>
 
@@ -260,7 +260,7 @@ export default function SocialAccountsPage() {
                 value={form.externalId}
                 onChange={(event) => setForm((current) => ({ ...current, externalId: event.target.value }))}
                 placeholder="company-123456"
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
               />
             </Field>
 
@@ -270,7 +270,7 @@ export default function SocialAccountsPage() {
                 value={form.accessToken}
                 onChange={(event) => setForm((current) => ({ ...current, accessToken: event.target.value }))}
                 placeholder="Paste provider token"
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
               />
             </Field>
 
@@ -280,7 +280,7 @@ export default function SocialAccountsPage() {
                 value={form.refreshToken}
                 onChange={(event) => setForm((current) => ({ ...current, refreshToken: event.target.value }))}
                 placeholder="Provider refresh token"
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
               />
             </Field>
 
@@ -289,7 +289,7 @@ export default function SocialAccountsPage() {
                 type="datetime-local"
                 value={form.tokenExpiresAt}
                 onChange={(event) => setForm((current) => ({ ...current, tokenExpiresAt: event.target.value }))}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
               />
             </Field>
 
@@ -298,7 +298,7 @@ export default function SocialAccountsPage() {
                 value={form.scopes}
                 onChange={(event) => setForm((current) => ({ ...current, scopes: event.target.value }))}
                 placeholder="w_member_social, r_organization_social"
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
               />
             </Field>
           </div>
@@ -318,8 +318,8 @@ export default function SocialAccountsPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-          <div className="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+          <div className="border-b border-gray-200 dark:border-gray-800 px-6 py-4 dark:border-gray-800">
             <h2 className="font-semibold text-gray-900 dark:text-white">Connected Accounts</h2>
           </div>
 
@@ -380,7 +380,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function InfoPill({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-gray-100 px-4 py-3 dark:border-gray-800">
+    <div className="rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-3 dark:border-gray-800">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400">
         {icon}
         {label}

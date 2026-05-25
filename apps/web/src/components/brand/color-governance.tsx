@@ -71,7 +71,7 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
         <Button 
           size="sm" 
           onClick={addColor}
-          className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 rounded-lg text-[10px] font-black uppercase shadow-sm"
+          className="bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white hover:bg-gray-800 dark:hover:bg-gray-200 rounded-lg text-[10px] font-black uppercase shadow-sm"
         >
           <Plus className="w-3 h-3 mr-1.5" /> Add Color
         </Button>
@@ -87,7 +87,7 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
           />
         ))}
         {filteredColors.length === 0 && (
-          <div className="col-span-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/50">
+          <div className="col-span-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50 dark:bg-gray-950/50">
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No {activeType} colors defined</p>
           </div>
         )}
@@ -119,7 +119,7 @@ function ColorCard({ color, onUpdate, onRemove }: {
           <Input 
             value={color.name} 
             onChange={(e) => onUpdate({ name: e.target.value })}
-            className="h-10 text-xs font-bold border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl px-3 text-gray-900 dark:text-white placeholder:text-gray-400"
+            className="h-10 text-xs font-bold border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 rounded-xl px-3 text-gray-900 dark:text-white placeholder:text-gray-400"
           />
         </div>
 
@@ -145,7 +145,7 @@ function ColorCard({ color, onUpdate, onRemove }: {
 
       <div className="flex items-center gap-2 pt-1">
         <div className="flex -space-x-1">
-          <div className="w-4 h-4 rounded-full border border-white dark:border-gray-900 bg-white shadow-sm" />
+          <div className="w-4 h-4 rounded-full border border-white dark:border-gray-900 bg-white dark:bg-gray-900 shadow-sm" />
           <div className="w-4 h-4 rounded-full border border-white dark:border-gray-900 bg-gray-900 shadow-sm" />
         </div>
         <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Compatible with dark mode</span>

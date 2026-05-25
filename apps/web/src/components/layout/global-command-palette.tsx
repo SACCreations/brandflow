@@ -111,7 +111,7 @@ export function GlobalCommandPalette() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 dark:border-gray-700 dark:bg-gray-800">
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 dark:border-gray-700 dark:bg-gray-800">
               ESC
             </kbd>
           </div>
@@ -150,7 +150,7 @@ export function GlobalCommandPalette() {
             <div className="py-12 text-center text-sm text-gray-400">No results found</div>
           )}
         </div>
-        <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50/50 px-4 py-2.5 text-[10px] text-gray-400 dark:border-gray-800 dark:bg-gray-800/50">
+        <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 px-4 py-2.5 text-[10px] text-gray-400 dark:border-gray-800 dark:bg-gray-800/50">
           <div className="flex gap-4">
             <span><kbd className="font-bold">↵</kbd> Open</span>
             <span><kbd className="font-bold">↑↓</kbd> Navigate</span>

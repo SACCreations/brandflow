@@ -148,7 +148,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
   return (
     <div className="fixed inset-0 z-50 bg-gray-50 dark:bg-gray-950 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="h-20 border-b border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl sticky top-0 z-50 px-8 flex items-center justify-between">
+      <header className="h-20 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/95 dark:bg-gray-900/95 backdrop-blur-xl sticky top-0 z-50 px-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <motion.div 
             initial={{ scale: 0.8, rotate: -10 }}
@@ -208,8 +208,8 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar Nav */}
-        <aside className="w-80 flex-shrink-0 border-r border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 hidden lg:block overflow-y-auto custom-scrollbar">
-          <nav aria-label="Wizard steps" role="tablist" aria-orientation="vertical" className="space-y-1">
+        <aside className="w-72 flex-shrink-0 border-r border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/50 dark:bg-gray-900/50 backdrop-blur-md p-6 hidden lg:block overflow-y-auto custom-scrollbar">
+          <nav aria-label="Wizard steps" role="tablist" aria-orientation="vertical" className="space-y-2">
             {STEPS.map((step, idx) => {
               const isActive = currentStepIdx === idx;
               const isVisited = idx <= maxVisitedStepIdx;
@@ -223,39 +223,38 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
                   aria-disabled={!isVisited}
                   onClick={() => handleStepClick(idx)}
                   className={cn(
-                    "w-full flex items-start gap-4 p-4 rounded-2xl transition-all text-left group relative",
+                    "w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left group relative border",
                     isActive 
-                      ? "bg-brand-50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-800" 
-                      : "hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent",
+                      ? "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm" 
+                      : "hover:bg-white dark:bg-gray-900/50 dark:hover:bg-gray-800/50 border-transparent",
                     !isVisited && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   {isActive && (
                     <motion.div 
                       layoutId="active-step-indicator"
-                      className="absolute left-0 top-4 w-1 h-8 bg-brand-600 rounded-r-full"
+                      className="absolute -left-px top-1/2 -translate-y-1/2 w-1 h-8 bg-brand-600 rounded-r-full"
                     />
                   )}
                   <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                    "w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center transition-all",
                     isActive 
                       ? "bg-brand-600 text-white shadow-lg shadow-brand-500/20" 
                       : isVisited 
-                        ? "bg-emerald-500 text-white" 
-                        : "bg-gray-100 dark:bg-gray-800 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                        ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/20" 
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-400 group-hover:text-gray-900 dark:text-white dark:group-hover:text-white"
                   )}>
                     {isVisited && !isActive ? <CheckCircle2 className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
                   </div>
-                  <div className="flex-1 py-0.5">
+                  <div className="flex-1 py-0.5 min-w-0">
                     <p className={cn(
                       "text-[10px] font-black uppercase tracking-widest leading-none mb-1",
-                      isActive ? "text-brand-600" : "text-gray-400"
+                      isActive ? "text-brand-600 dark:text-brand-400" : "text-gray-400"
                     )}>Step {idx + 1}</p>
                     <p className={cn(
                       "text-xs font-bold truncate",
                       isActive ? "text-gray-900 dark:text-white" : "text-gray-500"
                     )}>{step.label}</p>
-                    <p className="text-[9px] text-gray-400 font-medium truncate mt-0.5">{step.description}</p>
                   </div>
                 </button>
               );
@@ -264,7 +263,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
         </aside>
 
         {/* Main Form Area */}
-        <main className="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-gray-950 px-6 sm:px-12 py-8 sm:py-16 custom-scrollbar relative"
+        <main className="flex-1 min-w-0 overflow-y-auto bg-gray-50 dark:bg-gray-950/30 dark:bg-gray-950 px-6 sm:px-12 py-8 sm:py-16 custom-scrollbar relative"
           role="tabpanel"
           id={`step-panel-${currentStep.id}`}
           aria-labelledby={`step-tab-${currentStep.id}`}
@@ -276,19 +275,19 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
                  key={idx}
                  className={cn(
                    "h-1.5 flex-1 rounded-full transition-colors",
-                   idx <= currentStepIdx ? "bg-brand-600" : "bg-gray-200 dark:bg-gray-700"
+                   idx <= currentStepIdx ? "bg-brand-600" : "bg-gray-200 dark:bg-gray-800"
                  )}
                />
              ))}
            </div>
-           <div className="max-w-2xl mx-auto">
+           <div className="max-w-3xl mx-auto">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentStep.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
                 >
                    <BrandForm 
                       initialData={formData}
@@ -303,12 +302,12 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
               </AnimatePresence>
 
               {/* Navigation Actions */}
-              <div className="mt-12 pt-12 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between sticky bottom-0 bg-gray-50 dark:bg-gray-950/80 dark:bg-gray-950/80 backdrop-blur-xl pb-8 z-10">
                  <Button
                     variant="ghost"
                     onClick={handleBack}
                     disabled={currentStepIdx === 0}
-                    className="rounded-xl font-bold h-12 px-8 text-gray-500"
+                    className="rounded-xl font-bold h-12 px-6 sm:px-8 text-gray-500 hover:text-gray-900 dark:text-white dark:hover:text-white transition-colors"
                  >
                     <ChevronLeft className="w-4 h-4 mr-2" /> Back
                  </Button>
@@ -316,7 +315,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
                  <Button
                     onClick={handleNext}
                     disabled={isLoading || isSubmitting}
-                    className="rounded-xl font-black h-12 px-12 bg-brand-600 hover:bg-brand-700 shadow-xl shadow-brand-500/20 uppercase tracking-tight"
+                    className="rounded-xl font-black h-12 px-8 sm:px-12 bg-brand-600 hover:bg-brand-700 text-white shadow-xl shadow-brand-500/20 uppercase tracking-tight transition-all"
                  >
                     {isSubmitting ? (
                       <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {isEditMode ? 'Saving...' : 'Creating...'}</>
@@ -331,7 +330,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
         </main>
 
         {/* Preview Panel */}
-        <aside className="w-[400px] flex-shrink-0 hidden xl:block border-l border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30">
+        <aside className="w-[450px] flex-shrink-0 hidden xl:block border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 dark:bg-gray-900/50 backdrop-blur-md">
            <LivePreview data={formData} />
         </aside>
       </div>

@@ -69,7 +69,7 @@ export function LogoAssetCard({
                 onClick={() => setBg('light')}
                 className={cn("p-1 rounded transition-all", bg === 'light' ? "bg-white dark:bg-gray-700 shadow-sm" : "opacity-40")}
               >
-                <div className="w-3 h-3 bg-white border border-gray-200 rounded-sm" />
+                <div className="w-3 h-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-sm" />
               </button>
               <button 
                 type="button"
@@ -92,8 +92,8 @@ export function LogoAssetCard({
 
       <div className={cn(
         "relative aspect-video rounded-2xl border-2 border-dashed transition-all duration-300 overflow-hidden flex flex-col items-center justify-center gap-4 text-center",
-        !value ? "border-gray-100 dark:border-gray-800 hover:border-brand-200 bg-gray-50/50 dark:bg-gray-900/30" : "border-transparent shadow-xl",
-        bg === 'dark' && value ? "bg-gray-950" : bg === 'grid' && value ? "bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]" : "bg-white dark:bg-gray-900"
+        !value ? "border-gray-100 dark:border-gray-800 hover:border-brand-200 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-900/30" : "border-transparent shadow-xl",
+        bg === 'dark' && value ? "bg-gray-950" : bg === 'grid' && value ? "bg-white dark:bg-gray-900 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]" : "bg-white dark:bg-gray-900"
       )}>
         {isUploading ? (
           <div className="w-full max-w-[140px] space-y-3">
@@ -120,7 +120,7 @@ export function LogoAssetCard({
                 type="button" 
                 variant="secondary" 
                 size="sm" 
-                className="h-8 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white text-gray-900 hover:bg-gray-100"
+                className="h-8 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white dark:bg-gray-900 text-gray-900 dark:text-white hover:bg-gray-100"
                 asChild
               >
                 <a href={value} target="_blank" rel="noopener noreferrer">

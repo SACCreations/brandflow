@@ -85,16 +85,16 @@ export default function PromptManagementPage() {
               <input 
                 type="text" 
                 placeholder="Search prompt templates..." 
-                className="w-full rounded-xl border border-gray-200 bg-white pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
               />
             </div>
-            <button className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800">
+            <button className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800">
               <Filter className="h-4 w-4" /> Filter
             </button>
           </div>
 
           {prompts.map((prompt) => (
-            <div key={prompt.id} className="group relative rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:border-brand-500 hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
+            <div key={prompt.id} className="group relative rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all hover:border-brand-500 hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`rounded-xl p-2 ${
@@ -124,11 +124,11 @@ export default function PromptManagementPage() {
                 </div>
               </div>
 
-              <div className="mt-4 rounded-xl bg-gray-50 p-4 font-mono text-xs text-gray-600 dark:bg-gray-800/50 dark:text-gray-400 line-clamp-2">
+              <div className="mt-4 rounded-xl bg-gray-50 dark:bg-gray-950 p-4 font-mono text-xs text-gray-600 dark:bg-gray-800/50 dark:text-gray-400 line-clamp-2">
                 {prompt.template}
               </div>
 
-              <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800">
+              <div className="mt-6 flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-4 dark:border-gray-800">
                 <div className="flex items-center gap-4">
                   <span className="text-xs font-bold text-gray-400 flex items-center gap-1">
                     <History className="h-3.5 w-3.5" /> v{prompt.version}
@@ -138,7 +138,7 @@ export default function PromptManagementPage() {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="rounded-lg px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors">
+                  <button className="rounded-lg px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-white transition-colors">
                     History
                   </button>
                   <button className="rounded-lg bg-gray-900 px-4 py-1.5 text-xs font-bold text-white transition-all hover:bg-black dark:bg-brand-600">
@@ -169,7 +169,7 @@ export default function PromptManagementPage() {
               <ResolutionStep label="Campaign Context" template="Highlight 20% discount lead-gen." color="purple" />
             </div>
 
-            <div className="mt-8 rounded-xl bg-white p-4 border border-brand-200 shadow-sm dark:bg-gray-900 dark:border-gray-800">
+            <div className="mt-8 rounded-xl bg-white dark:bg-gray-900 p-4 border border-brand-200 shadow-sm dark:bg-gray-900 dark:border-gray-800">
               <div className="text-[10px] font-bold text-gray-400 uppercase mb-2">Final System Prompt</div>
               <div className="text-[11px] text-gray-600 dark:text-gray-400 font-mono leading-relaxed italic">
                 "Act as a professional marketing manager. Focus on authority. Avoid superlatives like 'world-class'. Highlight the 20% discount..."
@@ -178,7 +178,7 @@ export default function PromptManagementPage() {
           </div>
 
           {/* Governance Rules */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Safety & Governance</h3>
             <div className="space-y-3">
               <RuleItem label="PII Sanitization" active />
@@ -195,9 +195,9 @@ export default function PromptManagementPage() {
 
 function StatCard({ title, value, icon, change }: any) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-center justify-between mb-4">
-        <div className="rounded-xl bg-gray-50 p-2.5 dark:bg-gray-800">{icon}</div>
+        <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-2.5 dark:bg-gray-800">{icon}</div>
         <span className="text-[10px] font-bold text-emerald-600 uppercase">{change}</span>
       </div>
       <div className="text-2xl font-black text-gray-900 dark:text-white">{value}</div>
@@ -211,7 +211,7 @@ function ResolutionStep({ label, template, color }: any) {
     <div className={`rounded-xl border p-3 ${
       color === 'brand' ? 'border-brand-200 bg-brand-50/50' : 
       color === 'purple' ? 'border-purple-200 bg-purple-50/50' : 
-      'border-gray-200 bg-gray-50'
+      'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950'
     } dark:bg-gray-800 dark:border-gray-700`}>
       <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{label}</div>
       <div className="text-[11px] text-gray-600 dark:text-gray-300 truncate">{template}</div>

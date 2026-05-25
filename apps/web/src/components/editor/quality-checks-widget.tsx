@@ -51,9 +51,9 @@ export default function QualityChecksWidget({
   };
 
   return (
-    <div className="flex flex-col h-full rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+    <div className="flex flex-col h-full rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 p-4 dark:border-gray-800">
+      <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-brand-600" />
           <h3 className="font-bold text-gray-900 dark:text-white">AI Quality Guard</h3>
@@ -66,7 +66,7 @@ export default function QualityChecksWidget({
       </div>
 
       {/* Score Overview */}
-      <div className="relative flex flex-col items-center justify-center p-6 bg-gray-50/50 dark:bg-gray-800/30">
+      <div className="relative flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/30">
         <div className="h-32 w-32">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -108,7 +108,7 @@ export default function QualityChecksWidget({
           </div>
         ) : (
           displayViolations.map((v, i) => (
-          <div key={i} className="group relative rounded-xl border border-gray-100 bg-white p-3 transition-all hover:border-brand-500 dark:border-gray-800 dark:bg-gray-900/50">
+          <div key={i} className="group relative rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 transition-all hover:border-brand-500 dark:border-gray-800 dark:bg-gray-900/50">
             <div className="flex items-start gap-3">
               <div className={`mt-0.5 rounded-lg p-1.5 ${
                 v.severity === 'high' ? 'bg-red-50 text-red-600 dark:bg-red-500/10' : 

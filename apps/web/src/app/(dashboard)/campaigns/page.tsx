@@ -182,13 +182,13 @@ export default function CampaignsPage() {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full max-w-lg rounded-3xl border border-gray-100 bg-white p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
+          <div className="w-full max-w-lg rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">Create New Campaign</h2>
                 <p className="text-sm text-gray-500">Define your next strategic initiative.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-gray-50 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
+              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-gray-50 dark:bg-gray-950 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
                 <XCircle className="h-5 w-5" />
               </button>
             </div>
@@ -199,7 +199,7 @@ export default function CampaignsPage() {
                 <input 
                   type="text" 
                   placeholder="e.g. Q3 Product Launch"
-                  className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                  className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                   value={newCampaign.name}
                   onChange={(e) => setNewCampaign({...newCampaign, name: e.target.value})}
                 />
@@ -208,7 +208,7 @@ export default function CampaignsPage() {
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Objective / Description</label>
                 <textarea 
                   placeholder="What is the primary goal of this campaign?"
-                  className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                  className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                   rows={3}
                   value={newCampaign.description}
                   onChange={(e) => setNewCampaign({...newCampaign, description: e.target.value})}
@@ -219,7 +219,7 @@ export default function CampaignsPage() {
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Start Date</label>
                   <input 
                     type="date" 
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={newCampaign.startDate}
                     onChange={(e) => setNewCampaign({...newCampaign, startDate: e.target.value})}
                   />
@@ -228,7 +228,7 @@ export default function CampaignsPage() {
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">End Date</label>
                   <input 
                     type="date" 
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={newCampaign.endDate}
                     onChange={(e) => setNewCampaign({...newCampaign, endDate: e.target.value})}
                   />
@@ -238,7 +238,7 @@ export default function CampaignsPage() {
               <div className="pt-4 flex gap-4">
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl border border-gray-100 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:border-gray-800"
+                  className="flex-1 rounded-xl border border-gray-100 dark:border-gray-800 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800"
                 >
                   Cancel
                 </button>
@@ -264,7 +264,7 @@ export default function CampaignsPage() {
       </div>
 
       {/* Tabs & Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
         <div className="flex items-center gap-6">
           <button 
             onClick={() => setActiveTab('active')}
@@ -285,10 +285,10 @@ export default function CampaignsPage() {
             <input 
               type="text" 
               placeholder="Search campaigns..." 
-              className="rounded-xl border border-gray-200 bg-white pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
+              className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
             />
           </div>
-          <button className="rounded-xl border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800">
+          <button className="rounded-xl border border-gray-200 dark:border-gray-800 p-2 text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800">
             <Filter className="h-5 w-5" />
           </button>
         </div>
@@ -297,19 +297,19 @@ export default function CampaignsPage() {
       {/* Campaign List */}
       <div className="grid gap-6">
         {filteredCampaigns.length === 0 ? (
-          <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 text-sm font-medium text-gray-400 dark:border-gray-800">
+          <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800 text-sm font-medium text-gray-400 dark:border-gray-800">
             No campaigns found for this view.
           </div>
         ) : (
           filteredCampaigns.map((campaign) => (
-            <div key={campaign.id} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
+            <div key={campaign.id} className="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
               <div className="flex items-start justify-between">
                 <div className="flex gap-4">
                   <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-800 text-brand-600`}>
                     <Calendar className="h-6 w-6" />
                   </div>
                   <div>
-                    <Link href={`/campaigns/${campaign.id}`} className="text-lg font-bold text-gray-900 hover:text-brand-600 dark:text-white dark:hover:text-brand-400">
+                    <Link href={`/campaigns/${campaign.id}`} className="text-lg font-bold text-gray-900 dark:text-white hover:text-brand-600 dark:text-white dark:hover:text-brand-400">
                       {campaign.name}
                     </Link>
                     <div className="mt-1 flex items-center gap-4 text-xs text-gray-500 font-medium">
@@ -396,9 +396,9 @@ export default function CampaignsPage() {
 
 function CampaignSummaryCard({ title, value, subValue, icon }: any) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
       <div className="flex items-center justify-between mb-4">
-        <div className="rounded-xl bg-gray-50 p-3 dark:bg-gray-800">{icon}</div>
+        <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-3 dark:bg-gray-800">{icon}</div>
         <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full dark:bg-emerald-500/10">
           {subValue}
         </span>
@@ -412,7 +412,7 @@ function CampaignSummaryCard({ title, value, subValue, icon }: any) {
 function CampaignStat({ label, value, icon }: any) {
   return (
     <div className="flex items-center gap-3">
-      <div className="rounded-lg bg-gray-50 p-1.5 text-gray-400 dark:bg-gray-800">{icon}</div>
+      <div className="rounded-lg bg-gray-50 dark:bg-gray-950 p-1.5 text-gray-400 dark:bg-gray-800">{icon}</div>
       <div>
         <div className="text-sm font-bold text-gray-900 dark:text-white">{value}</div>
         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{label}</div>

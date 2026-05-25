@@ -140,14 +140,14 @@ export default function AnalyticsDashboard() {
           <select
             value={windowDays}
             onChange={(e) => setWindowDays(e.target.value as '7' | '30')}
-            className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+            className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
           >
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
           </select>
           <button
             onClick={() => void refetch()}
-            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
             Refresh
@@ -195,7 +195,7 @@ export default function AnalyticsDashboard() {
       {/* Charts Grid */}
       <div className="grid gap-8 lg:grid-cols-12">
         {/* Performance Trend */}
-        <div className="lg:col-span-8 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="lg:col-span-8 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">Performance Trend</h2>
@@ -203,7 +203,7 @@ export default function AnalyticsDashboard() {
                 Reach and engagement over the past {windowDays} days.
               </p>
             </div>
-            <div className="rounded-xl bg-gray-50 px-3 py-2 text-xs font-bold uppercase tracking-widest text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+            <div className="rounded-xl bg-gray-50 dark:bg-gray-950 px-3 py-2 text-xs font-bold uppercase tracking-widest text-gray-500 dark:bg-gray-800 dark:text-gray-400">
               {analytics?.range?.to
                 ? formatDistanceToNow(new Date(analytics.range.to), { addSuffix: true })
                 : 'Current'}
@@ -238,7 +238,7 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Impact Attribution */}
-        <div className="lg:col-span-4 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="lg:col-span-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
           <h2 className="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
             <BrainCircuit className="h-5 w-5 text-brand-600" />
             Impact Attribution
@@ -268,7 +268,7 @@ export default function AnalyticsDashboard() {
             )}
           </div>
 
-          <div className="mt-8 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50">
+          <div className="mt-8 rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/50">
             <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
               Top source ROI contribution
             </p>
@@ -286,7 +286,7 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Platform Breakdown */}
-        <div className="lg:col-span-7 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="lg:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
               <BarChart3 className="h-5 w-5 text-brand-600" />
@@ -313,7 +313,7 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Event Mix */}
-        <div className="lg:col-span-5 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="lg:col-span-5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
               <Activity className="h-5 w-5 text-brand-600" />
@@ -348,8 +348,8 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Knowledge Impact Matrix */}
-        <div className="lg:col-span-12 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/60 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50">
+        <div className="lg:col-span-12 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/60 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50">
             <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-900 dark:text-white">
               <BrainCircuit className="h-4 w-4 text-brand-600" />
               Knowledge Impact Matrix
@@ -373,7 +373,7 @@ export default function AnalyticsDashboard() {
                     const maxEngagement = analytics!.topSources[0]?.engagement ?? 1;
                     const percent = maxEngagement > 0 ? Math.round((source.engagement / maxEngagement) * 100) : 0;
                     return (
-                      <tr key={source.sourceId} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                      <tr key={source.sourceId} className="hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800/40">
                         <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{source.name}</td>
                         <td className="px-6 py-4 text-xs uppercase text-gray-500">{formatLabel(source.type)}</td>
                         <td className="px-6 py-4 text-xs text-gray-500">{source.usageCount} posts</td>
@@ -437,9 +437,9 @@ export default function AnalyticsDashboard() {
 
 function MetricCard({ title, value, helper, icon }: { title: string; value: string; helper: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
       <div className="mb-4 flex items-center justify-between">
-        <div className="rounded-xl bg-gray-50 p-2.5 dark:bg-gray-800">{icon}</div>
+        <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-2.5 dark:bg-gray-800">{icon}</div>
         <ArrowUpRight className="h-4 w-4 text-gray-300" />
       </div>
       <div className="text-2xl font-black text-gray-900 dark:text-white">{value}</div>
@@ -461,7 +461,7 @@ function RecommendationCard({
   impact: string;
 }) {
   return (
-    <div className="group rounded-2xl border border-brand-100 bg-white p-6 shadow-sm transition-all hover:shadow-lg dark:border-gray-800 dark:bg-gray-900">
+    <div className="group rounded-2xl border border-brand-100 bg-white dark:bg-gray-900 p-6 shadow-sm transition-all hover:shadow-lg dark:border-gray-800 dark:bg-gray-900">
       <div className="mb-4 flex items-center justify-between">
         <span className="rounded-lg bg-brand-50 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-700 dark:bg-brand-500/10">
           Recommendation

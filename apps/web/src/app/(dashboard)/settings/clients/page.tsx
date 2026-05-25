@@ -155,7 +155,7 @@ export default function ClientsSettingsPage() {
         <p className="text-sm text-gray-500">We couldn't load your client database. Please check your connection and try again.</p>
         <button 
           onClick={() => queryClient.invalidateQueries({ queryKey: ['clients'] })}
-          className="rounded-xl bg-gray-100 px-6 py-2 text-sm font-bold text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white"
+          className="rounded-xl bg-gray-100 px-6 py-2 text-sm font-bold text-gray-900 dark:text-white hover:bg-gray-200 dark:bg-gray-800 dark:text-white"
         >
           Try Again
         </button>
@@ -179,7 +179,7 @@ export default function ClientsSettingsPage() {
       </div>
 
       {/* Grid of Clients */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
         <div className="flex items-center gap-6">
           {[
             { label: `All Clients (${clients?.length || 0})`, value: 'all' },
@@ -208,7 +208,7 @@ export default function ClientsSettingsPage() {
               placeholder="Search database..." 
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="rounded-xl border border-gray-100 bg-white pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
+              className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
             />
           </div>
         </div>
@@ -216,7 +216,7 @@ export default function ClientsSettingsPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {clients?.map((client) => (
-          <div key={client.id} className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
+          <div key={client.id} className="group relative overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-start justify-between">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10">
                 <Building2 className="h-6 w-6" />
@@ -230,7 +230,7 @@ export default function ClientsSettingsPage() {
                 </Link>
                 <button 
                   onClick={() => handleEdit(client)}
-                  className="rounded-lg p-2 text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="rounded-lg p-2 text-gray-400 hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800"
                 >
                   <Edit3 className="h-4 w-4" />
                 </button>
@@ -277,7 +277,7 @@ export default function ClientsSettingsPage() {
         
         {clients?.length === 0 && (
           <div className="col-span-full py-20 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-gray-300 dark:bg-gray-800">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-950 text-gray-300 dark:bg-gray-800">
               <User className="h-8 w-8" />
             </div>
             <h3 className="mt-4 text-lg font-bold text-gray-900 dark:text-white">No clients found</h3>
@@ -289,13 +289,13 @@ export default function ClientsSettingsPage() {
       {/* Client Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full max-w-lg rounded-3xl border border-gray-100 bg-white p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
+          <div className="w-full max-w-lg rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">{editingClient ? 'Edit Client' : 'Add New Client'}</h2>
                 <p className="text-sm text-gray-500">Enter client information to save it to your database.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-gray-50 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
+              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-gray-50 dark:bg-gray-950 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -308,7 +308,7 @@ export default function ClientsSettingsPage() {
                   <input 
                     type="text" 
                     placeholder="e.g. John Doe"
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-10 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-10 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
@@ -321,7 +321,7 @@ export default function ClientsSettingsPage() {
                   <input 
                     type="email" 
                     placeholder="john@example.com"
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-10 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-10 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                   />
@@ -333,7 +333,7 @@ export default function ClientsSettingsPage() {
                   <input 
                     type="text" 
                     placeholder="Company Name"
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={formData.company}
                     onChange={(e) => setFormData({...formData, company: e.target.value})}
                   />
@@ -343,7 +343,7 @@ export default function ClientsSettingsPage() {
                   <input 
                     type="text" 
                     placeholder="+1 (555) 000-0000"
-                    className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   />
@@ -360,7 +360,7 @@ export default function ClientsSettingsPage() {
                       className={`flex-1 rounded-xl border py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
                         formData.status === s 
                           ? 'border-brand-500 bg-brand-50 text-brand-600 dark:bg-brand-500/10' 
-                          : 'border-gray-100 bg-gray-50 text-gray-400 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-800'
+                          : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-400 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-800'
                       }`}
                     >
                       {s}
@@ -372,7 +372,7 @@ export default function ClientsSettingsPage() {
               <div className="pt-4 flex gap-4">
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl border border-gray-100 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:border-gray-800"
+                  className="flex-1 rounded-xl border border-gray-100 dark:border-gray-800 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800"
                 >
                   Cancel
                 </button>

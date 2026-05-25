@@ -68,7 +68,7 @@ export function KnowledgeFreshnessWidget() {
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 animate-pulse">
+      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900 animate-pulse">
         <div className="h-5 w-40 rounded bg-gray-200 dark:bg-gray-800" />
         <div className="mt-4 h-20 rounded bg-gray-100 dark:bg-gray-800/50" />
       </div>
@@ -85,7 +85,7 @@ export function KnowledgeFreshnessWidget() {
   const isAllFresh = data.staleSources === 0;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-2">
           <Database className="h-4 w-4 text-gray-500" />
@@ -142,7 +142,7 @@ export function KnowledgeFreshnessWidget() {
               return (
                 <div
                   key={source.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-800/50"
+                  className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 dark:border-gray-800 dark:bg-gray-800/50"
                 >
                   <div className="flex items-center gap-3">
                     <SourceTypeIcon type={source.type} />
@@ -161,7 +161,7 @@ export function KnowledgeFreshnessWidget() {
                   <button
                     onClick={() => syncMutation.mutate(source.id)}
                     disabled={isSyncing}
-                    className="flex items-center gap-1 rounded-md border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-white hover:border-brand-400 hover:text-brand-600 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+                    className="flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-800 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-white dark:bg-gray-900 hover:border-brand-400 hover:text-brand-600 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
                   >
                     <RefreshCw className={cn('h-3 w-3', isSyncing && 'animate-spin')} />
                     Re-ingest
@@ -202,7 +202,7 @@ function SourceTypeIcon({ type }: { type: string }) {
     <span
       className={cn(
         'flex h-8 w-8 items-center justify-center rounded-lg text-[10px] font-bold uppercase',
-        colors[type.toLowerCase()] ?? colors.manual,
+        colors[type.toLowerCase()] ?? colors['manual'],
       )}
     >
       {type.slice(0, 3)}

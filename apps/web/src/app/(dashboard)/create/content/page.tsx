@@ -365,7 +365,7 @@ export default function ContentGeneratorPage() {
     <ErrorBoundary backHref={backHref}>
     <div className="mx-auto max-w-7xl px-2 py-4 space-y-8 animate-in fade-in duration-500">
       {/* Header Banner */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between border-b border-gray-100 pb-6 dark:border-gray-800">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between border-b border-gray-100 dark:border-gray-800 pb-6 dark:border-gray-800">
         <div className="space-y-2">
           <Link href={backHref} className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500 hover:text-brand-600 transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back to campaign
@@ -403,7 +403,7 @@ export default function ContentGeneratorPage() {
           
           {/* Step 1: Identity & Target mapping */}
           <Card className="p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-            <div className="flex items-center gap-3 border-b border-gray-100 pb-4 dark:border-gray-800">
+            <div className="flex items-center gap-3 border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
               <Layers className="h-5 w-5 text-brand-600" />
               <h2 className="text-base font-bold text-gray-950 dark:text-white">1. Core Identity & Campaign Mapping</h2>
             </div>
@@ -413,7 +413,7 @@ export default function ContentGeneratorPage() {
                 <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Brand Selector *</span>
                 <select
                   disabled={!!briefId}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                   value={selectedBrandId}
                   onChange={(e) => setSelectedBrandId(e.target.value)}
                 >
@@ -430,7 +430,7 @@ export default function ContentGeneratorPage() {
                 <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Link Campaign</span>
                 <select
                   disabled={!!briefId}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                   value={selectedCampaignId}
                   onChange={(e) => setSelectedCampaignId(e.target.value)}
                 >
@@ -445,7 +445,7 @@ export default function ContentGeneratorPage() {
 
           {/* Step 2: Formats and Batch configuration */}
           <Card className="p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-            <div className="flex items-center gap-3 border-b border-gray-100 pb-4 dark:border-gray-800">
+            <div className="flex items-center gap-3 border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
               <Calendar className="h-5 w-5 text-brand-600" />
               <h2 className="text-base font-bold text-gray-950 dark:text-white">2. Format Rules & Output Batching</h2>
             </div>
@@ -460,7 +460,7 @@ export default function ContentGeneratorPage() {
                     className={`flex flex-col items-start p-3 text-left rounded-xl border transition-all ${
                       selectedCategory === cat.id
                         ? 'border-brand-600 bg-brand-50/40 text-brand-900 ring-2 ring-brand-500/20 dark:border-brand-500 dark:bg-brand-500/10 dark:text-brand-300'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800'
+                        : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800'
                     }`}
                   >
                     <span className="text-xs font-bold">{cat.label}</span>
@@ -474,7 +474,7 @@ export default function ContentGeneratorPage() {
               <div className="space-y-2">
                 <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Target Social Platform</span>
                 <select
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                   value={selectedPlatform}
                   onChange={(e) => setSelectedPlatform(e.target.value)}
                 >
@@ -492,7 +492,7 @@ export default function ContentGeneratorPage() {
                   )}
                 </span>
                 <select
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                   value={contentCount}
                   onChange={(e) => setContentCount(Number(e.target.value))}
                 >
@@ -510,7 +510,7 @@ export default function ContentGeneratorPage() {
 
           {/* Step 3: Interactive Topic Planner */}
           <Card className="p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
               <div className="flex items-center gap-3">
                 <BrainCircuit className="h-5 w-5 text-brand-600" />
                 <h2 className="text-base font-bold text-gray-950 dark:text-white">3. Intelligent Topic Selection</h2>
@@ -555,7 +555,7 @@ export default function ContentGeneratorPage() {
               </span>
               
               {!selectedBrandId ? (
-                <div className="text-center p-6 border border-dashed border-gray-200 rounded-2xl text-xs text-gray-400">
+                <div className="text-center p-6 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl text-xs text-gray-400">
                   Pick a Brand in Step 1 to load dynamic, brand-positioning suggestions.
                 </div>
               ) : isSuggestionsLoading ? (
@@ -575,7 +575,7 @@ export default function ContentGeneratorPage() {
                         className={`flex items-start justify-between p-3.5 rounded-xl border text-left transition-all ${
                           isPicked
                             ? 'border-brand-600 bg-brand-50/20 text-brand-900 ring-2 ring-brand-500/10 dark:border-brand-500 dark:bg-brand-500/10 dark:text-brand-300'
-                            : 'border-gray-100 hover:border-gray-200 text-gray-700 hover:bg-gray-50/50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/40'
+                            : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:border-gray-800 text-gray-700 hover:bg-gray-50 dark:bg-gray-950/50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/40'
                         }`}
                       >
                         <div className="space-y-1 pr-4">
@@ -592,7 +592,7 @@ export default function ContentGeneratorPage() {
                   })}
                 </div>
               ) : (
-                <div className="text-center p-6 border border-dashed border-gray-200 rounded-2xl text-xs text-gray-400">
+                <div className="text-center p-6 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl text-xs text-gray-400">
                   No explicit suggested topics returned. Use the custom topic box below.
                 </div>
               )}
@@ -602,7 +602,7 @@ export default function ContentGeneratorPage() {
             <div className="space-y-2 pt-2">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Custom Topic Focus (Optional)</span>
               <input
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                 value={customTopic}
                 onChange={(e) => setCustomTopic(e.target.value)}
                 placeholder="E.g. Launching the biryani festival offer for local delivery"
@@ -648,7 +648,7 @@ export default function ContentGeneratorPage() {
                 <div className="space-y-2">
                   <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Target Language</span>
                   <select
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
                   >
@@ -664,7 +664,7 @@ export default function ContentGeneratorPage() {
                 <div className="space-y-2">
                   <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Call-to-Action (CTA) Focus</span>
                   <input
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                     value={cta}
                     onChange={(e) => setCta(e.target.value)}
                     placeholder="E.g. Visit Website, Order Now"
@@ -674,7 +674,7 @@ export default function ContentGeneratorPage() {
                 <div className="space-y-2">
                   <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Strict Quality Compliance</span>
                   <select
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                     value={complianceStrictness}
                     onChange={(e) => setComplianceStrictness(e.target.value)}
                   >
@@ -684,7 +684,7 @@ export default function ContentGeneratorPage() {
                   </select>
                 </div>
 
-                <div className="md:col-span-2 flex items-center justify-between p-3.5 bg-gray-50/50 rounded-xl dark:bg-gray-800/20">
+                <div className="md:col-span-2 flex items-center justify-between p-3.5 bg-gray-50 dark:bg-gray-950/50 rounded-xl dark:bg-gray-800/20">
                   <div className="space-y-1">
                     <div className="text-xs font-bold text-gray-900 dark:text-white">SEO Optimization Module</div>
                     <div className="text-[10px] text-gray-400 font-medium">Embed keyword indexing and search metadata in headers.</div>
@@ -696,7 +696,7 @@ export default function ContentGeneratorPage() {
                       checked={seoOptimized}
                       onChange={(e) => setSeoOptimized(e.target.checked)}
                     />
-                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-brand-600"></div>
+                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-900 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-brand-600"></div>
                   </label>
                 </div>
               </div>
@@ -826,7 +826,7 @@ export default function ContentGeneratorPage() {
                 {brief.cta && (
                   <div>
                     <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">CTA Target</span>
-                    <p className="mt-0.5 text-gray-900 font-bold dark:text-white underline decoration-brand-500 underline-offset-4">{brief.cta}</p>
+                    <p className="mt-0.5 text-gray-900 dark:text-white font-bold dark:text-white underline decoration-brand-500 underline-offset-4">{brief.cta}</p>
                   </div>
                 )}
               </div>
@@ -835,7 +835,7 @@ export default function ContentGeneratorPage() {
 
           {/* Sticky Brand positioning summary */}
           <Card className="p-5 border border-gray-100 dark:border-gray-800 space-y-4 shadow-sm">
-            <div className="flex items-center gap-2.5 border-b border-gray-100 pb-3 dark:border-gray-800">
+            <div className="flex items-center gap-2.5 border-b border-gray-100 dark:border-gray-800 pb-3 dark:border-gray-800">
               <BrainCircuit className="h-4 w-4 text-brand-600" />
               <h3 className="text-xs font-extrabold uppercase tracking-widest text-gray-500">Brand Context Rules</h3>
             </div>
@@ -847,7 +847,7 @@ export default function ContentGeneratorPage() {
             ) : isBrandContextLoading ? (
               <div className="space-y-3">
                 <div className="h-4 w-2/3 bg-gray-100 rounded animate-pulse dark:bg-gray-800" />
-                <div className="h-10 w-full bg-gray-50 rounded animate-pulse dark:bg-gray-850" />
+                <div className="h-10 w-full bg-gray-50 dark:bg-gray-950 rounded animate-pulse dark:bg-gray-850" />
               </div>
             ) : brandContext ? (
               <div className="space-y-4 text-xs leading-relaxed">
@@ -875,7 +875,7 @@ export default function ContentGeneratorPage() {
                     <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">Linked Intelligence Atom Sources</span>
                     <div className="mt-2 space-y-2 max-h-36 overflow-y-auto pr-1">
                       {brandContext.knowledgeEntries.slice(0, 3).map((e: any, idx: number) => (
-                        <div key={idx} className="flex gap-2 p-2 bg-gray-50 rounded-lg text-[10px] font-medium text-gray-500 dark:bg-gray-800/40">
+                        <div key={idx} className="flex gap-2 p-2 bg-gray-50 dark:bg-gray-950 rounded-lg text-[10px] font-medium text-gray-500 dark:bg-gray-800/40">
                           <FileText className="h-3.5 w-3.5 text-brand-500 flex-shrink-0" />
                           <span className="line-clamp-2">{e.content || e}</span>
                         </div>
@@ -892,7 +892,7 @@ export default function ContentGeneratorPage() {
           </Card>
 
           {/* Global platform compliance alert */}
-          <Card className="p-4 border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/30 text-xs text-gray-400 space-y-2">
+          <Card className="p-4 border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/30 text-xs text-gray-400 space-y-2">
             <div className="flex items-center gap-2 font-bold text-gray-500 uppercase tracking-wider text-[10px]">
               <AlertTriangle className="h-4 w-4 text-amber-500" /> Compliance guard active
             </div>
