@@ -37,6 +37,8 @@ interface ExtractedPageSignals {
   fonts: string[];
   headingFonts: string[];
   bodyFonts: string[];
+  supportingFonts: string[];
+  backupFonts: string[];
   colors: string[];
 }
 
@@ -102,6 +104,8 @@ export class BrandAnalyserService {
             fontFamily: 'string | null',
             headingFont: 'string | null',
             bodyFont: 'string | null',
+            supportingFont: 'string | null',
+            backupFont: 'string | null',
             logoUrls: [{ url: 'string | null', type: 'string | null', name: 'string | null' }],
           },
           identity: {
@@ -487,6 +491,10 @@ export class BrandAnalyserService {
           ?? this.normalizeString(primarySignals?.headingFonts?.[0] ?? primarySignals?.fonts?.[0], 100),
         bodyFont: this.normalizeString(visualRules?.['bodyFont'], 100)
           ?? this.normalizeString(primarySignals?.bodyFonts?.[0] ?? primarySignals?.fonts?.[1] ?? primarySignals?.fonts?.[0], 100),
+        supportingFont: this.normalizeString(visualRules?.['supportingFont'], 100)
+          ?? this.normalizeString(primarySignals?.supportingFonts?.[0] ?? primarySignals?.fonts?.[2], 100),
+        backupFont: this.normalizeString(visualRules?.['backupFont'], 100)
+          ?? this.normalizeString(primarySignals?.backupFonts?.[0] ?? primarySignals?.fonts?.[3] ?? 'sans-serif', 100),
         logoUrls: Array.isArray(visualRules?.['logoUrls']) ? visualRules['logoUrls'].map((l: any) => ({
           url: this.normalizeString(l?.url, 1000),
           type: this.normalizeString(l?.type, 50),
@@ -713,10 +721,26 @@ export class BrandAnalyserService {
         .map((match) => (match[1] || '').replace(/["']/g, '').trim())
         .filter(Boolean),
     )).slice(0, 5);
+    
+    // Attempt to parse out some general fonts as supporting/backup
+    const supportingFonts = Array.from(new Set(
+      [...html.matchAll(/<span[^>]*style=["'][^"']*font-family:\s*([^;"'}]+)/gi)]
+        .map((match) => (match[1] || '').replace(/["']/g, '').trim())
+        .filter((f): f is string => Boolean(f)),
+    )).slice(0, 5);
+    const backupFonts = Array.from(new Set(
+      [...html.matchAll(/font-family:\s*[^;"'}]+,\s*([^;"'}]+)/gi)]
+        .map((match) => (match[1] || '').replace(/["']/g, '').trim())
+        .filter((f): f is string => Boolean(f)),
+    )).slice(0, 5);
+
     const fonts = Array.from(new Set(
       [...html.matchAll(/font-family:\s*([^;"'}]+)/gi)]
-        .map((match) => (match[1] || '').replace(/["']/g, '').trim())
-        .filter(Boolean),
+        .map((match) => {
+          const firstFont = (match[1] || '').replace(/["']/g, '').trim().split(',')[0];
+          return firstFont;
+        })
+        .filter((f): f is string => Boolean(f)),
     )).slice(0, 10);
     const colors = Array.from(new Set(
       [...html.matchAll(/(?:color|background-color):\s*(#[0-9a-fA-F]{3,6})/gi)]
@@ -745,6 +769,8 @@ export class BrandAnalyserService {
       fonts,
       headingFonts,
       bodyFonts,
+      supportingFonts,
+      backupFonts,
       colors,
     };
   }
@@ -763,6 +789,8 @@ export class BrandAnalyserService {
       signals.fonts.length > 0 ? `Detected fonts: ${signals.fonts.join(', ')}` : null,
       signals.headingFonts.length > 0 ? `Detected heading fonts: ${signals.headingFonts.join(', ')}` : null,
       signals.bodyFonts.length > 0 ? `Detected body fonts: ${signals.bodyFonts.join(', ')}` : null,
+      signals.supportingFonts.length > 0 ? `Detected supporting fonts: ${signals.supportingFonts.join(', ')}` : null,
+      signals.backupFonts.length > 0 ? `Detected backup fonts: ${signals.backupFonts.join(', ')}` : null,
       signals.colors.length > 0 ? `Detected colors: ${signals.colors.join(', ')}` : null,
     ].filter(Boolean).join('\n');
   }

@@ -149,14 +149,16 @@ const sanitizeInitialData = (data: any) => {
         if (!arr[1]) arr[1] = { url: '', type: 'dark', name: 'Dark Variant' };
         return arr;
       })(),
-      colorTokens: Array.isArray(cleaned.visualRules?.colorTokens)
+      colorTokens: Array.isArray(cleaned.visualRules?.colorTokens) && cleaned.visualRules.colorTokens.length > 0
         ? cleaned.visualRules.colorTokens
         : [
             cleaned.visualRules?.primaryColor ? { id: '1', name: 'Primary', value: cleaned.visualRules.primaryColor, type: 'primary' } : null,
             cleaned.visualRules?.secondaryColor ? { id: '2', name: 'Secondary', value: cleaned.visualRules.secondaryColor, type: 'secondary' } : null,
             cleaned.visualRules?.accentColor ? { id: '3', name: 'Accent', value: cleaned.visualRules.accentColor, type: 'accent' } : null,
+            cleaned.visualRules?.neutralColor ? { id: '4', name: 'Neutral', value: cleaned.visualRules.neutralColor, type: 'neutral' } : null,
+            cleaned.visualRules?.semanticColor ? { id: '5', name: 'Semantic', value: cleaned.visualRules.semanticColor, type: 'semantic' } : null,
           ].filter(Boolean),
-      typographySettings: Array.isArray(cleaned.visualRules?.typographySettings)
+      typographySettings: Array.isArray(cleaned.visualRules?.typographySettings) && cleaned.visualRules.typographySettings.length > 0
         ? cleaned.visualRules.typographySettings
         : [
             cleaned.visualRules?.headingFont || cleaned.visualRules?.fontFamily
@@ -164,6 +166,12 @@ const sanitizeInitialData = (data: any) => {
               : null,
             cleaned.visualRules?.bodyFont || cleaned.visualRules?.fontFamily
               ? { id: 'b', label: 'Body Font', fontFamily: cleaned.visualRules?.bodyFont || cleaned.visualRules?.fontFamily, weight: '400', sizeScale: '1', lineHeight: '1.5' }
+              : null,
+            cleaned.visualRules?.supportingFont
+              ? { id: 's', label: 'Supporting Font', fontFamily: cleaned.visualRules?.supportingFont, weight: '400', sizeScale: '0.875', lineHeight: '1.4' }
+              : null,
+            cleaned.visualRules?.backupFont
+              ? { id: 'bs', label: 'Backup/System Font', fontFamily: cleaned.visualRules?.backupFont, weight: '400', sizeScale: '1', lineHeight: '1.5' }
               : null,
           ].filter(Boolean),
       typographyScales: Array.isArray(cleaned.visualRules?.typographyScales) ? cleaned.visualRules.typographyScales : []
@@ -287,8 +295,12 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
     register('visualRules.primaryColor');
     register('visualRules.secondaryColor');
     register('visualRules.accentColor');
+    register('visualRules.neutralColor');
+    register('visualRules.semanticColor');
     register('visualRules.headingFont');
     register('visualRules.bodyFont');
+    register('visualRules.supportingFont');
+    register('visualRules.backupFont');
     register('visualRules.logoUrls');
     register('tone');
     register('governance.bannedPhrases');
@@ -338,11 +350,11 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
   const getFieldsForStep = (stepId: string): string[] => {
     switch (stepId) {
       case 'basics':
-        return ['name', 'slug', 'tagline', 'description', 'industry', 'website', 'contactInfo.personName', 'contactInfo.phoneNumber', 'contactInfo.email', 'contactInfo.officeAddress'];
+        return ['name', 'slug', 'tagline', 'description', 'industry', 'website', 'foundedYear', 'headquarters', 'contactInfo.personName', 'contactInfo.phoneNumber', 'contactInfo.email', 'contactInfo.officeAddress'];
       case 'visuals':
-        return ['visualRules.primaryColor', 'visualRules.secondaryColor', 'visualRules.accentColor', 'visualRules.fontFamily', 'visualRules.logoUrls'];
+        return ['visualRules.primaryColor', 'visualRules.secondaryColor', 'visualRules.accentColor', 'visualRules.neutralColor', 'visualRules.semanticColor', 'visualRules.fontFamily', 'visualRules.headingFont', 'visualRules.bodyFont', 'visualRules.supportingFont', 'visualRules.backupFont', 'visualRules.logoUrls'];
       case 'voice':
-        return ['tone', 'positioning', 'identity.mission', 'identity.vision', 'identity.promise', 'identity.personality', 'identity.values'];
+        return ['tone', 'positioning', 'differentiators', 'identity.mission', 'identity.vision', 'identity.promise', 'identity.personality', 'identity.values'];
       case 'strategy':
         return ['audience', 'strategy.targetLocation', 'strategy.ageGroup', 'strategy.interests', 'strategy.postingFrequency', 'strategy.contentLanguage', 'strategy.ctaPreference', 'competitors'];
       case 'design-prefs':
@@ -376,16 +388,24 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
        const primary = colors.find((c: any) => c.type === 'primary')?.value || submitData.visualRules.primaryColor;
        const secondary = colors.find((c: any) => c.type === 'secondary')?.value || submitData.visualRules.secondaryColor;
        const accent = colors.find((c: any) => c.type === 'accent')?.value || submitData.visualRules.accentColor;
+       const neutral = colors.find((c: any) => c.type === 'neutral')?.value || submitData.visualRules.neutralColor;
+       const semantic = colors.find((c: any) => c.type === 'semantic')?.value || submitData.visualRules.semanticColor;
        
        const fonts = submitData.visualRules.typographySettings || [];
        const heading = fonts.find((f: any) => f.id === 'h')?.fontFamily || submitData.visualRules.headingFont;
        const body = fonts.find((f: any) => f.id === 'b')?.fontFamily || submitData.visualRules.bodyFont;
+       const supporting = fonts.find((f: any) => f.id === 's')?.fontFamily || submitData.visualRules.supportingFont;
+       const backup = fonts.find((f: any) => f.id === 'bs')?.fontFamily || submitData.visualRules.backupFont;
 
        submitData.visualRules.primaryColor = primary;
        submitData.visualRules.secondaryColor = secondary;
        submitData.visualRules.accentColor = accent;
+       submitData.visualRules.neutralColor = neutral;
+       submitData.visualRules.semanticColor = semantic;
        submitData.visualRules.headingFont = heading;
        submitData.visualRules.bodyFont = body;
+       submitData.visualRules.supportingFont = supporting;
+       submitData.visualRules.backupFont = backup;
     }
     onSubmit(submitData);
   };

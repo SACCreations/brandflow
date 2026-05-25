@@ -44,7 +44,9 @@ export function TypographyGovernance({
 }: TypographyGovernanceProps) {
   const headingFont = settings.find((setting) => setting.id === 'h')?.fontFamily;
   const bodyFont = settings.find((setting) => setting.id === 'b')?.fontFamily;
-  const hasDetectedPairing = Boolean(headingFont || bodyFont);
+  const supportingFont = settings.find((setting) => setting.id === 's')?.fontFamily;
+  const backupFont = settings.find((setting) => setting.id === 'bs')?.fontFamily;
+  const hasDetectedPairing = Boolean(headingFont || bodyFont || supportingFont || backupFont);
 
   return (
     <div className="space-y-8">
@@ -130,7 +132,7 @@ export function TypographyGovernance({
             </div>
             <p className="text-xs font-medium text-brand-50 leading-relaxed opacity-90">
               {hasDetectedPairing
-                ? <>Detected pairing from your brand data: <span className="font-bold underline">{headingFont || 'Not set yet'}</span> for headings and <span className="font-bold underline">{bodyFont || headingFont || 'Not set yet'}</span> for body text.</>
+                ? <>Detected typography from your brand data: <span className="font-bold underline">{headingFont || 'Not set'}</span> (Headings), <span className="font-bold underline">{bodyFont || 'Not set'}</span> (Body), <span className="font-bold underline">{supportingFont || 'Not set'}</span> (Supporting), and <span className="font-bold underline">{backupFont || 'Not set'}</span> (Backup).</>
                 : 'No typography was confidently detected from the analysed brand sources yet. Add or adjust fonts manually if needed.'}
             </p>
             <Button className="w-full bg-white text-brand-600 hover:bg-brand-50 rounded-xl text-[10px] font-black uppercase tracking-widest h-10 shadow-lg" disabled={!hasDetectedPairing}>

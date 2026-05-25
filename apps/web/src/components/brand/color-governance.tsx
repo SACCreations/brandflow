@@ -71,7 +71,7 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
         <Button 
           size="sm" 
           onClick={addColor}
-          className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg text-[10px] font-black uppercase"
+          className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 rounded-lg text-[10px] font-black uppercase shadow-sm"
         >
           <Plus className="w-3 h-3 mr-1.5" /> Add Color
         </Button>
@@ -119,7 +119,7 @@ function ColorCard({ color, onUpdate, onRemove }: {
           <Input 
             value={color.name} 
             onChange={(e) => onUpdate({ name: e.target.value })}
-            className="h-10 text-xs font-bold border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl px-3 text-gray-900 dark:text-white"
+            className="h-10 text-xs font-bold border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl px-3 text-gray-900 dark:text-white placeholder:text-gray-400"
           />
         </div>
 
@@ -139,7 +139,7 @@ function ColorCard({ color, onUpdate, onRemove }: {
         </div>
         <div className="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-xl border border-gray-100 dark:border-gray-800">
           <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1.5">HSL Values</p>
-          <p className="text-[10px] font-mono font-bold text-gray-600">232° 84% 63%</p>
+          <p className="text-[10px] font-mono font-bold text-gray-600 dark:text-gray-300">232° 84% 63%</p>
         </div>
       </div>
 

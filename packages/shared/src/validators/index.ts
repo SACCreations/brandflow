@@ -108,6 +108,8 @@ export const brandAnalysisBrandSchema = z.object({
     fontFamily: z.string().max(100).nullish().or(z.literal('')),
     headingFont: z.string().max(100).nullish().or(z.literal('')),
     bodyFont: z.string().max(100).nullish().or(z.literal('')),
+    supportingFont: z.string().max(100).nullish().or(z.literal('')),
+    backupFont: z.string().max(100).nullish().or(z.literal('')),
     logoUrls: z.array(z.object({
       url: z.string().max(1000).nullish().or(z.literal('')),
       type: z.string().max(50).nullish(),
@@ -234,6 +236,8 @@ export const createBrandSchema = z.object({
       fontFamily: z.string().max(100).nullish().or(z.literal('')),
       headingFont: z.string().max(100).nullish().or(z.literal('')),
       bodyFont: z.string().max(100).nullish().or(z.literal('')),
+      supportingFont: z.string().max(100).nullish().or(z.literal('')),
+      backupFont: z.string().max(100).nullish().or(z.literal('')),
       logoUrls: z
         .array(
           z.object({
