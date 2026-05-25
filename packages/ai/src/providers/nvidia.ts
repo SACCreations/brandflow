@@ -7,7 +7,7 @@ export class NvidiaProvider implements LLMProvider {
   private model: string;
   private apiKey: string;
 
-  constructor(apiKey: string, model = 'minimaxai/minimax-m2.7') {
+  constructor(apiKey: string, model = 'meta/llama-3.1-70b-instruct') {
     this.client = new OpenAI({ 
       apiKey,
       baseURL: "https://integrate.api.nvidia.com/v1"

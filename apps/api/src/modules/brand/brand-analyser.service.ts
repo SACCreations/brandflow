@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { prisma } from '@brandflow/db';
 import { LLMGateway } from '@brandflow/ai';
@@ -171,7 +171,7 @@ export class BrandAnalyserService {
     let gatewayResult;
     try {
       gatewayResult = await this.gateway.complete(systemPrompt, userPrompt, {
-        provider: preferredProvider,
+        provider: preferredProvider as 'openai' | 'anthropic' | 'google' | 'fallback' | 'nvidia',
         model: settings.model ?? undefined,
         temperature: 0.15,
         maxTokens: Math.min(settings.maxTokens ?? 1800, 1800),

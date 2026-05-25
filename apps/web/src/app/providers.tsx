@@ -8,6 +8,7 @@ import type { AuthTokens } from '@brandflow/shared';
 import { Toaster } from '@brandflow/ui';
 import { apiClient } from '@/lib/api-client';
 import { useAuthStore } from '@/store/auth.store';
+import { getJwtExpirationMs } from '@/lib/jwt';
 
 interface SessionProfileResponse {
   user: {
@@ -137,6 +138,54 @@ function SessionBootstrap() {
   return null;
 }
 
+function TokenRefreshScheduler() {
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const updateToken = useAuthStore((state) => state.updateToken);
+
+  useEffect(() => {
+    if (!accessToken) return;
+
+    const expirationMs = getJwtExpirationMs(accessToken);
+    if (!expirationMs) return;
+
+    // Proactively refresh 1 minute before token expires
+    const refreshTime = expirationMs - 60000;
+    const now = Date.now();
+    const delay = Math.max(0, refreshTime - now);
+
+    const timerId = setTimeout(async () => {
+      try {
+        // Use Web Locks API to ensure only one tab refreshes concurrently
+        if (typeof navigator !== 'undefined' && navigator.locks) {
+          await navigator.locks.request('auth-refresh-lock', async () => {
+            // Check if token was already updated by another tab while waiting for lock
+            const currentToken = useAuthStore.getState().accessToken;
+            if (currentToken !== accessToken) return;
+
+            console.log('[TOKEN REFRESH] Proactively refreshing token...');
+            const res = await apiClient.post<AuthTokens>('/auth/refresh', {});
+            updateToken(res.data.accessToken);
+            console.log('[TOKEN REFRESH] Success.');
+          });
+        } else {
+          // Fallback if Web Locks API is not supported
+          console.log('[TOKEN REFRESH] Proactively refreshing token (no lock)...');
+          const res = await apiClient.post<AuthTokens>('/auth/refresh', {});
+          updateToken(res.data.accessToken);
+        }
+      } catch (err) {
+        console.error('[TOKEN REFRESH] Failed proactive refresh:', err);
+        // We do not force logout here. If the proactive refresh fails,
+        // the normal interceptor will catch the 401 on the next API call.
+      }
+    }, delay);
+
+    return () => clearTimeout(timerId);
+  }, [accessToken, updateToken]);
+
+  return null;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -150,6 +199,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <SessionBootstrap />
+      <TokenRefreshScheduler />
       {children}
       <Toaster />
     </QueryClientProvider>

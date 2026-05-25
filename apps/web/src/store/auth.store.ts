@@ -96,3 +96,13 @@ export const useAuthStore = create<AuthState>()(
   ),
 );
 
+// Synchronize state across tabs when localStorage changes
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'brandflow-auth') {
+      // Rehydrate the store from the updated localStorage
+      useAuthStore.persist.rehydrate();
+    }
+  });
+}
+
