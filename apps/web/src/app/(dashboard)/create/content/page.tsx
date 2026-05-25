@@ -10,22 +10,16 @@ import {
   ArrowLeft, 
   Loader2, 
   Sparkles, 
-  Target, 
-  CheckCircle2, 
-  Clock, 
   BrainCircuit, 
-  Layers, 
-  SlidersHorizontal,
-  Plus,
-  HelpCircle,
+  Target,
   FileText,
-  Volume2,
-  Calendar,
-  AlertTriangle,
-  ChevronRight,
-  ExternalLink,
-  RotateCcw,
+  AlertTriangle
 } from 'lucide-react';
+
+import { GeneratorConfigForm } from '@/features/content/components/GeneratorConfigForm';
+import { TopicSelectionMatrix } from '@/features/content/components/TopicSelectionMatrix';
+import { AdvancedTuningPanel } from '@/features/content/components/AdvancedTuningPanel';
+import { QueueProgressMonitor } from '@/features/content/components/QueueProgressMonitor';
 
 interface BriefContext {
   id: string;
@@ -71,25 +65,7 @@ interface SuggestedTopic {
   tag: string;
 }
 
-const CATEGORIES = [
-  { id: 'SMO Poster', label: 'SMO Poster', desc: 'Social posters with optimized copy' },
-  { id: 'Reel Script', label: 'Reel & Video Script', desc: 'Engaging short-form video script' },
-  { id: 'Blog', label: 'Blog Article', desc: 'SEO-optimized long-form article' },
-  { id: 'Carousel', label: 'Carousel Post', desc: 'Multi-slide social media copy' },
-  { id: 'Newsletter', label: 'Newsletter', desc: 'Conversion-oriented email newsletter' },
-  { id: 'SOP', label: 'SOP / Doc', desc: 'Standard operating procedure guide' },
-  { id: 'Print Material', label: 'Print Banner/Flyer', desc: 'Copy for offline physical banners' },
-];
 
-const PLATFORMS = [
-  { id: 'linkedin', label: 'LinkedIn' },
-  { id: 'instagram', label: 'Instagram' },
-  { id: 'facebook', label: 'Facebook' },
-  { id: 'twitter', label: 'X / Twitter' },
-  { id: 'tiktok', label: 'TikTok' },
-  { id: 'email', label: 'Email' },
-  { id: 'web', label: 'Web Blog' },
-];
 
 export default function ContentGeneratorPage() {
   const router = useRouter();
@@ -401,401 +377,61 @@ export default function ContentGeneratorPage() {
         {/* Left Forms Workspace (8 cols) */}
         <div className="lg:col-span-8 space-y-8">
           
-          {/* Step 1: Identity & Target mapping */}
-          <Card className="p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-            <div className="flex items-center gap-3 border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
-              <Layers className="h-5 w-5 text-brand-600" />
-              <h2 className="text-base font-bold text-gray-950 dark:text-white">1. Core Identity & Campaign Mapping</h2>
-            </div>
-            
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Brand Selector *</span>
-                <select
-                  disabled={!!briefId}
-                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                  value={selectedBrandId}
-                  onChange={(e) => setSelectedBrandId(e.target.value)}
-                >
-                  <option value="" disabled>-- Choose Brand --</option>
-                  {brands.map((b) => (
-                    <option key={b.id} value={b.id}>{b.name}</option>
-                  ))}
-                </select>
-                {briefId && <span className="text-[10px] text-gray-400 font-medium">Locked to brief's designated brand.</span>}
-                {validationErrors['brand'] && <span className="text-[10px] font-semibold text-red-500">{validationErrors['brand']}</span>}
-              </div>
-
-              <div className="space-y-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Link Campaign</span>
-                <select
-                  disabled={!!briefId}
-                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                  value={selectedCampaignId}
-                  onChange={(e) => setSelectedCampaignId(e.target.value)}
-                >
-                  <option value="">Standalone Generation (No Campaign)</option>
-                  {campaigns.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </Card>
-
-          {/* Step 2: Formats and Batch configuration */}
-          <Card className="p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-            <div className="flex items-center gap-3 border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
-              <Calendar className="h-5 w-5 text-brand-600" />
-              <h2 className="text-base font-bold text-gray-950 dark:text-white">2. Format Rules & Output Batching</h2>
-            </div>
-
-            <div className="space-y-4">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 block">Content Category</span>
-              <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex flex-col items-start p-3 text-left rounded-xl border transition-all ${
-                      selectedCategory === cat.id
-                        ? 'border-brand-600 bg-brand-50/40 text-brand-900 ring-2 ring-brand-500/20 dark:border-brand-500 dark:bg-brand-500/10 dark:text-brand-300'
-                        : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    <span className="text-xs font-bold">{cat.label}</span>
-                    <span className="text-[9px] text-gray-400 mt-1 line-clamp-1">{cat.desc}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 pt-2">
-              <div className="space-y-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Target Social Platform</span>
-                <select
-                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                  value={selectedPlatform}
-                  onChange={(e) => setSelectedPlatform(e.target.value)}
-                >
-                  {PLATFORMS.map((plat) => (
-                    <option key={plat.id} value={plat.id}>{plat.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 flex items-center justify-between">
-                  <span>Batch Copy Count</span>
-                  {contentCount > 3 && (
-                    <span className="text-[9px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded font-bold uppercase tracking-wider dark:bg-amber-500/10">Queue Process</span>
-                  )}
-                </span>
-                <select
-                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                  value={contentCount}
-                  onChange={(e) => setContentCount(Number(e.target.value))}
-                >
-                  <option value={1}>1 (Sync Variant)</option>
-                  <option value={2}>2 (Compare Drafts)</option>
-                  <option value={3}>3 (Fast Batch)</option>
-                  <option value={5}>5 (Queue Generation)</option>
-                  <option value={10}>10 (Queue Campaign)</option>
-                  <option value={20}>20 (Enterprise Batch)</option>
-                  <option value={50}>50 (Full SMO Sweep)</option>
-                </select>
-              </div>
-            </div>
-          </Card>
+          {/* Step 1 & 2 */}
+          <GeneratorConfigForm
+            briefId={briefId}
+            brands={brands}
+            campaigns={campaigns}
+            selectedBrandId={selectedBrandId}
+            setSelectedBrandId={setSelectedBrandId}
+            selectedCampaignId={selectedCampaignId}
+            setSelectedCampaignId={setSelectedCampaignId}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            selectedPlatform={selectedPlatform}
+            setSelectedPlatform={setSelectedPlatform}
+            contentCount={contentCount}
+            setContentCount={setContentCount}
+            validationErrors={validationErrors}
+          />
 
           {/* Step 3: Interactive Topic Planner */}
-          <Card className="p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-5">
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
-              <div className="flex items-center gap-3">
-                <BrainCircuit className="h-5 w-5 text-brand-600" />
-                <h2 className="text-base font-bold text-gray-950 dark:text-white">3. Intelligent Topic Selection</h2>
-              </div>
-              <div className="flex items-center gap-4">
-                <Button 
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    const res = await generateTopics();
-                    if (res.isError) {
-                      toast({
-                        title: 'Failed to generate topics',
-                        description: (res.error as any)?.response?.data?.message || (res.error as any)?.message || 'Unknown error occurred.',
-                        variant: 'destructive',
-                      });
-                    }
-                  }} 
-                  disabled={!selectedBrandId || isSuggestionsLoading}
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs font-bold gap-1.5"
-                >
-                  {isSuggestionsLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                  Generate Topics
-                </Button>
-                {suggestedTopicsData && suggestedTopicsData.topics.length > 0 && (
-                  <button 
-                    onClick={handleSelectAllTopics} 
-                    className="text-xs font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400"
-                  >
-                    {selectedTopics.length === suggestedTopicsData.topics.length ? 'Clear All' : 'Select All'}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Quick AI Suggestions Grid */}
-            <div className="space-y-3">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                AI Suggested Quick Topics
-                {isSuggestionsLoading && <Loader2 className="h-3 w-3 animate-spin text-brand-600" />}
-              </span>
-              
-              {!selectedBrandId ? (
-                <div className="text-center p-6 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl text-xs text-gray-400">
-                  Pick a Brand in Step 1 to load dynamic, brand-positioning suggestions.
-                </div>
-              ) : isSuggestionsLoading ? (
-                <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-14 rounded-xl bg-gray-50 dark:bg-gray-800 animate-pulse" />
-                  ))}
-                </div>
-              ) : suggestedTopicsData?.topics?.length ? (
-                <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
-                  {suggestedTopicsData.topics.map((t) => {
-                    const isPicked = selectedTopics.includes(t.name);
-                    return (
-                      <button
-                        key={t.id}
-                        onClick={() => handleToggleTopic(t.name)}
-                        className={`flex items-start justify-between p-3.5 rounded-xl border text-left transition-all ${
-                          isPicked
-                            ? 'border-brand-600 bg-brand-50/20 text-brand-900 ring-2 ring-brand-500/10 dark:border-brand-500 dark:bg-brand-500/10 dark:text-brand-300'
-                            : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:border-gray-800 text-gray-700 hover:bg-gray-50 dark:bg-gray-950/50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/40'
-                        }`}
-                      >
-                        <div className="space-y-1 pr-4">
-                          <div className="text-xs font-semibold leading-snug line-clamp-1">{t.name}</div>
-                          <div className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">{t.tag}</div>
-                        </div>
-                        <div className={`h-4 w-4 rounded-full border flex items-center justify-center transition-colors ${
-                          isPicked ? 'border-brand-600 bg-brand-600 text-white' : 'border-gray-300'
-                        }`}>
-                          {isPicked && <span className="text-[8px] font-bold">✓</span>}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center p-6 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl text-xs text-gray-400">
-                  No explicit suggested topics returned. Use the custom topic box below.
-                </div>
-              )}
-            </div>
-
-            {/* Custom Input */}
-            <div className="space-y-2 pt-2">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Custom Topic Focus (Optional)</span>
-              <input
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                value={customTopic}
-                onChange={(e) => setCustomTopic(e.target.value)}
-                placeholder="E.g. Launching the biryani festival offer for local delivery"
-              />
-            </div>
-          </Card>
+          <TopicSelectionMatrix
+            selectedBrandId={selectedBrandId}
+            isSuggestionsLoading={isSuggestionsLoading}
+            suggestedTopicsData={suggestedTopicsData}
+            generateTopics={generateTopics}
+            selectedTopics={selectedTopics}
+            handleSelectAllTopics={handleSelectAllTopics}
+            handleToggleTopic={handleToggleTopic}
+            customTopic={customTopic}
+            setCustomTopic={setCustomTopic}
+          />
 
           {/* Step 4: Advanced Tuning parameters */}
-          <Card className="p-6 border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
-            <button
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="flex items-center justify-between w-full text-left"
-            >
-              <div className="flex items-center gap-3">
-                <SlidersHorizontal className="h-5 w-5 text-brand-600" />
-                <h2 className="text-base font-bold text-gray-950 dark:text-white">4. Advanced Model Parameters</h2>
-              </div>
-              <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} />
-            </button>
-
-            {showAdvanced && (
-              <div className="grid gap-6 md:grid-cols-2 pt-4 border-t border-gray-100 dark:border-gray-800 animate-in slide-in-from-top-2 duration-300">
-                <div className="space-y-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 flex items-center justify-between">
-                    <span>Creativity Slider</span>
-                    <span className="font-bold text-brand-600">{creativity}</span>
-                  </span>
-                  <input
-                    type="range"
-                    min="0.1"
-                    max="1.5"
-                    step="0.05"
-                    className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-600 dark:bg-gray-800"
-                    value={creativity}
-                    onChange={(e) => setCreativity(Number(e.target.value))}
-                  />
-                  <div className="flex justify-between text-[9px] text-gray-400 font-semibold uppercase">
-                    <span>Deterministic</span>
-                    <span>Highly Creative</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Target Language</span>
-                  <select
-                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                  >
-                    <option value="english">English (US)</option>
-                    <option value="spanish">Spanish</option>
-                    <option value="french">French</option>
-                    <option value="german">German</option>
-                    <option value="hindi">Hindi</option>
-                    <option value="arabic">Arabic</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Call-to-Action (CTA) Focus</span>
-                  <input
-                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                    value={cta}
-                    onChange={(e) => setCta(e.target.value)}
-                    placeholder="E.g. Visit Website, Order Now"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400">Strict Quality Compliance</span>
-                  <select
-                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-                    value={complianceStrictness}
-                    onChange={(e) => setComplianceStrictness(e.target.value)}
-                  >
-                    <option value="low">Standard QC checks</option>
-                    <option value="medium">Medium alignment gate</option>
-                    <option value="high">Strict compliance audit</option>
-                  </select>
-                </div>
-
-                <div className="md:col-span-2 flex items-center justify-between p-3.5 bg-gray-50 dark:bg-gray-950/50 rounded-xl dark:bg-gray-800/20">
-                  <div className="space-y-1">
-                    <div className="text-xs font-bold text-gray-900 dark:text-white">SEO Optimization Module</div>
-                    <div className="text-[10px] text-gray-400 font-medium">Embed keyword indexing and search metadata in headers.</div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      className="sr-only peer" 
-                      checked={seoOptimized}
-                      onChange={(e) => setSeoOptimized(e.target.checked)}
-                    />
-                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-900 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-brand-600"></div>
-                  </label>
-                </div>
-              </div>
-            )}
-          </Card>
+          <AdvancedTuningPanel
+            showAdvanced={showAdvanced}
+            setShowAdvanced={setShowAdvanced}
+            creativity={creativity}
+            setCreativity={setCreativity}
+            language={language}
+            setLanguage={setLanguage}
+            cta={cta}
+            setCta={setCta}
+            complianceStrictness={complianceStrictness}
+            setComplianceStrictness={setComplianceStrictness}
+            seoOptimized={seoOptimized}
+            setSeoOptimized={setSeoOptimized}
+          />
 
           {/* Active Generation Runner UI */}
-          {loading && (
-            <Card className="p-6 border border-brand-200 bg-brand-50/20 dark:border-brand-500/30 dark:bg-brand-500/5 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Loader2 className="h-5 w-5 animate-spin text-brand-600 dark:text-brand-400" />
-                  <span className="text-sm font-extrabold text-brand-900 dark:text-brand-300">
-                    {jobStatus === 'generating' ? 'Running batch queue process...' : 'Sending transaction request...'}
-                  </span>
-                </div>
-                <span className="text-xs font-extrabold text-brand-600 bg-brand-100 px-2 py-0.5 rounded dark:bg-brand-500/20 dark:text-brand-400">
-                  {jobProgress}% Done
-                </span>
-              </div>
-
-              <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-800 overflow-hidden">
-                <div 
-                  className="bg-brand-600 h-2 rounded-full transition-all duration-500 dark:bg-brand-500 shadow-md shadow-brand-500/30"
-                  style={{ width: `${jobProgress}%` }}
-                />
-              </div>
-
-              <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex justify-between">
-                <span>Concurrently processing items</span>
-                <span>Do not close this tab</span>
-              </div>
-            </Card>
-          )}
-
-          {/* Queue completed variants results list */}
-          {completedContents.length > 0 && (
-            <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                  <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-500">Generated Batch Outputs ({completedContents.length})</h3>
-                </div>
-                {completedContents.length > 1 && completedContents.some((c) => c.status === 'success') && (
-                  <Link href={`/create/content/compare?groupId=${completedContents[0]?.generationGroupId || ''}`}>
-                    <Button variant="outline" size="sm" className="gap-1.5 text-xs font-bold">
-                      Compare Variants <ExternalLink className="h-3.5 w-3.5" />
-                    </Button>
-                  </Link>
-                )}
-              </div>
-
-              <div className="grid gap-4">
-                {completedContents.map((c, idx) => (
-                  <Card key={idx} className={`p-4 border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                    c.status === 'success' 
-                      ? 'border-emerald-100 bg-emerald-50/10 dark:border-emerald-500/20'
-                      : 'border-red-100 bg-red-50/10 dark:border-red-500/20'
-                  }`}>
-                    <div className="space-y-1">
-                      <div className="text-xs font-bold text-gray-900 dark:text-white line-clamp-1">{c.topic}</div>
-                      <div className="text-[10px] flex items-center gap-2">
-                        <span className="text-gray-400">Index: {idx + 1}</span>
-                        <span className="text-gray-400">•</span>
-                        {c.status === 'success' ? (
-                          <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-extrabold uppercase tracking-wider text-[9px] dark:bg-emerald-500/10 dark:text-emerald-400">Draft created</span>
-                        ) : (
-                          <span className="text-red-700 bg-red-50 px-1.5 py-0.2 rounded font-extrabold uppercase tracking-wider text-[9px] dark:bg-red-500/10 dark:text-red-400">Failed: {c.error || 'Unknown error'}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {c.status === 'failed' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1.5 text-xs font-bold text-amber-700 border-amber-200 hover:bg-amber-50"
-                          onClick={() => {
-                            // Re-trigger generation for failed item
-                            generateMutation.mutate();
-                          }}
-                        >
-                          <RotateCcw className="h-3.5 w-3.5" /> Retry
-                        </Button>
-                      )}
-                      {c.status === 'success' && c.contentId && (
-                        <Link href={`/create/content/${c.contentId}`}>
-                          <Button variant="outline" className="gap-1.5 text-xs font-bold">
-                            Open in Editor <ExternalLink className="h-3.5 w-3.5" />
-                          </Button>
-                        </Link>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          <QueueProgressMonitor
+            loading={loading}
+            jobStatus={jobStatus}
+            jobProgress={jobProgress}
+            completedContents={completedContents}
+            generateMutation={generateMutation}
+          />
 
         </div>
 

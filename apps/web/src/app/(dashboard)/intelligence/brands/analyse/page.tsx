@@ -39,6 +39,37 @@ export default function BrandAnalysePage() {
   const [currentUrl, setCurrentUrl] = useState('');
   const [step, setStep] = useState<'input' | 'processing' | 'review'>('input');
   const [extractedData, setExtractedData] = useState<BrandAnalysisResult | null>(null);
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+
+  // Polling query for the background job
+  useQuery({
+    queryKey: ['brand-analysis-job', activeJobId],
+    queryFn: async () => {
+      if (!activeJobId) return null;
+      const res = await apiClient.get(`/brands/analyse/${activeJobId}`);
+      
+      const data = res.data;
+      if (data.status === 'completed') {
+        setExtractedData(data.result);
+        setSources((current) => current.map((source) => ({ ...source, status: 'done' })));
+        setStep('review');
+        setActiveJobId(null);
+      } else if (data.status === 'failed') {
+        setSources((current) => current.map((source) => ({ ...source, status: 'error' })));
+        setStep('input');
+        setActiveJobId(null);
+        toast({
+          title: 'Analysis failed',
+          description: data.error || 'The background analysis job failed.',
+          variant: 'destructive',
+        });
+      }
+
+      return data;
+    },
+    enabled: !!activeJobId,
+    refetchInterval: 2000,
+  });
 
   const { data: customer } = useQuery({
     queryKey: ['analysis-customer-context', customerId],
@@ -106,12 +137,10 @@ export default function BrandAnalysePage() {
         })),
       });
 
-      return analysisRes.data as BrandAnalysisResult;
+      return analysisRes.data as { jobId: string; status: string };
     },
     onSuccess: (result) => {
-      setExtractedData(result);
-      setSources((current) => current.map((source) => ({ ...source, status: 'done' })));
-      setStep('review');
+      setActiveJobId(result.jobId);
     },
     onError: (error: any) => {
       setSources((current) => current.map((source) => ({ ...source, status: 'error' })));

@@ -2,19 +2,149 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #111827;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0f172a;
-    --foreground: #f1f5f9;
+    /* Base Surface Colors */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    /* Mutable Brand Colors (Indigo base for BrandFlow) */
+    --brand-50: 226 100% 97%;
+    --brand-100: 226 100% 94%;
+    --brand-200: 226 96% 87%;
+    --brand-300: 226 94% 76%;
+    --brand-400: 226 90% 64%;
+    --brand-500: 226 83% 53%;
+    --brand-600: 226 77% 46%;
+    --brand-700: 226 71% 37%;
+    --brand-800: 226 67% 31%;
+    --brand-900: 226 62% 26%;
+    --brand-950: 226 60% 16%;
+
+    /* Semantic Layers */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Interactive States */
+    --primary: var(--brand-600);
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
+    /* System States */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 142.1 76.2% 36.3%;
+    --success-foreground: 355.7 100% 97.3%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 48 96% 89%;
+
+    /* Borders & Structural */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: var(--brand-600);
+    --radius: 0.75rem;
+
+    /* Fluid Typography (clamp) */
+    --font-size-xs: clamp(0.75rem, 0.71rem + 0.18vw, 0.8rem);
+    --font-size-sm: clamp(0.875rem, 0.84rem + 0.18vw, 0.925rem);
+    --font-size-base: clamp(1rem, 0.96rem + 0.18vw, 1.05rem);
+    --font-size-lg: clamp(1.125rem, 1.09rem + 0.18vw, 1.175rem);
+    --font-size-xl: clamp(1.25rem, 1.19rem + 0.27vw, 1.325rem);
+    --font-size-2xl: clamp(1.5rem, 1.41rem + 0.45vw, 1.625rem);
+    --font-size-3xl: clamp(1.875rem, 1.74rem + 0.68vw, 2.0625rem);
+    --font-size-4xl: clamp(2.25rem, 2.07rem + 0.9vw, 2.5rem);
+    --font-size-5xl: clamp(3rem, 2.73rem + 1.34vw, 3.375rem);
+  }
+
+  .dark {
+    /* Base Surface Colors */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    /* Mutable Brand Colors */
+    --brand-50: 226 60% 16%;
+    --brand-100: 226 62% 26%;
+    --brand-200: 226 67% 31%;
+    --brand-300: 226 71% 37%;
+    --brand-400: 226 77% 46%;
+    --brand-500: 226 83% 53%;
+    --brand-600: 226 90% 64%;
+    --brand-700: 226 94% 76%;
+    --brand-800: 226 96% 87%;
+    --brand-900: 226 100% 94%;
+    --brand-950: 226 100% 97%;
+
+    /* Semantic Layers */
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Interactive States */
+    --primary: var(--brand-600);
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    /* System States */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 142.1 76.2% 20%;
+    --success-foreground: 355.7 100% 97.3%;
+    --warning: 38 92% 20%;
+    --warning-foreground: 48 96% 89%;
+
+    /* Borders & Structural */
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: var(--brand-600);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    /* Custom fluid scrollbar */
+  }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted));
+  border-radius: 10px;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted));
+}
+
+/* Utilities */
+.glass {
+  @apply bg-background/60 backdrop-blur-xl border border-border/50 shadow-sm;
+}
+.glass-panel {
+  @apply bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl;
+}
+.text-balance {
+  text-wrap: balance;
 }

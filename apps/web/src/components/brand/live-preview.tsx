@@ -145,7 +145,7 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
                 </div>
                 <div className="p-4 flex items-center gap-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
                   <div className="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/20 flex items-center justify-center font-bold text-xs overflow-hidden border-2 border-transparent shadow-inner" style={{ borderColor: `${primaryColor}30`}}>
-                    {data.visualRules?.logoUrls?.[0]?.url ? <img src={data.visualRules.logoUrls[0].url} className="w-full h-full object-cover" /> : <span className="text-brand-600 font-black">{data.name?.[0] || 'B'}</span>}
+                    {data.visualRules?.logoUrls?.[0]?.url ? <img src={data.visualRules.logoUrls[0].url} alt="Brand Logo" className="w-full h-full object-cover" /> : <span className="text-brand-600 font-black">{data.name?.[0] || 'B'}</span>}
                   </div>
                   <span className="text-xs font-black uppercase text-gray-900 dark:text-white tracking-widest">{data.name || 'Brand'}</span>
                 </div>
@@ -176,7 +176,7 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
                </div>
                <div className="absolute inset-0 p-10 flex flex-col justify-between z-10">
                  <div className="w-14 h-14 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center p-2 shadow-2xl border border-white/20">
-                    {data.visualRules?.logoUrls?.[1]?.url ? <img src={data.visualRules.logoUrls[1].url} className="w-full h-full object-contain" /> : (data.visualRules?.logoUrls?.[0]?.url ? <img src={data.visualRules.logoUrls[0].url} className="w-full h-full object-contain" /> : <span className="font-black text-gray-900 dark:text-white text-xl">{data.name?.[0] || 'B'}</span>)}
+                    {data.visualRules?.logoUrls?.[1]?.url ? <img src={data.visualRules.logoUrls[1].url} alt="Brand Logo" className="w-full h-full object-contain" /> : (data.visualRules?.logoUrls?.[0]?.url ? <img src={data.visualRules.logoUrls[0].url} alt="Brand Logo" className="w-full h-full object-contain" /> : <span className="font-black text-gray-900 dark:text-white text-xl">{data.name?.[0] || 'B'}</span>)}
                  </div>
                  <div className="space-y-4 max-w-[80%]">
                    <h3 className="text-3xl font-black text-white leading-none uppercase tracking-tighter" style={{ fontFamily: headingFont }}>{data.tagline || 'Ad Headline'}</h3>

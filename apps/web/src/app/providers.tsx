@@ -132,6 +132,7 @@ function SessionBootstrap() {
     };
 
     void bootstrap();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasHydrated]); // Minimized dependencies to prevent re-runs
 
 

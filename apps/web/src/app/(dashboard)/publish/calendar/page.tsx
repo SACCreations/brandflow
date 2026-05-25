@@ -30,7 +30,7 @@ const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function CalendarPage() {
   const [monthOffset, setMonthOffset] = useState(0);
-  const now = new Date();
+  const now = useMemo(() => new Date(), []);
 
   const { data: schedules = [], isLoading } = useQuery({
     queryKey: ['publish-calendar'],
