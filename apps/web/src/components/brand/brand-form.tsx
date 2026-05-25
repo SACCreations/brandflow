@@ -455,7 +455,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Primary Logo Variant</label>
@@ -637,7 +637,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="space-y-4">
               <label className="text-sm font-black uppercase tracking-widest text-gray-400">Voice Keywords</label>
               <div className="flex flex-wrap gap-2 mb-4">
@@ -703,7 +703,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="space-y-2">
              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Target Customers</label>
              <Textarea 
@@ -745,7 +745,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-black uppercase tracking-widest text-gray-400">Main Competitors</label>
@@ -855,7 +855,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -964,7 +964,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="max-w-xs mx-auto space-y-4">
               <div className="w-16 h-16 rounded-3xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center text-brand-600 mx-auto">
                 <Globe className="w-8 h-8" />
@@ -1015,7 +1015,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <Textarea 
             {...register('governance.requiredDisclaimer')} 
             placeholder="Legal footer, copyright info, or required disclosures..." 
@@ -1038,7 +1038,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
         
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {values.visualRules?.logoUrls?.filter((l: any) => l.url).map((logo: any, i: number) => (
                 <div key={i} className="aspect-square rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800/30 relative group overflow-hidden">
@@ -1074,7 +1074,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
           <div className="space-y-4">
             <FileUploader 
               label="Upload Brand Document"
@@ -1137,7 +1137,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Preferred Design Style</label>
@@ -1263,7 +1263,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Content Reviewer</label>
@@ -1349,7 +1349,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Marketing Goal</label>
@@ -1428,7 +1428,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
              <div className="space-y-6">
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
@@ -1489,7 +1489,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 { name: 'LinkedIn', handleField: 'socialAccess.linkedinPage', placeholder: 'LinkedIn Page URL' },
@@ -1561,7 +1561,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="flex items-center justify-between relative z-10">
               <div className="space-y-2">
                  <h4 className="text-4xl font-black tracking-tighter text-gray-900 dark:text-white">94.2%</h4>
@@ -1589,7 +1589,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
           <p className="text-gray-500 font-medium px-10">Centralized repository for images, icons, and videos.</p>
         </div>
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="max-w-xs mx-auto space-y-4">
               <Globe className="w-12 h-12 text-gray-300 mx-auto" />
               <p className="text-xs text-gray-500">The Media Library DAM (Digital Asset Management) is coming soon. Use the Logo Library for now.</p>
@@ -1608,7 +1608,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
           <p className="text-gray-500 font-medium px-10">AI-driven marketing workflows and content scheduling.</p>
         </div>
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="max-w-xs mx-auto space-y-4">
               <Settings className="w-12 h-12 text-gray-300 mx-auto" />
               <p className="text-xs text-gray-500">Configure AI content engines and automated social posting rules.</p>
@@ -1635,7 +1635,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
           <p className="text-gray-500 font-medium px-10">Marketing ROI and brand reach metrics.</p>
         </div>
-        <Card className=" border-transparent dark:border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none  bg-white dark:bg-gray-900/40 rounded-3xl ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="max-w-xs mx-auto space-y-4">
               <Sparkles className="w-12 h-12 text-gray-300 mx-auto" />
               <p className="text-xs text-gray-500">Performance tracking will be available after connecting social and web properties.</p>

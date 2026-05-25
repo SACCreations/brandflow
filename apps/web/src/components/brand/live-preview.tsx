@@ -34,13 +34,13 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
   const bodyFont = data.visualRules?.bodyFont || data.visualRules?.fontFamily || 'Inter';
 
   return (
-    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-900/50 border-l border-gray-200 dark:border-gray-800 backdrop-blur-xl relative z-20">
-      <div className="h-20 px-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-0 z-10">
+    <div className="h-full flex flex-col bg-gray-50/30 dark:bg-gray-950/30 backdrop-blur-3xl border-l border-white/20 dark:border-white/5 relative z-20 shadow-2xl">
+      <div className="h-20 px-6 border-b border-white/20 dark:border-white/5 flex items-center justify-between bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl sticky top-0 z-10 shadow-sm">
         <h2 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-gray-900 dark:text-white">
           <Sparkles className="w-4 h-4 text-brand-600" />
           Live Preview
         </h2>
-        <div className="flex bg-gray-100 dark:bg-gray-800/80 p-1 rounded-xl shadow-inner border border-gray-200 dark:border-gray-800/50 dark:border-gray-700/50">
+        <div className="flex bg-white/50 dark:bg-gray-900/50 backdrop-blur-md p-1 rounded-xl shadow-inner border border-white/20 dark:border-white/10">
           <button 
             onClick={() => setDevice('mobile')}
             className={cn(
@@ -64,7 +64,7 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
 
       <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center custom-scrollbar">
         <Tabs defaultValue="web" className="w-full flex flex-col items-center">
-          <TabsList className="mb-8 bg-white dark:bg-gray-900/50 dark:bg-gray-800/50 p-1.5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-inner backdrop-blur-sm">
+          <TabsList className="mb-8 bg-white/40 dark:bg-gray-900/40 p-1.5 rounded-2xl border border-white/20 dark:border-white/5 shadow-inner backdrop-blur-xl">
             <TabsTrigger value="web" className="rounded-xl text-[10px] font-black uppercase tracking-widest px-4 data-[state=active]:bg-brand-600 data-[state=active]:shadow-lg data-[state=active]:text-white transition-all">Web</TabsTrigger>
             <TabsTrigger value="social" className="rounded-xl text-[10px] font-black uppercase tracking-widest px-4 data-[state=active]:bg-brand-600 data-[state=active]:shadow-lg data-[state=active]:text-white transition-all">Social</TabsTrigger>
             <TabsTrigger value="ads" className="rounded-xl text-[10px] font-black uppercase tracking-widest px-4 data-[state=active]:bg-brand-600 data-[state=active]:shadow-lg data-[state=active]:text-white transition-all">Ads</TabsTrigger>
@@ -72,11 +72,11 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
 
           <TabsContent value="web" className="w-full mt-0 focus-visible:ring-0 flex justify-center">
             <div className={cn(
-              "bg-white dark:bg-gray-950 shadow-2xl rounded-[2rem] border-8 border-gray-200 dark:border-gray-800 transition-all duration-500 overflow-hidden relative",
-              device === 'mobile' ? "w-[320px] h-[600px] rounded-[3rem]" : "w-full max-w-[600px] min-h-[400px] rounded-2xl border-4"
+              "bg-white dark:bg-gray-950 shadow-2xl transition-all duration-500 overflow-hidden relative border",
+              device === 'mobile' ? "w-[320px] h-[600px] rounded-[3rem] border-8 border-gray-100 dark:border-gray-800 ring-4 ring-gray-200/50 dark:ring-gray-900/50" : "w-full max-w-[600px] min-h-[400px] rounded-2xl border-white/20 dark:border-white/5 shadow-2xl ring-1 ring-gray-900/5"
             )}>
               {/* Fake Browser/Phone Header */}
-              <div className="h-6 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center px-4 gap-1.5">
+              <div className="h-6 bg-gray-100/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center px-4 gap-1.5">
                 {device === 'desktop' ? (
                   <>
                     <div className="w-2 h-2 rounded-full bg-red-400" />
@@ -139,8 +139,8 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
           </TabsContent>
 
           <TabsContent value="social" className="w-full mt-0 focus-visible:ring-0 flex justify-center">
-             <div className="w-[320px] bg-white dark:bg-gray-950 rounded-[3rem] border-8 border-gray-200 dark:border-gray-800 overflow-hidden shadow-2xl relative">
-                <div className="h-6 bg-gray-100 dark:bg-gray-900 flex items-center justify-center relative z-20">
+             <div className="w-[320px] bg-white dark:bg-gray-950 rounded-[3rem] border-8 border-gray-100 dark:border-gray-800 ring-4 ring-gray-200/50 dark:ring-gray-900/50 overflow-hidden shadow-2xl relative">
+                <div className="h-6 bg-gray-100/80 dark:bg-gray-900/80 backdrop-blur-md flex items-center justify-center relative z-20">
                     <div className="w-16 h-4 bg-black rounded-b-xl absolute top-0" />
                 </div>
                 <div className="p-4 flex items-center gap-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
@@ -170,7 +170,7 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality }: LivePrevie
           </TabsContent>
 
           <TabsContent value="ads" className="w-full mt-0 focus-visible:ring-0 flex justify-center">
-             <div className="w-full max-w-[500px] aspect-[16/9] bg-gray-950 rounded-3xl overflow-hidden relative shadow-2xl border border-gray-200 dark:border-gray-800 group">
+             <div className="w-full max-w-[500px] aspect-[16/9] bg-gray-950 rounded-3xl overflow-hidden relative shadow-2xl border border-white/20 dark:border-white/5 ring-1 ring-gray-900/5 group">
                <div className="absolute inset-0 opacity-60">
                  <div className="absolute inset-0 bg-gradient-to-br from-brand-600 to-purple-600" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }} />
                </div>
