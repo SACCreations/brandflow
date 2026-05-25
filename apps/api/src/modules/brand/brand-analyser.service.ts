@@ -61,9 +61,7 @@ export class BrandAnalyserService {
 
     const settings = await this.llmSettingsService.getSettings(businessId);
     const decryptedApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId);
-    const preferredProvider = settings.provider === 'anthropic' || settings.provider === 'fallback'
-      ? settings.provider
-      : 'openai';
+    const preferredProvider = settings.provider || 'openai';
 
     const systemPrompt = [
       'You are BrandFlow\'s senior brand strategist and brand-governance analyst.',
@@ -170,14 +168,21 @@ export class BrandAnalyserService {
 
     const userPrompt = this.buildUserPrompt(resolvedSources);
 
-    const { response, requestId, provider } = await this.gateway.complete(systemPrompt, userPrompt, {
-      provider: preferredProvider,
-      model: settings.model ?? undefined,
-      temperature: 0.15,
-      maxTokens: Math.min(settings.maxTokens ?? 1800, 1800),
-      apiKey: decryptedApiKey ?? undefined,
-      jsonMode: true,
-    });
+    let gatewayResult;
+    try {
+      gatewayResult = await this.gateway.complete(systemPrompt, userPrompt, {
+        provider: preferredProvider,
+        model: settings.model ?? undefined,
+        temperature: 0.15,
+        maxTokens: Math.min(settings.maxTokens ?? 1800, 1800),
+        apiKey: decryptedApiKey ?? undefined,
+        jsonMode: true,
+      });
+    } catch (err: any) {
+      throw new InternalServerErrorException(`Brand analysis failed: ${err.message}`);
+    }
+
+    const { response, requestId, provider } = gatewayResult;
 
     return this.parseAnalysisResult(response.content, {
       requestId,
