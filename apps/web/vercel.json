@@ -1,0 +1,6 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && npx turbo run build --filter=@brandflow/web...",
+  "outputDirectory": ".next",
+  "installCommand": "cd ../.. && pnpm install"
+}

@@ -16,7 +16,7 @@ interface WorkspaceSnapshotProps {
 export function WorkspaceSnapshot({ stats, isLoading }: WorkspaceSnapshotProps) {
   return (
     <div className="space-y-6">
-      <Card className="glass-panel rounded-2xl overflow-hidden">
+      <Card className="glass-premium rounded-3xl overflow-hidden animate-fade-in-up" style={{ animationDelay: '200ms' }}>
         <div className="px-6 py-4 border-b border-border/50">
           <h2 className="font-semibold text-gray-900 dark:text-white">Workspace Snapshot</h2>
         </div>
@@ -27,7 +27,7 @@ export function WorkspaceSnapshot({ stats, isLoading }: WorkspaceSnapshotProps) 
         </div>
       </Card>
 
-      <Card className="glass-panel rounded-2xl overflow-hidden">
+      <Card className="glass-premium rounded-3xl overflow-hidden animate-fade-in-up" style={{ animationDelay: '300ms' }}>
         <div className="px-6 py-4 border-b border-border/50">
           <h2 className="font-semibold text-gray-900 dark:text-white">Quick Actions</h2>
         </div>
@@ -42,7 +42,7 @@ export function WorkspaceSnapshot({ stats, isLoading }: WorkspaceSnapshotProps) 
             <Link
               key={a.label}
               href={a.href}
-              className="flex items-center gap-3 rounded-xl border border-border/50 bg-gray-50/50 dark:bg-gray-800/20 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-brand-400 hover:text-brand-600 transition-all hover:shadow-md"
+              className="flex items-center gap-3 rounded-2xl border-2 border-transparent bg-white/50 dark:bg-black/20 px-5 py-4 text-sm font-bold text-gray-700 dark:text-gray-300 hover:border-brand-500 hover:bg-white dark:hover:bg-zinc-900 transition-all hover:shadow-xl micro-hover"
             >
               <span className="text-brand-500">{a.icon}</span>
               {a.label}
@@ -56,8 +56,8 @@ export function WorkspaceSnapshot({ stats, isLoading }: WorkspaceSnapshotProps) 
 
 function MetricTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-gray-50/50 dark:bg-gray-800/30 p-4 border border-border/30">
-      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{label}</p>
+    <div className="rounded-2xl bg-white/40 dark:bg-black/20 p-5 border border-white/30 dark:border-white/5 shadow-sm">
+      <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{label}</p>
       <p className="mt-2 text-3xl font-black text-gray-900 dark:text-white">{value}</p>
     </div>
   );

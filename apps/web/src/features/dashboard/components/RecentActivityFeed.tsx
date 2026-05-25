@@ -20,7 +20,7 @@ interface RecentActivityFeedProps {
 
 export function RecentActivityFeed({ recentActivity, isLoading, isError }: RecentActivityFeedProps) {
   return (
-    <Card className="glass-panel rounded-2xl overflow-hidden">
+    <Card className="glass-premium rounded-3xl overflow-hidden animate-fade-in-up" style={{ animationDelay: '500ms' }}>
       <div className="px-6 py-4 border-b border-border/50">
         <h2 className="font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
       </div>

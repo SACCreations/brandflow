@@ -15,7 +15,7 @@ export function AiInsightsWidget() {
   );
 
   return (
-    <Card className="glass-panel rounded-2xl overflow-hidden relative">
+    <Card className="glass-premium rounded-3xl overflow-hidden relative animate-fade-in-up" style={{ animationDelay: '400ms' }}>
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-500/10 blur-3xl rounded-full pointer-events-none" />
       <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
         <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">

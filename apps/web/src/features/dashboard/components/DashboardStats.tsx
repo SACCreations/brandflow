@@ -61,10 +61,11 @@ export function DashboardStats({ stats, isLoading }: DashboardStatsProps) {
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {statItems.map((stat) => (
+      {statItems.map((stat, idx) => (
         <Card
           key={stat.label}
-          className="glass rounded-2xl p-5 hover:shadow-lg transition-all duration-300"
+          className="glass-premium rounded-3xl p-6 hover:shadow-2xl transition-all duration-300 animate-fade-in-up micro-hover"
+          style={{ animationDelay: `${idx * 100}ms` }}
         >
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-bold uppercase tracking-widest text-gray-500">{stat.label}</p>
