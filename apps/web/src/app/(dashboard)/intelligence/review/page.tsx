@@ -55,7 +55,7 @@ export default function ReviewQueuePage() {
     queryKey: ['approval-queue', sourceFilter],
     queryFn: async () => {
       const params: Record<string, string> = { status: 'pending' };
-      if (sourceFilter !== 'all') params.source = sourceFilter;
+      if (sourceFilter !== 'all') params['source'] = sourceFilter;
       const res = await apiClient.get('/approvals/queue', { params });
       return Array.isArray(res.data) ? res.data : [];
     },

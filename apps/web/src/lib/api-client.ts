@@ -5,7 +5,7 @@ export const apiClient = axios.create({
   baseURL: process.env['NEXT_PUBLIC_API_URL']?.includes('3001') ? 'http://localhost:4000/api/v1' : (process.env['NEXT_PUBLIC_API_URL'] || 'http://localhost:4000/api/v1'),
   withCredentials: true, // send cookies (refresh token)
   headers: { 'Content-Type': 'application/json' },
-  timeout: 60000, // 60s timeout
+  timeout: 120000, // 120s timeout
 });
 
 // Attach access token from store

@@ -55,6 +55,7 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
           {(['primary', 'secondary', 'accent', 'neutral', 'semantic'] as const).map(type => (
             <button
               key={type}
+              type="button"
               onClick={() => setActiveType(type)}
               className={cn(
                 "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",

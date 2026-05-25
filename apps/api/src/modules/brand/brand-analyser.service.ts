@@ -35,6 +35,8 @@ interface ExtractedPageSignals {
   logoUrls: string[];
   socialLinks: string[];
   fonts: string[];
+  headingFonts: string[];
+  bodyFonts: string[];
   colors: string[];
 }
 
@@ -49,7 +51,7 @@ export class BrandAnalyserService {
     this.gateway = new LLMGateway({
       defaultProvider: (this.config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic'),
       fallbackProvider: (this.config.get('llm.fallbackProvider', 'anthropic') as 'openai' | 'anthropic' | 'fallback'),
-      requestTimeoutMs: this.config.get('llm.requestTimeoutMs', 30000),
+      requestTimeoutMs: this.config.get('llm.requestTimeoutMs', 120000),
     });
   }
 
@@ -70,6 +72,9 @@ export class BrandAnalyserService {
       'If information is uncertain, use null for strings and empty arrays for lists.',
       'For core basics like brand name, website, and description, strongly prefer explicit page signals such as canonical URL, organization schema, title, meta description, and repeated headings.',
       'Never write generic placeholder copy. If the sources do not support a field, leave it null or empty.',
+      'Extract exact brand colors and classify them correctly into primary, secondary, accent, neutral, and semantic colors.',
+      'For Voice & Intelligence, identify specific tones and phrases from the copy.',
+      'For Target Audience and Market Intelligence, confidently infer age groups, interests, and competitors from context based on the industry if explicit data is missing.',
       'The brand object must use this shape:',
       JSON.stringify({
         brand: {
@@ -92,6 +97,8 @@ export class BrandAnalyserService {
             primaryColor: 'string | null',
             secondaryColor: 'string | null',
             accentColor: 'string | null',
+            neutralColor: 'string | null',
+            semanticColor: 'string | null',
             fontFamily: 'string | null',
             headingFont: 'string | null',
             bodyFont: 'string | null',
@@ -470,12 +477,16 @@ export class BrandAnalyserService {
           ?? this.normalizeColor(primarySignals?.colors?.[1]),
         accentColor: this.normalizeColor(this.normalizeString(visualRules?.['accentColor'], 20))
           ?? this.normalizeColor(primarySignals?.colors?.[2]),
+        neutralColor: this.normalizeColor(this.normalizeString(visualRules?.['neutralColor'], 20))
+          ?? this.normalizeColor(primarySignals?.colors?.[3]),
+        semanticColor: this.normalizeColor(this.normalizeString(visualRules?.['semanticColor'], 20))
+          ?? this.normalizeColor(primarySignals?.colors?.[4]),
         fontFamily: this.normalizeString(visualRules?.['fontFamily'], 100)
           ?? this.normalizeString(primarySignals?.fonts?.[0], 100),
         headingFont: this.normalizeString(visualRules?.['headingFont'], 100)
-          ?? this.normalizeString(primarySignals?.fonts?.[0], 100),
+          ?? this.normalizeString(primarySignals?.headingFonts?.[0] ?? primarySignals?.fonts?.[0], 100),
         bodyFont: this.normalizeString(visualRules?.['bodyFont'], 100)
-          ?? this.normalizeString(primarySignals?.fonts?.[1] ?? primarySignals?.fonts?.[0], 100),
+          ?? this.normalizeString(primarySignals?.bodyFonts?.[0] ?? primarySignals?.fonts?.[1] ?? primarySignals?.fonts?.[0], 100),
         logoUrls: Array.isArray(visualRules?.['logoUrls']) ? visualRules['logoUrls'].map((l: any) => ({
           url: this.normalizeString(l?.url, 1000),
           type: this.normalizeString(l?.type, 50),
@@ -692,6 +703,16 @@ export class BrandAnalyserService {
       ...this.extractAssetUrls(html, baseUrl, /<link[^>]+href=["']([^"']+)["'][^>]*>/gi)
         .filter((url) => /logo|brand|icon/i.test(url)),
     ])).slice(0, 5);
+    const headingFonts = Array.from(new Set(
+      [...html.matchAll(/<h[1-6][^>]*style=["'][^"']*font-family:\s*([^;"'}]+)/gi)]
+        .map((match) => (match[1] || '').replace(/["']/g, '').trim())
+        .filter(Boolean),
+    )).slice(0, 5);
+    const bodyFonts = Array.from(new Set(
+      [...html.matchAll(/<p[^>]*style=["'][^"']*font-family:\s*([^;"'}]+)/gi)]
+        .map((match) => (match[1] || '').replace(/["']/g, '').trim())
+        .filter(Boolean),
+    )).slice(0, 5);
     const fonts = Array.from(new Set(
       [...html.matchAll(/font-family:\s*([^;"'}]+)/gi)]
         .map((match) => (match[1] || '').replace(/["']/g, '').trim())
@@ -722,6 +743,8 @@ export class BrandAnalyserService {
       logoUrls,
       socialLinks,
       fonts,
+      headingFonts,
+      bodyFonts,
       colors,
     };
   }
@@ -738,6 +761,8 @@ export class BrandAnalyserService {
       signals.socialLinks.length > 0 ? `Social links: ${signals.socialLinks.join(', ')}` : null,
       signals.logoUrls.length > 0 ? `Logo/image candidates: ${signals.logoUrls.join(', ')}` : null,
       signals.fonts.length > 0 ? `Detected fonts: ${signals.fonts.join(', ')}` : null,
+      signals.headingFonts.length > 0 ? `Detected heading fonts: ${signals.headingFonts.join(', ')}` : null,
+      signals.bodyFonts.length > 0 ? `Detected body fonts: ${signals.bodyFonts.join(', ')}` : null,
       signals.colors.length > 0 ? `Detected colors: ${signals.colors.join(', ')}` : null,
     ].filter(Boolean).join('\n');
   }

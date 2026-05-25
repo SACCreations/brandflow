@@ -29,6 +29,7 @@ interface BrandWizardProps {
   title: string;
   onClose?: () => void;
   initialData?: any;
+  isEditMode?: boolean;
 }
 
 const STEPS = [
@@ -42,7 +43,7 @@ const STEPS = [
   { id: 'finish', label: 'Analytics & Finish', icon: Sparkles, description: 'Reporting & Review' }
 ];
 
-export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }: BrandWizardProps) {
+export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, isEditMode }: BrandWizardProps) {
   const [currentStepIdx, setCurrentStepIdx] = React.useState(0);
   const [maxVisitedStepIdx, setMaxVisitedStepIdx] = React.useState(0);
   const [formData, setFormData] = React.useState<any>(initialData || {});
@@ -97,7 +98,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
       } catch (err: any) {
         toast({
           variant: 'destructive',
-          title: 'Failed to create brand',
+          title: isEditMode ? 'Failed to update brand' : 'Failed to create brand',
           description: err?.message || 'An unexpected error occurred. Please try again.',
         });
       } finally {
@@ -318,9 +319,9 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData }
                     className="rounded-xl font-black h-12 px-12 bg-brand-600 hover:bg-brand-700 shadow-xl shadow-brand-500/20 uppercase tracking-tight"
                  >
                     {isSubmitting ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating...</>
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {isEditMode ? 'Saving...' : 'Creating...'}</>
                     ) : currentStepIdx === STEPS.length - 1 ? (
-                      <>Finish & Publish <CheckCircle2 className="w-4 h-4 ml-2" /></>
+                      <>{isEditMode ? 'Save Changes' : 'Finish & Publish'} <CheckCircle2 className="w-4 h-4 ml-2" /></>
                     ) : (
                       <>Continue <ChevronRight className="w-4 h-4 ml-2" /></>
                     )}

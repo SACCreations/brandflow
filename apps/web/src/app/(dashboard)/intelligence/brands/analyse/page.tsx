@@ -298,22 +298,21 @@ export default function BrandAnalysePage() {
           <div className="relative w-24 h-24 mx-auto">
             <div className="absolute inset-0 rounded-full border-4 border-brand-100 border-t-brand-600 animate-spin"></div>
             <div className="absolute inset-4 rounded-full bg-brand-50 flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-brand-600" />
+              <Sparkles className="w-8 h-8 text-brand-600 animate-pulse" />
             </div>
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-semibold">AI is Analysing your Brand...</h2>
             <p className="text-gray-500 max-w-sm mx-auto">
-              We're reading your website and distilling your unique brand voice. This usually takes 10-20 seconds.
+              We're deeply analyzing your website and distilling your unique brand voice. This complex task may take up to 2 minutes.
             </p>
           </div>
-          <div className="flex flex-col gap-2 max-w-xs mx-auto">
-             <div className="flex justify-between text-xs font-medium">
-               <span className="text-brand-600">Extracting content...</span>
-               <span>75%</span>
+          <div className="flex flex-col gap-2 max-w-xs mx-auto pt-4">
+             <div className="flex justify-center text-xs font-medium">
+               <span className="text-brand-600 animate-pulse">Processing evidence...</span>
              </div>
-             <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-               <div className="h-full bg-brand-600 rounded-full animate-pulse" style={{ width: '75%' }}></div>
+             <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden relative">
+               <div className="absolute top-0 left-0 h-full bg-brand-600 rounded-full w-full animate-pulse"></div>
              </div>
           </div>
         </Card>

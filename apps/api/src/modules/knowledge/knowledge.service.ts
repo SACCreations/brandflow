@@ -184,26 +184,27 @@ export class KnowledgeService {
       }
     }
 
-    // Use transaction to prevent orphaned sources if enqueue fails
-    const source = await this.prisma.client.$transaction(async (tx) => {
-      const created = await tx.knowledgeSource.create({
-        data: {
-          businessId,
-          brandId: dto.brandId,
-          name: dto.name,
-          type: dto.type,
-          sourceUrl: dto.sourceUrl,
-          trustLevel: dto.trustLevel ?? 'high',
-          syncFrequency: dto.syncFrequency ?? 'manual',
-          status: 'pending',
-          metadata: { ...(dto.metadata ?? {}), locale: dto.locale ?? 'en-US' },
-        },
-      });
-
-      await this.triggerIngestion(created.id, businessId, dto.text);
-
-      return created;
+    const source = await this.prisma.client.knowledgeSource.create({
+      data: {
+        businessId,
+        brandId: dto.brandId,
+        name: dto.name,
+        type: dto.type,
+        sourceUrl: dto.sourceUrl,
+        trustLevel: dto.trustLevel ?? 'high',
+        syncFrequency: dto.syncFrequency ?? 'manual',
+        status: 'pending',
+        metadata: { ...(dto.metadata ?? {}), locale: dto.locale ?? 'en-US' },
+      },
     });
+
+    try {
+      await this.triggerIngestion(source.id, businessId, dto.text);
+    } catch (err) {
+      // If ingestion enqueue fails, remove the orphaned source so it can be retried
+      await this.prisma.client.knowledgeSource.delete({ where: { id: source.id } });
+      throw err;
+    }
 
     return source;
   }

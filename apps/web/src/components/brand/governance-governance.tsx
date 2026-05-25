@@ -56,6 +56,7 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
             {(['banned', 'required', 'cta', 'legal'] as const).map(type => (
               <button
                 key={type}
+                type="button"
                 onClick={() => setActiveType(type)}
                 className={cn(
                   "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
@@ -86,6 +87,7 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
                   />
                 </div>
                 <button 
+                  type="button"
                   onClick={() => removeRule(rule.id)}
                   className="p-3 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-xl transition-all opacity-0 group-hover:opacity-100"
                 >

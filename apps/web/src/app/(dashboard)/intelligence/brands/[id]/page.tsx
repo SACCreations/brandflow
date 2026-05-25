@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useParams } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
-import { BrandStudio } from '@/components/brand/brand-studio';
+import { BrandWizard } from '@/components/brand/brand-wizard';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { Button, useToast } from '@brandflow/ui';
 
@@ -69,14 +69,16 @@ export default function BrandEditPage() {
   }
 
   return (
-    <div>
-      <BrandStudio 
+    <div className="bg-white dark:bg-gray-950">
+      <BrandWizard 
         title="Edit Brand"
         initialData={brand}
+        isEditMode={true}
         onSubmit={async (data) => {
           await mutation.mutateAsync(data);
         }}
         isLoading={mutation.isPending}
+        onClose={() => router.push('/intelligence/brands')}
       />
     </div>
   );
