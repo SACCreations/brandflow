@@ -12,7 +12,7 @@ export default function AutomationsRedirect() {
 
   return (
     <div className="flex h-[60vh] items-center justify-center">
-      <p className="text-gray-500">Redirecting to automations...</p>
+      <p className="text-muted-foreground">Redirecting to automations...</p>
     </div>
   );
 }

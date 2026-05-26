@@ -50,8 +50,8 @@ export default function BrandEditPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] gap-4">
-        <Loader2 className="w-10 h-10 text-brand-600 animate-spin" />
-        <p className="text-gray-500 font-medium">Loading brand studio...</p>
+        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+        <p className="text-muted-foreground font-medium">Loading brand studio...</p>
       </div>
     );
   }
@@ -59,7 +59,7 @@ export default function BrandEditPage() {
   if (!brand) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] gap-4">
-        <p className="text-gray-500 text-lg font-medium">Brand not found.</p>
+        <p className="text-muted-foreground text-lg font-medium">Brand not found.</p>
         <Button variant="outline" onClick={() => router.push('/intelligence/brands')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Brands
@@ -69,7 +69,7 @@ export default function BrandEditPage() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-950">
+    <div className="bg-background">
       <BrandWizard 
         title="Edit Brand"
         initialData={brand}

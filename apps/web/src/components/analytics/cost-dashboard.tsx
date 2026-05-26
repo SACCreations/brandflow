@@ -39,10 +39,10 @@ export function CostAnalysisDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/50 dark:border-gray-800 dark:bg-gray-900/50">
+      <div className="flex h-96 items-center justify-center rounded-2xl border border-border/60 bg-background/50 border-border bg-background/50">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
-          <p className="text-sm font-bold text-gray-400">Analyzing AI compute costs...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm font-bold text-muted-foreground">Analyzing AI compute costs...</p>
         </div>
       </div>
     );
@@ -80,19 +80,19 @@ export function CostAnalysisDashboard() {
           title="Avg. Cost per Request" 
           value={`$${(totalCost / (costData?.dailyTrend?.length || 1)).toFixed(2)}`} 
           subtitle="Efficiency Score"
-          icon={<Activity className="h-5 w-5 text-brand-500" />} 
+          icon={<Activity className="h-5 w-5 text-primary" />} 
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Cost Trend */}
-        <div className="lg:col-span-8 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="lg:col-span-8 rounded-2xl border border-border bg-background p-6 border-border bg-background">
           <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-brand-600" />
+            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
               Spend Velocity
             </h3>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Daily USD Spend</span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Daily USD Spend</span>
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -134,9 +134,9 @@ export function CostAnalysisDashboard() {
         </div>
 
         {/* Breakdown */}
-        <div className="lg:col-span-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <Layers className="h-5 w-5 text-brand-600" />
+        <div className="lg:col-span-4 rounded-2xl border border-border bg-background p-6 border-border bg-background">
+          <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+            <Layers className="h-5 w-5 text-primary" />
             Module Allocation
           </h3>
           <div className="h-64 w-full">
@@ -168,14 +168,14 @@ export function CostAnalysisDashboard() {
 
 function CostStat({ title, value, subtitle, icon }: any) {
   return (
-    <div className="group rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm transition-all hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
+    <div className="group rounded-2xl border border-border bg-background p-6 shadow-sm transition-all hover:shadow-md border-border bg-background">
       <div className="flex items-center justify-between mb-4">
-        <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-2.5 dark:bg-gray-800 group-hover:scale-110 transition-transform">{icon}</div>
-        <ArrowUpRight className="h-4 w-4 text-gray-300" />
+        <div className="rounded-xl bg-surface-1 bg-background p-2.5 bg-surface-2 group-hover:scale-110 transition-transform">{icon}</div>
+        <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
       </div>
-      <div className="text-3xl font-black text-gray-900 dark:text-white">{value}</div>
-      <div className="text-sm font-bold text-gray-500">{title}</div>
-      <p className="mt-1 text-[10px] text-gray-400 uppercase tracking-widest">{subtitle}</p>
+      <div className="text-3xl font-black text-foreground">{value}</div>
+      <div className="text-sm font-bold text-muted-foreground">{title}</div>
+      <p className="mt-1 text-[10px] text-muted-foreground uppercase tracking-widest">{subtitle}</p>
     </div>
   );
 }

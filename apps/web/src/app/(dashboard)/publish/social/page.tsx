@@ -24,7 +24,7 @@ interface SocialAccount {
 const platforms = [
   { id: 'linkedin', label: 'LinkedIn', icon: 'in', color: 'bg-blue-700', desc: 'Company pages & personal profiles' },
   { id: 'instagram', label: 'Instagram', icon: 'IG', color: 'bg-pink-600', desc: 'Posts, Stories & Reels' },
-  { id: 'twitter', label: 'X / Twitter', icon: 'X', color: 'bg-gray-900', desc: 'Tweets & threads' },
+  { id: 'twitter', label: 'X / Twitter', icon: 'X', color: 'bg-background', desc: 'Tweets & threads' },
   { id: 'facebook', label: 'Facebook', icon: 'f', color: 'bg-blue-600', desc: 'Pages & groups' },
   { id: 'tiktok', label: 'TikTok', icon: 'TT', color: 'bg-black', desc: 'Short-form videos & teasers' },
 ] as const;
@@ -163,29 +163,29 @@ export default function SocialAccountsPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Social Accounts</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">Connect publishing destinations so approved content can move from editor to queue without handoffs falling through the floorboards.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Social Accounts</h1>
+          <p className="mt-2 text-muted-foreground">Connect publishing destinations so approved content can move from editor to queue without handoffs falling through the floorboards.</p>
         </div>
-        <div className="rounded-2xl border border-brand-100 bg-brand-50/70 px-4 py-3 text-sm text-brand-700 dark:border-brand-500/20 dark:bg-brand-500/10 dark:text-brand-300">
+        <div className="rounded-2xl border border-primary/10 bg-brand-50/70 px-4 py-3 text-sm text-brand-700 dark:border-primary/20 dark:bg-primary/100/10 dark:text-brand-300">
           LinkedIn OAuth is now wired end to end. The manual form stays here for test environments and upcoming platform connectors.
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {platforms.map((platform) => (
-          <div key={platform.id} className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 dark:border-gray-800 dark:bg-gray-900">
+          <div key={platform.id} className="rounded-2xl border border-border bg-background p-5 border-border bg-background">
             <div className="flex items-center gap-4">
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${platform.color} text-sm font-black text-white`}>
+              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${platform.color} text-sm font-black text-foreground`}>
                 {platform.icon}
               </div>
               <div>
-                <p className="font-semibold text-gray-900 dark:text-white">{platform.label}</p>
-                <p className="text-xs text-gray-500">{platform.desc}</p>
+                <p className="font-semibold text-foreground">{platform.label}</p>
+                <p className="text-xs text-muted-foreground">{platform.desc}</p>
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
+            <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
               <span>Connected</span>
-              <span className="rounded-full bg-gray-100 px-2 py-1 font-bold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+              <span className="rounded-full bg-surface-2 px-2 py-1 font-bold text-foreground bg-surface-2 text-foreground">
                 {accountCounts[platform.id] ?? 0}
               </span>
             </div>
@@ -215,12 +215,12 @@ export default function SocialAccountsPage() {
       </div>
 
       <div className="grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-border bg-background p-6 border-border bg-background">
           <div className="flex items-center gap-3">
-            <ShieldCheck className="h-5 w-5 text-brand-600" />
+            <ShieldCheck className="h-5 w-5 text-primary" />
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Connect an account</h2>
-              <p className="text-sm text-gray-500">Store account access securely so scheduling can use it later.</p>
+              <h2 className="text-lg font-semibold text-foreground">Connect an account</h2>
+              <p className="text-sm text-muted-foreground">Store account access securely so scheduling can use it later.</p>
             </div>
           </div>
 
@@ -229,7 +229,7 @@ export default function SocialAccountsPage() {
               <select
                 value={form.platform}
                 onChange={(event) => setForm((current) => ({ ...current, platform: event.target.value }))}
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
               >
                 {platforms.map((platform) => (
                   <option key={platform.id} value={platform.id}>{platform.label}</option>
@@ -242,7 +242,7 @@ export default function SocialAccountsPage() {
                 value={form.accountType}
                 onChange={(event) => setForm((current) => ({ ...current, accountType: event.target.value }))}
                 placeholder="company"
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
               />
             </Field>
 
@@ -251,7 +251,7 @@ export default function SocialAccountsPage() {
                 value={form.name}
                 onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
                 placeholder="BrandFlow LinkedIn"
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
               />
             </Field>
 
@@ -260,7 +260,7 @@ export default function SocialAccountsPage() {
                 value={form.externalId}
                 onChange={(event) => setForm((current) => ({ ...current, externalId: event.target.value }))}
                 placeholder="company-123456"
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
               />
             </Field>
 
@@ -270,7 +270,7 @@ export default function SocialAccountsPage() {
                 value={form.accessToken}
                 onChange={(event) => setForm((current) => ({ ...current, accessToken: event.target.value }))}
                 placeholder="Paste provider token"
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
               />
             </Field>
 
@@ -280,7 +280,7 @@ export default function SocialAccountsPage() {
                 value={form.refreshToken}
                 onChange={(event) => setForm((current) => ({ ...current, refreshToken: event.target.value }))}
                 placeholder="Provider refresh token"
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
               />
             </Field>
 
@@ -289,7 +289,7 @@ export default function SocialAccountsPage() {
                 type="datetime-local"
                 value={form.tokenExpiresAt}
                 onChange={(event) => setForm((current) => ({ ...current, tokenExpiresAt: event.target.value }))}
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
               />
             </Field>
 
@@ -298,7 +298,7 @@ export default function SocialAccountsPage() {
                 value={form.scopes}
                 onChange={(event) => setForm((current) => ({ ...current, scopes: event.target.value }))}
                 placeholder="w_member_social, r_organization_social"
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
               />
             </Field>
           </div>
@@ -312,23 +312,23 @@ export default function SocialAccountsPage() {
               {connectMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
               Connect account
             </Button>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-muted-foreground">
               Tokens are encrypted at rest in the API service.
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-          <div className="border-b border-gray-200 dark:border-gray-800 px-6 py-4 dark:border-gray-800">
-            <h2 className="font-semibold text-gray-900 dark:text-white">Connected Accounts</h2>
+        <div className="rounded-2xl border border-border bg-background border-border bg-background overflow-hidden">
+          <div className="border-b border-border px-6 py-4 border-border">
+            <h2 className="font-semibold text-foreground">Connected Accounts</h2>
           </div>
 
           {isLoading ? (
             <div className="flex h-48 items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : accounts.length === 0 ? (
-            <div className="p-8 text-center text-sm text-gray-500">
+            <div className="p-8 text-center text-sm text-muted-foreground">
               No social accounts connected yet.
             </div>
           ) : (
@@ -338,16 +338,16 @@ export default function SocialAccountsPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{account.name}</h3>
-                        <span className="rounded-full bg-gray-100 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                        <h3 className="font-semibold text-foreground">{account.name}</h3>
+                        <span className="rounded-full bg-surface-2 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-surface-2 text-foreground">
                           {account.platform}
                         </span>
                       </div>
-                      <div className="mt-1 text-xs text-gray-500">{account.accountType} • {account.externalId}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">{account.accountType} • {account.externalId}</div>
                     </div>
                     <button
                       onClick={() => disconnectMutation.mutate(account.id)}
-                      className="rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800"
+                      className="rounded-lg p-2 text-muted-foreground transition hover:bg-surface-2 hover:text-red-600 dark:hover:bg-surface-1"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -357,7 +357,7 @@ export default function SocialAccountsPage() {
                     <InfoPill icon={<CheckCircle2 className="h-4 w-4 text-emerald-500" />} label="Schedules" value={String(account._count?.schedules ?? 0)} />
                     <InfoPill icon={<CheckCircle2 className="h-4 w-4 text-blue-500" />} label="Publish jobs" value={String(account._count?.publishJobs ?? 0)} />
                     <InfoPill icon={<AlertCircle className="h-4 w-4 text-amber-500" />} label="Expiry" value={account.tokenExpiresAt ? new Date(account.tokenExpiresAt).toLocaleString() : 'No expiry set'} />
-                    <InfoPill icon={<ShieldCheck className="h-4 w-4 text-brand-500" />} label="Scopes" value={account.scopes?.length ? account.scopes.join(', ') : 'Not provided'} />
+                    <InfoPill icon={<ShieldCheck className="h-4 w-4 text-primary" />} label="Scopes" value={account.scopes?.length ? account.scopes.join(', ') : 'Not provided'} />
                   </div>
                 </div>
               ))}
@@ -372,7 +372,7 @@ export default function SocialAccountsPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-2">
-      <span className="text-xs font-bold uppercase tracking-widest text-gray-400">{label}</span>
+      <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
       {children}
     </label>
   );
@@ -380,12 +380,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function InfoPill({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-3 dark:border-gray-800">
-      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400">
+    <div className="rounded-xl border border-border/60 px-4 py-3 border-border">
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
         {icon}
         {label}
       </div>
-      <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">{value}</div>
+      <div className="mt-2 text-sm text-foreground">{value}</div>
     </div>
   );
 }

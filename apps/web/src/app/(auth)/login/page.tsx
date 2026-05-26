@@ -46,23 +46,23 @@ function LoginContent() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 space-y-6">
+    <div className="bg-background rounded-2xl shadow-lg p-8 space-y-6">
       <div className="text-center">
-        <div className="text-3xl font-bold text-brand-600 mb-2">BrandFlow</div>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Welcome back</h1>
-        <p className="mt-1 text-sm text-gray-500">Sign in to your workspace</p>
+        <div className="text-3xl font-bold text-primary mb-2">BrandFlow</div>
+        <h1 className="text-xl font-bold text-foreground">Welcome back</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Sign in to your workspace</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             Email
           </label>
           <input
             type="email"
             {...register('email')}
             autoComplete="email"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full px-3 py-2 border border-border bg-surface-2 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             placeholder="you@company.com"
           />
           {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
@@ -70,13 +70,13 @@ function LoginContent() {
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-foreground">
               Password
             </label>
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="text-xs text-gray-500 hover:text-brand-600"
+              className="text-xs text-muted-foreground hover:text-primary"
             >
               {showPassword ? 'Hide' : 'Show'}
             </button>
@@ -85,7 +85,7 @@ function LoginContent() {
             type={showPassword ? 'text' : 'password'}
             {...register('password')}
             autoComplete="current-password"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full px-3 py-2 border border-border bg-surface-2 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
           {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
         </div>
@@ -99,15 +99,15 @@ function LoginContent() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-2.5 bg-primary hover:bg-brand-700 text-foreground font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{' '}
-        <Link href="/register" className="text-brand-600 hover:underline font-medium">
+        <Link href="/register" className="text-primary hover:underline font-medium">
           Create one
         </Link>
       </p>
@@ -117,7 +117,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-gray-500">Loading...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading...</div>}>
       <LoginContent />
     </Suspense>
   );

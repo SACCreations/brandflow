@@ -104,13 +104,13 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" role="dialog" aria-modal="true" aria-labelledby="add-source-title">
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-white dark:bg-gray-900 shadow-2xl dark:bg-gray-900 border border-gray-200 dark:border-gray-800 animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-background shadow-2xl bg-background border border-border animate-in zoom-in-95 duration-300">
         
         {/* Close Button */}
         <button 
           onClick={reset}
           aria-label="Close dialog"
-          className="absolute right-6 top-6 rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors z-10"
+          className="absolute right-6 top-6 rounded-full p-2 text-muted-foreground hover:bg-surface-2 dark:hover:bg-surface-1 transition-colors z-10"
         >
           <X className="h-5 w-5" />
         </button>
@@ -120,17 +120,17 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
             <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10">
               <Check className="h-10 w-10" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Ingestion Started!</h2>
-            <p className="mt-2 text-gray-500 dark:text-gray-400">Your knowledge source is being processed in the background.</p>
+            <h2 className="text-2xl font-bold text-foreground">Ingestion Started!</h2>
+            <p className="mt-2 text-muted-foreground">Your knowledge source is being processed in the background.</p>
           </div>
         ) : (
           <>
             <div className="p-8">
-              <h2 id="add-source-title" className="text-2xl font-bold text-gray-900 dark:text-white">Add Knowledge Source</h2>
-              <p className="mt-2 text-gray-500 dark:text-gray-400">Select how you want to ingest knowledge into your brand brain.</p>
+              <h2 id="add-source-title" className="text-2xl font-bold text-foreground">Add Knowledge Source</h2>
+              <p className="mt-2 text-muted-foreground">Select how you want to ingest knowledge into your brand brain.</p>
 
               {/* Tabs */}
-              <div className="mt-6 flex gap-2 border-b border-gray-200 dark:border-gray-800 pb-2 dark:border-gray-800 overflow-x-auto scrollbar-none">
+              <div className="mt-6 flex gap-2 border-b border-border pb-2 border-border overflow-x-auto scrollbar-none">
                 {[
                   { id: 'web', label: 'Website URL', icon: Globe },
                   { id: 'file', label: 'File Upload', icon: Upload },
@@ -142,8 +142,8 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
                     onClick={() => setSelectedType(tab.id as SourceType)}
                     className={`flex shrink-0 items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all border-b-2 -mb-[9px] ${
                       selectedType === tab.id
-                        ? 'border-brand-500 text-brand-600 dark:text-brand-500'
-                        : 'border-transparent text-gray-500 hover:text-gray-900 dark:text-white dark:hover:text-gray-300'
+                        ? 'border-primary text-primary dark:text-primary'
+                        : 'border-transparent text-muted-foreground hover:text-foreground dark:hover:text-gray-300'
                     }`}
                   >
                     <tab.icon className="h-4 w-4" />
@@ -178,13 +178,13 @@ export default function AddSourceModal({ isOpen, onClose }: { isOpen: boolean, o
 function BrandSelector({ brandId, brands, isBrandsLoading, setBrandId }: SourceFormSharedProps) {
   return (
     <div>
-      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+      <label className="block text-sm font-bold text-foreground mb-2">
         Attach to brand
       </label>
       <select
         value={brandId}
         onChange={(event) => setBrandId(event.target.value)}
-        className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800 dark:text-white"
+        className="w-full rounded-xl border border-border bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2 text-foreground"
       >
         <option value="">{isBrandsLoading ? 'Loading brands…' : 'Select a brand'}</option>
         {brands.map((brand) => (
@@ -206,14 +206,14 @@ function SourceOption({ icon, title, description, onClick }: any) {
   return (
     <button 
       onClick={onClick}
-      className="group flex flex-col items-start rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 text-left transition-all hover:border-brand-500 hover:shadow-xl hover:shadow-brand-500/5 dark:border-gray-800 dark:bg-gray-900/50 dark:hover:border-brand-500"
+      className="group flex flex-col items-start rounded-2xl border border-border bg-background p-6 text-left transition-all hover:border-primary hover:shadow-xl hover:shadow-brand-500/5 border-border bg-background/50 dark:hover:border-primary"
     >
-      <div className="mb-4 rounded-xl bg-gray-50 dark:bg-gray-950 p-3 transition-colors group-hover:bg-brand-50 dark:bg-gray-800 dark:group-hover:bg-brand-500/10">
+      <div className="mb-4 rounded-xl bg-surface-1 bg-background p-3 transition-colors group-hover:bg-primary/10 bg-surface-2 dark:group-hover:bg-primary/100/10">
         {icon}
       </div>
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
-      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{description}</p>
-      <div className="mt-4 flex items-center gap-1 text-xs font-bold text-brand-600 opacity-0 transition-opacity group-hover:opacity-100 uppercase tracking-wider">
+      <h3 className="text-lg font-bold text-foreground">{title}</h3>
+      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{description}</p>
+      <div className="mt-4 flex items-center gap-1 text-xs font-bold text-primary opacity-0 transition-opacity group-hover:opacity-100 uppercase tracking-wider">
         Setup <ChevronRight className="h-3 w-3" />
       </div>
     </button>
@@ -255,15 +255,15 @@ function WebSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId
   return (
     <div className="p-8 pt-0">
 
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Website Ingestion</h2>
-      <p className="mt-2 text-gray-500 dark:text-gray-400">Extract intelligence from live web content.</p>
+      <h2 className="text-2xl font-bold text-foreground">Website Ingestion</h2>
+      <p className="mt-2 text-muted-foreground">Extract intelligence from live web content.</p>
 
-      <div className="mt-8 flex gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl w-fit">
+      <div className="mt-8 flex gap-2 p-1 bg-surface-3 rounded-xl w-fit">
         {['single', 'sitemap', 'rss'].map((m) => (
           <button 
             key={m}
             onClick={() => setMethod(m)}
-            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all capitalize ${method === m ? 'bg-white dark:bg-gray-900 text-brand-600 shadow-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500'}`}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all capitalize ${method === m ? 'bg-background text-primary shadow-sm bg-surface-3 text-foreground' : 'text-muted-foreground'}`}
           >
             {m}
           </button>
@@ -273,7 +273,7 @@ function WebSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId
       <div className="mt-6 space-y-4">
         <BrandSelector brandId={brandId} brands={brands} isBrandsLoading={isBrandsLoading} setBrandId={setBrandId} />
         <div>
-          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-bold text-foreground mb-2">
             {method === 'single' ? 'Enter URL' : method === 'sitemap' ? 'Sitemap XML URL' : 'RSS Feed URL'}
           </label>
           <input 
@@ -281,7 +281,7 @@ function WebSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://example.com/..." 
-            className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-xl border border-border bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2 text-foreground"
           />
         </div>
       </div>
@@ -296,7 +296,7 @@ function WebSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId
         <button 
           onClick={handleSubmit}
           disabled={isSubmitting || isBrandsLoading || brands.length === 0}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-8 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-2.5 text-sm font-semibold text-foreground shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700 disabled:opacity-50"
         >
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Start Ingestion'}
         </button>
@@ -393,8 +393,8 @@ function FileSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandI
   return (
     <div className="p-8 pt-0">
 
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Upload Documents</h2>
-      <p className="mt-2 text-gray-500 dark:text-gray-400">PDF, DOCX, CSV, and TXT files supported.</p>
+      <h2 className="text-2xl font-bold text-foreground">Upload Documents</h2>
+      <p className="mt-2 text-muted-foreground">PDF, DOCX, CSV, and TXT files supported.</p>
 
       <input 
         type="file" 
@@ -417,17 +417,17 @@ function FileSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandI
         onDragLeave={handleDragLeave}
         className={`mt-6 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-all group cursor-pointer ${
           isDragging 
-            ? 'border-brand-500 bg-brand-50/20 dark:bg-brand-900/20' 
-            : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 dark:border-gray-800 dark:bg-gray-800/30 hover:border-brand-500 hover:bg-brand-50/10'
+            ? 'border-primary bg-brand-50/20 dark:bg-brand-900/20' 
+            : 'border-border bg-surface-1 dark:bg-gray-950/50 border-border bg-surface-2/30 hover:border-primary hover:bg-brand-50/10'
         }`}
       >
-        <div className="rounded-full bg-white dark:bg-gray-900 p-4 shadow-sm dark:bg-gray-800 group-hover:scale-110 transition-transform">
-          <Upload className="h-8 w-8 text-brand-600" />
+        <div className="rounded-full bg-background p-4 shadow-sm bg-surface-2 group-hover:scale-110 transition-transform">
+          <Upload className="h-8 w-8 text-primary" />
         </div>
-        <p className="mt-6 text-sm font-bold text-gray-900 dark:text-white">
+        <p className="mt-6 text-sm font-bold text-foreground">
           {files.length > 0 ? `${files.length} file(s) selected` : 'Click to upload or drag and drop'}
         </p>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           {files.length > 0 ? files.map(f => f.name).join(', ') : 'PDF, DOCX, XLSX, CSV, PPTX, TXT — up to 50MB each'}
         </p>
 
@@ -443,7 +443,7 @@ function FileSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandI
         <button 
           onClick={handleSubmit}
           disabled={isSubmitting || files.length === 0 || isBrandsLoading || brands.length === 0}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-8 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-2.5 text-sm font-semibold text-foreground shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700 disabled:opacity-50"
         >
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Upload and Ingest'}
         </button>
@@ -485,29 +485,29 @@ function ApiSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId
   return (
     <div className="p-8 pt-0">
 
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Direct Knowledge Input</h2>
-      <p className="mt-2 text-gray-500 dark:text-gray-400">Paste raw text, snippets, or connect custom data.</p>
+      <h2 className="text-2xl font-bold text-foreground">Direct Knowledge Input</h2>
+      <p className="mt-2 text-muted-foreground">Paste raw text, snippets, or connect custom data.</p>
 
       <div className="mt-8 space-y-4">
         <BrandSelector brandId={brandId} brands={brands} isBrandsLoading={isBrandsLoading} setBrandId={setBrandId} />
         <div>
-          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Reference Name</label>
+          <label className="block text-sm font-bold text-foreground mb-2">Reference Name</label>
           <input 
             type="text" 
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Q4 Competitor Analysis" 
-            className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm dark:border-gray-800 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-xl border border-border bg-surface-1 bg-background px-4 py-3 text-sm border-border bg-surface-2 text-foreground"
           />
         </div>
         <div>
-          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Knowledge Content</label>
+          <label className="block text-sm font-bold text-foreground mb-2">Knowledge Content</label>
           <textarea 
             rows={5}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Paste text here..." 
-            className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm dark:border-gray-800 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-xl border border-border bg-surface-1 bg-background px-4 py-3 text-sm border-border bg-surface-2 text-foreground"
           />
         </div>
       </div>
@@ -522,7 +522,7 @@ function ApiSourceForm({ onSuccess, brandId, brands, isBrandsLoading, setBrandId
         <button 
           onClick={handleSubmit}
           disabled={isSubmitting || isBrandsLoading || brands.length === 0}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-8 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-2.5 text-sm font-semibold text-foreground shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700 disabled:opacity-50"
         >
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Knowledge'}
         </button>
@@ -542,8 +542,8 @@ function IntegrationSourceForm({ onSuccess }: any) {
   return (
     <div className="p-8 pt-0">
 
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Integrations</h2>
-      <p className="mt-2 text-gray-500 dark:text-gray-400">Sync knowledge from your existing tools.</p>
+      <h2 className="text-2xl font-bold text-foreground">Integrations</h2>
+      <p className="mt-2 text-muted-foreground">Sync knowledge from your existing tools.</p>
 
       <div className="mt-8 space-y-3">
         {integrations.map((app) => (
@@ -551,17 +551,17 @@ function IntegrationSourceForm({ onSuccess }: any) {
             key={app.name}
             disabled={app.status === 'coming soon'}
             onClick={() => app.status !== 'coming soon' && onSuccess()}
-            className={`flex w-full items-center justify-between rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 transition-all dark:border-gray-800 dark:bg-gray-900/50 ${
-              app.status === 'coming soon' ? 'opacity-50 grayscale' : 'hover:border-brand-500 hover:shadow-md'
+            className={`flex w-full items-center justify-between rounded-2xl border border-border/60 bg-background p-4 transition-all border-border bg-background/50 ${
+              app.status === 'coming soon' ? 'opacity-50 grayscale' : 'hover:border-primary hover:shadow-md'
             }`}
           >
             <div className="flex items-center gap-4">
-              <div className="rounded-lg bg-gray-50 dark:bg-gray-950 p-2.5 dark:bg-gray-800">{app.icon}</div>
-              <span className="font-bold text-gray-900 dark:text-white">{app.name}</span>
+              <div className="rounded-lg bg-surface-1 bg-background p-2.5 bg-surface-2">{app.icon}</div>
+              <span className="font-bold text-foreground">{app.name}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{app.status}</span>
-              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{app.status}</span>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
           </button>
         ))}

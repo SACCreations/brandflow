@@ -43,7 +43,7 @@ export default function AutomationsPage() {
   if (isLoading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -55,7 +55,7 @@ export default function AutomationsPage() {
         <h2 className="text-xl font-bold">Failed to load automations</h2>
         <button 
           onClick={() => queryClient.invalidateQueries({ queryKey: ['automations'] })}
-          className="rounded-xl bg-brand-600 px-6 py-2 text-sm font-bold text-white"
+          className="rounded-xl bg-primary px-6 py-2 text-sm font-bold text-foreground"
         >
           Try Again
         </button>
@@ -67,12 +67,12 @@ export default function AutomationsPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Workflow Automation</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">Automate your brand operations with custom IF-THIS-THEN-THAT rules.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Workflow Automation</h1>
+          <p className="mt-2 text-muted-foreground">Automate your brand operations with custom IF-THIS-THEN-THAT rules.</p>
         </div>
         <button 
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
+          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
         >
           <Plus className="h-4 w-4" /> Create Automation
         </button>

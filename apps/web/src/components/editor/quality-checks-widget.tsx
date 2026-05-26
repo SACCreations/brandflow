@@ -51,12 +51,12 @@ export default function QualityChecksWidget({
   };
 
   return (
-    <div className="flex flex-col h-full rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+    <div className="flex flex-col h-full rounded-2xl border border-border bg-background shadow-sm border-border bg-background overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
+      <div className="flex items-center justify-between border-b border-border/60 p-4 border-border">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-brand-600" />
-          <h3 className="font-bold text-gray-900 dark:text-white">AI Quality Guard</h3>
+          <ShieldCheck className="h-5 w-5 text-primary" />
+          <h3 className="font-bold text-foreground">AI Quality Guard</h3>
         </div>
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
           passed ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10' : 'bg-red-100 text-red-700 dark:bg-red-500/10'
@@ -66,7 +66,7 @@ export default function QualityChecksWidget({
       </div>
 
       {/* Score Overview */}
-      <div className="relative flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/30">
+      <div className="relative flex flex-col items-center justify-center p-6 bg-surface-1 dark:bg-gray-950/50 bg-surface-2/30">
         <div className="h-32 w-32">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -88,27 +88,27 @@ export default function QualityChecksWidget({
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pt-6">
-            <span className="text-2xl font-black text-gray-900 dark:text-white">{score}</span>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Quality</span>
+            <span className="text-2xl font-black text-foreground">{score}</span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Quality</span>
           </div>
         </div>
-        <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400 max-w-[200px]">
+        <p className="mt-4 text-center text-xs text-muted-foreground max-w-[200px]">
           Content is {score}% aligned with brand truth and voice.
         </p>
       </div>
 
       {/* Violation List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Findings ({displayViolations.length})</h4>
+        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Findings ({displayViolations.length})</h4>
         
         {displayViolations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-6 text-center border border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
+          <div className="flex flex-col items-center justify-center p-6 text-center border border-dashed border-border rounded-xl">
             <CheckCircle2 className="h-6 w-6 text-emerald-500 mb-2" />
-            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">No findings detected</p>
+            <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">No findings detected</p>
           </div>
         ) : (
           displayViolations.map((v, i) => (
-          <div key={i} className="group relative rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 transition-all hover:border-brand-500 dark:border-gray-800 dark:bg-gray-900/50">
+          <div key={i} className="group relative rounded-xl border border-border/60 bg-background p-3 transition-all hover:border-primary border-border bg-background/50">
             <div className="flex items-start gap-3">
               <div className={`mt-0.5 rounded-lg p-1.5 ${
                 v.severity === 'high' ? 'bg-red-50 text-red-600 dark:bg-red-500/10' : 
@@ -119,19 +119,19 @@ export default function QualityChecksWidget({
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold uppercase text-gray-400">{v.type.replace('_', ' ')}</span>
+                  <span className="text-[10px] font-bold uppercase text-muted-foreground">{v.type.replace('_', ' ')}</span>
                   <span className={`text-[10px] font-bold px-1.5 rounded-md ${
                     v.severity === 'high' ? 'text-red-600 bg-red-50' : 'text-amber-600 bg-amber-50'
                   }`}>
                     {v.severity}
                   </span>
                 </div>
-                <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                <p className="text-xs text-foreground leading-relaxed">
                   {v.detail}
                 </p>
                 
                 {v.type === 'factual_error' && (
-                  <button className="mt-2 flex items-center gap-1 text-[10px] font-bold text-brand-600 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+                  <button className="mt-2 flex items-center gap-1 text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
                     <FileSearch className="h-3 w-3" /> View Source <ChevronRight className="h-3 w-3" />
                   </button>
                 )}
@@ -142,12 +142,12 @@ export default function QualityChecksWidget({
       </div>
 
       {/* Footer / Remediation */}
-      <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-2 mb-2 text-xs font-bold text-gray-900 dark:text-white">
+      <div className="p-4 bg-surface-2 border-t border-border/60">
+        <div className="flex items-center gap-2 mb-2 text-xs font-bold text-foreground">
           <Info className="h-3.5 w-3.5 text-blue-500" />
           Remediation Hint
         </div>
-        <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed italic">
+        <p className="text-[11px] text-muted-foreground leading-relaxed italic">
           {remediation || "Switch to a more formal tone and verify the discount percentage against the latest sales collateral."}
         </p>
       </div>

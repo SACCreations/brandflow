@@ -50,8 +50,8 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
-        <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+      <div className="flex items-center justify-between border-b border-border/60 pb-4">
+        <div className="flex bg-surface-3 p-1 rounded-xl">
           {(['primary', 'secondary', 'accent', 'neutral', 'semantic'] as const).map(type => (
             <button
               key={type}
@@ -60,8 +60,8 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
               className={cn(
                 "px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",
                 activeType === type 
-                  ? "bg-white dark:bg-gray-700 text-brand-600 shadow-sm" 
-                  : "text-gray-400 hover:text-gray-600"
+                  ? "bg-background bg-surface-3 text-primary shadow-sm" 
+                  : "text-muted-foreground hover:text-gray-600"
               )}
             >
               {type}
@@ -71,7 +71,7 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
         <Button 
           size="sm" 
           onClick={addColor}
-          className="bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white hover:bg-gray-800 dark:hover:bg-gray-200 rounded-lg text-[10px] font-black uppercase shadow-sm"
+          className="bg-background dark:bg-background text-foreground dark:text-foreground hover:bg-surface-1 dark:hover:bg-surface-3 rounded-lg text-[10px] font-black uppercase shadow-sm"
         >
           <Plus className="w-3 h-3 mr-1.5" /> Add Color
         </Button>
@@ -87,8 +87,8 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
           />
         ))}
         {filteredColors.length === 0 && (
-          <div className="col-span-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50 dark:bg-gray-950/50">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No {activeType} colors defined</p>
+          <div className="col-span-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-border/60 rounded-2xl bg-surface-1 dark:bg-gray-950/50">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">No {activeType} colors defined</p>
           </div>
         )}
       </div>
@@ -102,7 +102,7 @@ function ColorCard({ color, onUpdate, onRemove }: {
   onRemove: () => void;
 }) {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 space-y-4 hover:shadow-lg transition-all group relative overflow-hidden">
+    <div className="bg-background border border-border/60 rounded-2xl p-5 space-y-4 hover:shadow-lg transition-all group relative overflow-hidden">
       <div className="absolute top-2 right-2 flex gap-1">
          <button 
           type="button"
@@ -115,11 +115,11 @@ function ColorCard({ color, onUpdate, onRemove }: {
 
       <div className="space-y-4">
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Token Name</label>
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Token Name</label>
           <Input 
             value={color.name} 
             onChange={(e) => onUpdate({ name: e.target.value })}
-            className="h-10 text-xs font-bold border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 rounded-xl px-3 text-gray-900 dark:text-white placeholder:text-gray-400"
+            className="h-10 text-xs font-bold border-border/60 bg-surface-1 dark:bg-gray-950/50 bg-surface-2/50 rounded-xl px-3 text-foreground placeholder:text-gray-400"
           />
         </div>
 
@@ -130,25 +130,25 @@ function ColorCard({ color, onUpdate, onRemove }: {
       </div>
 
       <div className="grid grid-cols-2 gap-2 pt-2">
-        <div className="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-xl border border-gray-100 dark:border-gray-800">
-          <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1.5">Accessibility</p>
+        <div className="bg-surface-2 p-2 rounded-xl border border-border/60">
+          <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground leading-none mb-1.5">Accessibility</p>
           <div className="flex items-center justify-between">
             <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 text-[8px] font-black h-4 px-1">PASS AAA</Badge>
-            <span className="text-[10px] font-bold text-gray-900 dark:text-white">7.4:1</span>
+            <span className="text-[10px] font-bold text-foreground">7.4:1</span>
           </div>
         </div>
-        <div className="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-xl border border-gray-100 dark:border-gray-800">
-          <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1.5">HSL Values</p>
-          <p className="text-[10px] font-mono font-bold text-gray-600 dark:text-gray-300">232° 84% 63%</p>
+        <div className="bg-surface-2 p-2 rounded-xl border border-border/60">
+          <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground leading-none mb-1.5">HSL Values</p>
+          <p className="text-[10px] font-mono font-bold text-muted-foreground text-foreground">232° 84% 63%</p>
         </div>
       </div>
 
       <div className="flex items-center gap-2 pt-1">
         <div className="flex -space-x-1">
-          <div className="w-4 h-4 rounded-full border border-white dark:border-gray-900 bg-white dark:bg-gray-900 shadow-sm" />
-          <div className="w-4 h-4 rounded-full border border-white dark:border-gray-900 bg-gray-900 shadow-sm" />
+          <div className="w-4 h-4 rounded-full border border-white border-border bg-background shadow-sm" />
+          <div className="w-4 h-4 rounded-full border border-white border-border bg-background shadow-sm" />
         </div>
-        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Compatible with dark mode</span>
+        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">Compatible with dark mode</span>
       </div>
     </div>
   );

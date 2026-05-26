@@ -14,7 +14,7 @@ export function AnalyticsMetricsGrid({ summary, windowDays }: AnalyticsMetricsGr
         title="Total Reach"
         value={formatCompactNumber(summary?.totalReach ?? 0)}
         helper={`${windowDays} day window`}
-        icon={<Eye className="h-5 w-5 text-brand-600" />}
+        icon={<Eye className="h-5 w-5 text-primary" />}
       />
       <MetricCard
         title="Engagement"
@@ -42,14 +42,14 @@ function MetricCard({ title, value, helper, icon }: { title: string; value: stri
   return (
     <div className="glass-panel p-6">
       <div className="mb-4 flex items-center justify-between">
-        <div className="rounded-xl bg-gray-50/50 dark:bg-gray-900/50 p-2.5 border border-gray-100 dark:border-gray-800">
+        <div className="rounded-xl bg-surface-1/50 bg-background/50 p-2.5 border border-border/60">
           {icon}
         </div>
-        <ArrowUpRight className="h-4 w-4 text-gray-300 dark:text-gray-600" />
+        <ArrowUpRight className="h-4 w-4 text-muted-foreground dark:text-gray-600" />
       </div>
-      <div className="text-2xl font-black text-gray-900 dark:text-white">{value}</div>
-      <div className="text-xs font-medium text-gray-500">{title}</div>
-      <div className="mt-2 text-xs text-gray-400">{helper}</div>
+      <div className="text-2xl font-black text-foreground">{value}</div>
+      <div className="text-xs font-medium text-muted-foreground">{title}</div>
+      <div className="mt-2 text-xs text-muted-foreground">{helper}</div>
     </div>
   );
 }

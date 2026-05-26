@@ -132,10 +132,10 @@ export function Sidebar() {
   });
 
   return (
-    <aside className="flex h-full w-56 flex-shrink-0 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900">
+    <aside className="flex h-full w-56 flex-shrink-0 flex-col border-r border-border/60 bg-surface-1">
       {/* Logo */}
-      <div className="flex h-16 items-center px-5 border-b border-gray-200 dark:border-gray-800">
-        <span className="text-lg font-bold text-brand-600">BrandFlow</span>
+      <div className="flex h-16 items-center px-6 border-b border-border/60">
+        <span className="text-xl font-bold tracking-tight text-gradient">BrandFlow</span>
       </div>
 
       {/* Nav */}
@@ -163,10 +163,10 @@ function CollapsibleGroup({ group, items, pathname }: { group: string; items: Na
     <div className="pt-3 first:pt-0">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-2 py-1 text-xs font-semibold uppercase tracking-wider text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+        className="flex w-full items-center justify-between px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors group"
       >
         {group}
-        <ChevronDown className={cn('h-3 w-3 transition-transform', open ? '' : '-rotate-90')} />
+        <ChevronDown className={cn('h-3.5 w-3.5 transition-transform opacity-50 group-hover:opacity-100', open ? '' : '-rotate-90')} />
       </button>
       {open && (
         <div className="mt-1 space-y-0.5">
@@ -185,16 +185,16 @@ function NavLink({ href, Icon, label, pathname, badge }: { href: string; Icon: L
     <Link
       href={href}
       className={cn(
-        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+        'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition-all duration-200',
         active
-          ? 'bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-400'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100',
+          ? 'bg-primary/10 text-primary shadow-sm dark:bg-primary/20 dark:text-primary-foreground'
+          : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground hover:-translate-y-[1px]',
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
       <span className="flex-1">{label}</span>
       {badge != null && badge > 0 && (
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-foreground">
           {badge}
         </span>
       )}

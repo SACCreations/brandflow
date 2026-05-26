@@ -46,7 +46,7 @@ export default function BrandOnboardingPage() {
   });
 
   return (
-    <div className="bg-white dark:bg-gray-950">
+    <div className="bg-background">
       <BrandWizard 
         title="Enterprise Brand Onboarding"
         onSubmit={async (data) => {

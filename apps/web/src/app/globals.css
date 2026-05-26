@@ -5,37 +5,44 @@
 @layer base {
   :root {
     /* Premium Light Theme Base Surface Colors */
-    --background: 0 0% 99.5%; /* Softest white */
-    --foreground: 240 10% 10%; /* Rich dark gray */
+    --background: 0 0% 99.5%; /* Extremely soft white */
+    --foreground: 220 10% 12%; /* Rich slate for text */
 
-    /* Mutable Brand Colors (Indigo base with vibrant saturation) */
+    /* Semantic Layers for Depth */
+    --surface-1: 0 0% 100%; /* Pure white cards */
+    --surface-2: 240 5% 98%; /* Slightly offset layer */
+    --surface-3: 240 5% 96%; /* Deeper offset */
+
+    /* Mutable Brand Colors (Electric Indigo base) */
     --brand-50: 238 100% 97%;
     --brand-100: 238 100% 94%;
     --brand-200: 238 96% 87%;
     --brand-300: 238 94% 76%;
     --brand-400: 238 90% 64%;
-    --brand-500: 238 85% 55%;
+    --brand-500: 238 85% 55%; /* Primary */
     --brand-600: 238 77% 46%;
     --brand-700: 238 71% 37%;
     --brand-800: 238 67% 31%;
     --brand-900: 238 62% 26%;
     --brand-950: 238 60% 16%;
 
-    /* Semantic Layers */
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 15%;
+    /* Semantic Mappings */
+    --card: var(--surface-1);
+    --card-foreground: var(--foreground);
+    --popover: var(--surface-1);
+    --popover-foreground: var(--foreground);
 
     /* Interactive States */
     --primary: var(--brand-600);
     --primary-foreground: 0 0% 100%;
     --secondary: 240 5% 96%;
-    --secondary-foreground: 240 20% 15%;
+    --secondary-foreground: 220 10% 12%;
     --muted: 240 5% 96%;
     --muted-foreground: 240 5% 45%;
     --accent: 240 5% 96%;
-    --accent-foreground: 240 20% 15%;
+    --accent-foreground: 220 10% 12%;
+    --ai: 270 90% 60%; /* Purple AI base */
+    --ai-foreground: 0 0% 100%;
     
     /* System States */
     --destructive: 0 84.2% 60.2%;
@@ -47,55 +54,63 @@
 
     /* Borders & Structural */
     --border: 240 6% 90%;
+    --border-strong: 240 6% 80%;
     --input: 240 6% 90%;
     --ring: var(--brand-500);
-    --radius: 1rem;
+    --radius: 0.5rem; /* Standard enterprise radius (8px) */
 
-    /* Fluid Typography (clamp) */
-    --font-size-xs: clamp(0.75rem, 0.71rem + 0.18vw, 0.8rem);
-    --font-size-sm: clamp(0.875rem, 0.84rem + 0.18vw, 0.925rem);
-    --font-size-base: clamp(1rem, 0.96rem + 0.18vw, 1.05rem);
-    --font-size-lg: clamp(1.125rem, 1.09rem + 0.18vw, 1.175rem);
-    --font-size-xl: clamp(1.25rem, 1.19rem + 0.27vw, 1.325rem);
-    --font-size-2xl: clamp(1.5rem, 1.41rem + 0.45vw, 1.625rem);
-    --font-size-3xl: clamp(1.875rem, 1.74rem + 0.68vw, 2.0625rem);
-    --font-size-4xl: clamp(2.25rem, 2.07rem + 0.9vw, 2.5rem);
-    --font-size-5xl: clamp(3rem, 2.73rem + 1.34vw, 3.375rem);
+    /* Strict Enterprise Typography Sizing */
+    --font-size-xs: 0.75rem; /* 12px */
+    --font-size-sm: 0.875rem; /* 14px */
+    --font-size-base: 1rem; /* 16px */
+    --font-size-lg: 1.125rem; /* 18px */
+    --font-size-xl: 1.25rem; /* 20px */
+    --font-size-2xl: 1.5rem; /* 24px */
+    --font-size-3xl: 1.875rem; /* 30px */
+    --font-size-4xl: 2.25rem; /* 36px */
+    --font-size-5xl: 3rem; /* 48px */
   }
 
   .dark {
-    /* Premium Dark Theme Base Surface Colors */
-    --background: 240 10% 4%; /* Deep OLED-like Slate */
+    /* Premium Cinematic Dark Theme */
+    --background: 240 10% 3%; /* Extremely deep slate, almost OLED */
     --foreground: 0 0% 98%;
 
-    /* Mutable Brand Colors - optimized for dark mode */
+    /* Semantic Layers for Dark Depth */
+    --surface-1: 240 10% 6%; /* Slight elevation */
+    --surface-2: 240 10% 9%; /* Medium elevation */
+    --surface-3: 240 10% 12%; /* High elevation */
+
+    /* Mutable Brand Colors */
     --brand-50: 238 60% 12%;
     --brand-100: 238 60% 16%;
     --brand-200: 238 62% 26%;
     --brand-300: 238 67% 31%;
     --brand-400: 238 71% 37%;
     --brand-500: 238 77% 46%;
-    --brand-600: 238 85% 55%;
+    --brand-600: 238 85% 55%; /* Primary dark */
     --brand-700: 238 90% 64%;
     --brand-800: 238 94% 76%;
     --brand-900: 238 96% 87%;
     --brand-950: 238 100% 94%;
 
-    /* Semantic Layers - sleek raised surfaces */
-    --card: 240 10% 7%;
+    /* Semantic Mappings */
+    --card: var(--surface-1);
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 7%;
+    --popover: var(--surface-2);
     --popover-foreground: 0 0% 98%;
 
     /* Interactive States */
     --primary: var(--brand-600);
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 6% 12%;
+    --secondary: var(--surface-2);
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 6% 12%;
+    --muted: var(--surface-2);
     --muted-foreground: 240 5% 65%;
-    --accent: 240 6% 12%;
+    --accent: var(--surface-2);
     --accent-foreground: 0 0% 98%;
+    --ai: 270 90% 65%;
+    --ai-foreground: 0 0% 98%;
 
     /* System States */
     --destructive: 0 62.8% 45.6%;
@@ -105,8 +120,9 @@
     --warning: 38 92% 40%;
     --warning-foreground: 0 0% 98%;
 
-    /* Borders & Structural - extremely subtle in dark mode */
-    --border: 240 6% 14%;
+    /* Borders & Structural */
+    --border: 240 6% 12%;
+    --border-strong: 240 6% 18%;
     --input: 240 6% 14%;
     --ring: var(--brand-600);
   }
@@ -118,24 +134,24 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    /* Custom fluid scrollbar */
+    /* Custom fluid scrollbar applied globally */
   }
 }
 
 /* Custom Scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted));
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border-strong) / 0.5);
   border-radius: 10px;
 }
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted));
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.5);
 }
 
 /* Utilities & Premium Aesthetics */
@@ -148,12 +164,22 @@
 .glass-premium {
   @apply bg-gradient-to-br from-white/90 to-white/50 dark:from-zinc-900/90 dark:to-zinc-950/50 backdrop-blur-3xl border border-white/60 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)];
 }
+
+/* Motion & Feedback */
 .micro-hover {
-  @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg active:translate-y-0 active:shadow-md;
+  @apply transition-all duration-300 ease-out hover:-translate-y-[2px] hover:shadow-lg hover:border-border-strong active:translate-y-[1px] active:shadow-sm;
 }
+.interactive-scale {
+  @apply transition-transform duration-200 ease-out active:scale-[0.98];
+}
+
+/* Typography Tools */
 .text-balance {
   text-wrap: balance;
 }
 .text-gradient {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-indigo-500 dark:from-brand-400 dark:to-indigo-300;
+}
+.text-gradient-ai {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(var(--ai))] to-fuchsia-500;
 }

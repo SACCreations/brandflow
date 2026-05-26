@@ -202,21 +202,21 @@ export default function BrandsPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">
-          <h1 className="text-4xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-3">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground flex items-center gap-3">
             Brand Intelligence
-            <Badge className="bg-brand-500/10 text-brand-600 border-brand-200/50 text-[10px] font-black uppercase tracking-widest px-2 py-0.5">Control Center</Badge>
+            <Badge className="bg-primary/10 text-primary border-primary/20 text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5">Control Center</Badge>
           </h1>
-          <p className="text-gray-500 text-lg font-medium max-w-2xl">The operational hub for your AI-powered brand identities, governance, and marketing assets.</p>
+          <p className="mt-2 text-base text-muted-foreground max-w-2xl text-balance">The operational hub for your AI-powered brand identities, governance, and marketing assets.</p>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/intelligence/brands/analyse">
-            <Button variant="outline" className="h-12 px-6 gap-2 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-950 font-bold rounded-xl shadow-sm">
-              <Sparkles className="w-4 h-4 text-brand-500" />
+            <Button variant="outline" className="h-11 px-6 gap-2 rounded-xl text-foreground font-semibold shadow-sm hover:bg-surface-2 transition-all">
+              <Sparkles className="w-4 h-4 text-primary" />
               AI Analysis
             </Button>
           </Link>
           <Link href="/intelligence/brands/new">
-            <Button className="h-12 px-8 gap-2 bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white hover:bg-gray-800 dark:hover:bg-gray-100 font-black uppercase tracking-tight rounded-xl shadow-xl shadow-gray-200 dark:shadow-none">
+            <Button className="h-11 px-8 gap-2 bg-primary text-primary-foreground font-bold tracking-wide rounded-xl shadow-sm transition-all hover:bg-primary/90 hover:-translate-y-[1px]">
               <Plus className="w-4 h-4" />
               Create Brand
             </Button>
@@ -225,99 +225,99 @@ export default function BrandsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+        <Card className="p-6 glass-premium border-border/60 rounded-[1.25rem] shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden relative micro-hover">
           <div className="relative z-10 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600">
+              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20 shadow-sm">
                 <Building2 className="w-5 h-5" />
               </div>
-              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-blue-100 text-blue-500">Live</Badge>
+              <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest border-blue-500/20 text-blue-500">Live</Badge>
             </div>
             <div>
-              <p className="text-3xl font-black text-gray-900 dark:text-white">{stats.total}</p>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">Total Identities</p>
+              <p className="text-3xl font-bold tracking-tight text-foreground">{stats.total}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-2">Total Identities</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+        <Card className="p-6 glass-premium border-border/60 rounded-[1.25rem] shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden relative micro-hover">
           <div className="relative z-10 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-sm">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <div className="flex items-center gap-1 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+              <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Optimal
               </div>
             </div>
             <div>
-              <p className="text-3xl font-black text-emerald-600">{stats.avgHealth}%</p>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">AI Readiness Score</p>
+              <p className="text-3xl font-bold tracking-tight text-emerald-500">{stats.avgHealth}%</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-2">AI Readiness Score</p>
             </div>
-            <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
               <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${stats.avgHealth}%` }} />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+        <Card className="p-6 glass-premium border-border/60 rounded-[1.25rem] shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden relative micro-hover">
           <div className="relative z-10 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600">
+              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-sm">
                 <Palette className="w-5 h-5" />
               </div>
               {stats.active > 0 && (
-                <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-amber-100 text-amber-500">Active</Badge>
+                <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest border-amber-500/20 text-amber-500">Active</Badge>
               )}
             </div>
             <div>
-              <p className="text-3xl font-black text-gray-900 dark:text-white">{stats.active}</p>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">Active This Week</p>
+              <p className="text-3xl font-bold tracking-tight text-foreground">{stats.active}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-2">Active This Week</p>
             </div>
-            <p className="text-[10px] text-gray-500 font-bold leading-tight">Brands updated in the last 7 days.</p>
+            <p className="text-[11px] text-muted-foreground leading-tight">Brands updated in the last 7 days.</p>
           </div>
         </Card>
 
-        <Card className="p-6 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+        <Card className="p-6 glass-premium border-border/60 rounded-[1.25rem] shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden relative micro-hover">
           <div className="relative z-10 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600">
+              <div className="p-2 rounded-xl bg-[hsl(var(--ai))]/10 text-[hsl(var(--ai))] border border-[hsl(var(--ai))]/20 shadow-sm">
                 <Sparkles className="w-5 h-5" />
               </div>
             </div>
             <div>
-              <p className="text-3xl font-black text-gray-900 dark:text-white">{stats.total}</p>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-1">Brand Profiles</p>
+              <p className="text-3xl font-bold tracking-tight text-foreground">{stats.total}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-2">Brand Profiles</p>
             </div>
-            <div className="flex items-center gap-1.5 pt-2">
-              <div className="h-1 flex-1 bg-purple-100 dark:bg-purple-900/20 rounded-full overflow-hidden">
-                <div className="h-full bg-purple-500 transition-all duration-1000" style={{ width: `${stats.avgHealth}%` }} />
+            <div className="flex items-center gap-2 pt-2">
+              <div className="h-1.5 flex-1 bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-[hsl(var(--ai))] transition-all duration-1000" style={{ width: `${stats.avgHealth}%` }} />
               </div>
-              <span className="text-[9px] font-black text-purple-600 uppercase tracking-widest">Avg: {stats.avgHealth}%</span>
+              <span className="text-[10px] font-bold text-[hsl(var(--ai))] uppercase tracking-widest">Avg: {stats.avgHealth}%</span>
             </div>
           </div>
         </Card>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-2 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-1 p-2 rounded-2xl border border-border/60 shadow-sm">
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:flex-1">
           <div className="relative w-full md:max-w-md group">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-brand-500 transition-colors" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input 
               placeholder="Search brands by name or industry..." 
-              className="pl-10 h-11 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 focus-visible:ring-brand-500 rounded-xl"
+              className="pl-10 h-11 bg-background border-border focus-visible:ring-primary/20 rounded-xl transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
           <Select value={industryFilter} onValueChange={setIndustryFilter}>
-            <SelectTrigger className="w-full md:w-[200px] h-11 rounded-xl bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm transition-all hover:border-brand-200">
+            <SelectTrigger className="w-full md:w-[200px] h-11 rounded-xl bg-background border-border shadow-sm transition-all hover:border-border-strong">
               <div className="flex items-center gap-2">
-                <Filter className="w-3.5 h-3.5 text-gray-400" />
+                <Filter className="w-3.5 h-3.5 text-muted-foreground" />
                 <div className="flex flex-col items-start leading-none">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Industry</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Industry</span>
                   <SelectValue placeholder="All Sectors" />
                 </div>
               </div>
@@ -333,11 +333,11 @@ export default function BrandsPage() {
 
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full md:w-[200px] h-11 rounded-xl bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 shadow-sm transition-all hover:border-brand-200">
+            <SelectTrigger className="w-full md:w-[200px] h-11 rounded-xl bg-background border-border shadow-sm transition-all hover:border-border-strong">
               <div className="flex items-center gap-2">
-                <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
+                <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
                 <div className="flex flex-col items-start leading-none">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Order By</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Order By</span>
                   <SelectValue placeholder="Sort By" />
                 </div>
               </div>
@@ -349,14 +349,14 @@ export default function BrandsPage() {
             </SelectContent>
           </Select>
 
-          <div className="h-8 w-px bg-gray-100 dark:bg-gray-800 hidden md:block mx-1" />
+          <div className="h-8 w-px bg-border/50 hidden md:block mx-1" />
 
-          <div className="flex items-center bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-xl border border-gray-100 dark:border-gray-800 shadow-inner">
+          <div className="flex items-center bg-surface-2 p-1 rounded-xl border border-border shadow-inner">
             <button 
               onClick={() => setViewMode('grid')}
               className={cn(
                 "p-2 rounded-lg transition-all",
-                viewMode === 'grid' ? "bg-white dark:bg-gray-700 shadow-sm text-brand-600" : "text-gray-400 hover:text-gray-600"
+                viewMode === 'grid' ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <LayoutGrid className="w-4 h-4" />
@@ -365,7 +365,7 @@ export default function BrandsPage() {
               onClick={() => setViewMode('table')}
               className={cn(
                 "p-2 rounded-lg transition-all",
-                viewMode === 'table' ? "bg-white dark:bg-gray-700 shadow-sm text-brand-600" : "text-gray-400 hover:text-gray-600"
+                viewMode === 'table' ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <List className="w-4 h-4" />
@@ -378,7 +378,7 @@ export default function BrandsPage() {
         viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBrands.map((brand: any) => (
-              <Card key={brand.id} className="p-0 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-500 group relative border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+              <Card key={brand.id} className="p-0 overflow-hidden hover:shadow-xl dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] hover:-translate-y-1 transition-all duration-500 group relative border-border/60 bg-card rounded-[1.25rem]">
                 <div 
                   className="h-32 p-6 flex items-end relative overflow-hidden"
                   style={{ 
@@ -388,16 +388,16 @@ export default function BrandsPage() {
                   }}
                 >
                   {/* Decorative Glassmorphism Element */}
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-white dark:bg-gray-900/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-background/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
                   
                   <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 bg-white dark:bg-gray-900/20 hover:bg-white dark:bg-gray-900/40 text-white rounded-full backdrop-blur-md border border-white/20 shadow-xl">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 bg-background/20 hover:bg-background/40 text-foreground rounded-full backdrop-blur-md border border-white/20 shadow-xl">
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl border-gray-100 dark:border-gray-800 space-y-1 backdrop-blur-xl bg-white dark:bg-gray-900/90 dark:bg-gray-900/90">
+                      <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-2xl border-border/60 space-y-1 backdrop-blur-xl bg-background/90 bg-background/90">
                         <Link href={`/intelligence/brands/${brand.id}`}>
                           <DropdownMenuItem className="gap-2 cursor-pointer rounded-lg font-bold text-xs uppercase tracking-tight">
                             <Edit className="w-4 h-4" /> Edit Identity
@@ -406,7 +406,7 @@ export default function BrandsPage() {
                         <DropdownMenuItem className="gap-2 cursor-pointer rounded-lg font-bold text-xs uppercase tracking-tight" onClick={() => duplicateMutation.mutate(brand)}>
                           <Copy className="w-4 h-4" /> Duplicate
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
+                        <DropdownMenuSeparator className="bg-surface-3" />
                         <DropdownMenuItem className="gap-2 cursor-pointer rounded-lg font-bold text-xs uppercase tracking-tight text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20" onClick={() => setDeleteId(brand.id)}>
                           <Trash2 className="w-4 h-4" /> Move to Trash
                         </DropdownMenuItem>
@@ -414,11 +414,11 @@ export default function BrandsPage() {
                     </DropdownMenu>
                   </div>
 
-                  <div className="w-16 h-16 bg-white dark:bg-gray-900/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl border border-white/20 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 relative z-10 p-3">
+                  <div className="w-16 h-16 bg-background/95 bg-surface-2/95 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl border border-white/20 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 relative z-10 p-3">
                     {brand.visualRules?.logoUrls?.[0]?.url ? (
                       <img src={brand.visualRules.logoUrls[0].url} alt={brand.name} className="w-full h-full object-contain drop-shadow-sm" />
                     ) : (
-                      <Building2 className="w-8 h-8 text-brand-600" />
+                      <Building2 className="w-8 h-8 text-primary" />
                     )}
                   </div>
                 </div>
@@ -427,43 +427,43 @@ export default function BrandsPage() {
                   <div className="p-6 space-y-5">
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-black text-gray-900 dark:text-white truncate pr-2 group-hover:text-brand-600 transition-colors tracking-tight">{brand.name}</h3>
+                        <h3 className="text-xl font-black text-foreground truncate pr-2 group-hover:text-primary transition-colors tracking-tight">{brand.name}</h3>
                         <div className="flex -space-x-1.5">
                           {brand.visualRules?.primaryColor && (
-                            <div className="w-4 h-4 rounded-full border-2 border-white dark:border-gray-900 shadow-sm ring-1 ring-gray-100 dark:ring-gray-800" style={{ backgroundColor: brand.visualRules.primaryColor }} />
+                            <div className="w-4 h-4 rounded-full border-2 border-white border-border shadow-sm ring-1 ring-gray-100 dark:ring-gray-800" style={{ backgroundColor: brand.visualRules.primaryColor }} />
                           )}
                           {brand.visualRules?.secondaryColor && (
-                            <div className="w-4 h-4 rounded-full border-2 border-white dark:border-gray-900 shadow-sm ring-1 ring-gray-100 dark:ring-gray-800" style={{ backgroundColor: brand.visualRules.secondaryColor }} />
+                            <div className="w-4 h-4 rounded-full border-2 border-white border-border shadow-sm ring-1 ring-gray-100 dark:ring-gray-800" style={{ backgroundColor: brand.visualRules.secondaryColor }} />
                           )}
                         </div>
                       </div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-brand-600/80">{brand.industry || 'Global Entity'}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-primary/80">{brand.industry || 'Global Entity'}</p>
                     </div>
 
-                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[40px] leading-relaxed font-medium">
+                    <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px] leading-relaxed font-medium">
                       {brand.tagline || brand.positioning || 'Identity pending AI analysis. Connect knowledge sources to begin governance mapping.'}
                     </p>
                     
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">Health</p>
+                      <div className="bg-surface-2 p-2 rounded-xl border border-border/60">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground leading-none mb-1">Health</p>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-black text-gray-900 dark:text-white">{brand.healthScore ?? 0}%</span>
+                          <span className="text-xs font-black text-foreground">{brand.healthScore ?? 0}%</span>
                           {(brand.healthScore ?? 0) >= 70 ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <AlertCircle className="w-3 h-3 text-amber-500" />}
                         </div>
                       </div>
-                      <div className="bg-gray-50 dark:bg-gray-800/50 p-2 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">Status</p>
+                      <div className="bg-surface-2 p-2 rounded-xl border border-border/60">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground leading-none mb-1">Status</p>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-black text-gray-900 dark:text-white capitalize">{brand.status || 'draft'}</span>
-                          <Sparkles className="w-3 h-3 text-brand-500" />
+                          <span className="text-xs font-black text-foreground capitalize">{brand.status || 'draft'}</span>
+                          <Sparkles className="w-3 h-3 text-primary" />
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                    <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/60">
                       <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none">v{brand.version || 1}</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground leading-none">v{brand.version || 1}</span>
                       </div>
                       
                       {brand.tone && Array.isArray(brand.tone) && brand.tone.length > 0 && (
@@ -474,11 +474,11 @@ export default function BrandsPage() {
                 </Link>
 
                 {/* Progress bar at the very bottom */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-50 dark:bg-gray-800 overflow-hidden">
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-surface-2 overflow-hidden">
                   <div 
                     className={cn(
                       "h-full transition-all duration-1000",
-                      brand.healthScore > 70 ? "bg-emerald-500" : brand.healthScore > 40 ? "bg-amber-500" : "bg-brand-500"
+                      brand.healthScore > 70 ? "bg-emerald-500" : brand.healthScore > 40 ? "bg-amber-500" : "bg-primary"
                     )}
                     style={{ width: `${brand.healthScore}%` }}
                   />
@@ -487,10 +487,10 @@ export default function BrandsPage() {
             ))}
           </div>
         ) : (
-          <Card className="p-0 overflow-hidden border-gray-100 dark:border-gray-800">
+          <Card className="p-0 overflow-hidden border-border/60 bg-card rounded-[1.25rem]">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 text-xs uppercase tracking-wider">
+                <tr className="bg-surface-2 text-muted-foreground text-xs uppercase tracking-wider">
                   <th className="px-6 py-4 font-semibold">Brand</th>
                   <th className="px-6 py-4 font-semibold">Industry</th>
                   <th className="px-6 py-4 font-semibold">Health Score</th>
@@ -500,11 +500,11 @@ export default function BrandsPage() {
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {filteredBrands.map((brand: any) => (
-                  <tr key={brand.id} className="hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800/30 transition-colors group">
+                  <tr key={brand.id} className="hover:bg-surface-1 bg-background dark:hover:bg-surface-1/30 transition-colors group">
                     <td className="px-6 py-4">
                       <Link href={`/intelligence/brands/${brand.id}`} className="flex items-center gap-3">
                         <div 
-                          className="w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm"
+                          className="w-10 h-10 rounded-lg flex items-center justify-center text-foreground shrink-0 shadow-sm"
                           style={{ 
                             background: brand.visualRules?.primaryColor 
                               ? `linear-gradient(135deg, ${brand.visualRules.primaryColor} 0%, ${brand.visualRules.secondaryColor || brand.visualRules.primaryColor} 100%)`
@@ -518,8 +518,8 @@ export default function BrandsPage() {
                           )}
                         </div>
                         <div>
-                          <p className="font-bold text-gray-900 dark:text-white">{brand.name}</p>
-                          <p className="text-xs text-gray-500 truncate w-48">{brand.tagline || 'Identity defined'}</p>
+                          <p className="font-bold text-foreground">{brand.name}</p>
+                          <p className="text-xs text-muted-foreground truncate w-48">{brand.tagline || 'Identity defined'}</p>
                         </div>
                       </Link>
                     </td>
@@ -528,26 +528,26 @@ export default function BrandsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <div className="w-24 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div className="w-24 h-1.5 bg-surface-3 rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-brand-500 transition-all"
+                            className="h-full bg-primary transition-all"
                             style={{ width: `${brand.healthScore}%` }}
                           />
                         </div>
-                        <span className="text-xs font-bold text-gray-600">{brand.healthScore}%</span>
+                        <span className="text-xs font-bold text-muted-foreground">{brand.healthScore}%</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {format(new Date(brand.updatedAt), 'MMM d, yyyy')}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-                            <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-surface-2 dark:hover:bg-surface-1 rounded-full transition-colors">
+                            <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 p-2 rounded-xl shadow-xl border-gray-100 dark:border-gray-800 space-y-1">
+                        <DropdownMenuContent align="end" className="w-48 p-2 rounded-xl shadow-xl border-border/60 space-y-1">
                           <Link href={`/intelligence/brands/${brand.id}`}>
                             <DropdownMenuItem className="gap-2 cursor-pointer">
                               <Edit className="w-4 h-4" /> Edit
@@ -570,14 +570,14 @@ export default function BrandsPage() {
           </Card>
         )
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-20 text-center dark:border-gray-800 bg-gray-50 dark:bg-gray-950/30">
-          <div className="p-6 bg-brand-50 rounded-full mb-6 ring-8 ring-brand-50/50">
-            <Building2 className="w-12 h-12 text-brand-600 opacity-40" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border p-20 text-center border-border bg-surface-1 dark:bg-gray-950/30">
+          <div className="p-6 bg-primary/10 rounded-full mb-6 ring-8 ring-brand-50/50">
+            <Building2 className="w-12 h-12 text-primary opacity-40" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
             {searchQuery ? 'No results found' : 'No Brands Found'}
           </h2>
-          <p className="text-gray-500 max-w-sm mb-8 text-lg">
+          <p className="text-muted-foreground max-w-sm mb-8 text-lg">
             {searchQuery ? `We couldn't find any brands matching "${searchQuery}". Try a different term.` : 'Start by creating your first brand identity. You can use our AI analyser to extract it automatically.'}
           </p>
           <div className="flex gap-4">
@@ -586,7 +586,7 @@ export default function BrandsPage() {
             ) : (
               <>
                 <Link href="/intelligence/brands/analyse">
-                  <Button className="gap-2 bg-brand-600 hover:bg-brand-700 shadow-xl shadow-brand-200 h-12 px-6 font-bold">
+                  <Button className="gap-2 bg-primary hover:bg-brand-700 shadow-xl shadow-brand-200 h-12 px-6 font-bold">
                     <Sparkles className="w-5 h-5" />
                     Analyse with AI
                   </Button>
@@ -610,13 +610,13 @@ export default function BrandsPage() {
             </DialogTitle>
             <DialogDescription className="pt-2">
               Are you sure you want to delete this brand? This will move it to the trash.
-              <span className="block mt-2 font-semibold text-gray-900 dark:text-gray-100">"This action can be undone from the trash later."</span>
+              <span className="block mt-2 font-semibold text-foreground">"This action can be undone from the trash later."</span>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-6">
             <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
             <Button 
-              className="bg-red-600 hover:bg-red-700 text-white gap-2" 
+              className="bg-red-600 hover:bg-red-700 text-foreground gap-2" 
               onClick={() => deleteId && deleteMutation.mutate(deleteId)}
               disabled={deleteMutation.isPending}
             >

@@ -22,7 +22,7 @@ export function KnowledgeStatsGrid({ stats, isLoading }: KnowledgeStatsGridProps
         title="Intelligence Health" 
         value={isLoading ? '—' : `${stats.healthScore}%`} 
         description="Global accuracy & freshness"
-        icon={<BrainCircuit className="h-6 w-6 text-brand-500" />}
+        icon={<BrainCircuit className="h-6 w-6 text-primary" />}
         trend={isLoading ? undefined : `${stats.pendingReviews} pending`}
         trendUp={stats.pendingReviews < 5}
       />
@@ -51,9 +51,9 @@ export function KnowledgeStatsGrid({ stats, isLoading }: KnowledgeStatsGridProps
 
 function StatCard({ title, value, description, icon, trend, trendUp, alert }: any) {
   return (
-    <Card className={`glass rounded-2xl p-6 transition-all hover:shadow-lg ${alert ? 'ring-2 ring-amber-500/50' : ''}`}>
+    <Card className={`glass-premium border-border/60 rounded-[1.25rem] p-6 shadow-sm hover:shadow-xl transition-all duration-300 micro-hover ${alert ? 'ring-2 ring-amber-500/50' : ''}`}>
       <div className="flex items-start justify-between">
-        <div className="rounded-xl bg-gray-50/50 dark:bg-gray-800/50 p-3 border border-border/50">
+        <div className="rounded-xl bg-background p-3 border border-border shadow-sm">
           {icon}
         </div>
         {trend && (
@@ -64,9 +64,9 @@ function StatCard({ title, value, description, icon, trend, trendUp, alert }: an
         )}
       </div>
       <div className="mt-4">
-        <p className="text-sm font-bold text-gray-500 dark:text-gray-400">{title}</p>
-        <h4 className="mt-1 text-3xl font-black text-gray-900 dark:text-white">{value}</h4>
-        <p className="mt-1 text-xs font-medium text-gray-400">{description}</p>
+        <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{title}</p>
+        <h4 className="mt-2 text-3xl font-bold tracking-tight text-foreground">{value}</h4>
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{description}</p>
       </div>
     </Card>
   );

@@ -68,9 +68,9 @@ export function KnowledgeFreshnessWidget() {
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900 animate-pulse">
-        <div className="h-5 w-40 rounded bg-gray-200 dark:bg-gray-800" />
-        <div className="mt-4 h-20 rounded bg-gray-100 dark:bg-gray-800/50" />
+      <div className="rounded-xl border border-border bg-background p-6 border-border bg-background animate-pulse">
+        <div className="h-5 w-40 rounded bg-surface-3 bg-surface-2" />
+        <div className="mt-4 h-20 rounded bg-surface-3/50" />
       </div>
     );
   }
@@ -85,11 +85,11 @@ export function KnowledgeFreshnessWidget() {
   const isAllFresh = data.staleSources === 0;
 
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+    <div className="rounded-xl border border-border bg-background border-border bg-background overflow-hidden">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Database className="h-4 w-4 text-gray-500" />
-          <h2 className="font-semibold text-gray-900 dark:text-white">Knowledge Freshness</h2>
+          <Database className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-semibold text-foreground">Knowledge Freshness</h2>
         </div>
         <div className="flex items-center gap-3">
           <span
@@ -112,7 +112,7 @@ export function KnowledgeFreshnessWidget() {
               </>
             )}
           </span>
-          <span className="text-2xl font-bold text-gray-900 dark:text-white">
+          <span className="text-2xl font-bold text-foreground">
             {freshnessPercent}%
           </span>
         </div>
@@ -121,13 +121,13 @@ export function KnowledgeFreshnessWidget() {
       {!isAllFresh && (
         <div className="p-4">
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {data.staleEntries} entries affected across {data.staleSources} source{data.staleSources !== 1 ? 's' : ''}
             </p>
             <button
               onClick={() => syncAllMutation.mutate()}
               disabled={syncAllMutation.isPending}
-              className="flex items-center gap-1.5 rounded-md bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-foreground hover:bg-brand-700 disabled:opacity-50 transition-colors"
             >
               <RefreshCw
                 className={cn('h-3 w-3', syncAllMutation.isPending && 'animate-spin')}
@@ -142,15 +142,15 @@ export function KnowledgeFreshnessWidget() {
               return (
                 <div
                   key={source.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 dark:border-gray-800 dark:bg-gray-800/50"
+                  className="flex items-center justify-between rounded-lg border border-border/60 bg-surface-1 bg-background px-4 py-3 border-border bg-surface-2/50"
                 >
                   <div className="flex items-center gap-3">
                     <SourceTypeIcon type={source.type} />
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      <p className="text-sm font-medium text-foreground">
                         {source.title}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {source.lastSyncedAt
                           ? `Last synced ${formatDistanceToNow(new Date(source.lastSyncedAt), { addSuffix: true })}`
                           : 'Never synced'}
@@ -161,7 +161,7 @@ export function KnowledgeFreshnessWidget() {
                   <button
                     onClick={() => syncMutation.mutate(source.id)}
                     disabled={isSyncing}
-                    className="flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-800 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-white dark:bg-gray-900 hover:border-brand-400 hover:text-brand-600 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+                    className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-background hover:border-brand-400 hover:text-primary disabled:opacity-50 border-border text-foreground dark:hover:bg-surface-1 transition-colors"
                   >
                     <RefreshCw className={cn('h-3 w-3', isSyncing && 'animate-spin')} />
                     Re-ingest
@@ -176,11 +176,11 @@ export function KnowledgeFreshnessWidget() {
       {isAllFresh && (
         <div className="px-6 py-8 text-center">
           <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500" />
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             All knowledge sources are up to date.
           </p>
           {data.lastChecked && (
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-muted-foreground">
               Last checked {formatDistanceToNow(new Date(data.lastChecked), { addSuffix: true })}
             </p>
           )}
@@ -194,7 +194,7 @@ function SourceTypeIcon({ type }: { type: string }) {
   const colors: Record<string, string> = {
     pdf: 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400',
     url: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
-    notion: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+    notion: 'bg-surface-2 text-muted-foreground bg-surface-2 text-muted-foreground',
     manual: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
   };
 

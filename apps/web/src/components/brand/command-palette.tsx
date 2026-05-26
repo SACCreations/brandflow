@@ -81,19 +81,19 @@ export function CommandPalette({ onJump, onSave, open, setOpen }: CommandPalette
     <>
       <button 
         onClick={() => updateOpen(true)}
-        className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-white dark:bg-gray-900/80 dark:bg-gray-900/80 backdrop-blur-md border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-brand-600 transition-all hover:scale-105 group"
+        className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-background/80 bg-background/80 backdrop-blur-md border border-border px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-primary transition-all hover:scale-105 group"
       >
         <Command className="w-3.5 h-3.5" />
-        <span>Press <kbd className="font-sans font-bold text-gray-900 dark:text-gray-100 group-hover:text-brand-600">⌘K</kbd> to open Command Palette</span>
+        <span>Press <kbd className="font-sans font-bold text-foreground group-hover:text-primary">⌘K</kbd> to open Command Palette</span>
       </button>
 
       <Dialog open={paletteOpen} onOpenChange={updateOpen}>
-        <DialogContent className="p-0 overflow-hidden sm:max-w-[550px] top-[20%] translate-y-0 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+        <DialogContent className="p-0 overflow-hidden sm:max-w-[550px] top-[20%] translate-y-0 bg-background border-border">
           <DialogTitle className="sr-only">Command Palette</DialogTitle>
           <DialogDescription className="sr-only">Search and execute commands within the brand studio.</DialogDescription>
-          <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+          <div className="p-4 border-b border-border/60">
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 placeholder="Search commands..." 
                 className="pl-8 h-12 text-base border-none focus-visible:ring-0 shadow-none bg-transparent"
@@ -110,23 +110,23 @@ export function CommandPalette({ onJump, onSave, open, setOpen }: CommandPalette
                   if (cmds.length === 0) return null;
                   return (
                     <div key={category} className="space-y-1">
-                      <p className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{category}</p>
+                      <p className="px-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{category}</p>
                       {cmds.map((cmd) => {
                         const Icon = cmd.icon;
                         return (
                           <button
                             key={cmd.id}
                             onClick={() => handleSelect(cmd.id)}
-                            className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300 transition-all text-left"
+                            className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium hover:bg-primary/10 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300 transition-all text-left"
                           >
                             <div className="flex items-center gap-3">
-                              <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-md group-hover:bg-white dark:bg-gray-900 dark:group-hover:bg-gray-700 transition-colors">
+                              <div className="p-1.5 bg-surface-3 rounded-md group-hover:bg-background dark:group-hover:bg-gray-700 transition-colors">
                                 <Icon className="w-4 h-4" />
                               </div>
                               {cmd.label}
                             </div>
                             {cmd.shortcut && (
-                              <kbd className="text-[10px] font-sans bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-gray-400">{cmd.shortcut}</kbd>
+                              <kbd className="text-[10px] font-sans bg-surface-3 px-1.5 py-0.5 rounded text-muted-foreground">{cmd.shortcut}</kbd>
                             )}
                           </button>
                         );
@@ -136,10 +136,10 @@ export function CommandPalette({ onJump, onSave, open, setOpen }: CommandPalette
                 })}
               </div>
             ) : (
-              <div className="p-8 text-center text-gray-500">No commands found</div>
+              <div className="p-8 text-center text-muted-foreground">No commands found</div>
             )}
           </div>
-          <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between text-[10px] text-gray-400">
+          <div className="p-3 border-t border-border/60 bg-surface-2 flex items-center justify-between text-[10px] text-muted-foreground">
             <div className="flex gap-3">
               <span><kbd className="font-sans font-bold">↵</kbd> Select</span>
               <span><kbd className="font-sans font-bold">↑↓</kbd> Navigate</span>

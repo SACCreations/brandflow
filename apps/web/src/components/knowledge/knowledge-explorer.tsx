@@ -117,7 +117,7 @@ export default function KnowledgeExplorer({ isOpen, onClose }: { isOpen: boolean
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="relative w-full max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden bg-slate-900 shadow-2xl border border-slate-800 text-white rounded-3xl animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden bg-slate-900 shadow-2xl border border-slate-800 text-foreground rounded-3xl animate-in zoom-in-95 duration-300">
         
         {/* Close Button */}
         <button 
@@ -133,7 +133,7 @@ export default function KnowledgeExplorer({ isOpen, onClose }: { isOpen: boolean
               <Brain className="h-6 w-6 text-indigo-400" />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
+              <h2 className="text-xl font-extrabold text-foreground flex items-center gap-2">
                 Brand Brain Explorer
               </h2>
               <p className="text-xs text-slate-400 mt-1">
@@ -172,7 +172,7 @@ export default function KnowledgeExplorer({ isOpen, onClose }: { isOpen: boolean
                 onClick={() => setClassification(cat.id)}
                 className={`px-4 py-2 rounded-xl text-xs font-black transition-all capitalize shrink-0 ${
                   classification === cat.id
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/10'
+                    ? 'bg-indigo-600 text-foreground shadow-md shadow-indigo-500/10'
                     : 'bg-slate-950 border border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
                 }`}
               >
@@ -453,7 +453,7 @@ export default function KnowledgeExplorer({ isOpen, onClose }: { isOpen: boolean
         {/* Toast notification */}
         {toastMessage && (
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <p className="text-sm font-semibold text-white">{toastMessage.title}</p>
+            <p className="text-sm font-semibold text-foreground">{toastMessage.title}</p>
             <p className="text-xs text-slate-400">{toastMessage.description}</p>
           </div>
         )}

@@ -61,7 +61,7 @@ export function FileUploader({
 
   return (
     <div className={cn("space-y-2", className)}>
-      {label && <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>}
+      {label && <label className="text-sm font-medium text-foreground">{label}</label>}
       
       <div
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -75,7 +75,7 @@ export function FileUploader({
         onClick={() => document.getElementById(`file-input-${label}`)?.click()}
         className={cn(
           "relative border-2 border-dashed rounded-2xl p-8 transition-all cursor-pointer flex flex-col items-center justify-center gap-4 text-center group",
-          isDragging ? "border-brand-500 bg-brand-50/50 dark:bg-brand-900/20" : "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-gray-50 dark:bg-gray-950/30 dark:bg-gray-900/30",
+          isDragging ? "border-primary bg-brand-50/50 dark:bg-brand-900/20" : "border-border hover:border-gray-300 dark:hover:border-gray-700 bg-surface-1 dark:bg-gray-950/30 bg-background/30",
           uploadedUrl && "border-emerald-200 bg-emerald-50/30 dark:border-emerald-900/50 dark:bg-emerald-900/10"
         )}
       >
@@ -92,9 +92,9 @@ export function FileUploader({
 
         {uploading ? (
           <div className="w-full max-w-[200px] space-y-4">
-            <Loader2 className="w-8 h-8 text-brand-500 animate-spin mx-auto" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto" />
             <div className="space-y-1.5">
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 <span>Uploading...</span>
                 <span>{progress}%</span>
               </div>
@@ -107,7 +107,7 @@ export function FileUploader({
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px]">
+              <p className="text-sm font-bold text-foreground truncate max-w-[200px]">
                 {file?.name}
               </p>
               <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Successfully Uploaded</p>
@@ -116,21 +116,21 @@ export function FileUploader({
               variant="ghost" 
               size="sm" 
               onClick={reset}
-              className="mt-2 h-7 px-2 text-gray-400 hover:text-red-500"
+              className="mt-2 h-7 px-2 text-muted-foreground hover:text-red-500"
             >
               <X className="w-3.5 h-3.5 mr-1" /> Remove
             </Button>
           </div>
         ) : (
           <>
-            <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-2xl bg-surface-3 flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform">
               <Upload className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-bold text-gray-900 dark:text-white">
+              <p className="text-sm font-bold text-foreground">
                 Click to upload or drag and drop
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 {accept.includes('image') ? 'PNG, JPG, SVG' : 'PDF, DOCX'} (max {maxSize}MB)
               </p>
             </div>

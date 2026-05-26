@@ -60,16 +60,16 @@ export default function AnalyticsDashboard() {
       <div className="space-y-6 animate-in fade-in duration-300">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <div className="h-8 w-48 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800" />
-            <div className="h-4 w-72 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+            <div className="h-8 w-48 animate-pulse rounded-lg bg-surface-3 bg-surface-2" />
+            <div className="h-4 w-72 animate-pulse rounded-lg bg-surface-3" />
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-36 animate-pulse rounded-2xl bg-gray-100 dark:bg-gray-800" />
+            <div key={i} className="h-36 animate-pulse rounded-2xl bg-surface-3" />
           ))}
         </div>
-        <div className="h-80 animate-pulse rounded-2xl bg-gray-100 dark:bg-gray-800" />
+        <div className="h-80 animate-pulse rounded-2xl bg-surface-3" />
       </div>
     );
   }
@@ -79,8 +79,8 @@ export default function AnalyticsDashboard() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">ROI & Intelligence</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">ROI & Intelligence</h1>
+          <p className="mt-2 text-base text-muted-foreground max-w-2xl text-balance">
             Live attribution across performance, AI cost, and your knowledge-powered content loop.
           </p>
         </div>
@@ -88,14 +88,14 @@ export default function AnalyticsDashboard() {
           <select
             value={windowDays}
             onChange={(e) => setWindowDays(e.target.value as '7' | '30')}
-            className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+            className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary/20 hover:bg-surface-2 transition-all"
           >
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
           </select>
           <button
             onClick={() => void refetch()}
-            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-2 hover:border-primary transition-all micro-hover"
           >
             <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
             Refresh
@@ -106,8 +106,9 @@ export default function AnalyticsDashboard() {
       <AnalyticsMetricsGrid summary={analytics?.summary} windowDays={windowDays} />
 
       {/* AI Spend Section */}
-      <div className="rounded-3xl bg-brand-50/30 p-8 dark:bg-brand-500/5">
-        <h2 className="text-xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-3">
+      <div className="rounded-[1.25rem] bg-surface-1 p-8 border border-border/60 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-3xl rounded-full pointer-events-none" />
+        <h2 className="text-xl font-bold text-foreground mb-8 flex items-center gap-3 relative z-10">
           <DollarSign className="h-6 w-6 text-emerald-500" />
           AI Spend & Compute Efficiency
         </h2>

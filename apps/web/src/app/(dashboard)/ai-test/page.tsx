@@ -75,7 +75,7 @@ export default function AiTestPage() {
               AI Chatbot & Telemetry Gateway
             </h1>
           </div>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             Internal diagnostics interface to validate multi-provider configurations, token accounting, and fallback mechanics.
           </p>
         </div>
@@ -90,19 +90,19 @@ export default function AiTestPage() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         {/* LEFT COLUMN: CONTROL & REQUEST INPUTS */}
         <div className="space-y-6 lg:col-span-5">
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <h2 className="text-md flex items-center gap-2 font-bold text-gray-900 dark:text-white">
+          <div className="rounded-2xl border border-border bg-background p-6 shadow-sm border-border bg-background">
+            <h2 className="text-md flex items-center gap-2 font-bold text-foreground">
               <Activity className="h-4.5 w-4.5 text-indigo-500" />
               Configure Diagnostic Payload
             </h2>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Send a test message to trigger provider resolution and gateway pipeline execution.
             </p>
 
             <div className="mt-6 space-y-4">
               {/* PROVIDER SELECTOR */}
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Preferred Provider</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Preferred Provider</label>
                 <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
                   <button
                     type="button"
@@ -110,7 +110,7 @@ export default function AiTestPage() {
                     className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                       provider === 'openai'
                         ? 'border-indigo-600 bg-indigo-50/40 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-950/20 dark:text-indigo-400'
-                        : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
+                        : 'border-border hover:bg-surface-1 bg-background border-border dark:hover:bg-surface-1/50 text-foreground'
                     }`}
                   >
                     <span className={`h-2.5 w-2.5 rounded-full ${provider === 'openai' ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-gray-300'}`} />
@@ -122,7 +122,7 @@ export default function AiTestPage() {
                     className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                       provider === 'anthropic'
                         ? 'border-purple-600 bg-purple-50/40 text-purple-700 dark:border-purple-500 dark:bg-purple-950/20 dark:text-purple-400'
-                        : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
+                        : 'border-border hover:bg-surface-1 bg-background border-border dark:hover:bg-surface-1/50 text-foreground'
                     }`}
                   >
                     <span className={`h-2.5 w-2.5 rounded-full ${provider === 'anthropic' ? 'bg-purple-600 dark:bg-purple-400' : 'bg-gray-300'}`} />
@@ -134,7 +134,7 @@ export default function AiTestPage() {
                     className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                       provider === 'google'
                         ? 'border-emerald-600 bg-emerald-50/40 text-emerald-700 dark:border-emerald-500 dark:bg-emerald-950/20 dark:text-emerald-400'
-                        : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
+                        : 'border-border hover:bg-surface-1 bg-background border-border dark:hover:bg-surface-1/50 text-foreground'
                     }`}
                   >
                     <span className={`h-2.5 w-2.5 rounded-full ${provider === 'google' ? 'bg-emerald-600 dark:bg-emerald-400' : 'bg-gray-300'}`} />
@@ -146,7 +146,7 @@ export default function AiTestPage() {
                     className={`flex items-center justify-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                       provider === 'nvidia'
                         ? 'border-green-600 bg-green-50/40 text-green-700 dark:border-green-500 dark:bg-green-950/20 dark:text-green-400'
-                        : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800/50 dark:text-gray-300'
+                        : 'border-border hover:bg-surface-1 bg-background border-border dark:hover:bg-surface-1/50 text-foreground'
                     }`}
                   >
                     <span className={`h-2.5 w-2.5 rounded-full ${provider === 'nvidia' ? 'bg-green-600 dark:bg-green-400' : 'bg-gray-300'}`} />
@@ -157,13 +157,13 @@ export default function AiTestPage() {
 
               {/* MESSAGE TEXTAREA */}
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Diagnostic Message</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Diagnostic Message</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={4}
                   placeholder="Enter message for AI infrastructure validation..."
-                  className="mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 p-4 text-sm text-gray-900 dark:text-white focus:border-indigo-500 focus:bg-white dark:bg-gray-900 focus:outline-none dark:border-gray-800 dark:bg-gray-950/50 dark:text-white dark:focus:border-indigo-500 dark:focus:bg-gray-900"
+                  className="mt-2 w-full rounded-xl border border-border bg-surface-1 dark:bg-gray-950/50 p-4 text-sm text-foreground focus:border-indigo-500 focus:bg-background focus:outline-none border-border dark:bg-gray-950/50 text-foreground dark:focus:border-indigo-500 dark:focus:bg-background"
                 />
               </div>
 
@@ -172,7 +172,7 @@ export default function AiTestPage() {
                 type="button"
                 onClick={handleSend}
                 disabled={loading || !message.trim()}
-                className="relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-500 px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-500 px-5 py-3 text-sm font-bold text-foreground shadow-md transition-all hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? (
                   <>
@@ -190,9 +190,9 @@ export default function AiTestPage() {
           </div>
 
           {/* TELEMETRY METRIC SNAPSHOT */}
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Validation Objectives Covered</h3>
-            <ul className="mt-3 space-y-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="rounded-2xl border border-border bg-background p-6 shadow-sm border-border bg-background">
+            <h3 className="text-sm font-bold text-foreground">Validation Objectives Covered</h3>
+            <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
               <li className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 <span>Multi-provider gateway routing</span>
@@ -215,12 +215,12 @@ export default function AiTestPage() {
 
         {/* RIGHT COLUMN: TELEMETRY & CHAT RESPONSE FEED */}
         <div className="lg:col-span-7">
-          <div className="flex h-full min-h-[480px] flex-col rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+          <div className="flex h-full min-h-[480px] flex-col rounded-2xl border border-border bg-background shadow-sm border-border bg-background overflow-hidden">
             {/* PANEL HEADER */}
-            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 px-6 py-4 dark:border-gray-800 dark:bg-gray-950/20">
+            <div className="flex items-center justify-between border-b border-border bg-surface-1 dark:bg-gray-950/50 px-6 py-4 border-border dark:bg-gray-950/20">
               <div className="flex items-center gap-2">
                 <Cpu className="h-4.5 w-4.5 text-indigo-500" />
-                <span className="text-sm font-bold text-gray-900 dark:text-white">Telemetry & Live Response</span>
+                <span className="text-sm font-bold text-foreground">Telemetry & Live Response</span>
               </div>
               {result && (
                 <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400">
@@ -245,8 +245,8 @@ export default function AiTestPage() {
                       <div className="absolute inset-0 rounded-full border-2 border-indigo-500/30 border-t-indigo-600 animate-spin" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 dark:text-white">Evaluating Gateway Options</h4>
-                      <p className="mt-1 text-xs text-gray-500 max-w-xs">
+                      <h4 className="font-bold text-foreground">Evaluating Gateway Options</h4>
+                      <p className="mt-1 text-xs text-muted-foreground max-w-xs">
                         Executing connection validation, checking cache budgets, and issuing completion parameters to {provider}.
                       </p>
                     </div>
@@ -282,8 +282,8 @@ export default function AiTestPage() {
                   >
                     {/* METRIC GRID */}
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                      <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/40">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Used Provider</span>
+                      <div className="rounded-xl bg-surface-1 bg-background p-4 bg-surface-2/40">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Used Provider</span>
                         <div className="mt-1 flex items-center gap-1.5">
                           <span className={`h-2.5 w-2.5 rounded-full ${
                             result.provider === 'openai' 
@@ -294,28 +294,28 @@ export default function AiTestPage() {
                                   ? 'bg-emerald-500'
                                   : 'bg-green-600'
                           }`} />
-                          <span className="text-sm font-bold text-gray-950 dark:text-white capitalize">{result.provider}</span>
+                          <span className="text-sm font-bold text-foreground capitalize">{result.provider}</span>
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/40">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Resolved Model</span>
-                        <div className="mt-1 text-sm font-bold text-gray-950 dark:text-white overflow-hidden text-ellipsis whitespace-nowrap">
+                      <div className="rounded-xl bg-surface-1 bg-background p-4 bg-surface-2/40">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Resolved Model</span>
+                        <div className="mt-1 text-sm font-bold text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
                           {result.model}
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/40">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Latency</span>
-                        <div className="mt-1 flex items-center gap-1 text-sm font-bold text-gray-950 dark:text-white">
+                      <div className="rounded-xl bg-surface-1 bg-background p-4 bg-surface-2/40">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Total Latency</span>
+                        <div className="mt-1 flex items-center gap-1 text-sm font-bold text-foreground">
                           <Clock className="h-4 w-4 text-indigo-500" />
                           <span>{result.latency} ms</span>
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-gray-50 dark:bg-gray-950 p-4 dark:bg-gray-800/40">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Tokens Accrued</span>
-                        <div className="mt-1 text-sm font-bold text-gray-950 dark:text-white">
+                      <div className="rounded-xl bg-surface-1 bg-background p-4 bg-surface-2/40">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tokens Accrued</span>
+                        <div className="mt-1 text-sm font-bold text-foreground">
                           In: {result.tokens.input} | Out: {result.tokens.output}
                         </div>
                       </div>
@@ -328,11 +328,11 @@ export default function AiTestPage() {
                           <RefreshCw className="h-3.5 w-3.5 animate-spin" />
                           <span>Infrastructure Fallback Handler Triggered!</span>
                         </div>
-                        <p className="mt-1 text-gray-600 dark:text-gray-400">
+                        <p className="mt-1 text-muted-foreground">
                           The primary provider failed to resolve or connect. The request was automatically rescheduled and successfully completed using:
                           <strong className="ml-1 text-yellow-900 dark:text-yellow-300 capitalize">{result.provider} ({result.model})</strong>.
                         </p>
-                        <div className="mt-2 grid grid-cols-2 gap-2 text-gray-500">
+                        <div className="mt-2 grid grid-cols-2 gap-2 text-muted-foreground">
                           <span>Retry Attempts: {result.retryCount}</span>
                           <span>Fallback Used: {result.fallbackUsed ? 'Yes' : 'No'}</span>
                         </div>
@@ -341,20 +341,20 @@ export default function AiTestPage() {
 
                     {/* AI RESPONSE WRAPPER */}
                     <div className="space-y-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                         <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
                         AI Response Content
                       </span>
-                      <div className="rounded-2xl border border-indigo-100 bg-indigo-50/20 p-5 text-sm leading-relaxed text-gray-800 dark:text-gray-100 dark:border-indigo-950/30 dark:bg-indigo-950/10 dark:text-gray-200 whitespace-pre-wrap font-sans">
+                      <div className="rounded-2xl border border-indigo-100 bg-indigo-50/20 p-5 text-sm leading-relaxed text-foreground dark:border-indigo-950/30 dark:bg-indigo-950/10 text-foreground whitespace-pre-wrap font-sans">
                         {result.response}
                       </div>
                     </div>
 
                     {/* DB PERSISTENCE DETAILS */}
-                    <div className="flex items-center gap-2 rounded-xl bg-gray-50 dark:bg-gray-950 px-4 py-3 text-xs text-gray-500 dark:bg-gray-800/40">
-                      <Database className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center gap-2 rounded-xl bg-surface-1 bg-background px-4 py-3 text-xs text-muted-foreground bg-surface-2/40">
+                      <Database className="h-4 w-4 text-muted-foreground" />
                       <span>
-                        AIRequestLog row created: <strong className="font-mono text-gray-700 dark:text-gray-300">Success</strong>. Latency and token values successfully committed to DB.
+                        AIRequestLog row created: <strong className="font-mono text-foreground">Success</strong>. Latency and token values successfully committed to DB.
                       </span>
                     </div>
                   </motion.div>
@@ -364,7 +364,7 @@ export default function AiTestPage() {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="flex h-full flex-col items-center justify-center space-y-3 text-center text-gray-400 dark:text-gray-500"
+                    className="flex h-full flex-col items-center justify-center space-y-3 text-center text-muted-foreground dark:text-muted-foreground"
                   >
                     <Bot className="h-12 w-12 stroke-[1.5]" />
                     <div>

@@ -199,7 +199,7 @@ export default function ProjectsPage() {
   if (projectsLoading) {
     return (
       <div className="flex h-[400px] items-center justify-center">
-        <LoaderIcon className="h-8 w-8 animate-spin text-brand-600" />
+        <LoaderIcon className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -208,11 +208,11 @@ export default function ProjectsPage() {
     return (
       <div className="flex h-[400px] flex-col items-center justify-center gap-4 text-center">
         <AlertCircle className="h-12 w-12 text-red-500" />
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Project workspace unavailable</h2>
-        <p className="text-sm text-gray-500">We couldn't load your projects right now. Please try again in a moment.</p>
+        <h2 className="text-xl font-bold text-foreground">Project workspace unavailable</h2>
+        <p className="text-sm text-muted-foreground">We couldn't load your projects right now. Please try again in a moment.</p>
         <button
           onClick={() => queryClient.invalidateQueries({ queryKey: ['projects'] })}
-          className="rounded-xl bg-gray-100 px-6 py-2 text-sm font-bold text-gray-900 dark:text-white hover:bg-gray-200 dark:bg-gray-800 dark:text-white"
+          className="rounded-xl bg-surface-2 px-6 py-2 text-sm font-bold text-foreground hover:bg-surface-2 text-foreground"
         >
           Try Again
         </button>
@@ -224,33 +224,33 @@ export default function ProjectsPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Project Management</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">Orchestrate your workflows and track progress across initiatives.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Project Management</h1>
+          <p className="mt-2 text-muted-foreground">Orchestrate your workflows and track progress across initiatives.</p>
         </div>
         <button 
           onClick={() => { resetForm(); setIsModalOpen(true); }}
-          className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
+          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
         >
           <PlusIcon className="h-4 w-4" /> Create Project
         </button>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-background p-4 border-border bg-background md:flex-row md:items-center md:justify-between">
         <div className="relative w-full md:max-w-sm">
-          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search projects or clients..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+            className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
           />
         </div>
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
-            className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+            className="rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
           >
             <option value="all">All statuses</option>
             <option value="active">Active</option>
@@ -260,7 +260,7 @@ export default function ProjectsPage() {
           <select
             value={customerFilter}
             onChange={(event) => setCustomerFilter(event.target.value)}
-            className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+            className="rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
           >
             <option value="all">All clients</option>
             {customers?.map((customer) => (
@@ -272,41 +272,41 @@ export default function ProjectsPage() {
 
       {/* Stats Mini-Bar */}
       <div className="grid gap-6 md:grid-cols-4">
-        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-2 dark:bg-blue-500/10"><LayoutIcon className="h-5 w-5 text-blue-600" /></div>
             <div>
-              <div className="text-xl font-black text-gray-900 dark:text-white">{projects?.length || 0}</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Projects</div>
+              <div className="text-xl font-black text-foreground">{projects?.length || 0}</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active Projects</div>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-emerald-50 p-2 dark:bg-emerald-500/10"><CheckIcon className="h-5 w-5 text-emerald-600" /></div>
             <div>
-              <div className="text-xl font-black text-gray-900 dark:text-white">{projects?.filter(p => p.status === 'completed').length || 0}</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Completed</div>
+              <div className="text-xl font-black text-foreground">{projects?.filter(p => p.status === 'completed').length || 0}</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Completed</div>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-amber-50 p-2 dark:bg-amber-500/10"><DollarIcon className="h-5 w-5 text-amber-600" /></div>
             <div>
-              <div className="text-xl font-black text-gray-900 dark:text-white">
+              <div className="text-xl font-black text-foreground">
                 ${projects?.reduce((acc, p) => acc + (p.budget || 0), 0).toLocaleString()}
               </div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Budget</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Budget</div>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-purple-50 p-2 dark:bg-purple-500/10"><UsersIcon className="h-5 w-5 text-purple-600" /></div>
             <div>
-              <div className="text-xl font-black text-gray-900 dark:text-white">Multi</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Collaboration</div>
+              <div className="text-xl font-black text-foreground">Multi</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Collaboration</div>
             </div>
           </div>
         </div>
@@ -315,21 +315,21 @@ export default function ProjectsPage() {
       {/* Projects Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {projects?.map((project) => (
-          <div key={project.id} className="group relative overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all hover:shadow-2xl dark:border-gray-800 dark:bg-gray-900 hover:-translate-y-1">
+          <div key={project.id} className="group relative overflow-hidden rounded-3xl border border-border/60 bg-background p-6 transition-all hover:shadow-2xl border-border bg-background hover:-translate-y-1">
             <div className="flex items-start justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-brand-500/10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-primary/100/10">
                 <ProjectIcon className="h-6 w-6" />
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button 
                   onClick={() => handleEdit(project)}
-                  className="rounded-lg p-2 text-gray-400 hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800"
+                  className="rounded-lg p-2 text-muted-foreground hover:bg-surface-1 bg-background dark:hover:bg-surface-1"
                 >
                   <EditIcon className="h-4 w-4" />
                 </button>
                 <button 
                   onClick={() => deleteMutation.mutate(project.id)}
-                  className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+                  className="rounded-lg p-2 text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
                 >
                   <TrashIcon className="h-4 w-4" />
                 </button>
@@ -338,35 +338,35 @@ export default function ProjectsPage() {
             
             <div className="mt-4">
               <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{project.name}</h3>
+                  <h3 className="text-xl font-bold text-foreground">{project.name}</h3>
                   <Link
                     href={`/projects/${project.id}`}
-                    className="text-xs font-bold text-brand-600 opacity-0 transition-opacity group-hover:opacity-100"
+                    className="text-xs font-bold text-primary opacity-0 transition-opacity group-hover:opacity-100"
                   >
                     View
                   </Link>
                 </div>
               {project.customer && (
-                <div className="mt-1 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-brand-600">
+                <div className="mt-1 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-primary">
                   <Building2 className="h-3 w-3" />
                   {project.customer.name}
                 </div>
               )}
-              <p className="mt-2 text-sm text-gray-500 line-clamp-2 min-h-[40px]">{project.description || 'No description provided.'}</p>
+              <p className="mt-2 text-sm text-muted-foreground line-clamp-2 min-h-[40px]">{project.description || 'No description provided.'}</p>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-gray-50 pt-6 dark:border-gray-800">
+            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-gray-50 pt-6 border-border">
               <div className="space-y-1">
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Budget</div>
-                <div className="flex items-center gap-1.5 text-sm font-bold text-gray-900 dark:text-white">
-                  <DollarIcon className="h-3.5 w-3.5 text-brand-600" />
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Budget</div>
+                <div className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+                  <DollarIcon className="h-3.5 w-3.5 text-primary" />
                   {project.budget ? project.budget.toLocaleString() : 'N/A'}
                 </div>
               </div>
               <div className="space-y-1">
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Deadline</div>
-                <div className="flex items-center gap-1.5 text-sm font-bold text-gray-900 dark:text-white">
-                  <CalendarIcon className="h-3.5 w-3.5 text-brand-600" />
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Deadline</div>
+                <div className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+                  <CalendarIcon className="h-3.5 w-3.5 text-primary" />
                   {project.endDate ? format(new Date(project.endDate), 'MMM d, yyyy') : 'No date'}
                 </div>
               </div>
@@ -375,7 +375,7 @@ export default function ProjectsPage() {
             <div className="mt-6 flex items-center justify-between">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-8 w-8 rounded-full border-2 border-white bg-gray-100 dark:border-gray-900 dark:bg-gray-800 flex items-center justify-center text-[10px] font-bold text-gray-400">
+                  <div key={i} className="h-8 w-8 rounded-full border-2 border-white bg-surface-2 border-border bg-surface-2 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
                     U{i}
                   </div>
                 ))}
@@ -383,7 +383,7 @@ export default function ProjectsPage() {
               <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${
                 project.status === 'active' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' : 
                 project.status === 'completed' ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10' :
-                'bg-gray-100 text-gray-500 dark:bg-gray-800'
+                'bg-surface-2 text-muted-foreground bg-surface-2'
               }`}>
                 {project.status}
               </span>
@@ -392,12 +392,12 @@ export default function ProjectsPage() {
         ))}
 
         {projects?.length === 0 && (
-          <div className="col-span-full rounded-3xl border border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/60 p-12 text-center dark:border-gray-800 dark:bg-gray-900/70">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-950 text-gray-300 dark:bg-gray-800">
+          <div className="col-span-full rounded-3xl border border-dashed border-border bg-background/60 p-12 text-center border-border bg-background/70">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface-1 bg-background text-muted-foreground bg-surface-2">
               <ProjectIcon className="h-8 w-8" />
             </div>
-            <h3 className="mt-4 text-lg font-bold text-gray-900 dark:text-white">No projects match these filters</h3>
-            <p className="mt-2 text-sm text-gray-500">Try adjusting your search, changing the status filter, or create a fresh project.</p>
+            <h3 className="mt-4 text-lg font-bold text-foreground">No projects match these filters</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Try adjusting your search, changing the status filter, or create a fresh project.</p>
           </div>
         )}
       </div>
@@ -405,13 +405,13 @@ export default function ProjectsPage() {
       {/* Project Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full max-w-xl rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
+          <div className="w-full max-w-xl rounded-3xl border border-border/60 bg-background p-8 shadow-2xl border-border bg-background animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{editingProject ? 'Edit Project' : 'Initiate New Project'}</h2>
-                <p className="text-sm text-gray-500">Configure your project parameters and timeline.</p>
+                <h2 className="text-2xl font-bold text-foreground">{editingProject ? 'Edit Project' : 'Initiate New Project'}</h2>
+                <p className="text-sm text-muted-foreground">Configure your project parameters and timeline.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-gray-50 dark:bg-gray-950 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
+              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-surface-1 bg-background p-2 text-muted-foreground hover:bg-surface-3 dark:hover:bg-gray-700">
                 <XIcon className="h-5 w-5" />
               </button>
             </div>
@@ -419,19 +419,19 @@ export default function ProjectsPage() {
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Project Name</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Project Name</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Q3 Marketing Blitz"
-                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assign Client</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Assign Client</label>
                   <select 
-                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                     value={formData.customerId}
                     onChange={(e) => setFormData({...formData, customerId: e.target.value})}
                   >
@@ -444,11 +444,11 @@ export default function ProjectsPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Description</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Description</label>
                 <textarea 
                   rows={3}
                   placeholder="What are the main objectives?"
-                  className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                  className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
@@ -456,19 +456,19 @@ export default function ProjectsPage() {
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Start Date</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Start Date</label>
                   <input 
                     type="date" 
-                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                     value={formData.startDate}
                     onChange={(e) => setFormData({...formData, startDate: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">End Date</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">End Date</label>
                   <input 
                     type="date" 
-                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                     value={formData.endDate}
                     onChange={(e) => setFormData({...formData, endDate: e.target.value})}
                   />
@@ -477,19 +477,19 @@ export default function ProjectsPage() {
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Budget ($)</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Budget ($)</label>
                   <input 
                     type="number" 
                     placeholder="0.00"
-                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                     value={formData.budget}
                     onChange={(e) => setFormData({...formData, budget: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</label>
                   <select 
-                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                     value={formData.status}
                     onChange={(e) => setFormData({...formData, status: e.target.value})}
                   >
@@ -503,14 +503,14 @@ export default function ProjectsPage() {
               <div className="pt-6 flex gap-4">
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl border border-gray-100 dark:border-gray-800 py-3.5 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800"
+                  className="flex-1 rounded-xl border border-border/60 py-3.5 text-sm font-bold text-muted-foreground hover:bg-surface-1 bg-background border-border"
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={handleSubmit}
                   disabled={createMutation.isPending || updateMutation.isPending}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 disabled:opacity-50"
                 >
                   {(createMutation.isPending || updateMutation.isPending) && <LoaderIcon className="h-4 w-4 animate-spin" />}
                   {editingProject ? 'Update Project' : 'Launch Project'}

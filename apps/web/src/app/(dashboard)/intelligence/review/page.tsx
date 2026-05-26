@@ -92,8 +92,8 @@ export default function ReviewQueuePage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Review Queue</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Review Queue</h1>
+          <p className="mt-2 text-muted-foreground">
             Approve, reject, or request revisions for content requiring review.
           </p>
         </div>
@@ -108,8 +108,8 @@ export default function ReviewQueuePage() {
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Sidebar Filters */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 dark:border-gray-800 dark:bg-gray-900">
-            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-500">Filter By</h3>
+          <div className="rounded-2xl border border-border bg-background p-5 border-border bg-background">
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-muted-foreground">Filter By</h3>
             <div className="space-y-2">
               <FilterItem label="All Items" count={approvals.length} active={sourceFilter === 'all'} onClick={() => setSourceFilter('all')} />
               <FilterItem label="Auto-Routed" count={autoRouted.length} active={sourceFilter === 'auto'} onClick={() => setSourceFilter('auto')} />
@@ -124,7 +124,7 @@ export default function ReviewQueuePage() {
               <button
                 onClick={() => bulkApproveMutation.mutate(approvals.map((a) => a.id))}
                 disabled={bulkApproveMutation.isPending}
-                className="w-full rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-700 disabled:opacity-50"
+                className="w-full rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-emerald-700 disabled:opacity-50"
               >
                 {bulkApproveMutation.isPending ? 'Approving…' : `Bulk Approve (${approvals.length})`}
               </button>
@@ -136,17 +136,17 @@ export default function ReviewQueuePage() {
         <div className="lg:col-span-3 space-y-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-brand-500" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : isError ? (
             <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center dark:border-red-900 dark:bg-red-900/10">
               <p className="text-sm text-red-600">Failed to load approval queue. Please try again.</p>
             </div>
           ) : approvals.length === 0 ? (
-            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-12 text-center dark:border-gray-800 dark:bg-gray-900">
-              <Inbox className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" />
-              <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Queue is clear</h3>
-              <p className="mt-2 text-sm text-gray-500">No items pending review. Content with quality grade below B will appear here automatically.</p>
+            <div className="rounded-2xl border border-border bg-background p-12 text-center border-border bg-background">
+              <Inbox className="mx-auto h-12 w-12 text-muted-foreground dark:text-gray-600" />
+              <h3 className="mt-4 text-lg font-semibold text-foreground">Queue is clear</h3>
+              <p className="mt-2 text-sm text-muted-foreground">No items pending review. Content with quality grade below B will appear here automatically.</p>
             </div>
           ) : (
             approvals.map((item) => (
@@ -192,10 +192,10 @@ function ApprovalCard({
 
   return (
     <div className={cn(
-      'group relative rounded-2xl border bg-white dark:bg-gray-900 p-6 transition-all hover:shadow-lg dark:bg-gray-900',
+      'group relative rounded-2xl border bg-background p-6 transition-all hover:shadow-lg bg-background',
       isAutoRouted
         ? 'border-amber-200 dark:border-amber-500/30 ring-1 ring-amber-500/10'
-        : 'border-gray-200 dark:border-gray-800',
+        : 'border-border',
     )}>
       <div className="mb-4 flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -204,11 +204,11 @@ function ApprovalCard({
               Grade {qc.overallGrade}
             </span>
           )}
-          <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-[10px] font-bold uppercase text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+          <span className="rounded-lg bg-surface-2 px-2.5 py-1 text-[10px] font-bold uppercase text-muted-foreground bg-surface-2 text-muted-foreground">
             {item.content.platform} · {item.content.type}
           </span>
           {item.content.brand && (
-            <span className="text-xs text-gray-400 flex items-center gap-1">
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
               {item.content.brand.name}
             </span>
           )}
@@ -220,12 +220,12 @@ function ApprovalCard({
           )}
         </div>
         {item.content.campaign && (
-          <span className="text-xs text-gray-400">{item.content.campaign.name}</span>
+          <span className="text-xs text-muted-foreground">{item.content.campaign.name}</span>
         )}
       </div>
 
       <div className="mb-6">
-        <p className="text-sm text-gray-900 dark:text-white leading-relaxed line-clamp-4">
+        <p className="text-sm text-foreground leading-relaxed line-clamp-4">
           {item.content.body}
         </p>
       </div>
@@ -249,25 +249,25 @@ function ApprovalCard({
         </div>
       )}
 
-      <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-800 pt-4 dark:border-gray-800">
+      <div className="flex items-center justify-end gap-2 border-t border-border/60 pt-4 border-border">
         <button
           onClick={onRevision}
           disabled={isActing}
-          className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-gray-600 transition-all hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800 disabled:opacity-50"
+          className="rounded-xl border border-border bg-background px-4 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-surface-1 bg-background border-border bg-background dark:hover:bg-surface-1 disabled:opacity-50"
         >
           <MessageSquare className="h-3.5 w-3.5 mr-1 inline" /> Revision
         </button>
         <button
           onClick={onReject}
           disabled={isActing}
-          className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-semibold text-red-600 transition-all hover:bg-red-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-red-500/10 disabled:opacity-50"
+          className="rounded-xl border border-border bg-background px-4 py-2 text-sm font-semibold text-red-600 transition-all hover:bg-red-50 border-border bg-background dark:hover:bg-red-500/10 disabled:opacity-50"
         >
           <X className="h-4 w-4 mr-1 inline" /> Reject
         </button>
         <button
           onClick={onApprove}
           disabled={isActing}
-          className="rounded-xl bg-emerald-600 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+          className="rounded-xl bg-emerald-600 px-6 py-2 text-sm font-semibold text-foreground transition-all hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 disabled:opacity-50"
         >
           <Check className="h-4 w-4 mr-1 inline" /> Approve
         </button>
@@ -281,8 +281,8 @@ function ScorePill({ label, value }: { label: string; value: number }) {
   const color =
     percent >= 90 ? 'text-emerald-600' : percent >= 70 ? 'text-amber-600' : 'text-red-600';
   return (
-    <div className="rounded-lg bg-gray-50 dark:bg-gray-950 px-3 py-2 text-center dark:bg-gray-800/50">
-      <p className="text-[10px] uppercase text-gray-400">{label}</p>
+    <div className="rounded-lg bg-surface-1 bg-background px-3 py-2 text-center bg-surface-2/50">
+      <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
       <p className={cn('text-sm font-bold', color)}>{percent}%</p>
     </div>
   );
@@ -295,14 +295,14 @@ function FilterItem({ label, count, active, onClick }: { label: string; count: n
       className={cn(
         'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all',
         active
-          ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400'
-          : 'text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800',
+          ? 'bg-primary/10 text-brand-700 dark:bg-primary/100/10 dark:text-brand-400'
+          : 'text-muted-foreground hover:bg-surface-1 bg-background dark:hover:bg-surface-1',
       )}
     >
       <span>{label}</span>
       <span className={cn(
         'rounded-full px-2 py-0.5 text-[10px]',
-        active ? 'bg-brand-200 text-brand-800' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-500',
+        active ? 'bg-brand-200 text-brand-800' : 'bg-surface-2 text-muted-foreground bg-surface-2 dark:text-muted-foreground',
       )}>
         {count}
       </span>

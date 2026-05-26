@@ -372,7 +372,7 @@ export default function ImageGeneratorPage() {
               <Sparkles className="h-7 w-7 text-indigo-400 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+              <h1 className="text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
                 AI Image Creation Workspace
                 <span className="rounded-full bg-indigo-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-indigo-400 border border-indigo-500/30">PRO GATEWAY</span>
               </h1>
@@ -404,7 +404,7 @@ export default function ImageGeneratorPage() {
           <Button 
             onClick={() => generateMutation.mutate()} 
             disabled={!canSubmit} 
-            className="gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
+            className="gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-foreground font-extrabold px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
             aria-label="Queue creative design for generation"
           >
             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -432,7 +432,7 @@ export default function ImageGeneratorPage() {
                   <Skeleton className="h-12 w-full rounded-xl" />
                 ) : (
                   <select
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors"
                     value={selectedBrandId}
                     onChange={(e) => setSelectedBrandId(e.target.value)}
                     aria-label="Select brand profile"
@@ -454,7 +454,7 @@ export default function ImageGeneratorPage() {
                   <Skeleton className="h-12 w-full rounded-xl" />
                 ) : (
                   <select
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors"
                     value={selectedCampaignId}
                     onChange={(e) => setSelectedCampaignId(e.target.value)}
                     aria-label="Link to campaign"
@@ -486,7 +486,7 @@ export default function ImageGeneratorPage() {
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`flex flex-col items-start p-3 text-left rounded-xl border transition-all ${
                       selectedCategory === cat.id
-                        ? 'border-indigo-500 bg-indigo-500/10 text-white ring-2 ring-indigo-500/25'
+                        ? 'border-indigo-500 bg-indigo-500/10 text-foreground ring-2 ring-indigo-500/25'
                         : 'border-slate-800 hover:border-slate-700 text-slate-400 hover:bg-slate-900'
                     }`}
                   >
@@ -507,7 +507,7 @@ export default function ImageGeneratorPage() {
                     onClick={() => setSelectedStyle(style.id)}
                     className={`flex flex-col items-start p-3 text-left rounded-xl border transition-all ${
                       selectedStyle === style.id
-                        ? 'border-indigo-500 bg-indigo-500/10 text-white ring-2 ring-indigo-500/25'
+                        ? 'border-indigo-500 bg-indigo-500/10 text-foreground ring-2 ring-indigo-500/25'
                         : 'border-slate-800 hover:border-slate-700 text-slate-400 hover:bg-slate-900'
                     }`}
                   >
@@ -528,7 +528,7 @@ export default function ImageGeneratorPage() {
                     onClick={() => setSelectedRatioId(ratio.id)}
                     className={`flex items-start gap-3 p-3.5 text-left rounded-xl border transition-all ${
                       selectedRatioId === ratio.id
-                        ? 'border-indigo-500 bg-indigo-500/10 text-white ring-2 ring-indigo-500/25'
+                        ? 'border-indigo-500 bg-indigo-500/10 text-foreground ring-2 ring-indigo-500/25'
                         : 'border-slate-800 hover:border-slate-700 text-slate-400 hover:bg-slate-900'
                     }`}
                   >
@@ -570,7 +570,7 @@ export default function ImageGeneratorPage() {
                         onChange={(e) => setCustomWidth(parseInt(e.target.value) || 0)}
                         min={DIM_MIN}
                         max={DIM_MAX}
-                        className={`w-24 rounded-xl border bg-slate-950 px-3 py-2 text-xs text-white outline-none transition-colors ${
+                        className={`w-24 rounded-xl border bg-slate-950 px-3 py-2 text-xs text-foreground outline-none transition-colors ${
                           isCustomSize && (customWidth < DIM_MIN || customWidth > DIM_MAX) ? 'border-rose-500' : 'border-slate-800 focus:border-indigo-500'
                         }`}
                         aria-label="Custom width in pixels"
@@ -585,7 +585,7 @@ export default function ImageGeneratorPage() {
                         onChange={(e) => setCustomHeight(parseInt(e.target.value) || 0)}
                         min={DIM_MIN}
                         max={DIM_MAX}
-                        className={`w-24 rounded-xl border bg-slate-950 px-3 py-2 text-xs text-white outline-none transition-colors ${
+                        className={`w-24 rounded-xl border bg-slate-950 px-3 py-2 text-xs text-foreground outline-none transition-colors ${
                           isCustomSize && (customHeight < DIM_MIN || customHeight > DIM_MAX) ? 'border-rose-500' : 'border-slate-800 focus:border-indigo-500'
                         }`}
                         aria-label="Custom height in pixels"
@@ -638,7 +638,7 @@ export default function ImageGeneratorPage() {
                     <span className="text-[9px] text-indigo-400 font-bold uppercase">Enhanced by Brand Prompt-Engine</span>
                   </span>
                   <textarea
-                    className={`w-full min-h-[100px] rounded-xl border bg-slate-950 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-slate-600 ${
+                    className={`w-full min-h-[100px] rounded-xl border bg-slate-950 px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-slate-600 ${
                       promptError ? 'border-rose-500 focus:border-rose-400' : 'border-slate-800 focus:border-indigo-500'
                     }`}
                     value={promptText}
@@ -709,7 +709,7 @@ export default function ImageGeneratorPage() {
                 <div className="space-y-2">
                   <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Select Knowledge Base Reference</span>
                   <select
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors"
                     onChange={(e) => {
                       if (e.target.value) {
                         setPromptText(`Base image on knowledge hub document: ${e.target.value}`);
@@ -733,11 +733,11 @@ export default function ImageGeneratorPage() {
                     <input
                       type="url"
                       placeholder="https://example.com/reference-image"
-                      className="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
+                      className="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
                       id="sourceUrlInput"
                     />
                     <button 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-3 rounded-xl text-xs font-bold transition-colors"
+                      className="bg-indigo-500 hover:bg-indigo-600 text-foreground px-4 py-3 rounded-xl text-xs font-bold transition-colors"
                       onClick={() => {
                         const val = (document.getElementById('sourceUrlInput') as HTMLInputElement)?.value;
                         if (val) {
@@ -767,7 +767,7 @@ export default function ImageGeneratorPage() {
                 <div className="space-y-2">
                   <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Preferred AI Provider Model</span>
                   <select
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors"
                     value={selectedProvider}
                     onChange={(e) => setSelectedProvider(e.target.value)}
                   >
@@ -779,7 +779,7 @@ export default function ImageGeneratorPage() {
                 <div className="space-y-2">
                   <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Rendering Resolution Quality</span>
                   <select
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors"
                     value={selectedQuality}
                     onChange={(e) => setSelectedQuality(e.target.value as any)}
                   >
@@ -1058,15 +1058,15 @@ export default function ImageGeneratorPage() {
             <div className="bg-slate-900 border border-slate-800 p-2.5 rounded text-[10.5px] text-slate-400 font-bold space-y-1">
               <div className="flex justify-between">
                 <span>Stability AI (Standard):</span>
-                <span className="text-white">~$0.03</span>
+                <span className="text-foreground">~$0.03</span>
               </div>
               <div className="flex justify-between">
                 <span>OpenAI DALL-E 3 (Standard):</span>
-                <span className="text-white">~$0.04</span>
+                <span className="text-foreground">~$0.04</span>
               </div>
               <div className="flex justify-between">
                 <span>OpenAI DALL-E 3 (HD):</span>
-                <span className="text-white">~$0.08</span>
+                <span className="text-foreground">~$0.08</span>
               </div>
               <div className="border-t border-slate-800 pt-1 mt-1 flex justify-between text-indigo-400">
                 <span>Your selection:</span>

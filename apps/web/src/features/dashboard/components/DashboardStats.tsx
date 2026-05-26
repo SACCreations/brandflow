@@ -28,8 +28,8 @@ export function DashboardStats({ stats, isLoading }: DashboardStatsProps) {
       value: isLoading ? '—' : String(stats?.contentCreated ?? 0),
       helper: 'All generated and saved items',
       icon: '✦',
-      color: 'text-brand-500',
-      bg: 'bg-brand-500/10'
+      color: 'text-primary',
+      bg: 'bg-primary/10'
     },
     {
       label: 'Pending Approvals',
@@ -64,17 +64,17 @@ export function DashboardStats({ stats, isLoading }: DashboardStatsProps) {
       {statItems.map((stat, idx) => (
         <Card
           key={stat.label}
-          className="glass-premium rounded-3xl p-6 hover:shadow-2xl transition-all duration-300 animate-fade-in-up micro-hover"
+          className="glass-premium p-6 transition-all duration-300 animate-fade-in-up micro-hover"
           style={{ animationDelay: `${idx * 100}ms` }}
         >
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-500">{stat.label}</p>
-            <span className={`w-8 h-8 rounded-full flex items-center justify-center ${stat.bg} ${stat.color}`}>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{stat.label}</p>
+            <span className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${stat.bg} ${stat.color}`}>
               {stat.icon}
             </span>
           </div>
-          <p className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">{stat.value}</p>
-          <p className="mt-2 text-xs font-medium text-gray-400">{stat.helper}</p>
+          <p className="text-3xl font-bold tracking-tight text-foreground">{stat.value}</p>
+          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{stat.helper}</p>
         </Card>
       ))}
     </div>

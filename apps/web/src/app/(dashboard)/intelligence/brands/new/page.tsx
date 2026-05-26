@@ -94,7 +94,7 @@ export default function BrandCreatePage() {
   if (!isReady) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-950">
+    <div className="bg-background">
       <BrandWizard 
         title="Brand Onboarding Wizard"
         initialData={initialData}

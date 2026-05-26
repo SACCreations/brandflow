@@ -52,7 +52,7 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
     <div className="space-y-8">
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-1 space-y-6">
-          <div className="flex bg-gray-100 dark:bg-gray-800 p-1.5 rounded-2xl w-fit">
+          <div className="flex bg-surface-3 p-1.5 rounded-2xl w-fit">
             {(['banned', 'required', 'cta', 'legal'] as const).map(type => (
               <button
                 key={type}
@@ -61,8 +61,8 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
                 className={cn(
                   "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
                   activeType === type 
-                    ? "bg-white dark:bg-gray-700 text-brand-600 shadow-sm" 
-                    : "text-gray-400 hover:text-gray-600"
+                    ? "bg-background bg-surface-3 text-primary shadow-sm" 
+                    : "text-muted-foreground hover:text-gray-600"
                 )}
               >
                 {type}
@@ -83,7 +83,7 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
                       activeType === 'cta' ? "e.g. 'Start Free Trial', 'Book Demo'" :
                       "e.g. 'Terms and conditions apply...'"
                     }
-                    className="h-12 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-xl font-bold text-sm"
+                    className="h-12 bg-background border-border/60 rounded-xl font-bold text-sm"
                   />
                 </div>
                 <button 
@@ -99,7 +99,7 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
             <Button 
               variant="outline" 
               onClick={addRule}
-              className="w-full h-12 border-2 border-dashed border-gray-200 dark:border-gray-800 text-gray-400 hover:text-brand-600 hover:border-brand-200 hover:bg-brand-50/50 rounded-xl font-black uppercase tracking-widest text-[10px]"
+              className="w-full h-12 border-2 border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary/20 hover:bg-brand-50/50 rounded-xl font-black uppercase tracking-widest text-[10px]"
             >
               <Plus className="w-4 h-4 mr-2" /> Add {activeType} entry
             </Button>
@@ -107,7 +107,7 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
         </div>
 
         <div className="w-full lg:w-80 space-y-6">
-          <div className="p-6 rounded-2xl bg-gray-900 dark:bg-white dark:bg-gray-900 text-white dark:text-gray-900 dark:text-white shadow-2xl space-y-4">
+          <div className="p-6 rounded-2xl bg-background dark:bg-background text-foreground dark:text-foreground shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
               <Scale className="w-5 h-5 text-brand-400" />
               <h3 className="text-xs font-black uppercase tracking-widest">Compliance Health</h3>
@@ -116,20 +116,20 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
               <span className="text-4xl font-black">92%</span>
               <span className="text-[10px] font-black text-emerald-400 uppercase pb-1">Excellent</span>
             </div>
-            <div className="h-1.5 w-full bg-white dark:bg-gray-900/10 dark:bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-brand-500 w-[92%]" />
+            <div className="h-1.5 w-full bg-background/10 dark:bg-surface-2 rounded-full overflow-hidden">
+              <div className="h-full bg-primary w-[92%]" />
             </div>
             <p className="text-[10px] font-medium opacity-60 leading-relaxed">
               Based on 14 active governance rules and content generation history.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 space-y-4">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+          <div className="p-5 rounded-2xl border border-border/60 bg-background space-y-4">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
               <Info className="w-3 h-3" />
               Operational Impact
             </h3>
-            <p className="text-[11px] text-gray-500 font-medium leading-relaxed">
+            <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
               These rules are injected directly into the AI context window. All generated content is automatically validated against this list before presentation.
             </p>
           </div>

@@ -20,9 +20,9 @@ interface RecentActivityFeedProps {
 
 export function RecentActivityFeed({ recentActivity, isLoading, isError }: RecentActivityFeedProps) {
   return (
-    <Card className="glass-premium rounded-3xl overflow-hidden animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+    <Card className="glass-premium overflow-hidden animate-fade-in-up" style={{ animationDelay: '500ms' }}>
       <div className="px-6 py-4 border-b border-border/50">
-        <h2 className="font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
+        <h2 className="font-semibold text-foreground">Recent Activity</h2>
       </div>
 
       {isError ? (
@@ -33,8 +33,8 @@ export function RecentActivityFeed({ recentActivity, isLoading, isError }: Recen
         <div className="divide-y divide-border/50">
           {Array.from({ length: 5 }).map((_, index) => (
             <div key={index} className="px-6 py-4 animate-pulse">
-              <div className="h-4 w-40 rounded bg-gray-200 dark:bg-gray-800" />
-              <div className="mt-2 h-3 w-64 rounded bg-gray-100 dark:bg-gray-900" />
+              <div className="h-4 w-40 rounded bg-surface-2" />
+              <div className="mt-2 h-3 w-64 rounded bg-surface-3" />
             </div>
           ))}
         </div>
@@ -44,14 +44,14 @@ export function RecentActivityFeed({ recentActivity, isLoading, isError }: Recen
             <Link
               key={activity.id}
               href={activity.href}
-              className="block px-6 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+              className="block px-6 py-4 transition-colors hover:bg-surface-2"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.title}</p>
-                  <p className="mt-1 text-sm text-gray-500">{activity.description}</p>
+                  <p className="text-sm font-medium text-foreground">{activity.title}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{activity.description}</p>
                 </div>
-                <span className="whitespace-nowrap text-xs text-gray-400 font-medium">
+                <span className="whitespace-nowrap text-xs text-muted-foreground font-medium">
                   {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
                 </span>
               </div>
@@ -59,7 +59,7 @@ export function RecentActivityFeed({ recentActivity, isLoading, isError }: Recen
           ))}
         </div>
       ) : (
-        <div className="p-8 text-center text-gray-500 text-sm">No activity yet — create content, campaigns, or approvals to populate this feed.</div>
+        <div className="p-8 text-center text-muted-foreground text-sm">No activity yet — create content, campaigns, or approvals to populate this feed.</div>
       )}
     </Card>
   );

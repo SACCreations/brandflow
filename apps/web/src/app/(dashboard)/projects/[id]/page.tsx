@@ -128,7 +128,7 @@ export default function ProjectDetailPage() {
   if (isLoading) {
     return (
       <div className="flex h-[420px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -136,12 +136,12 @@ export default function ProjectDetailPage() {
   if (isError || !project) {
     return (
       <div className="space-y-6">
-        <Link href="/projects" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-white">
+        <Link href="/projects" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to projects
         </Link>
         <Card className="p-10 text-center">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Project not found</h1>
-          <p className="mt-2 text-sm text-gray-500">This project either no longer exists or you do not have access to it.</p>
+          <h1 className="text-xl font-bold text-foreground">Project not found</h1>
+          <p className="mt-2 text-sm text-muted-foreground">This project either no longer exists or you do not have access to it.</p>
         </Card>
       </div>
     );
@@ -155,17 +155,17 @@ export default function ProjectDetailPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
-          <Link href="/projects" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-white dark:hover:text-white">
+          <Link href="/projects" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground dark:hover:text-white">
             <ArrowLeft className="h-4 w-4" /> Back to projects
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{project.name}</h1>
-              <Badge className={project.status === 'active' ? 'bg-emerald-50 text-emerald-600' : project.status === 'completed' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-600'}>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">{project.name}</h1>
+              <Badge className={project.status === 'active' ? 'bg-emerald-50 text-emerald-600' : project.status === 'completed' ? 'bg-blue-50 text-blue-600' : 'bg-surface-2 text-muted-foreground'}>
                 {project.status}
               </Badge>
             </div>
-            <p className="mt-2 text-gray-500 dark:text-gray-400">
+            <p className="mt-2 text-muted-foreground">
               {project.customer ? `${project.customer.name}${project.customer.company ? ` • ${project.customer.company}` : ''}` : 'Internal project'}
             </p>
           </div>
@@ -214,8 +214,8 @@ export default function ProjectDetailPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="p-6 lg:col-span-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Project snapshot</h2>
-            <span className="text-xs font-medium text-gray-400">Updated {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
+            <h2 className="text-lg font-bold text-foreground">Project snapshot</h2>
+            <span className="text-xs font-medium text-muted-foreground">Updated {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -225,30 +225,30 @@ export default function ProjectDetailPage() {
             <InfoRow icon={<FolderKanban className="h-4 w-4" />} label="Created" value={format(new Date(project.createdAt), 'MMM d, yyyy')} />
           </div>
 
-          <div className="mt-6 rounded-xl border border-gray-100 dark:border-gray-800 p-5 text-sm text-gray-600 dark:border-gray-800 dark:text-gray-300">
+          <div className="mt-6 rounded-xl border border-border/60 p-5 text-sm text-muted-foreground border-border text-foreground">
             {project.description || 'No project description yet. Add objectives, deliverables, and constraints to make this workflow smarter.'}
           </div>
         </Card>
 
         <div className="space-y-6">
           <Card className="p-6">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Linked brand</h2>
+            <h2 className="text-lg font-bold text-foreground">Linked brand</h2>
             {linkedBrand ? (
               <div className="mt-4 space-y-4">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{linkedBrand.name}</p>
-                  <p className="text-xs text-gray-500">{linkedBrand.industry || 'Industry not set'}</p>
+                  <p className="text-sm font-semibold text-foreground">{linkedBrand.name}</p>
+                  <p className="text-xs text-muted-foreground">{linkedBrand.industry || 'Industry not set'}</p>
                 </div>
-                <div className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
-                  <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Health score</div>
-                  <div className="mt-2 text-2xl font-black text-brand-600">{linkedBrand.healthScore}%</div>
+                <div className="rounded-xl border border-border/60 p-4 border-border">
+                  <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Health score</div>
+                  <div className="mt-2 text-2xl font-black text-primary">{linkedBrand.healthScore}%</div>
                 </div>
                 <Link href={`/intelligence/brands/${linkedBrand.id}`}>
                   <Button variant="outline" className="w-full">Open linked brand</Button>
                 </Link>
               </div>
             ) : (
-              <div className="mt-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 p-5 text-sm text-gray-500 dark:border-gray-800">
+              <div className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground border-border">
                 This project does not have a linked brand yet. Run the analyzer to create one from client or project sources.
               </div>
             )}
@@ -256,7 +256,7 @@ export default function ProjectDetailPage() {
 
           <Card className="p-6">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Latest brief</h2>
+              <h2 className="text-lg font-bold text-foreground">Latest brief</h2>
               <Badge className={getBriefStatusClass(latestBrief?.metadata?.status)}>
                 {formatBriefStatus(latestBrief?.metadata?.status)}
               </Badge>
@@ -265,22 +265,22 @@ export default function ProjectDetailPage() {
             {latestBrief ? (
               <div className="mt-4 space-y-4">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{latestBrief.objective}</p>
-                  <p className="mt-2 text-xs text-gray-500">
+                  <p className="text-sm font-semibold text-foreground">{latestBrief.objective}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
                     {latestBrief.platform || 'platform not set'} • {latestBrief.contentType || 'content type not set'} • {latestBrief.format || 'format not set'}
                   </p>
                 </div>
 
                 {latestBrief.campaignTheme && (
-                  <div className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 text-sm text-gray-600 dark:border-gray-800 dark:text-gray-300">
+                  <div className="rounded-xl border border-border/60 p-4 text-sm text-muted-foreground border-border text-foreground">
                     {latestBrief.campaignTheme}
                   </div>
                 )}
 
-                <div className="flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
+                <div className="flex items-center justify-between rounded-xl border border-border/60 p-4 border-border">
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Readiness</div>
-                    <div className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
+                    <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Readiness</div>
+                    <div className="mt-1 text-sm font-medium text-foreground">
                       {latestBrief.isComplete ? 'Complete and ready for delivery' : 'Still missing a few required fields'}
                     </div>
                   </div>
@@ -321,7 +321,7 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
             ) : (
-              <div className="mt-4 space-y-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 p-5 text-sm text-gray-500 dark:border-gray-800">
+              <div className="mt-4 space-y-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground border-border">
                 <p>No brief exists for this project yet. Create one to define goals, audience, tone, and delivery constraints.</p>
                 <Link href={`/create/brief?projectId=${project.id}`}>
                   <Button className="w-full gap-2">
@@ -339,12 +339,12 @@ export default function ProjectDetailPage() {
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
-      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400">
+    <div className="rounded-xl border border-border/60 p-4 border-border">
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
         {icon}
         {label}
       </div>
-      <div className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{value}</div>
+      <div className="mt-2 text-sm font-medium text-foreground">{value}</div>
     </div>
   );
 }
@@ -358,5 +358,5 @@ function formatBriefStatus(status?: 'draft' | 'in_review' | 'approved') {
 function getBriefStatusClass(status?: 'draft' | 'in_review' | 'approved') {
   if (status === 'approved') return 'bg-emerald-50 text-emerald-700';
   if (status === 'in_review') return 'bg-amber-50 text-amber-700';
-  return 'bg-gray-100 text-gray-700';
+  return 'bg-surface-2 text-foreground';
 }

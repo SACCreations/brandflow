@@ -21,12 +21,12 @@ export function PerformanceTrendChart({ chartData, windowDays, rangeTo }: Perfor
     <div className="lg:col-span-8 glass-panel p-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Performance Trend</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h2 className="text-lg font-bold text-foreground">Performance Trend</h2>
+          <p className="text-sm text-muted-foreground">
             Reach and engagement over the past {windowDays} days.
           </p>
         </div>
-        <div className="rounded-xl bg-gray-50/50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 px-3 py-2 text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+        <div className="rounded-xl bg-surface-1/50 bg-background/50 border border-border/60 px-3 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
           {rangeTo
             ? formatDistanceToNow(new Date(rangeTo), { addSuffix: true })
             : 'Current'}

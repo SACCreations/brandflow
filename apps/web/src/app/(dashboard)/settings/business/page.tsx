@@ -58,10 +58,10 @@ export default function BusinessSettingsPage() {
     return (
       <div className="space-y-6 animate-in fade-in duration-300">
         <div className="space-y-2">
-          <div className="h-8 w-48 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800" />
-          <div className="h-4 w-72 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+          <div className="h-8 w-48 animate-pulse rounded-lg bg-surface-3 bg-surface-2" />
+          <div className="h-4 w-72 animate-pulse rounded-lg bg-surface-3" />
         </div>
-        <div className="h-96 animate-pulse rounded-2xl bg-gray-100 dark:bg-gray-800" />
+        <div className="h-96 animate-pulse rounded-2xl bg-surface-3" />
       </div>
     );
   }
@@ -69,43 +69,43 @@ export default function BusinessSettingsPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Business Settings</h1>
-        <p className="mt-1 text-gray-500 dark:text-gray-400">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Business Settings</h1>
+        <p className="mt-1 text-muted-foreground">
           Manage your workspace profile and preferences.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Profile Section */}
-        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-border bg-background p-6 border-border bg-background">
           <div className="mb-6 flex items-center gap-3">
-            <div className="rounded-xl bg-brand-50 p-2.5 dark:bg-brand-900/20">
-              <Building2 className="h-5 w-5 text-brand-600" />
+            <div className="rounded-xl bg-primary/10 p-2.5 dark:bg-brand-900/20">
+              <Building2 className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Workspace Profile</h2>
-              <p className="text-sm text-gray-500">Basic information about your business</p>
+              <h2 className="text-lg font-semibold text-foreground">Workspace Profile</h2>
+              <p className="text-sm text-muted-foreground">Basic information about your business</p>
             </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Business Name</label>
+              <label className="text-sm font-medium text-foreground">Business Name</label>
               <input
                 type="text"
                 value={currentValues.name ?? ''}
                 onChange={(e) => updateField('name', e.target.value)}
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20/20 border-border bg-surface-2 text-foreground"
                 placeholder="Your business name"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Industry</label>
+              <label className="text-sm font-medium text-foreground">Industry</label>
               <select
                 value={currentValues.industry ?? ''}
                 onChange={(e) => updateField('industry', e.target.value)}
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20/20 border-border bg-surface-2 text-foreground"
               >
                 <option value="">Select industry</option>
                 <option value="technology">Technology</option>
@@ -122,27 +122,27 @@ export default function BusinessSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Website</label>
+              <label className="text-sm font-medium text-foreground">Website</label>
               <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-gray-400" />
+                <Globe className="h-4 w-4 text-muted-foreground" />
                 <input
                   type="url"
                   value={currentValues.website ?? ''}
                   onChange={(e) => updateField('website', e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20/20 border-border bg-surface-2 text-foreground"
                   placeholder="https://example.com"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Timezone</label>
+              <label className="text-sm font-medium text-foreground">Timezone</label>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-gray-400" />
+                <Clock className="h-4 w-4 text-muted-foreground" />
                 <select
                   value={currentValues.timezone ?? 'UTC'}
                   onChange={(e) => updateField('timezone', e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20/20 border-border bg-surface-2 text-foreground"
                 >
                   <option value="UTC">UTC</option>
                   <option value="America/New_York">Eastern Time (US)</option>
@@ -159,12 +159,12 @@ export default function BusinessSettingsPage() {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+              <label className="text-sm font-medium text-foreground">Description</label>
               <textarea
                 value={currentValues.description ?? ''}
                 onChange={(e) => updateField('description', e.target.value)}
                 rows={3}
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20/20 border-border bg-surface-2 text-foreground"
                 placeholder="Brief description of your business"
               />
             </div>
@@ -172,24 +172,24 @@ export default function BusinessSettingsPage() {
         </div>
 
         {/* Preferences Section */}
-        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-border bg-background p-6 border-border bg-background">
           <div className="mb-6 flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-2.5 dark:bg-blue-900/20">
               <Shield className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Preferences</h2>
-              <p className="text-sm text-gray-500">Default settings for your workspace</p>
+              <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
+              <p className="text-sm text-muted-foreground">Default settings for your workspace</p>
             </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Default Language</label>
+              <label className="text-sm font-medium text-foreground">Default Language</label>
               <select
                 value={currentValues.defaultLanguage ?? 'en'}
                 onChange={(e) => updateField('defaultLanguage', e.target.value)}
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20/20 border-border bg-surface-2 text-foreground"
               >
                 <option value="en">English</option>
                 <option value="ar">Arabic</option>
@@ -200,14 +200,14 @@ export default function BusinessSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Workspace Slug</label>
+              <label className="text-sm font-medium text-foreground">Workspace Slug</label>
               <input
                 type="text"
                 value={currentValues.slug ?? ''}
                 disabled
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-2.5 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400"
+                className="w-full rounded-xl border border-border bg-surface-1 bg-background px-4 py-2.5 text-sm text-muted-foreground border-border bg-surface-2/50 text-muted-foreground"
               />
-              <p className="text-xs text-gray-400">Used in URLs. Cannot be changed.</p>
+              <p className="text-xs text-muted-foreground">Used in URLs. Cannot be changed.</p>
             </div>
           </div>
         </div>
@@ -217,7 +217,7 @@ export default function BusinessSettingsPage() {
           <button
             type="submit"
             disabled={Object.keys(form).length === 0 || updateMutation.isPending}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-foreground transition-all hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-4 w-4" />
             {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
@@ -247,7 +247,7 @@ export default function BusinessSettingsPage() {
         </p>
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-xl border border-red-300 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30"
+          className="inline-flex items-center gap-2 rounded-xl border border-red-300 bg-background px-4 py-2.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30"
           onClick={() => {
             if (window.confirm('Are you sure you want to delete this workspace? This action cannot be undone.')) {
               // Handle workspace deletion

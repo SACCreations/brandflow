@@ -59,15 +59,15 @@ export default function KnowledgeDashboard() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">Knowledge Hub</h1>
-          <p className="mt-2 text-sm font-medium text-gray-500">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">Knowledge Hub</h1>
+          <p className="mt-2 text-base text-muted-foreground max-w-2xl text-balance">
             The operational brain and truth source for your enterprise AI.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setIsExplorerOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl border border-border/50 bg-white dark:bg-gray-900/50 px-4 py-2.5 text-sm font-bold text-gray-700 dark:text-gray-300 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 shadow-sm"
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-all hover:bg-surface-2 shadow-sm micro-hover"
           >
             <Search className="h-4 w-4" />
             Explorer
@@ -75,7 +75,7 @@ export default function KnowledgeDashboard() {
           
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-700 hover:shadow-brand-500/40 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:-translate-y-[1px] micro-hover"
           >
             <Plus className="h-4 w-4" />
             Add Knowledge
@@ -85,14 +85,14 @@ export default function KnowledgeDashboard() {
 
       {/* Stats Grid */}
       {isError ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 dark:border-red-800/50 dark:bg-red-900/10">
+        <div className="rounded-[1.25rem] border border-destructive/20 bg-destructive/5 p-6 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-red-100 p-2 dark:bg-red-900/30">
-              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <div className="rounded-xl bg-destructive/10 p-2 text-destructive">
+              <AlertCircle className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-red-900 dark:text-red-200">Failed to load knowledge stats</h3>
-              <p className="text-xs font-medium text-red-600 dark:text-red-400">Check your connection and try again.</p>
+              <h3 className="text-sm font-bold text-foreground">Failed to load knowledge stats</h3>
+              <p className="text-sm font-medium text-destructive mt-1">Check your connection and try again.</p>
             </div>
           </div>
         </div>

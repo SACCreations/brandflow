@@ -12,7 +12,7 @@ export default function CreateCampaignRedirect() {
 
   return (
     <div className="flex h-[60vh] items-center justify-center">
-      <p className="text-gray-500">Redirecting to campaign management...</p>
+      <p className="text-muted-foreground">Redirecting to campaign management...</p>
     </div>
   );
 }

@@ -143,7 +143,7 @@ export default function PublishQueuePage() {
   if (isLoading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -152,14 +152,14 @@ export default function PublishQueuePage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Publishing Hub</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">Manage, tailor, and schedule your global content distribution.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Publishing Hub</h1>
+          <p className="mt-2 text-muted-foreground">Manage, tailor, and schedule your global content distribution.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/publish/calendar" className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800">
+          <Link href="/publish/calendar" className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-1 bg-background border-border bg-background text-foreground dark:hover:bg-surface-1">
             <Calendar className="h-4 w-4" /> Calendar View
           </Link>
-          <Link href="/publish/social" className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700">
+          <Link href="/publish/social" className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700">
             <Sparkles className="h-4 w-4" /> Manage accounts
           </Link>
         </div>
@@ -169,8 +169,8 @@ export default function PublishQueuePage() {
       <div className="grid gap-6 md:grid-cols-4">
         <PublishStat label="Scheduled" value={String(scheduledCount)} icon={<Clock className="h-4 w-4 text-blue-500" />} />
         <PublishStat label="Published" value={String(publishedCount)} icon={<CheckCircle2 className="h-4 w-4 text-emerald-500" />} />
-        <PublishStat label="Connected Accounts" value={String(socialAccounts.length)} icon={<Activity className="h-4 w-4 text-brand-500" />} />
-        <PublishStat label="Errors" value={String(failedCount)} icon={<AlertCircle className="h-4 w-4 text-gray-400" />} />
+        <PublishStat label="Connected Accounts" value={String(socialAccounts.length)} icon={<Activity className="h-4 w-4 text-primary" />} />
+        <PublishStat label="Errors" value={String(failedCount)} icon={<AlertCircle className="h-4 w-4 text-muted-foreground" />} />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-12">
@@ -179,25 +179,25 @@ export default function PublishQueuePage() {
         <div className="lg:col-span-8 space-y-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-4">
-              <button onClick={() => setView('queue')} className={`text-sm ${view === 'queue' ? 'font-bold text-brand-600 border-b-2 border-brand-600 pb-1' : 'font-medium text-gray-500 hover:text-gray-700'}`}>Queue</button>
-              <button onClick={() => setView('history')} className={`text-sm ${view === 'history' ? 'font-bold text-brand-600 border-b-2 border-brand-600 pb-1' : 'font-medium text-gray-500 hover:text-gray-700'}`}>History</button>
+              <button onClick={() => setView('queue')} className={`text-sm ${view === 'queue' ? 'font-bold text-primary border-b-2 border-brand-600 pb-1' : 'font-medium text-muted-foreground hover:text-gray-700'}`}>Queue</button>
+              <button onClick={() => setView('history')} className={`text-sm ${view === 'history' ? 'font-bold text-primary border-b-2 border-brand-600 pb-1' : 'font-medium text-muted-foreground hover:text-gray-700'}`}>History</button>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <input 
                   type="text" 
                   placeholder="Search posts..." 
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
+                  className="rounded-lg border border-border bg-background pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-primary/20 border-border bg-background"
                 />
               </div>
             </div>
           </div>
 
           {filteredSchedules.length === 0 ? (
-            <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800 text-sm font-medium text-gray-400 dark:border-gray-800">
+            <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-border/60 text-sm font-medium text-muted-foreground border-border">
               No schedules found for this view.
             </div>
           ) : filteredSchedules.map((schedule) => {
@@ -205,10 +205,10 @@ export default function PublishQueuePage() {
             const platform = schedule.socialAccount.platform;
             const latestPublishJob = schedule.publishJobs[0];
             return (
-            <div key={schedule.id} className="group relative rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 transition-all hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
+            <div key={schedule.id} className="group relative rounded-2xl border border-border bg-background p-5 transition-all hover:shadow-md border-border bg-background">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-gray-600 dark:border-gray-900 dark:bg-gray-800">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-surface-2 text-muted-foreground border-border bg-surface-2">
                     {platform === 'linkedin' && <Linkedin className="h-3.5 w-3.5 text-blue-700" />}
                     {platform === 'twitter' && <Twitter className="h-3.5 w-3.5 text-sky-500" />}
                     {platform === 'instagram' && <Instagram className="h-3.5 w-3.5 text-pink-600" />}
@@ -216,7 +216,7 @@ export default function PublishQueuePage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">{new Date(schedule.scheduledAt).toLocaleString()}</span>
+                      <span className="text-sm font-bold text-foreground">{new Date(schedule.scheduledAt).toLocaleString()}</span>
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter ${
                         schedule.status === 'published' ? 'bg-emerald-100 text-emerald-700' :
                         schedule.status === 'failed' ? 'bg-red-100 text-red-700' :
@@ -225,25 +225,25 @@ export default function PublishQueuePage() {
                         {schedule.status.replace('_', ' ')}
                       </span>
                     </div>
-                    <p className="text-[10px] text-gray-400 font-medium">{schedule.socialAccount.name}{schedule.campaign?.name ? ` • ${schedule.campaign.name}` : ''}</p>
+                    <p className="text-[10px] text-muted-foreground font-medium">{schedule.socialAccount.name}{schedule.campaign?.name ? ` • ${schedule.campaign.name}` : ''}</p>
                   </div>
                 </div>
                 {schedule.status === 'pending' ? (
-                  <button onClick={() => cancelScheduleMutation.mutate(schedule.id)} className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                  <button onClick={() => cancelScheduleMutation.mutate(schedule.id)} className="rounded-lg p-2 text-muted-foreground hover:bg-surface-2 dark:hover:bg-surface-1">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 ) : schedule.status === 'failed' ? (
-                  <button onClick={() => retryScheduleMutation.mutate(schedule.id)} className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                  <button onClick={() => retryScheduleMutation.mutate(schedule.id)} className="rounded-lg p-2 text-muted-foreground hover:bg-surface-2 dark:hover:bg-surface-1">
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 ) : (
-                  <button className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                  <button className="rounded-lg p-2 text-muted-foreground hover:bg-surface-2 dark:hover:bg-surface-1">
                     <MoreVertical className="h-4 w-4" />
                   </button>
                 )}
               </div>
 
-              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-2">
+              <p className="text-sm text-muted-foreground text-foreground leading-relaxed line-clamp-2">
                 {post?.body || 'Linked content was removed.'}
               </p>
 
@@ -254,14 +254,14 @@ export default function PublishQueuePage() {
                 </div>
               ) : null}
 
-              <div className="mt-5 flex items-center justify-between border-t border-gray-50 pt-4 dark:border-gray-800">
+              <div className="mt-5 flex items-center justify-between border-t border-gray-50 pt-4 border-border">
                 <div className="flex items-center gap-3">
                   {post?.id ? (
-                    <Link href={`/create/content/${post.id}`} className="flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:underline">
+                    <Link href={`/create/content/${post.id}`} className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
                       <Eye className="h-3.5 w-3.5" /> Preview
                     </Link>
                   ) : null}
-                  <span className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
                     <Sparkles className="h-3.5 w-3.5" /> {platform}
                   </span>
                 </div>
@@ -275,7 +275,7 @@ export default function PublishQueuePage() {
                     </button>
                   ) : null}
                   {post?.id ? (
-                    <Link href={`/create/content/${post.id}`} className="rounded-lg bg-gray-900 px-4 py-1.5 text-xs font-bold text-white dark:bg-brand-600">
+                    <Link href={`/create/content/${post.id}`} className="rounded-lg bg-background px-4 py-1.5 text-xs font-bold text-foreground dark:bg-primary">
                       Edit Post
                     </Link>
                   ) : null}
@@ -287,25 +287,25 @@ export default function PublishQueuePage() {
 
         {/* Sidebar Insights */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="rounded-2xl border border-brand-100 bg-brand-50/20 p-6 dark:border-brand-500/20 dark:bg-brand-500/5">
-            <h3 className="text-sm font-bold text-brand-900 dark:text-white flex items-center gap-2 mb-4">
-              <Sparkles className="h-4 w-4 text-brand-600" />
+          <div className="rounded-2xl border border-primary/10 bg-brand-50/20 p-6 dark:border-primary/20 dark:bg-primary/100/5">
+            <h3 className="text-sm font-bold text-brand-900 text-foreground flex items-center gap-2 mb-4">
+              <Sparkles className="h-4 w-4 text-primary" />
               Smart Scheduling
             </h3>
             <p className="text-xs text-brand-700/70 dark:text-brand-400/70 mb-6 leading-relaxed">
               The scheduler is now live: approved content can be queued from the editor and tracked here by connected destination account.
             </p>
-            <div className="rounded-xl bg-white dark:bg-gray-900 p-4 text-center border border-brand-200 shadow-sm dark:bg-gray-900 dark:border-gray-800">
-              <div className="text-2xl font-black text-brand-600">{socialAccounts.length}</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Connected Accounts</div>
+            <div className="rounded-xl bg-background p-4 text-center border border-primary/20 shadow-sm bg-background border-border">
+              <div className="text-2xl font-black text-primary">{socialAccounts.length}</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Connected Accounts</div>
             </div>
             <Link href="/publish/social">
               <Button className="mt-4 w-full">Manage social accounts</Button>
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 dark:border-gray-800 dark:bg-gray-900">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <div className="rounded-2xl border border-border bg-background p-6 border-border bg-background">
+            <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
               <Layout className="h-4 w-4 text-purple-500" />
               Platform Limits
             </h3>
@@ -324,12 +324,12 @@ export default function PublishQueuePage() {
 
 function PublishStat({ label, value, icon }: any) {
   return (
-    <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-xl border border-border/60 bg-background p-4 border-border bg-background">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-gray-50 dark:bg-gray-950 p-2 dark:bg-gray-800">{icon}</div>
+        <div className="rounded-lg bg-surface-1 bg-background p-2 bg-surface-2">{icon}</div>
         <div>
-          <div className="text-lg font-black text-gray-900 dark:text-white">{value}</div>
-          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</div>
+          <div className="text-lg font-black text-foreground">{value}</div>
+          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</div>
         </div>
       </div>
     </div>
@@ -341,12 +341,12 @@ function LimitItem({ label, value, used }: any) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-[10px] font-bold uppercase">
-        <span className="text-gray-500">{label}</span>
-        <span className="text-gray-400">{used} / {value}</span>
+        <span className="text-muted-foreground">{label}</span>
+        <span className="text-muted-foreground">{used} / {value}</span>
       </div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-3">
         <div 
-          className={`h-full ${percentage > 90 ? 'bg-red-500' : 'bg-brand-500'}`} 
+          className={`h-full ${percentage > 90 ? 'bg-red-500' : 'bg-primary'}`} 
           style={{ width: `${percentage}%` }}
         />
       </div>

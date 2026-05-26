@@ -49,7 +49,7 @@ const STATUS_CONFIG = {
 };
 
 const LEVEL_COLOR: Record<string, string> = {
-  DEBUG: 'text-gray-400',
+  DEBUG: 'text-muted-foreground',
   INFO:  'text-blue-500',
   WARN:  'text-amber-500',
   ERROR: 'text-red-500',
@@ -83,14 +83,14 @@ function JobRow({ job, businessId }: { job: KnowledgeJob; businessId?: string })
         <Icon className={`h-4 w-4 flex-shrink-0 ${cfg.color} ${'spin' in cfg && cfg.spin ? 'animate-spin' : ''}`} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+            <span className="text-sm font-semibold text-foreground truncate">
               {job.source?.name ?? job.sourceId.slice(0, 8)}
             </span>
-            <span className="text-xs text-gray-400 capitalize">{job.source?.type}</span>
+            <span className="text-xs text-muted-foreground capitalize">{job.source?.type}</span>
             <span className={`ml-auto text-xs font-bold uppercase ${cfg.color}`}>{cfg.label}</span>
           </div>
           {job.status === 'processing' && (
-            <div className="mt-1.5 h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+            <div className="mt-1.5 h-1.5 w-full rounded-full bg-surface-3 bg-surface-3">
               <div
                 className="h-1.5 rounded-full bg-blue-500 transition-all duration-500"
                 style={{ width: `${job.progress}%` }}
@@ -98,17 +98,17 @@ function JobRow({ job, businessId }: { job: KnowledgeJob; businessId?: string })
             </div>
           )}
           {job.stage && job.status === 'processing' && (
-            <p className="mt-1 text-xs text-gray-400 capitalize">{job.stage} — {job.progress}%</p>
+            <p className="mt-1 text-xs text-muted-foreground capitalize">{job.stage} — {job.progress}%</p>
           )}
           {job.error && (
             <p className="mt-1 text-xs text-red-500 truncate">{job.error}</p>
           )}
         </div>
-        {expanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
+        {expanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
       </button>
 
       {expanded && (
-        <div className="border-t border-gray-100 dark:border-gray-800 px-4 py-3 space-y-1 max-h-60 overflow-y-auto">
+        <div className="border-t border-border/60 px-4 py-3 space-y-1 max-h-60 overflow-y-auto">
           {job.status === 'failed' && (
             <button
               onClick={handleRetry}
@@ -118,13 +118,13 @@ function JobRow({ job, businessId }: { job: KnowledgeJob; businessId?: string })
             </button>
           )}
           {logs.length === 0 ? (
-            <p className="text-xs text-gray-400">No logs yet.</p>
+            <p className="text-xs text-muted-foreground">No logs yet.</p>
           ) : (
             logs.map((log) => (
               <div key={log.id} className="flex items-start gap-2 text-xs font-mono">
                 <span className={`font-bold w-12 flex-shrink-0 ${LEVEL_COLOR[log.level]}`}>{log.level}</span>
-                <span className="text-gray-600 dark:text-gray-300 break-all">{log.message}</span>
-                <span className="ml-auto text-gray-300 dark:text-gray-600 whitespace-nowrap">
+                <span className="text-muted-foreground text-foreground break-all">{log.message}</span>
+                <span className="ml-auto text-muted-foreground dark:text-gray-600 whitespace-nowrap">
                   {new Date(log.createdAt).toLocaleTimeString()}
                 </span>
               </div>
@@ -162,12 +162,12 @@ export default function LiveIngestionMonitor() {
   const recentJobs = jobs.slice(0, 25);
 
   return (
-    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
+    <div className="rounded-[1.25rem] border border-border bg-surface-1 overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-blue-500" />
-          <h3 className="text-base font-bold text-gray-900 dark:text-white">Live Ingestion Monitor</h3>
+          <h3 className="text-base font-bold text-foreground">Live Ingestion Monitor</h3>
           {activeJobs.length > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-950/30 px-2 py-0.5 text-xs font-bold text-blue-600">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
@@ -177,7 +177,7 @@ export default function LiveIngestionMonitor() {
         </div>
         <button
           onClick={() => refetchJobs()}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-surface-2"
           title="Refresh"
         >
           <RefreshCw className="h-4 w-4" />
@@ -185,15 +185,15 @@ export default function LiveIngestionMonitor() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-100 dark:border-gray-800">
+      <div className="flex border-b border-border/50">
         {(['jobs', 'failed'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-5 py-2.5 text-sm font-semibold capitalize transition-colors ${
+            className={`px-5 py-2.5 text-sm font-semibold capitalize transition-all ${
               tab === t
-                ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground hover:bg-surface-2'
             }`}
           >
             {t === 'failed' ? 'Failed Records' : 'Ingestion Jobs'}
@@ -213,12 +213,12 @@ export default function LiveIngestionMonitor() {
             {jobsLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="rounded-xl bg-gray-50 dark:bg-gray-800/50 p-4 animate-pulse">
+                  <div key={i} className="rounded-xl bg-surface-2 p-4 animate-pulse">
                     <div className="flex items-center gap-3">
-                      <div className="h-4 w-4 rounded-full bg-gray-200 dark:bg-gray-700" />
+                      <div className="h-4 w-4 rounded-full bg-surface-3 bg-surface-3" />
                       <div className="flex-1 space-y-2">
-                        <div className="h-3 w-1/3 rounded bg-gray-200 dark:bg-gray-700" />
-                        <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700" />
+                        <div className="h-3 w-1/3 rounded bg-surface-3 bg-surface-3" />
+                        <div className="h-1.5 w-full rounded-full bg-surface-3 bg-surface-3" />
                       </div>
                     </div>
                   </div>
@@ -235,7 +235,7 @@ export default function LiveIngestionMonitor() {
             ) : recentJobs.length === 0 ? (
               <div className="py-12 text-center">
                 <Activity className="h-10 w-10 text-gray-200 dark:text-gray-700 mx-auto mb-3" />
-                <p className="text-sm text-gray-400">No ingestion jobs yet. Add a source to get started.</p>
+                <p className="text-sm text-muted-foreground">No ingestion jobs yet. Add a source to get started.</p>
               </div>
             ) : (
               recentJobs.map((job) => <JobRow key={job.id} job={job} />)
@@ -248,7 +248,7 @@ export default function LiveIngestionMonitor() {
             {failedRecords.length === 0 ? (
               <div className="py-12 text-center">
                 <CheckCircle2 className="h-10 w-10 text-emerald-200 dark:text-emerald-900 mx-auto mb-3" />
-                <p className="text-sm text-gray-400">No failed records. All ingestions succeeded.</p>
+                <p className="text-sm text-muted-foreground">No failed records. All ingestions succeeded.</p>
               </div>
             ) : (
               failedRecords.map((record) => (
@@ -257,7 +257,7 @@ export default function LiveIngestionMonitor() {
                     <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-xs font-mono text-red-700 dark:text-red-400 break-all">{record.error}</p>
-                      <p className="mt-1 text-xs text-gray-400">
+                      <p className="mt-1 text-xs text-muted-foreground">
                         Source: {record.sourceId.slice(0, 8)}… · {new Date(record.failedAt).toLocaleString()}
                       </p>
                     </div>

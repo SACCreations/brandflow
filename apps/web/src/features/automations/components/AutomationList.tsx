@@ -12,24 +12,24 @@ export function AutomationList({ automations, toggleMutation }: AutomationListPr
   return (
     <div className="lg:col-span-8 space-y-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Active Workflows</h3>
+        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Active Workflows</h3>
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input 
               type="text" 
               placeholder="Search rules..." 
-              className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 backdrop-blur-sm transition-all"
+              className="rounded-lg border border-border bg-background/50 bg-background/50 pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-primary/20 backdrop-blur-sm transition-all"
             />
           </div>
-          <button className="rounded-lg border border-gray-200 dark:border-gray-800 p-1.5 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          <button className="rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-surface-1 dark:hover:bg-surface-1 transition-colors">
             <Filter className="h-4 w-4" />
           </button>
         </div>
       </div>
 
       {automations?.length === 0 ? (
-        <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800 text-sm font-medium text-gray-400">
+        <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-border/60 text-sm font-medium text-muted-foreground">
           No automations created yet.
         </div>
       ) : (
@@ -37,12 +37,12 @@ export function AutomationList({ automations, toggleMutation }: AutomationListPr
           <div key={auto.id} className="glass-panel group relative overflow-hidden p-6 transition-all hover:shadow-xl">
             <div className="flex items-start justify-between">
               <div className="flex gap-4">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${auto.isActive ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10' : 'bg-gray-50 dark:bg-gray-800 text-gray-400'}`}>
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${auto.isActive ? 'bg-primary/10 text-primary dark:bg-primary/100/10' : 'bg-surface-2 text-muted-foreground'}`}>
                   <Zap className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{auto.name}</h3>
-                  <div className="mt-1 flex items-center gap-3 text-xs font-medium text-gray-400">
+                  <h3 className="text-lg font-bold text-foreground">{auto.name}</h3>
+                  <div className="mt-1 flex items-center gap-3 text-xs font-medium text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" /> Last run: {auto.lastRunAt ? formatDistanceToNow(new Date(auto.lastRunAt)) + ' ago' : 'Never'}
                     </span>
@@ -55,27 +55,27 @@ export function AutomationList({ automations, toggleMutation }: AutomationListPr
                 <button 
                   onClick={() => toggleMutation.mutate(auto.id)}
                   disabled={toggleMutation.isPending}
-                  className="text-brand-600 disabled:opacity-50 transition-colors"
+                  className="text-primary disabled:opacity-50 transition-colors"
                 >
-                  {auto.isActive ? <ToggleRight className="h-8 w-8" /> : <ToggleLeft className="h-8 w-8 text-gray-300 dark:text-gray-600" />}
+                  {auto.isActive ? <ToggleRight className="h-8 w-8" /> : <ToggleLeft className="h-8 w-8 text-muted-foreground dark:text-gray-600" />}
                 </button>
-                <button className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <button className="rounded-lg p-2 text-muted-foreground hover:bg-surface-2 dark:hover:bg-surface-1 transition-colors">
                   <MoreVertical className="h-4 w-4" />
                 </button>
               </div>
             </div>
 
-            <div className="mt-6 flex items-center gap-4 rounded-xl bg-gray-50/50 dark:bg-gray-950/50 p-4 border border-gray-100 dark:border-gray-800/50">
+            <div className="mt-6 flex items-center gap-4 rounded-xl bg-surface-1/50 dark:bg-gray-950/50 p-4 border border-border/60/50">
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">When</span>
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{auto.triggerType}</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">When</span>
+                <span className="text-xs font-bold text-foreground">{auto.triggerType}</span>
               </div>
-              <ArrowRight className="h-4 w-4 text-gray-300 dark:text-gray-600" />
+              <ArrowRight className="h-4 w-4 text-muted-foreground dark:text-gray-600" />
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Then</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Then</span>
                 <div className="flex gap-2">
                   {auto.steps.map((step, i) => (
-                    <span key={i} className="rounded-md bg-white dark:bg-gray-900 px-2 py-0.5 text-[10px] font-bold text-brand-600 shadow-sm dark:text-brand-400 border border-gray-100 dark:border-gray-800">
+                    <span key={i} className="rounded-md bg-background px-2 py-0.5 text-[10px] font-bold text-primary shadow-sm dark:text-brand-400 border border-border/60">
                       {step.type}
                     </span>
                   ))}

@@ -41,8 +41,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">Workspace Overview</h1>
-        <p className="mt-2 text-sm text-gray-500 font-medium">Your live summary across brand, content, and publishing workflows.</p>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">Workspace Overview</h1>
+        <p className="mt-2 text-base text-muted-foreground max-w-2xl text-balance">Your live summary across brand, content, and publishing workflows.</p>
       </div>
 
       <DashboardStats stats={data?.stats} isLoading={isLoading} />

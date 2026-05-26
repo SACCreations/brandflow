@@ -22,27 +22,27 @@ export function QueueProgressMonitor({
     <>
       {/* Active Generation Runner UI */}
       {loading && (
-        <div className="glass-panel p-6 border-brand-500/30 bg-brand-500/5 space-y-4">
+        <div className="glass-panel p-6 border-primary/30 bg-primary/100/5 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Loader2 className="h-5 w-5 animate-spin text-brand-600 dark:text-brand-400" />
+              <Loader2 className="h-5 w-5 animate-spin text-primary dark:text-brand-400" />
               <span className="text-sm font-extrabold text-brand-900 dark:text-brand-300">
                 {jobStatus === 'generating' ? 'Running batch queue process...' : 'Sending transaction request...'}
               </span>
             </div>
-            <span className="text-xs font-extrabold text-brand-600 bg-brand-500/20 px-2 py-0.5 rounded dark:text-brand-400">
+            <span className="text-xs font-extrabold text-primary bg-primary/100/20 px-2 py-0.5 rounded dark:text-brand-400">
               {jobProgress}% Done
             </span>
           </div>
 
-          <div className="w-full bg-brand-500/10 rounded-full h-2 overflow-hidden backdrop-blur-sm">
+          <div className="w-full bg-primary/100/10 rounded-full h-2 overflow-hidden backdrop-blur-sm">
             <div 
-              className="bg-brand-600 dark:bg-brand-500 h-2 rounded-full transition-all duration-500 shadow-md shadow-brand-500/50"
+              className="bg-primary dark:bg-primary h-2 rounded-full transition-all duration-500 shadow-md shadow-brand-500/50"
               style={{ width: `${jobProgress}%` }}
             />
           </div>
 
-          <div className="text-[10px] font-semibold text-brand-600/70 dark:text-brand-400/70 uppercase tracking-wider flex justify-between">
+          <div className="text-[10px] font-semibold text-primary/70 dark:text-brand-400/70 uppercase tracking-wider flex justify-between">
             <span>Concurrently processing items</span>
             <span>Do not close this tab</span>
           </div>
@@ -55,13 +55,13 @@ export function QueueProgressMonitor({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
-              <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+              <h3 className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground">
                 Generated Batch Outputs ({completedContents.length})
               </h3>
             </div>
             {completedContents.length > 1 && completedContents.some((c) => c.status === 'success') && (
               <Link href={`/create/content/compare?groupId=${completedContents[0]?.generationGroupId || ''}`}>
-                <Button variant="outline" size="sm" className="gap-1.5 text-xs font-bold backdrop-blur-sm bg-white/50 dark:bg-gray-900/50">
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs font-bold backdrop-blur-sm bg-background/50 bg-background/50">
                   Compare Variants <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -76,10 +76,10 @@ export function QueueProgressMonitor({
                   : 'border-red-500/30 bg-red-500/5'
               }`}>
                 <div className="space-y-1">
-                  <div className="text-xs font-bold text-gray-900 dark:text-white line-clamp-1">{c.topic}</div>
+                  <div className="text-xs font-bold text-foreground line-clamp-1">{c.topic}</div>
                   <div className="text-[10px] flex items-center gap-2">
-                    <span className="text-gray-500 dark:text-gray-400">Index: {idx + 1}</span>
-                    <span className="text-gray-500 dark:text-gray-400">•</span>
+                    <span className="text-muted-foreground">Index: {idx + 1}</span>
+                    <span className="text-muted-foreground">•</span>
                     {c.status === 'success' ? (
                       <span className="text-emerald-700 bg-emerald-500/20 px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wider text-[9px] dark:text-emerald-400">Draft created</span>
                     ) : (
@@ -93,7 +93,7 @@ export function QueueProgressMonitor({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1.5 text-xs font-bold text-amber-700 border-amber-500/30 hover:bg-amber-500/10 dark:text-amber-400 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm"
+                      className="gap-1.5 text-xs font-bold text-amber-700 border-amber-500/30 hover:bg-amber-500/10 dark:text-amber-400 bg-background/50 bg-background/50 backdrop-blur-sm"
                       onClick={() => {
                         // Re-trigger generation for failed item
                         generateMutation.mutate();
@@ -104,7 +104,7 @@ export function QueueProgressMonitor({
                   )}
                   {c.status === 'success' && c.contentId && (
                     <Link href={`/create/content/${c.contentId}`}>
-                      <Button variant="outline" className="gap-1.5 text-xs font-bold backdrop-blur-sm bg-white/50 dark:bg-gray-900/50">
+                      <Button variant="outline" className="gap-1.5 text-xs font-bold backdrop-blur-sm bg-background/50 bg-background/50">
                         Open in Editor <ExternalLink className="h-3.5 w-3.5" />
                       </Button>
                     </Link>

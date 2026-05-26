@@ -20,11 +20,11 @@ export function PlatformBreakdownChart({ platformBreakdown }: PlatformBreakdownC
   return (
     <div className="lg:col-span-7 glass-panel p-6">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-          <BarChart3 className="h-5 w-5 text-brand-600" />
+        <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
+          <BarChart3 className="h-5 w-5 text-primary" />
           Platform Breakdown
         </h2>
-        <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Reach by platform</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Reach by platform</span>
       </div>
 
       <div className="h-72 w-full">

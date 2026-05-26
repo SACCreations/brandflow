@@ -36,13 +36,13 @@ function CampaignSummaryCard({ title, value, subValue, icon }: any) {
     <div className="glass-panel p-6 relative overflow-hidden group">
       <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
       <div className="relative z-10 flex items-center justify-between mb-4">
-        <div className="rounded-xl bg-white/50 dark:bg-gray-800/50 p-3 shadow-sm backdrop-blur-sm border border-border/50">{icon}</div>
+        <div className="rounded-xl bg-background/50 bg-surface-2/50 p-3 shadow-sm backdrop-blur-sm border border-border/50">{icon}</div>
         <span className="text-[10px] font-bold text-emerald-700 bg-emerald-500/20 px-2 py-0.5 rounded-full dark:text-emerald-400 border border-emerald-500/20">
           {subValue}
         </span>
       </div>
-      <div className="relative z-10 text-3xl font-black text-gray-900 dark:text-white">{value}</div>
-      <div className="relative z-10 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">{title}</div>
+      <div className="relative z-10 text-3xl font-black text-foreground">{value}</div>
+      <div className="relative z-10 text-sm font-bold text-muted-foreground uppercase tracking-widest mt-1">{title}</div>
     </div>
   );
 }

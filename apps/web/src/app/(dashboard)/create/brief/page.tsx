@@ -227,17 +227,17 @@ export default function BriefBuilderPage() {
     <div className="mx-auto max-w-7xl space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
-          <Link href={backHref} className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-white dark:hover:text-white">
+          <Link href={backHref} className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground dark:hover:text-white">
             <ArrowLeft className="h-4 w-4" /> Back
           </Link>
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
                 {briefId ? 'Edit project brief' : 'Project brief composer'}
               </h1>
               <Badge className={badgeClassMap[formData.status]}>{formatStatus(formData.status)}</Badge>
             </div>
-            <p className="mt-2 text-gray-500 dark:text-gray-400">
+            <p className="mt-2 text-muted-foreground">
               Turn project and brand context into execution-ready direction before content generation starts doing jazz hands.
             </p>
           </div>
@@ -259,7 +259,7 @@ export default function BriefBuilderPage() {
           <div className="grid gap-6 md:grid-cols-2">
             <Field label="Objective" required>
               <textarea
-                className="min-h-[120px] w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="min-h-[120px] w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none ring-0 transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.objective}
                 onChange={(event) => updateField(setFormData, 'objective', event.target.value)}
                 placeholder="What business outcome should this brief drive?"
@@ -268,7 +268,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Audience" required>
               <textarea
-                className="min-h-[120px] w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="min-h-[120px] w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none ring-0 transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.audience}
                 onChange={(event) => updateField(setFormData, 'audience', event.target.value)}
                 placeholder="Who should this message persuade or activate?"
@@ -277,7 +277,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Platform" required>
               <select
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.platform}
                 onChange={(event) => updateField(setFormData, 'platform', event.target.value as BriefPlatform)}
               >
@@ -291,7 +291,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Format">
               <select
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.format}
                 onChange={(event) => updateField(setFormData, 'format', event.target.value as BriefFormat)}
               >
@@ -306,7 +306,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Primary CTA" required>
               <input
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.cta}
                 onChange={(event) => updateField(setFormData, 'cta', event.target.value)}
                 placeholder="Book a discovery call"
@@ -315,7 +315,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Business goal" required>
               <input
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.businessGoal}
                 onChange={(event) => updateField(setFormData, 'businessGoal', event.target.value)}
                 placeholder="Generate qualified pipeline"
@@ -324,7 +324,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Tone">
               <input
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.tone}
                 onChange={(event) => updateField(setFormData, 'tone', event.target.value)}
                 placeholder="Confident, sharp, human"
@@ -333,7 +333,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Content type" required>
               <select
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.contentType}
                 onChange={(event) => updateField(setFormData, 'contentType', event.target.value as BriefContentType)}
               >
@@ -345,7 +345,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Campaign theme">
               <input
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.campaignTheme}
                 onChange={(event) => updateField(setFormData, 'campaignTheme', event.target.value)}
                 placeholder="Authority through measurable brand systems"
@@ -354,7 +354,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Workflow status">
               <select
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.status}
                 onChange={(event) => updateField(setFormData, 'status', event.target.value as BriefStatus)}
               >
@@ -366,7 +366,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Deliverables">
               <textarea
-                className="min-h-[120px] w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="min-h-[120px] w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none ring-0 transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.deliverablesText}
                 onChange={(event) => updateField(setFormData, 'deliverablesText', event.target.value)}
                 placeholder={'One deliverable per line\nLinkedIn thought-leadership post\nExecutive carousel'}
@@ -375,7 +375,7 @@ export default function BriefBuilderPage() {
 
             <Field label="Constraints">
               <textarea
-                className="min-h-[120px] w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none ring-0 transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                className="min-h-[120px] w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none ring-0 transition focus:border-primary border-border bg-background text-foreground"
                 value={formData.constraintsText}
                 onChange={(event) => updateField(setFormData, 'constraintsText', event.target.value)}
                 placeholder={'One constraint per line\nAvoid unsupported claims\nMention implementation timeline'}
@@ -386,8 +386,8 @@ export default function BriefBuilderPage() {
 
         <div className="space-y-6">
           <Card className="p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500">Workflow context</h2>
-            <div className="mt-4 space-y-4 text-sm text-gray-600 dark:text-gray-300">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Workflow context</h2>
+            <div className="mt-4 space-y-4 text-sm text-muted-foreground text-foreground">
               <ContextRow icon={<FolderKanban className="h-4 w-4" />} label="Project" value={project?.name || 'Standalone brief'} href={projectId ? `/projects/${projectId}` : undefined} />
               <ContextRow icon={<Building2 className="h-4 w-4" />} label="Client" value={project?.customer?.name || 'Not linked'} href={project?.customer ? `/settings/clients/${project.customer.id}` : undefined} />
               <ContextRow icon={<Sparkles className="h-4 w-4" />} label="Brand" value={linkedBrand?.name || 'No linked brand yet'} href={linkedBrand ? `/intelligence/brands/${linkedBrand.id}` : projectId ? `/intelligence/brands/analyse?projectId=${projectId}${project?.customerId ? `&customerId=${project.customerId}` : ''}` : undefined} />
@@ -396,28 +396,28 @@ export default function BriefBuilderPage() {
 
           <Card className="p-6">
             <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-brand-600" />
-              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500">Brief readiness</h2>
+              <Target className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Brief readiness</h2>
             </div>
             <div className="mt-4 space-y-3">
               {completionItems.map((item) => (
-                <div key={item.label} className="flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-3 dark:border-gray-800">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{item.label}</span>
+                <div key={item.label} className="flex items-center justify-between rounded-xl border border-border/60 px-4 py-3 border-border">
+                  <span className="text-sm text-foreground">{item.label}</span>
                   {item.ready ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <span className="text-xs font-bold uppercase tracking-widest text-amber-500">Needed</span>}
                 </div>
               ))}
             </div>
-            <div className="mt-4 rounded-xl bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300">
+            <div className="mt-4 rounded-xl bg-surface-1 bg-background px-4 py-3 text-sm text-muted-foreground bg-background text-foreground">
               {readyCount}/{completionItems.length} delivery inputs ready.
             </div>
           </Card>
 
           <Card className="p-6">
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-brand-600" />
-              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500">Prefill notes</h2>
+              <FileText className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Prefill notes</h2>
             </div>
-            <ul className="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
+            <ul className="mt-4 space-y-3 text-sm text-muted-foreground text-foreground">
               <li>Project context seeds the objective and theme.</li>
               <li>Client + linked brand fill audience, tone, and CTA hints.</li>
               <li>Status keeps handoff clean from draft to approval.</li>
@@ -528,15 +528,15 @@ function ContextRow({
   href?: string;
 }) {
   const content = (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-3 dark:border-gray-800">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 px-4 py-3 border-border">
       <div className="flex items-center gap-3">
-        <div className="text-brand-600">{icon}</div>
+        <div className="text-primary">{icon}</div>
         <div>
-          <div className="text-xs font-bold uppercase tracking-widest text-gray-400">{label}</div>
-          <div className="text-sm font-medium text-gray-900 dark:text-white">{value}</div>
+          <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</div>
+          <div className="text-sm font-medium text-foreground">{value}</div>
         </div>
       </div>
-      {href ? <span className="text-xs font-semibold text-brand-600">Open</span> : null}
+      {href ? <span className="text-xs font-semibold text-primary">Open</span> : null}
     </div>
   );
 
@@ -556,7 +556,7 @@ function Field({
 }) {
   return (
     <label className="space-y-2">
-      <span className="text-xs font-bold uppercase tracking-widest text-gray-500">
+      <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
         {label}
         {required ? ' *' : ''}
       </span>
@@ -566,7 +566,7 @@ function Field({
 }
 
 const badgeClassMap: Record<BriefStatus, string> = {
-  draft: 'bg-gray-100 text-gray-700',
+  draft: 'bg-surface-2 text-foreground',
   in_review: 'bg-amber-50 text-amber-700',
   approved: 'bg-emerald-50 text-emerald-700',
 };

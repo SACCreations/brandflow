@@ -68,8 +68,8 @@ export default function SourcesTable() {
 
   if (isLoading) {
     return (
-      <div className="flex h-40 items-center justify-center border border-gray-200 dark:border-gray-800 rounded-2xl bg-white dark:bg-gray-900 mt-8">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
+      <div className="flex h-40 items-center justify-center border border-border rounded-2xl bg-background mt-8">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
@@ -85,14 +85,14 @@ export default function SourcesTable() {
   }
 
   return (
-    <div className="mt-8 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900">
-      <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Active Knowledge Sources</h3>
+    <div className="mt-8 rounded-2xl border border-border bg-background border-border bg-background">
+      <div className="p-6 border-b border-border/60 flex items-center justify-between">
+        <h3 className="text-lg font-bold text-foreground">Active Knowledge Sources</h3>
         <div className="flex gap-2">
           <button 
             onClick={() => syncAllMutation.mutate()} 
             disabled={syncAllMutation.isPending} 
-            className="flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-surface-3 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-surface-3 dark:hover:bg-gray-700 disabled:opacity-50"
             title="Re-sync all knowledge sources"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${syncAllMutation.isPending ? 'animate-spin' : ''}`} />
@@ -100,7 +100,7 @@ export default function SourcesTable() {
           </button>
           <button 
             onClick={() => refetch()} 
-            className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="rounded-lg p-1.5 text-muted-foreground hover:text-gray-600 dark:hover:text-gray-200 hover:bg-surface-2 dark:hover:bg-surface-1 transition-colors"
             title="Refresh table"
           >
             <RefreshCw className="h-4 w-4" />
@@ -110,30 +110,30 @@ export default function SourcesTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/20">
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Source</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Status</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Entries</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Health</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Trust</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Last Sync</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 text-right">Actions</th>
+            <tr className="border-b border-border/60 bg-surface-1 dark:bg-gray-950/50 bg-surface-2/20">
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Source</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Entries</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Health</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Trust</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Last Sync</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
             {sources.map((source: any) => (
-              <tr key={source.id} className="group transition-colors hover:bg-gray-50 dark:bg-gray-950/50 dark:hover:bg-gray-800/30">
+              <tr key={source.id} className="group transition-colors hover:bg-surface-1 dark:bg-gray-950/50 dark:hover:bg-surface-1/30">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-muted-foreground bg-surface-2 text-muted-foreground">
                       {source.type === 'url' ? <Globe className="h-5 w-5" /> :
                        source.type === 'pdf' ? <FileText className="h-5 w-5" /> :
                        source.type === 'api' ? <LinkIcon className="h-5 w-5" /> :
                        <FileText className="h-5 w-5" />}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{source.name}</p>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono">{source.sourceUrl}</p>
+                      <p className="font-semibold text-foreground">{source.name}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono">{source.sourceUrl}</p>
                     </div>
                   </div>
                 </td>
@@ -154,18 +154,18 @@ export default function SourcesTable() {
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-black">
+                <td className="px-6 py-4 text-sm text-foreground font-black">
                   {source._count?.entries || 0}
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
-                    <div className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                    <div className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-3">
                       <div 
                         className={`h-full ${source.healthScore > 80 ? 'bg-emerald-500' : source.healthScore > 50 ? 'bg-amber-500' : 'bg-red-500'}`}
                         style={{ width: `${source.healthScore || 85}%` }}
                       />
                     </div>
-                    <span className="text-[10px] font-bold text-gray-500">{source.healthScore || 85}%</span>
+                    <span className="text-[10px] font-bold text-muted-foreground">{source.healthScore || 85}%</span>
                   </div>
                 </td>
                 <td className="px-6 py-4">
@@ -178,7 +178,7 @@ export default function SourcesTable() {
                     {source.trustLevel || 'high'}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                <td className="px-6 py-4 text-[10px] font-medium text-muted-foreground">
                   {source.lastIngested ? format(new Date(source.lastIngested), 'MMM d, HH:mm') : 'Never'}
                 </td>
                 <td className="px-6 py-4 text-right">
@@ -187,13 +187,13 @@ export default function SourcesTable() {
                       onClick={() => resyncMutation.mutate(source.id)}
                       disabled={resyncMutation.isPending || !['url', 'api', 'manual'].includes(source.type)}
                       title={!['url', 'api', 'manual'].includes(source.type) ? "Cannot re-sync files without re-uploading" : "Re-sync"}
-                      className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 disabled:opacity-50"
+                      className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-gray-600 dark:hover:bg-surface-1 disabled:opacity-50"
                     >
                       <RefreshCw className={`h-4 w-4 ${resyncMutation.isPending && resyncMutation.variables === source.id ? 'animate-spin' : ''}`} />
                     </button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                        <button className="rounded-lg p-2 text-muted-foreground hover:bg-surface-2 dark:hover:bg-surface-1 transition-colors">
                           <MoreVertical className="h-4 w-4" />
                         </button>
                       </DropdownMenuTrigger>
@@ -222,11 +222,11 @@ export default function SourcesTable() {
               <tr>
                 <td colSpan={7} className="px-6 py-20 text-center">
                   <div className="flex flex-col items-center justify-center gap-3">
-                    <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-3xl flex items-center justify-center text-gray-300">
+                    <div className="w-16 h-16 bg-surface-2 rounded-3xl flex items-center justify-center text-muted-foreground">
                       <Database className="w-8 h-8" />
                     </div>
-                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">No Knowledge Sources</h3>
-                    <p className="text-xs text-gray-500 max-w-xs mx-auto">Start by connecting a website or uploading a brand guideline PDF.</p>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground">No Knowledge Sources</h3>
+                    <p className="text-xs text-muted-foreground max-w-xs mx-auto">Start by connecting a website or uploading a brand guideline PDF.</p>
                   </div>
                 </td>
               </tr>

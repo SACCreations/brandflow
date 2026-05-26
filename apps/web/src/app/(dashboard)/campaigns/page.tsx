@@ -147,7 +147,7 @@ export default function CampaignsPage() {
   if (isLoading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -159,7 +159,7 @@ export default function CampaignsPage() {
         <h2 className="text-xl font-bold">Failed to load campaigns</h2>
         <button 
           onClick={() => queryClient.invalidateQueries({ queryKey: ['campaigns'] })}
-          className="rounded-xl bg-brand-600 px-6 py-2 text-sm font-bold text-white"
+          className="rounded-xl bg-primary px-6 py-2 text-sm font-bold text-foreground"
         >
           Try Again
         </button>
@@ -172,12 +172,12 @@ export default function CampaignsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Campaign Management</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">Organize your brand strategy, content, and distribution in one place.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Campaign Management</h1>
+          <p className="mt-2 text-muted-foreground">Organize your brand strategy, content, and distribution in one place.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
+          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
         >
           <Plus className="h-4 w-4" /> New Campaign
         </button>
@@ -185,31 +185,31 @@ export default function CampaignsPage() {
 
 
       {/* Tabs & Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border/60 pb-4 border-border">
         <div className="flex items-center gap-6">
           <button 
             onClick={() => setActiveTab('active')}
-            className={`text-sm font-bold transition-all ${activeTab === 'active' ? 'text-brand-600 border-b-2 border-brand-600 pb-4 -mb-4' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`text-sm font-bold transition-all ${activeTab === 'active' ? 'text-primary border-b-2 border-brand-600 pb-4 -mb-4' : 'text-muted-foreground hover:text-gray-600'}`}
           >
             Active Campaigns
           </button>
           <button 
             onClick={() => setActiveTab('archived')}
-            className={`text-sm font-bold transition-all ${activeTab === 'archived' ? 'text-brand-600 border-b-2 border-brand-600 pb-4 -mb-4' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`text-sm font-bold transition-all ${activeTab === 'archived' ? 'text-primary border-b-2 border-brand-600 pb-4 -mb-4' : 'text-muted-foreground hover:text-gray-600'}`}
           >
             Archived
           </button>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input 
               type="text" 
               placeholder="Search campaigns..." 
-              className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
+              className="rounded-xl border border-border bg-background pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-background"
             />
           </div>
-          <button className="rounded-xl border border-gray-200 dark:border-gray-800 p-2 text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800">
+          <button className="rounded-xl border border-border p-2 text-muted-foreground hover:bg-surface-1 bg-background border-border dark:hover:bg-surface-1">
             <Filter className="h-5 w-5" />
           </button>
         </div>

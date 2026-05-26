@@ -35,7 +35,7 @@ function CardsSkeleton() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
+          className="rounded-2xl border border-border bg-background p-6 border-border bg-background"
         >
           <div className="mb-4 flex items-center gap-3">
             <Skeleton className="h-10 w-10 rounded-xl" />
@@ -54,8 +54,8 @@ function CardsSkeleton() {
 
 function TableSkeleton() {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-      <div className="border-b border-gray-100 p-4 dark:border-gray-800">
+    <div className="rounded-2xl border border-border bg-background border-border bg-background">
+      <div className="border-b border-border/60 p-4 border-border">
         <div className="flex gap-4">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-4 w-24" />
@@ -64,7 +64,7 @@ function TableSkeleton() {
         </div>
       </div>
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 border-b border-gray-50 p-4 dark:border-gray-800">
+        <div key={i} className="flex items-center gap-4 border-b border-gray-50 p-4 border-border">
           <Skeleton className="h-8 w-8 rounded-full" />
           <Skeleton className="h-4 w-40" />
           <Skeleton className="h-4 w-24" />
@@ -79,11 +79,11 @@ function TableSkeleton() {
 function ChartSkeleton() {
   return (
     <div className="grid gap-6 lg:grid-cols-12">
-      <div className="lg:col-span-8 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+      <div className="lg:col-span-8 rounded-2xl border border-border bg-background p-6 border-border bg-background">
         <Skeleton className="mb-4 h-5 w-40" />
         <Skeleton className="h-72 w-full rounded-xl" />
       </div>
-      <div className="lg:col-span-4 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+      <div className="lg:col-span-4 rounded-2xl border border-border bg-background p-6 border-border bg-background">
         <Skeleton className="mb-4 h-5 w-32" />
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -103,7 +103,7 @@ function ChartSkeleton() {
 
 function FormSkeleton() {
   return (
-    <div className="max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900">
+    <div className="max-w-2xl rounded-2xl border border-border bg-background p-8 border-border bg-background">
       <div className="space-y-6">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="space-y-2">
@@ -123,7 +123,7 @@ function ListSkeleton() {
       {Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900"
+          className="flex items-center gap-4 rounded-xl border border-border bg-background p-4 border-border bg-background"
         >
           <Skeleton className="h-12 w-12 rounded-xl" />
           <div className="flex-1 space-y-2">

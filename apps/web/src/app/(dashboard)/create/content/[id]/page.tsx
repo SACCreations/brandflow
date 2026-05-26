@@ -263,7 +263,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
   if (isLoading || !data) {
     return (
       <div className="flex h-[420px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -289,22 +289,22 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
     <ErrorBoundary backHref={backHref}>
     <div className="flex h-[calc(100vh-120px)] flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Strategy Brief Context Bar */}
-      <div className="flex items-center gap-6 rounded-2xl bg-gray-900 px-6 py-3 text-white dark:bg-brand-500/10 dark:text-brand-400">
+      <div className="flex items-center gap-6 rounded-2xl bg-background px-6 py-3 text-foreground dark:bg-primary/100/10 dark:text-brand-400">
         <div className="flex items-center gap-2">
           <Target className="h-4 w-4 text-brand-400" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Objective:</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Objective:</span>
           <span className="text-xs font-semibold">{data.brief?.objective || 'No linked brief'}</span>
         </div>
         <div className="h-4 w-px bg-gray-700"></div>
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-brand-400" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Audience:</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Audience:</span>
           <span className="text-xs font-semibold">{data.brief?.audience || 'Not set'}</span>
         </div>
         <div className="h-4 w-px bg-gray-700"></div>
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-amber-400" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">CTA:</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">CTA:</span>
           <span className="text-xs font-semibold underline underline-offset-4">{data.brief?.cta || 'Not set'}</span>
         </div>
         {data.brief && (
@@ -315,14 +315,14 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Editor Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pb-6 dark:border-gray-800 dark:bg-transparent">
+      <div className="flex items-center justify-between border-b border-border bg-background pb-6 border-border dark:bg-transparent">
         <div className="flex items-center gap-4">
-          <Link href={backHref} className="rounded-xl border border-gray-200 dark:border-gray-800 p-2 text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800">
+          <Link href={backHref} className="rounded-xl border border-border p-2 text-muted-foreground hover:bg-surface-1 bg-background border-border dark:hover:bg-surface-1">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">{data.campaign?.name || data.brand.name}</h1>
-            <p className="text-xs text-gray-500 flex items-center gap-2">
+            <h1 className="text-xl font-bold text-foreground">{data.campaign?.name || data.brand.name}</h1>
+            <p className="text-xs text-muted-foreground flex items-center gap-2">
               <span className={`flex h-2 w-2 rounded-full ${data.status === 'approved' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
               {data.status} • {data.platform} • {data.type}
             </p>
@@ -333,7 +333,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending || !isDirty}
             aria-label="Save content"
-            className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:bg-gray-950 disabled:opacity-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-surface-1 bg-background disabled:opacity-50 border-border text-foreground dark:hover:bg-surface-1"
           >
             {saveMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -353,21 +353,21 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
             <button
               onClick={() => requestApprovalMutation.mutate()}
               disabled={requestApprovalMutation.isPending}
-              className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 disabled:opacity-60"
+              className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 disabled:opacity-60"
             >
               {requestApprovalMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               {workflowButtonLabel}
             </button>
           ) : data.status === 'in_review' ? (
-            <Link href="/review" className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700">
+            <Link href="/review" className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700">
               <ShieldCheck className="h-4 w-4" /> {workflowButtonLabel}
             </Link>
           ) : (
-            <Link href="/publish" className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700">
+            <Link href="/publish" className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700">
               <Calendar className="h-4 w-4" /> {workflowButtonLabel}
             </Link>
           )}
-          <button className="rounded-xl border border-gray-200 dark:border-gray-800 p-2 text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800">
+          <button className="rounded-xl border border-border p-2 text-muted-foreground hover:bg-surface-1 bg-background border-border dark:hover:bg-surface-1">
             <MoreVertical className="h-5 w-5" />
           </button>
         </div>
@@ -379,23 +379,23 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
 
 
         {/* Editor Area */}
-        <div className="lg:col-span-8 flex flex-col rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+        <div className="lg:col-span-8 flex flex-col rounded-2xl border border-border bg-background border-border bg-background overflow-hidden">
 
           
           <textarea 
             aria-label="Content body editor"
-            className="flex-1 w-full p-8 text-lg bg-transparent border-none focus:ring-0 text-gray-800 dark:text-gray-200 font-medium leading-relaxed resize-none"
+            className="flex-1 w-full p-8 text-lg bg-transparent border-none focus:ring-0 text-foreground font-medium leading-relaxed resize-none"
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
 
-          <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/30 flex items-center justify-between dark:border-gray-800">
-            <div className="flex gap-4 text-xs font-bold text-gray-400">
+          <div className="p-4 border-t border-border/60 bg-surface-1 dark:bg-gray-950/30 flex items-center justify-between border-border">
+            <div className="flex gap-4 text-xs font-bold text-muted-foreground">
               <span>Words: {content.trim() ? content.trim().split(/\s+/).length : 0}</span>
               <span>Reading time: {Math.max(1, Math.ceil((content.trim() ? content.trim().split(/\s+/).length : 0) / 200))}m</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Platform:</span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Platform:</span>
               <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-500/10">{data.platform}</span>
             </div>
           </div>
@@ -412,8 +412,8 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
           />
 
           <Card className="p-5">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500">Workflow state</h3>
-            <div className="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Workflow state</h3>
+            <div className="mt-4 space-y-3 text-sm text-muted-foreground text-foreground">
               <WorkflowRow label="Content status" value={data.status} icon={<Clock className="h-4 w-4" />} />
               <WorkflowRow label="Latest approval" value={latestApproval ? latestApproval.status : 'Not requested'} icon={<ShieldCheck className="h-4 w-4" />} />
               <WorkflowRow label="Schedules" value={hasSchedules ? `${data.schedules.length} active` : 'Not scheduled'} icon={<Calendar className="h-4 w-4" />} />
@@ -429,7 +429,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
             <h3 className="text-sm font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-indigo-500" /> Creative Assets
             </h3>
-            <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">
+            <p className="mt-2 text-xs text-muted-foreground dark:text-slate-400">
               Need a brand-aligned visual banner or post graphic? Create one instantly with AI.
             </p>
             <Link 
@@ -443,15 +443,15 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
           </Card>
 
           <Card className="p-5">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500">Scheduling handoff</h3>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Scheduling handoff</h3>
 
             {canSchedule ? (
               socialAccounts.length > 0 ? (
                 <div className="mt-4 space-y-4">
                   <label className="block space-y-2">
-                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Social account</span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Social account</span>
                     <select
-                      className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
                       value={selectedSocialAccountId}
                       onChange={(event) => setSelectedSocialAccountId(event.target.value)}
                     >
@@ -464,10 +464,10 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                   </label>
 
                   <label className="block space-y-2">
-                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Publish at</span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Publish at</span>
                     <input
                       type="datetime-local"
-                      className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition focus:border-brand-500 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary border-border bg-background text-foreground"
                       value={scheduleAt}
                       min={new Date().toISOString().slice(0, 16)}
                       onChange={(event) => setScheduleAt(event.target.value)}
@@ -484,7 +484,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                   </Button>
                 </div>
               ) : (
-                <div className="mt-4 space-y-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 p-4 text-sm text-gray-500 dark:border-gray-800">
+                <div className="mt-4 space-y-4 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground border-border">
                   <p>Connect a social account before scheduling approved content.</p>
                   <Link href="/publish/social">
                     <Button variant="outline" className="w-full">Connect account</Button>
@@ -492,7 +492,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
                 </div>
               )
             ) : (
-              <div className="mt-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 p-4 text-sm text-gray-500 dark:border-gray-800">
+              <div className="mt-4 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground border-border">
                 {data.status === 'scheduled'
                   ? 'This content is already queued for publishing.'
                   : 'Approve the content before it can move into the scheduler.'}
@@ -500,13 +500,13 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
             )}
 
             {hasSchedules && (
-              <div className="mt-4 space-y-3 border-t border-gray-100 dark:border-gray-800 pt-4 dark:border-gray-800">
+              <div className="mt-4 space-y-3 border-t border-border/60 pt-4 border-border">
                 {data.schedules.map((schedule) => (
-                  <div key={schedule.id} className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 dark:border-gray-800">
+                  <div key={schedule.id} className="rounded-xl border border-border/60 p-4 border-border">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="text-sm font-semibold text-gray-900 dark:text-white">{schedule.socialAccount.name}</div>
-                        <div className="mt-1 text-xs text-gray-500">{new Date(schedule.scheduledAt).toLocaleString()} • {schedule.status}</div>
+                        <div className="text-sm font-semibold text-foreground">{schedule.socialAccount.name}</div>
+                        <div className="mt-1 text-xs text-muted-foreground">{new Date(schedule.scheduledAt).toLocaleString()} • {schedule.status}</div>
                       </div>
                       {schedule.status === 'pending' && (
                         <button 
@@ -536,7 +536,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
 function ToolbarButton({ icon, active }: any) {
   return (
     <button className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-all ${
-      active ? 'bg-brand-600 text-white shadow-lg shadow-brand-500/20' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800'
+      active ? 'bg-primary text-foreground shadow-lg shadow-brand-500/20' : 'text-muted-foreground hover:bg-surface-2 hover:text-gray-600 dark:hover:bg-surface-1'
     }`}>
       {icon}
     </button>
@@ -545,12 +545,12 @@ function ToolbarButton({ icon, active }: any) {
 
 function WorkflowRow({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 dark:border-gray-800 px-4 py-3 dark:border-gray-800">
-      <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-        <span className="text-brand-600">{icon}</span>
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 px-4 py-3 border-border">
+      <div className="flex items-center gap-3 text-foreground">
+        <span className="text-primary">{icon}</span>
         <span>{label}</span>
       </div>
-      <span className="text-xs font-bold uppercase tracking-widest text-gray-400">{value}</span>
+      <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{value}</span>
     </div>
   );
 }

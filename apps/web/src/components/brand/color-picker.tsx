@@ -25,22 +25,22 @@ export function ColorPicker({ value = '#000000', onChange, label, description }:
 
   return (
     <div className="space-y-2">
-      {label && <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>}
+      {label && <label className="text-sm font-medium text-foreground">{label}</label>}
       <div className="flex gap-3">
         <div className="relative shrink-0">
           <input
             type="color"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="w-12 h-12 rounded-lg border border-gray-200 dark:border-gray-800 cursor-pointer p-0 overflow-hidden"
+            className="w-12 h-12 rounded-lg border border-border cursor-pointer p-0 overflow-hidden"
           />
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-            <Pipette className="w-4 h-4 text-white drop-shadow-md mix-blend-difference" />
+            <Pipette className="w-4 h-4 text-foreground drop-shadow-md mix-blend-difference" />
           </div>
         </div>
         <div className="flex-1 space-y-1">
           <div className="relative">
-            <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input 
               value={value.replace('#', '')}
               onChange={(e) => {
@@ -53,13 +53,13 @@ export function ColorPicker({ value = '#000000', onChange, label, description }:
               className="pl-8 uppercase font-mono h-12"
             />
           </div>
-          <div className="flex justify-between text-[10px] text-gray-400 font-mono px-1">
+          <div className="flex justify-between text-[10px] text-muted-foreground font-mono px-1">
             <span>{getRgb(value)}</span>
-            <span className="text-brand-600 font-bold">Contrast OK</span>
+            <span className="text-primary font-bold">Contrast OK</span>
           </div>
         </div>
       </div>
-      {description && <p className="text-[11px] text-gray-500 italic">{description}</p>}
+      {description && <p className="text-[11px] text-muted-foreground italic">{description}</p>}
     </div>
   );
 }

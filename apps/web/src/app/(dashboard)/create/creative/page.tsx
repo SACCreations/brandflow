@@ -314,18 +314,18 @@ export default function CreativeBuilderPage() {
       
       {/* ────────────────── TOP CONTROL BAR ────────────────── */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-32 bg-brand-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-80 h-32 bg-primary/100/10 rounded-full blur-3xl" />
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[10px] font-black tracking-widest px-2.5 py-1 rounded-md uppercase">
+              <span className="bg-primary/100/10 border border-primary/20 text-brand-400 text-[10px] font-black tracking-widest px-2.5 py-1 rounded-md uppercase">
                 Enterprise AI Studio
               </span>
               <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/10">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Active Tenant
               </span>
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white">BrandFlow Creative Studio</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">BrandFlow Creative Studio</h1>
             <p className="mt-1.5 text-slate-400 text-xs font-medium max-w-xl">
               Construct high-fidelity layouts, inject dynamic brand tokens, run identity compliance vision gates, and manage collaboration review.
             </p>
@@ -337,7 +337,7 @@ export default function CreativeBuilderPage() {
               <select 
                 value={selectedBrand} 
                 onChange={(e) => setSelectedBrand(e.target.value)}
-                className="bg-slate-950 border border-slate-800 text-slate-300 text-xs font-bold rounded-xl px-4 py-2.5 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 cursor-pointer outline-none transition-all"
+                className="bg-slate-950 border border-slate-800 text-slate-300 text-xs font-bold rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary/20 cursor-pointer outline-none transition-all"
               >
                 <option value="BrandFlow Corporate">BrandFlow Corporate</option>
                 <option value="SaaSify Global">SaaSify Global Pro</option>
@@ -364,7 +364,7 @@ export default function CreativeBuilderPage() {
           {/* STEP 1: CONTENT SOURCE SELECTION */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
             <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <span className="h-5 w-5 bg-brand-500/10 text-brand-400 rounded-lg flex items-center justify-center font-bold text-[10px]">1</span>
+              <span className="h-5 w-5 bg-primary/100/10 text-brand-400 rounded-lg flex items-center justify-center font-bold text-[10px]">1</span>
               Content Source Selection
             </h3>
             
@@ -394,7 +394,7 @@ export default function CreativeBuilderPage() {
                 <div className="space-y-2">
                   <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Manual Marketing Copy</label>
                   <textarea 
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs text-slate-300 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-all"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs text-slate-300 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all"
                     rows={3}
                     placeholder="Type customized promotional text blocks..."
                     value={marketingText}
@@ -427,8 +427,8 @@ export default function CreativeBuilderPage() {
               {contentSource === 'campaign' && (
                 <div className="space-y-2 bg-slate-950 border border-slate-850 p-3 rounded-xl">
                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Linked Campaign Brief</span>
-                  <div className="border-l-2 border-brand-500 pl-3">
-                    <h5 className="text-xs font-bold text-white">No Linked Campaign</h5>
+                  <div className="border-l-2 border-primary pl-3">
+                    <h5 className="text-xs font-bold text-foreground">No Linked Campaign</h5>
                     <p className="text-[11px] text-slate-400 mt-1">Select a campaign to import briefs.</p>
                   </div>
                 </div>
@@ -457,7 +457,7 @@ export default function CreativeBuilderPage() {
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-2">
-                <span className="h-5 w-5 bg-brand-500/10 text-brand-400 rounded-lg flex items-center justify-center font-bold text-[10px]">2</span>
+                <span className="h-5 w-5 bg-primary/100/10 text-brand-400 rounded-lg flex items-center justify-center font-bold text-[10px]">2</span>
                 Brand Visual Swatches
               </h3>
               <span className="text-[9px] text-slate-400 uppercase font-black">Connected</span>
@@ -477,7 +477,7 @@ export default function CreativeBuilderPage() {
                       style={{ backgroundColor: color }}
                       title={`Inject ${color}`}
                     >
-                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 bg-slate-950 text-[8px] text-white px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity font-mono pointer-events-none mb-1">
+                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 bg-slate-950 text-[8px] text-foreground px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity font-mono pointer-events-none mb-1">
                         {color}
                       </span>
                     </button>
@@ -497,7 +497,7 @@ export default function CreativeBuilderPage() {
                           return l;
                         }));
                       }}
-                      className="h-7 w-12 border border-slate-800 rounded-md bg-slate-950 p-1 flex items-center justify-center hover:border-brand-500 transition-all overflow-hidden"
+                      className="h-7 w-12 border border-slate-800 rounded-md bg-slate-950 p-1 flex items-center justify-center hover:border-primary transition-all overflow-hidden"
                     >
                       <img src={logo.url} alt={logo.name} className="h-full object-contain filter brightness-150" />
                     </button>
@@ -509,7 +509,7 @@ export default function CreativeBuilderPage() {
             <div className="rounded-xl border border-emerald-500/10 bg-emerald-500/5 p-3 flex items-center gap-2.5">
               <Shield className="h-4 w-4 text-emerald-400 flex-shrink-0" />
               <div className="text-[10px] text-emerald-400/80 font-bold leading-normal">
-                Visual alignment engine initialized. Design tokens, fonts and safety parameters connected to <span className="text-white font-extrabold">{selectedBrand}</span>.
+                Visual alignment engine initialized. Design tokens, fonts and safety parameters connected to <span className="text-foreground font-extrabold">{selectedBrand}</span>.
               </div>
             </div>
           </div>
@@ -517,7 +517,7 @@ export default function CreativeBuilderPage() {
           {/* STEP 3 & 4: IMAGE CATEGORY & GENERATION SETTINGS */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
             <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-2">
-              <span className="h-5 w-5 bg-brand-500/10 text-brand-400 rounded-lg flex items-center justify-center font-bold text-[10px]">3</span>
+              <span className="h-5 w-5 bg-primary/100/10 text-brand-400 rounded-lg flex items-center justify-center font-bold text-[10px]">3</span>
               Image Settings & Category
             </h3>
 
@@ -527,7 +527,7 @@ export default function CreativeBuilderPage() {
                 <select 
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs font-bold rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none cursor-pointer"
+                  className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs font-bold rounded-xl px-3 py-2.5 focus:border-primary outline-none cursor-pointer"
                 >
                   {categories.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -547,7 +547,7 @@ export default function CreativeBuilderPage() {
                       onClick={() => setSelectedFormat(f.id)}
                       className={`flex items-center justify-between border rounded-xl p-2.5 transition-all text-left ${
                         selectedFormat === f.id 
-                          ? 'border-brand-500 bg-brand-500/5 ring-1 ring-brand-500 text-white' 
+                          ? 'border-primary bg-primary/100/5 ring-1 ring-primary/20 text-foreground' 
                           : 'border-slate-800 bg-slate-950 hover:border-slate-700 text-slate-400 hover:text-slate-350'
                       }`}
                     >
@@ -584,7 +584,7 @@ export default function CreativeBuilderPage() {
                       onClick={() => setStyleMood(m.id)}
                       className={`text-[9px] font-black py-2 rounded-lg border text-center transition-all ${
                         styleMood === m.id 
-                          ? 'border-brand-500 bg-brand-500/10 text-brand-400' 
+                          ? 'border-primary bg-primary/100/10 text-brand-400' 
                           : 'border-slate-850 bg-slate-950 text-slate-500 hover:text-slate-350'
                       }`}
                     >
@@ -614,9 +614,9 @@ export default function CreativeBuilderPage() {
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Safe Gen Mode</span>
                   <button 
                     onClick={() => setSafeMode(!safeMode)}
-                    className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors ${safeMode ? 'bg-brand-500' : 'bg-slate-800'}`}
+                    className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors ${safeMode ? 'bg-primary' : 'bg-slate-800'}`}
                   >
-                    <span className={`inline-block h-3 w-3 transform rounded-full bg-white dark:bg-gray-900 transition-transform ${safeMode ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                    <span className={`inline-block h-3 w-3 transform rounded-full bg-background transition-transform ${safeMode ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
                   </button>
                 </div>
 
@@ -637,7 +637,7 @@ export default function CreativeBuilderPage() {
               <button 
                 onClick={triggerImageGeneration}
                 disabled={!marketingText || isGenerating}
-                className="w-full rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 py-3 text-xs font-bold text-white shadow-lg shadow-brand-500/10 disabled:opacity-40 transition-all flex items-center justify-center gap-2 group"
+                className="w-full rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 py-3 text-xs font-bold text-foreground shadow-lg shadow-brand-500/10 disabled:opacity-40 transition-all flex items-center justify-center gap-2 group"
               >
                 {isGenerating ? (
                   <>
@@ -670,7 +670,7 @@ export default function CreativeBuilderPage() {
                     Image Generation Pipeline
                   </span>
                 </div>
-                <span className="text-[10px] font-mono font-bold text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
+                <span className="text-[10px] font-mono font-bold text-brand-400 bg-primary/100/10 px-2 py-0.5 rounded border border-primary/20">
                   {jobStage}
                 </span>
               </div>
@@ -695,12 +695,12 @@ export default function CreativeBuilderPage() {
             {/* Editor Top Bar */}
             <div className="flex flex-wrap items-center justify-between border-b border-slate-850 px-5 py-3.5 bg-slate-900/60 backdrop-blur-md">
               <div className="flex items-center gap-4">
-                <span className="text-xs font-extrabold text-white flex items-center gap-1.5">
+                <span className="text-xs font-extrabold text-foreground flex items-center gap-1.5">
                   <Layout className="h-3.5 w-3.5 text-slate-400" /> Creative Canvas Studio
                 </span>
                 <div className="flex items-center gap-1 bg-slate-950 border border-slate-850 px-2.5 py-1 rounded-lg text-[9px] font-bold text-slate-400">
                   <span>SCALE:</span>
-                  <span className="text-white">100% (Render downscale)</span>
+                  <span className="text-foreground">100% (Render downscale)</span>
                 </div>
               </div>
 
@@ -758,7 +758,7 @@ export default function CreativeBuilderPage() {
                   onClick={() => setSnappingGuides(!snappingGuides)}
                   className={`p-1.5 rounded-lg border transition-all text-[9px] font-bold ${
                     snappingGuides 
-                      ? 'border-brand-500/20 bg-brand-500/10 text-brand-400' 
+                      ? 'border-primary/20 bg-primary/100/10 text-brand-400' 
                       : 'border-slate-850 bg-slate-950 text-slate-500'
                   }`}
                   title="Toggle Snap Guides"
@@ -784,7 +784,7 @@ export default function CreativeBuilderPage() {
                       onClick={() => setSelectedLayerId(layer.id)}
                       className={`flex items-center justify-between p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                         selectedLayerId === layer.id
-                          ? 'border-brand-500 bg-brand-500/5 text-white'
+                          ? 'border-primary bg-primary/100/5 text-foreground'
                           : 'border-slate-850 hover:border-slate-800 bg-slate-950/40 text-slate-400'
                       }`}
                     >
@@ -828,7 +828,7 @@ export default function CreativeBuilderPage() {
                         <label className="text-[9px] font-black text-slate-500 uppercase tracking-wider block">Content Editor</label>
                         <input 
                           type="text"
-                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white outline-none"
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-foreground outline-none"
                           value={currentLayers.find(l => l.id === selectedLayerId)?.content ?? ''}
                           onChange={(e) => handleLayerContentChange(selectedLayerId, e.target.value)}
                         />
@@ -912,7 +912,7 @@ export default function CreativeBuilderPage() {
                         <div 
                           key={layer.id}
                           className={`absolute inset-0 z-0 transition-opacity ${
-                            selectedLayerId === layer.id ? 'ring-2 ring-brand-500/50' : ''
+                            selectedLayerId === layer.id ? 'ring-2 ring-primary/20/50' : ''
                           }`}
                         >
                           <img src={layer.src} alt={layer.name} className="h-full w-full object-cover filter brightness-[0.75]" />
@@ -933,7 +933,7 @@ export default function CreativeBuilderPage() {
                           onClick={(e) => { e.stopPropagation(); setSelectedLayerId(layer.id); }}
                           style={{ left: `${x}px`, top: `${y}px` }}
                           className={`absolute z-20 cursor-move transition-shadow ${
-                            selectedLayerId === layer.id ? 'ring-2 ring-brand-500 p-0.5 bg-slate-950/20' : ''
+                            selectedLayerId === layer.id ? 'ring-2 ring-primary/20 p-0.5 bg-slate-950/20' : ''
                           }`}
                         >
                           <img src={layer.src} alt={layer.name} className="h-8 object-contain filter brightness-125 pointer-events-none" />
@@ -954,11 +954,11 @@ export default function CreativeBuilderPage() {
                           onClick={(e) => { e.stopPropagation(); setSelectedLayerId(layer.id); }}
                           style={{ left: `${x}px`, top: `${y}px`, width: `${layer.width}px` }}
                           className={`absolute z-30 cursor-move p-1 transition-shadow ${
-                            selectedLayerId === layer.id ? 'ring-2 ring-brand-500 bg-slate-950/30 backdrop-blur-[1px]' : ''
+                            selectedLayerId === layer.id ? 'ring-2 ring-primary/20 bg-slate-950/30 backdrop-blur-[1px]' : ''
                           }`}
                         >
                           <h4 
-                            className="font-extrabold leading-tight text-white select-none whitespace-normal tracking-wide"
+                            className="font-extrabold leading-tight text-foreground select-none whitespace-normal tracking-wide"
                             style={{ fontFamily: layer.fontFamily, fontSize: `${layer.fontSize}px`, color: layer.fill }}
                           >
                             {layer.content}
@@ -980,7 +980,7 @@ export default function CreativeBuilderPage() {
                           onClick={(e) => { e.stopPropagation(); setSelectedLayerId(layer.id); }}
                           style={{ left: `${x}px`, top: `${y}px`, width: `${layer.width}px`, height: `${layer.height}px`, backgroundColor: layer.fill }}
                           className={`absolute z-10 cursor-move rounded-md transition-shadow ${
-                            selectedLayerId === layer.id ? 'ring-2 ring-brand-500' : ''
+                            selectedLayerId === layer.id ? 'ring-2 ring-primary/20' : ''
                           } flex items-center justify-center`}
                         >
                           <span className="text-[8px] font-black text-white/50 tracking-wider select-none">CTA BANNER BLOCK</span>
@@ -1001,7 +1001,7 @@ export default function CreativeBuilderPage() {
                             style={{ left: `${comm.x}px`, top: `${comm.y}px`, width: `${comm.width}px`, height: `${comm.height}px` }}
                             className="absolute border-2 border-red-500 bg-red-500/10 z-40 animate-pulse pointer-events-none rounded"
                           >
-                            <span className="absolute -top-5 left-0 bg-red-500 text-[8px] font-extrabold text-white px-1.5 py-0.5 rounded uppercase tracking-wider">
+                            <span className="absolute -top-5 left-0 bg-red-500 text-[8px] font-extrabold text-foreground px-1.5 py-0.5 rounded uppercase tracking-wider">
                               Review Annotation Box
                             </span>
                           </div>
@@ -1033,7 +1033,7 @@ export default function CreativeBuilderPage() {
                 <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-brand-400" /> Compare Generated Variants
                 </h3>
-                <span className="text-[9px] text-brand-400 font-extrabold bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
+                <span className="text-[9px] text-brand-400 font-extrabold bg-primary/100/10 px-2 py-0.5 rounded border border-primary/20">
                   {4 + generatedCount} variants
                 </span>
               </div>
@@ -1052,14 +1052,14 @@ export default function CreativeBuilderPage() {
                     }}
                     className={`group relative aspect-square rounded-xl border-2 overflow-hidden transition-all text-left ${
                       activeVariantIndex === i 
-                        ? 'border-brand-500 ring-2 ring-brand-500/25 scale-[1.02]' 
+                        ? 'border-primary ring-2 ring-primary/20/25 scale-[1.02]' 
                         : 'border-slate-850 hover:border-slate-750 hover:scale-[1.01]'
                     }`}
                   >
                     <img src={variant.url} alt={variant.version} className="absolute inset-0 h-full w-full object-cover filter brightness-[0.75] group-hover:scale-105 transition-transform" />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-2.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-black text-white">{variant.version}</span>
+                        <span className="text-[9px] font-black text-foreground">{variant.version}</span>
                         <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded font-black">{variant.cost}</span>
                       </div>
                     </div>
@@ -1114,7 +1114,7 @@ export default function CreativeBuilderPage() {
                         onClick={() => setApprovalStage(st.id as any)}
                         className={`flex items-center gap-1.5 text-[9px] font-black px-2.5 py-1.5 rounded-lg border transition-all uppercase ${
                           approvalStage === st.id
-                            ? 'border-brand-500 bg-brand-500/10 text-brand-400 font-extrabold'
+                            ? 'border-primary bg-primary/100/10 text-brand-400 font-extrabold'
                             : 'border-transparent text-slate-500 hover:text-slate-350'
                         }`}
                       >
@@ -1139,7 +1139,7 @@ export default function CreativeBuilderPage() {
                           <img src={comm.avatar} alt={comm.user} className="h-5 w-5 rounded-full object-cover" />
                           <div>
                             <div className="flex items-center gap-1.5 leading-none">
-                              <span className="text-[10px] font-black text-white">{comm.user}</span>
+                              <span className="text-[10px] font-black text-foreground">{comm.user}</span>
                               <span className="bg-slate-900 border border-slate-850 text-[8px] font-bold text-slate-400 px-1 py-0.25 rounded uppercase">
                                 {comm.role}
                               </span>
@@ -1187,7 +1187,7 @@ export default function CreativeBuilderPage() {
                 </p>
               </div>
               <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider bg-slate-950 border border-slate-850 px-3 py-1.5 rounded-lg mt-2 md:mt-0">
-                Storage: <span className="text-white font-extrabold">2.4 GB / 10 GB limit</span>
+                Storage: <span className="text-foreground font-extrabold">2.4 GB / 10 GB limit</span>
               </div>
             </div>
 
@@ -1208,9 +1208,9 @@ export default function CreativeBuilderPage() {
 
               <button 
                 onClick={() => alert('CDN Shareable short-lived link generated: https://cdn.brandflow.ai/tenants/123/exports/creative_studio_webp_preview.webp') }
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all shadow-md shadow-emerald-500/10"
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-foreground py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all shadow-md shadow-emerald-500/10"
               >
-                <Share2 className="h-3.5 w-3.5 text-white" /> Get CDN Shareable Link
+                <Share2 className="h-3.5 w-3.5 text-foreground" /> Get CDN Shareable Link
               </button>
             </div>
 

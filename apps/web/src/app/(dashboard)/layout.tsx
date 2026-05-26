@@ -7,7 +7,7 @@ import { ScopeSwitcher } from '@/components/layout/scope-switcher';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="flex h-screen bg-background">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header />

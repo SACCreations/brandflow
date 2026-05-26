@@ -97,12 +97,12 @@ export function GlobalCommandPalette() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="p-0 overflow-hidden sm:max-w-[550px] top-[20%] translate-y-0 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+      <DialogContent className="p-0 overflow-hidden sm:max-w-[550px] top-[20%] translate-y-0 bg-background border-border">
         <DialogTitle className="sr-only">Command Palette</DialogTitle>
         <DialogDescription className="sr-only">Navigate anywhere in BrandFlow</DialogDescription>
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+        <div className="p-4 border-b border-border/60">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               ref={inputRef}
               placeholder="Type a command or search..."
@@ -111,7 +111,7 @@ export function GlobalCommandPalette() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 dark:border-gray-700 dark:bg-gray-800">
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-border bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
               ESC
             </kbd>
           </div>
@@ -123,7 +123,7 @@ export function GlobalCommandPalette() {
                 const cmds = filtered.filter((c) => c.category === category);
                 return (
                   <div key={category}>
-                    <p className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    <p className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                       {category}
                     </p>
                     {cmds.map((cmd) => {
@@ -132,12 +132,12 @@ export function GlobalCommandPalette() {
                         <button
                           key={cmd.id}
                           onClick={() => handleSelect(cmd)}
-                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:text-gray-300 dark:hover:bg-brand-900/20 dark:hover:text-brand-400"
+                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-surface-2"
                         >
-                          <Icon className="h-4 w-4 shrink-0 text-gray-400" />
+                          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
                           {cmd.label}
                           {cmd.shortcut && (
-                            <kbd className="ml-auto text-[10px] text-gray-400">{cmd.shortcut}</kbd>
+                            <kbd className="ml-auto text-[10px] text-muted-foreground">{cmd.shortcut}</kbd>
                           )}
                         </button>
                       );
@@ -147,10 +147,10 @@ export function GlobalCommandPalette() {
               })}
             </div>
           ) : (
-            <div className="py-12 text-center text-sm text-gray-400">No results found</div>
+            <div className="py-12 text-center text-sm text-muted-foreground">No results found</div>
           )}
         </div>
-        <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 px-4 py-2.5 text-[10px] text-gray-400 dark:border-gray-800 dark:bg-gray-800/50">
+        <div className="flex items-center justify-between border-t border-border/60 bg-surface-2 px-4 py-2.5 text-[10px] text-muted-foreground">
           <div className="flex gap-4">
             <span><kbd className="font-bold">↵</kbd> Open</span>
             <span><kbd className="font-bold">↑↓</kbd> Navigate</span>

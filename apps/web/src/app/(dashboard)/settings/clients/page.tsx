@@ -142,7 +142,7 @@ export default function ClientsSettingsPage() {
   if (isLoading) {
     return (
       <div className="flex h-[400px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -151,11 +151,11 @@ export default function ClientsSettingsPage() {
     return (
       <div className="flex h-[400px] flex-col items-center justify-center gap-4 text-center">
         <AlertCircle className="h-12 w-12 text-red-500" />
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Database Connection Error</h2>
-        <p className="text-sm text-gray-500">We couldn't load your client database. Please check your connection and try again.</p>
+        <h2 className="text-xl font-bold text-foreground">Database Connection Error</h2>
+        <p className="text-sm text-muted-foreground">We couldn't load your client database. Please check your connection and try again.</p>
         <button 
           onClick={() => queryClient.invalidateQueries({ queryKey: ['clients'] })}
-          className="rounded-xl bg-gray-100 px-6 py-2 text-sm font-bold text-gray-900 dark:text-white hover:bg-gray-200 dark:bg-gray-800 dark:text-white"
+          className="rounded-xl bg-surface-2 px-6 py-2 text-sm font-bold text-foreground hover:bg-surface-2 text-foreground"
         >
           Try Again
         </button>
@@ -167,19 +167,19 @@ export default function ClientsSettingsPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Client Management</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">Manage your external relationships and customer database.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Client Management</h1>
+          <p className="mt-2 text-muted-foreground">Manage your external relationships and customer database.</p>
         </div>
         <button 
           onClick={() => { resetForm(); setIsModalOpen(true); }}
-          className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
+          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
         >
           <Plus className="h-4 w-4" /> Add New Client
         </button>
       </div>
 
       {/* Grid of Clients */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 dark:border-gray-800 pb-4 dark:border-gray-800">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border/60 pb-4 border-border">
         <div className="flex items-center gap-6">
           {[
             { label: `All Clients (${clients?.length || 0})`, value: 'all' },
@@ -192,8 +192,8 @@ export default function ClientsSettingsPage() {
               onClick={() => setStatusFilter(tab.value as typeof statusFilter)}
               className={`text-sm font-bold pb-4 -mb-4 border-b-2 transition-colors ${
                 statusFilter === tab.value
-                  ? 'text-brand-600 border-brand-600'
-                  : 'text-gray-400 border-transparent hover:text-gray-600'
+                  ? 'text-primary border-brand-600'
+                  : 'text-muted-foreground border-transparent hover:text-gray-600'
               }`}
             >
               {tab.label}
@@ -202,13 +202,13 @@ export default function ClientsSettingsPage() {
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input 
               type="text" 
               placeholder="Search database..." 
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-900"
+              className="rounded-xl border border-border/60 bg-background pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-background"
             />
           </div>
         </div>
@@ -216,27 +216,27 @@ export default function ClientsSettingsPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {clients?.map((client) => (
-          <div key={client.id} className="group relative overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
+          <div key={client.id} className="group relative overflow-hidden rounded-2xl border border-border/60 bg-background p-6 transition-all hover:shadow-xl border-border bg-background">
             <div className="flex items-start justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/100/10">
                 <Building2 className="h-6 w-6" />
               </div>
               <div className="flex gap-1">
                 <Link
                   href={`/settings/clients/${client.id}`}
-                  className="rounded-lg px-3 py-2 text-xs font-bold text-brand-600 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-brand-50"
+                  className="rounded-lg px-3 py-2 text-xs font-bold text-primary opacity-0 transition-opacity group-hover:opacity-100 hover:bg-primary/10"
                 >
                   View
                 </Link>
                 <button 
                   onClick={() => handleEdit(client)}
-                  className="rounded-lg p-2 text-gray-400 hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800"
+                  className="rounded-lg p-2 text-muted-foreground hover:bg-surface-1 bg-background dark:hover:bg-surface-1"
                 >
                   <Edit3 className="h-4 w-4" />
                 </button>
                 <button 
                   onClick={() => deleteMutation.mutate(client.id)}
-                  className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+                  className="rounded-lg p-2 text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -244,44 +244,44 @@ export default function ClientsSettingsPage() {
             </div>
             
             <div className="mt-4">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{client.name}</h3>
-              <p className="text-xs text-gray-400 font-medium">{client.company || 'Private Client'}</p>
+              <h3 className="text-lg font-bold text-foreground">{client.name}</h3>
+              <p className="text-xs text-muted-foreground font-medium">{client.company || 'Private Client'}</p>
             </div>
 
             <div className="mt-6 space-y-3">
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Building2 className="h-3.5 w-3.5 text-gray-400" /> {client._count?.projects ?? 0} linked project{(client._count?.projects ?? 0) === 1 ? '' : 's'}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Building2 className="h-3.5 w-3.5 text-muted-foreground" /> {client._count?.projects ?? 0} linked project{(client._count?.projects ?? 0) === 1 ? '' : 's'}
               </div>
               {client.email && (
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <Mail className="h-3.5 w-3.5 text-gray-400" /> {client.email}
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground" /> {client.email}
                 </div>
               )}
               {client.phone && (
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <Phone className="h-3.5 w-3.5 text-gray-400" /> {client.phone}
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Phone className="h-3.5 w-3.5 text-muted-foreground" /> {client.phone}
                 </div>
               )}
             </div>
 
-            <div className="mt-6 flex items-center justify-between border-t border-gray-50 pt-4 dark:border-gray-800">
+            <div className="mt-6 flex items-center justify-between border-t border-gray-50 pt-4 border-border">
               <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
                 client.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
               }`}>
                 {client.status}
               </span>
-              <span className="text-[10px] text-gray-400 font-medium">Added {format(new Date(client.createdAt), 'MMM d, yyyy')}</span>
+              <span className="text-[10px] text-muted-foreground font-medium">Added {format(new Date(client.createdAt), 'MMM d, yyyy')}</span>
             </div>
           </div>
         ))}
         
         {clients?.length === 0 && (
           <div className="col-span-full py-20 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-950 text-gray-300 dark:bg-gray-800">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface-1 bg-background text-muted-foreground bg-surface-2">
               <User className="h-8 w-8" />
             </div>
-            <h3 className="mt-4 text-lg font-bold text-gray-900 dark:text-white">No clients found</h3>
-            <p className="text-sm text-gray-500">Start by adding your first customer or lead.</p>
+            <h3 className="mt-4 text-lg font-bold text-foreground">No clients found</h3>
+            <p className="text-sm text-muted-foreground">Start by adding your first customer or lead.</p>
           </div>
         )}
       </div>
@@ -289,39 +289,39 @@ export default function ClientsSettingsPage() {
       {/* Client Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full max-w-lg rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
+          <div className="w-full max-w-lg rounded-3xl border border-border/60 bg-background p-8 shadow-2xl border-border bg-background animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{editingClient ? 'Edit Client' : 'Add New Client'}</h2>
-                <p className="text-sm text-gray-500">Enter client information to save it to your database.</p>
+                <h2 className="text-xl font-bold text-foreground">{editingClient ? 'Edit Client' : 'Add New Client'}</h2>
+                <p className="text-sm text-muted-foreground">Enter client information to save it to your database.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-gray-50 dark:bg-gray-950 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
+              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-surface-1 bg-background p-2 text-muted-foreground hover:bg-surface-3 dark:hover:bg-gray-700">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Client Name</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Client Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input 
                     type="text" 
                     placeholder="e.g. John Doe"
-                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-10 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-10 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email Address</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input 
                     type="email" 
                     placeholder="john@example.com"
-                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-10 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-10 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                   />
@@ -329,21 +329,21 @@ export default function ClientsSettingsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Company</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Company</label>
                   <input 
                     type="text" 
                     placeholder="Company Name"
-                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                     value={formData.company}
                     onChange={(e) => setFormData({...formData, company: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Phone</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Phone</label>
                   <input 
                     type="text" 
                     placeholder="+1 (555) 000-0000"
-                    className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   />
@@ -351,7 +351,7 @@ export default function ClientsSettingsPage() {
               </div>
               
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Relationship Status</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Relationship Status</label>
                 <div className="flex gap-2">
                   {['active', 'lead', 'inactive'].map((s) => (
                     <button
@@ -359,8 +359,8 @@ export default function ClientsSettingsPage() {
                       onClick={() => setFormData({...formData, status: s})}
                       className={`flex-1 rounded-xl border py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
                         formData.status === s 
-                          ? 'border-brand-500 bg-brand-50 text-brand-600 dark:bg-brand-500/10' 
-                          : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-400 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-800'
+                          ? 'border-primary bg-primary/10 text-primary dark:bg-primary/100/10' 
+                          : 'border-border/60 bg-surface-1 bg-background text-muted-foreground hover:bg-surface-2 border-border bg-surface-2'
                       }`}
                     >
                       {s}
@@ -372,14 +372,14 @@ export default function ClientsSettingsPage() {
               <div className="pt-4 flex gap-4">
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl border border-gray-100 dark:border-gray-800 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800"
+                  className="flex-1 rounded-xl border border-border/60 py-3 text-sm font-bold text-muted-foreground hover:bg-surface-1 bg-background border-border"
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={handleSubmit}
                   disabled={createMutation.isPending || updateMutation.isPending}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 disabled:opacity-50"
                 >
                   {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="h-4 w-4 animate-spin" />}
                   {editingClient ? 'Save Changes' : 'Add Client'}

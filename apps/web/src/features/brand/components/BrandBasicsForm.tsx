@@ -36,38 +36,38 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
     <section id="basics" className="space-y-6 scroll-mt-24 animate-fade-in-up" style={{ animationDelay: '50ms' }}>
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-2">
-          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-xl shadow-brand-500/30">
+          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-foreground shadow-xl shadow-brand-500/30">
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">Brand Foundation</h2>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Company identity & core business details</p>
+            <h2 className="text-2xl font-black tracking-tight text-foreground">Brand Foundation</h2>
+            <p className="text-sm font-medium text-muted-foreground">Company identity & core business details</p>
           </div>
         </div>
       </div>
       
-      <Card className="p-8 space-y-8 glass-panel border-white/20 dark:border-white/5 shadow-2xl rounded-3xl bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl">
+      <Card className="p-8 space-y-8 glass-panel border-white/20 dark:border-white/5 shadow-2xl rounded-3xl bg-background/40 dark:bg-gray-950/40 backdrop-blur-2xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2">Brand Name <span className="text-red-500">*</span></label>
-            <Input {...register('name')} placeholder="e.g. Acme Corp" className="h-14 bg-white/60 dark:bg-gray-900/60 border-gray-200/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-brand-500 transition-all" />
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">Brand Name <span className="text-red-500">*</span></label>
+            <Input {...register('name')} placeholder="e.g. Acme Corp" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all" />
             {errors['name'] && <p className="text-xs text-red-500 font-bold">{errors['name'].message as string}</p>}
           </div>
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2">Industry <span className="text-red-500">*</span></label>
-            <Input {...register('industry')} placeholder="e.g. Technology" className="h-14 bg-white/60 dark:bg-gray-900/60 border-gray-200/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-brand-500 transition-all" />
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">Industry <span className="text-red-500">*</span></label>
+            <Input {...register('industry')} placeholder="e.g. Technology" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all" />
             {errors['industry'] && <p className="text-xs text-red-500 font-bold">{errors['industry']?.message as string}</p>}
           </div>
         </div>
         
-        <div className="space-y-3 group relative bg-brand-50/30 dark:bg-brand-500/5 p-6 rounded-3xl border border-brand-100/50 dark:border-brand-500/10 transition-colors hover:bg-brand-50/50 dark:hover:bg-brand-500/10">
+        <div className="space-y-3 group relative bg-brand-50/30 dark:bg-primary/100/5 p-6 rounded-3xl border border-brand-100/50 dark:border-primary/10 transition-colors hover:bg-brand-50/50 dark:hover:bg-primary/100/10">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold uppercase tracking-wider text-brand-700 dark:text-brand-400">Tagline</label>
             <Button 
               type="button" 
               variant="outline" 
               size="sm" 
-              className="h-8 rounded-full border-brand-200 dark:border-brand-800 text-brand-600 bg-white/50 dark:bg-gray-900/50 backdrop-blur hover:bg-brand-100 transition-all"
+              className="h-8 rounded-full border-primary/20 dark:border-brand-800 text-primary bg-background/50 bg-background/50 backdrop-blur hover:bg-brand-100 transition-all"
               onClick={() => {
                 const suggestion = buildTaglineSuggestion(values);
                 if (!suggestion) {
@@ -78,34 +78,34 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
                 setValue('tagline', suggestion, { shouldDirty: true });
               }}
             >
-              <Sparkles className="w-3.5 h-3.5 mr-2 text-brand-500" /> Generate with AI
+              <Sparkles className="w-3.5 h-3.5 mr-2 text-primary" /> Generate with AI
             </Button>
           </div>
-          <Input {...register('tagline')} placeholder="The future of branding..." className="h-14 bg-white/80 dark:bg-gray-900/80 border-brand-100 dark:border-gray-800 rounded-2xl text-base shadow-sm focus-visible:ring-brand-500" />
+          <Input {...register('tagline')} placeholder="The future of branding..." className="h-14 bg-background/80 bg-background/80 border-primary/10 border-border rounded-2xl text-base shadow-sm focus-visible:ring-primary/20" />
           {errors['tagline'] && <p className="text-xs text-red-500 font-bold">{errors['tagline']?.message as string}</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Website</label>
-            <Input {...register('website')} placeholder="https://acme.com" className="h-14 bg-white/60 dark:bg-gray-900/60 border-gray-200/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-brand-500 transition-all" />
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Website</label>
+            <Input {...register('website')} placeholder="https://acme.com" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all" />
             {errors['website'] && <p className="text-xs text-red-500 font-bold">{errors['website']?.message as string}</p>}
           </div>
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Slug</label>
-            <Input {...register('slug')} placeholder="acme-corp" className="h-14 bg-white/60 dark:bg-gray-900/60 border-gray-200/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-brand-500 transition-all" />
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Slug</label>
+            <Input {...register('slug')} placeholder="acme-corp" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all" />
             {errors['slug'] && <p className="text-xs text-red-500 font-bold">{errors['slug']?.message as string}</p>}
           </div>
         </div>
 
         <div className="space-y-3 group relative">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Description</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Description</label>
             <Button 
               type="button" 
               variant="ghost" 
               size="sm" 
-              className="h-8 rounded-full text-brand-600 hover:bg-brand-50 transition-all"
+              className="h-8 rounded-full text-primary hover:bg-primary/10 transition-all"
               onClick={() => {
                 const suggestion = buildDescriptionSuggestion(values);
                 if (!suggestion) {
@@ -122,29 +122,29 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
           <Textarea 
             {...register('description')} 
             placeholder="Tell us about your brand..." 
-            className="min-h-[140px] bg-white/60 dark:bg-gray-900/60 border-gray-200/50 dark:border-gray-800/50 rounded-2xl text-base p-4 shadow-sm focus-visible:ring-brand-500 transition-all leading-relaxed"
+            className="min-h-[140px] bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base p-4 shadow-sm focus-visible:ring-primary/20 transition-all leading-relaxed"
           />
           {errors['description'] && <p className="text-xs text-red-500 font-bold">{errors['description']?.message as string}</p>}
         </div>
 
-        <div className="pt-8 border-t border-gray-200/50 dark:border-gray-800/50 space-y-6">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Business Contact (Internal)</label>
+        <div className="pt-8 border-t border-border/50 dark:border-gray-800/50 space-y-6">
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Business Contact (Internal)</label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Input {...register('contactInfo.personName')} placeholder="Full Name" className="h-12 bg-white/60 dark:bg-gray-900/60 border-gray-200/50 dark:border-gray-800/50 rounded-xl" />
+                  <Input {...register('contactInfo.personName')} placeholder="Full Name" className="h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl" />
                   {(errors['contactInfo'] as any)?.personName && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).personName.message as string}</p>}
               </div>
               <div className="space-y-2">
-                  <Input {...register('contactInfo.phoneNumber')} placeholder="Phone (+1...)" className="h-12 bg-white/60 dark:bg-gray-900/60 border-gray-200/50 dark:border-gray-800/50 rounded-xl" />
+                  <Input {...register('contactInfo.phoneNumber')} placeholder="Phone (+1...)" className="h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl" />
                   {(errors['contactInfo'] as any)?.phoneNumber && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).phoneNumber.message as string}</p>}
               </div>
               <div className="space-y-2">
-                  <Input {...register('contactInfo.email')} placeholder="Email Address" className="h-12 bg-white/60 dark:bg-gray-900/60 border-gray-200/50 dark:border-gray-800/50 rounded-xl" />
+                  <Input {...register('contactInfo.email')} placeholder="Email Address" className="h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl" />
                   {(errors['contactInfo'] as any)?.email && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).email.message as string}</p>}
               </div>
             </div>
             <div className="space-y-2">
-              <Input {...register('contactInfo.officeAddress')} placeholder="Office Address (123 Business St, Suite 400...)" className="h-12 bg-white/60 dark:bg-gray-900/60 border-gray-200/50 dark:border-gray-800/50 rounded-xl" />
+              <Input {...register('contactInfo.officeAddress')} placeholder="Office Address (123 Business St, Suite 400...)" className="h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl" />
               {(errors['contactInfo'] as any)?.officeAddress && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).officeAddress.message as string}</p>}
             </div>
         </div>

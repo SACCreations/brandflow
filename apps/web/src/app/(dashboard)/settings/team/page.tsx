@@ -119,7 +119,7 @@ export default function TeamSettingsPage() {
   if (isLoading) {
     return (
       <div className="flex h-[400px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -128,12 +128,12 @@ export default function TeamSettingsPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Team Management</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">Manage access control and collaborate with your organization.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Team Management</h1>
+          <p className="mt-2 text-muted-foreground">Manage access control and collaborate with your organization.</p>
         </div>
         <button 
           onClick={() => setIsInviteModalOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
+          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
         >
           <UserPlus className="h-4 w-4" /> Add Team Members
         </button>
@@ -141,57 +141,57 @@ export default function TeamSettingsPage() {
 
       {/* Stats Mini-Bar */}
       <div className="grid gap-6 md:grid-cols-4">
-        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-2 dark:bg-blue-500/10"><Users className="h-5 w-5 text-blue-600" /></div>
             <div>
-              <div className="text-xl font-black text-gray-900 dark:text-white">{members?.length || 0}</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Seats</div>
+              <div className="text-xl font-black text-foreground">{members?.length || 0}</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Seats</div>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-purple-50 p-2 dark:bg-purple-500/10"><Shield className="h-5 w-5 text-purple-600" /></div>
             <div>
-              <div className="text-xl font-black text-gray-900 dark:text-white">{members?.filter(m => m.role.name === 'admin' || m.role.name === 'owner').length || 0}</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Admins</div>
+              <div className="text-xl font-black text-foreground">{members?.filter(m => m.role.name === 'admin' || m.role.name === 'owner').length || 0}</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Admins</div>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-emerald-50 p-2 dark:bg-emerald-500/10"><CheckCircle2 className="h-5 w-5 text-emerald-600" /></div>
             <div>
-              <div className="text-xl font-black text-gray-900 dark:text-white">Active</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</div>
+              <div className="text-xl font-black text-foreground">Active</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</div>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-brand-50 bg-brand-50/20 p-4 dark:border-brand-500/20 dark:bg-brand-500/5">
+        <div className="rounded-2xl border border-brand-50 bg-brand-50/20 p-4 dark:border-primary/20 dark:bg-primary/100/5">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-brand-100 p-2 dark:bg-brand-500/20"><UserPlus className="h-5 w-5 text-brand-600" /></div>
+            <div className="rounded-xl bg-brand-100 p-2 dark:bg-primary/100/20"><UserPlus className="h-5 w-5 text-primary" /></div>
             <div>
-              <div className="text-xl font-black text-gray-900 dark:text-white">Unlimited</div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Available</div>
+              <div className="text-xl font-black text-foreground">Unlimited</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Available</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Members Table */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 p-6 dark:border-gray-800">
+      <div className="overflow-hidden rounded-2xl border border-border bg-background border-border bg-background">
+        <div className="flex items-center justify-between border-b border-border/60 p-6 border-border">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input 
                 type="text" 
                 placeholder="Search team..." 
-                className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                className="rounded-xl border border-border/60 bg-surface-1 dark:bg-gray-950/50 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
               />
             </div>
-            <button className="rounded-xl border border-gray-100 dark:border-gray-800 p-2 text-gray-500 dark:border-gray-800 hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-800">
+            <button className="rounded-xl border border-border/60 p-2 text-muted-foreground border-border hover:bg-surface-1 bg-background dark:hover:bg-surface-1">
               <Filter className="h-5 w-5" />
             </button>
           </div>
@@ -200,46 +200,46 @@ export default function TeamSettingsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-gray-50 bg-gray-50 dark:bg-gray-950/50 dark:border-gray-800 dark:bg-gray-800/30">
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">User</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Role</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Joined</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+              <tr className="border-b border-gray-50 bg-surface-1 dark:bg-gray-950/50 border-border bg-surface-2/30">
+                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">User</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Role</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Joined</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {members?.map((member) => (
-                <tr key={member.id} className="group transition-colors hover:bg-gray-50 dark:bg-gray-950/50 dark:hover:bg-gray-800/30">
+                <tr key={member.id} className="group transition-colors hover:bg-surface-1 dark:bg-gray-950/50 dark:hover:bg-surface-1/30">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
+                      <div className="h-10 w-10 overflow-hidden rounded-xl bg-surface-3">
                         {member.user.avatarUrl ? (
                           <img src={member.user.avatarUrl} alt="" className="h-full w-full object-cover" />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-sm font-black text-gray-400">
+                          <div className="flex h-full w-full items-center justify-center text-sm font-black text-muted-foreground">
                             {member.user.firstName?.[0]}{member.user.lastName?.[0]}
                           </div>
                         )}
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-gray-900 dark:text-white">
+                        <div className="text-sm font-bold text-foreground">
                           {member.user.firstName} {member.user.lastName}
                         </div>
-                        <div className="text-xs text-gray-400">{member.user.email}</div>
+                        <div className="text-xs text-muted-foreground">{member.user.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
                       member.role.name === 'owner' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10' :
-                      member.role.name === 'admin' ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10' :
-                      'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                      member.role.name === 'admin' ? 'bg-primary/10 text-primary dark:bg-primary/100/10' :
+                      'bg-surface-2 text-muted-foreground bg-surface-2 text-muted-foreground'
                     }`}>
                       <Shield className="h-3 w-3" />
                       {member.role.name}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-xs text-gray-500 font-medium">
+                  <td className="px-6 py-4 text-xs text-muted-foreground font-medium">
                     {format(new Date(member.createdAt), 'MMM d, yyyy')}
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -247,12 +247,12 @@ export default function TeamSettingsPage() {
                       <button 
                         onClick={() => removeMutation.mutate(member.user.id)}
                         disabled={member.role.name === 'owner'}
-                        className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 transition-colors disabled:opacity-0"
+                        className="rounded-lg p-2 text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 transition-colors disabled:opacity-0"
                         title="Revoke Access"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                      <button className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                      <button className="rounded-lg p-2 text-muted-foreground hover:bg-surface-2 dark:hover:bg-surface-1 transition-colors">
                         <MoreVertical className="h-4 w-4" />
                       </button>
                     </div>
@@ -267,32 +267,32 @@ export default function TeamSettingsPage() {
       {/* Invite Modal */}
       {isInviteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full max-w-xl rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in zoom-in-95 duration-300">
+          <div className="w-full max-w-xl rounded-3xl border border-border/60 bg-background p-8 shadow-2xl border-border bg-background animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add Team Members</h2>
-                <p className="text-sm text-gray-500">Collaborate with your team by adding them here.</p>
+                <h2 className="text-xl font-bold text-foreground">Add Team Members</h2>
+                <p className="text-sm text-muted-foreground">Collaborate with your team by adding them here.</p>
               </div>
-              <button onClick={() => setIsInviteModalOpen(false)} className="rounded-full bg-gray-50 dark:bg-gray-950 p-2 text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
+              <button onClick={() => setIsInviteModalOpen(false)} className="rounded-full bg-surface-1 bg-background p-2 text-muted-foreground hover:bg-surface-3 dark:hover:bg-gray-700">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="space-y-6">
               <div className="space-y-4">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center justify-between">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center justify-between">
                   Email Addresses
-                  <span className="text-brand-600 cursor-pointer hover:underline" onClick={handleAddEmailRow}>+ Add Another</span>
+                  <span className="text-primary cursor-pointer hover:underline" onClick={handleAddEmailRow}>+ Add Another</span>
                 </label>
                 <div className="max-h-[200px] overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                   {inviteEmails.map((email, index) => (
                     <div key={index} className="flex gap-2 animate-in slide-in-from-right-2 duration-300">
                       <div className="relative flex-1">
-                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <input 
                           type="email" 
                           placeholder="coworker@company.com"
-                          className="w-full rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-10 py-3 text-sm focus:ring-2 focus:ring-brand-500 dark:border-gray-800 dark:bg-gray-800"
+                          className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-10 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
                           value={email}
                           onChange={(e) => handleEmailChange(index, e.target.value)}
                         />
@@ -300,7 +300,7 @@ export default function TeamSettingsPage() {
                       {inviteEmails.length > 1 && (
                         <button 
                           onClick={() => handleRemoveEmailRow(index)}
-                          className="rounded-xl border border-gray-100 dark:border-gray-800 p-3 text-gray-400 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800 dark:hover:bg-gray-800"
+                          className="rounded-xl border border-border/60 p-3 text-muted-foreground hover:bg-surface-1 bg-background border-border dark:hover:bg-surface-1"
                         >
                           <X className="h-5 w-5" />
                         </button>
@@ -311,7 +311,7 @@ export default function TeamSettingsPage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assign Role</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Assign Role</label>
                 <div className="grid grid-cols-3 gap-3">
                   {['admin', 'editor', 'viewer'].map((role) => (
                     <button
@@ -319,8 +319,8 @@ export default function TeamSettingsPage() {
                       onClick={() => setSelectedRole(role)}
                       className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
                         selectedRole === role 
-                          ? 'border-brand-500 bg-brand-50/50 text-brand-600 dark:bg-brand-500/10' 
-                          : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-500 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-800'
+                          ? 'border-primary bg-brand-50/50 text-primary dark:bg-primary/100/10' 
+                          : 'border-border/60 bg-surface-1 bg-background text-muted-foreground hover:bg-surface-2 border-border bg-surface-2'
                       }`}
                     >
                       <Shield className="h-5 w-5" />
@@ -333,14 +333,14 @@ export default function TeamSettingsPage() {
               <div className="pt-4 flex gap-4">
                 <button 
                   onClick={() => setIsInviteModalOpen(false)}
-                  className="flex-1 rounded-xl border border-gray-100 dark:border-gray-800 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 dark:bg-gray-950 dark:border-gray-800"
+                  className="flex-1 rounded-xl border border-border/60 py-3 text-sm font-bold text-muted-foreground hover:bg-surface-1 bg-background border-border"
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={handleInvite}
                   disabled={inviteMutation.isPending}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white shadow-lg shadow-brand-500/20 hover:bg-brand-700 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 disabled:opacity-50"
                 >
                   {inviteMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                   Send Invitations

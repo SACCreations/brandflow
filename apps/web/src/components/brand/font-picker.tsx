@@ -73,26 +73,26 @@ export function FontPicker({ value, onChange, label, description }: FontPickerPr
 
   return (
     <div className="space-y-2">
-      {label && <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">{label}</label>}
+      {label && <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{label}</label>}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-full justify-between font-bold hover:bg-gray-50 dark:bg-gray-950 h-12 border-gray-100 dark:border-gray-800 rounded-xl shadow-sm transition-all active:scale-[0.98]">
+          <Button variant="outline" className="w-full justify-between font-bold hover:bg-surface-1 bg-background h-12 border-border/60 rounded-xl shadow-sm transition-all active:scale-[0.98]">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gray-50 dark:bg-gray-950 text-gray-400">
+              <div className="p-2 rounded-lg bg-surface-1 bg-background text-muted-foreground">
                 <Type className="w-4 h-4" />
               </div>
               <span style={{ fontFamily: value }} className="text-sm">{value || 'Select a font'}</span>
             </div>
-            <Badge variant="secondary" className="bg-brand-50 text-brand-600 border-brand-100 text-[8px] font-black uppercase tracking-widest">Google Fonts</Badge>
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/10 text-[8px] font-black uppercase tracking-widest">Google Fonts</Badge>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[320px] p-0 rounded-2xl border-gray-100 dark:border-gray-800 shadow-2xl bg-white dark:bg-gray-900/95 dark:bg-gray-900/95 backdrop-blur-xl" align="start">
-          <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+        <DropdownMenuContent className="w-[320px] p-0 rounded-2xl border-border/60 shadow-2xl bg-background/95 bg-background/95 backdrop-blur-xl" align="start">
+          <div className="p-4 border-b border-border/60">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-brand-500 transition-colors" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <Input 
                 placeholder="Search 1000+ fonts..." 
-                className="pl-10 h-10 text-sm bg-gray-50 dark:bg-gray-950/50 border-gray-100 dark:border-gray-800 rounded-xl focus-visible:ring-brand-500"
+                className="pl-10 h-10 text-sm bg-surface-1 dark:bg-gray-950/50 border-border/60 rounded-xl focus-visible:ring-primary/20"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -103,26 +103,26 @@ export function FontPicker({ value, onChange, label, description }: FontPickerPr
               filteredFonts.map((font) => (
                 <DropdownMenuItem 
                   key={font.name}
-                  className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-xl focus:bg-brand-50 dark:focus:bg-brand-900/20 group transition-colors"
+                  className="flex items-center justify-between py-3 px-4 cursor-pointer rounded-xl focus:bg-primary/10 dark:focus:bg-brand-900/20 group transition-colors"
                   onSelect={() => onChange(font.name)}
                 >
                   <div className="flex flex-col">
-                    <span style={{ fontFamily: font.name }} className="text-base text-gray-900 dark:text-white group-focus:text-brand-700">{font.name}</span>
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{font.category}</span>
+                    <span style={{ fontFamily: font.name }} className="text-base text-foreground group-focus:text-brand-700">{font.name}</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{font.category}</span>
                   </div>
-                  {value === font.name && <Check className="w-4 h-4 text-brand-600" />}
+                  {value === font.name && <Check className="w-4 h-4 text-primary" />}
                 </DropdownMenuItem>
               ))
             ) : (
-              <div className="p-8 text-center text-sm text-gray-400 font-medium italic">No matches found</div>
+              <div className="p-8 text-center text-sm text-muted-foreground font-medium italic">No matches found</div>
             )}
           </div>
-          <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50 dark:bg-gray-800/50 text-[9px] font-black text-gray-400 text-center uppercase tracking-widest rounded-b-2xl">
+          <div className="p-3 border-t border-border/60 bg-surface-1 dark:bg-gray-950/50 bg-surface-2/50 text-[9px] font-black text-muted-foreground text-center uppercase tracking-widest rounded-b-2xl">
             Powered by Brandflow Intelligence
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
-      {description && <p className="text-[10px] text-gray-500 font-medium px-1">{description}</p>}
+      {description && <p className="text-[10px] text-muted-foreground font-medium px-1">{description}</p>}
       
       {/* Hidden link to load font for preview if needed */}
       {value && (

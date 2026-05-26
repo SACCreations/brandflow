@@ -341,21 +341,21 @@ export default function ContentGeneratorPage() {
     <ErrorBoundary backHref={backHref}>
     <div className="mx-auto max-w-7xl px-2 py-4 space-y-8 animate-in fade-in duration-500">
       {/* Header Banner */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between border-b border-gray-100 dark:border-gray-800 pb-6 dark:border-gray-800">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between border-b border-border/60 pb-6 border-border">
         <div className="space-y-2">
-          <Link href={backHref} className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500 hover:text-brand-600 transition-colors">
+          <Link href={backHref} className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back to campaign
           </Link>
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-brand-50 p-2.5 dark:bg-brand-500/10">
-              <BrainCircuit className="h-7 w-7 text-brand-600 dark:text-brand-400 animate-pulse" />
+            <div className="rounded-xl bg-primary/10 p-2.5 dark:bg-primary/100/10">
+              <BrainCircuit className="h-7 w-7 text-primary dark:text-brand-400 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-3">
+              <h1 className="text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
                 AI Generation Workspace
-                <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-700 dark:bg-brand-500/20 dark:text-brand-400">v2.0</span>
+                <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-700 dark:bg-primary/100/20 dark:text-brand-400">v2.0</span>
               </h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Design multi-channel campaigns, suggested topics, and bulk content in background queues using brand context boundaries.
               </p>
             </div>
@@ -365,7 +365,7 @@ export default function ContentGeneratorPage() {
         <Button 
           onClick={() => generateMutation.mutate()} 
           disabled={loading || !selectedBrandId} 
-          className="gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-brand-500/10 transition hover:-translate-y-0.5"
+          className="gap-2 bg-primary hover:bg-brand-700 text-foreground font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-brand-500/10 transition hover:-translate-y-0.5"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           Generate campaign drafts
@@ -440,29 +440,29 @@ export default function ContentGeneratorPage() {
           
           {/* Active Brief contextual guide */}
           {brief && (
-            <Card className="p-5 border border-brand-200 bg-brand-50/15 dark:border-brand-500/10 space-y-4">
+            <Card className="p-5 border border-primary/20 bg-brand-50/15 dark:border-primary/10 space-y-4">
               <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-brand-600" />
+                <Target className="h-4 w-4 text-primary" />
                 <h3 className="text-xs font-extrabold uppercase tracking-widest text-brand-700 dark:text-brand-400">Brief Directives</h3>
               </div>
 
-              <div className="space-y-3.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+              <div className="space-y-3.5 text-xs font-medium text-muted-foreground text-foreground">
                 <div>
-                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">Objective</span>
-                  <p className="mt-0.5 font-semibold text-gray-900 dark:text-white leading-relaxed">{brief.objective}</p>
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block">Objective</span>
+                  <p className="mt-0.5 font-semibold text-foreground leading-relaxed">{brief.objective}</p>
                 </div>
 
                 {brief.audience && (
                   <div>
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">Audience</span>
-                    <p className="mt-0.5 text-gray-800 dark:text-gray-200">{brief.audience}</p>
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block">Audience</span>
+                    <p className="mt-0.5 text-foreground">{brief.audience}</p>
                   </div>
                 )}
 
                 {brief.cta && (
                   <div>
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">CTA Target</span>
-                    <p className="mt-0.5 text-gray-900 dark:text-white font-bold dark:text-white underline decoration-brand-500 underline-offset-4">{brief.cta}</p>
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block">CTA Target</span>
+                    <p className="mt-0.5 text-foreground font-bold text-foreground underline decoration-brand-500 underline-offset-4">{brief.cta}</p>
                   </div>
                 )}
               </div>
@@ -470,28 +470,28 @@ export default function ContentGeneratorPage() {
           )}
 
           {/* Sticky Brand positioning summary */}
-          <Card className="p-5 border border-gray-100 dark:border-gray-800 space-y-4 shadow-sm">
-            <div className="flex items-center gap-2.5 border-b border-gray-100 dark:border-gray-800 pb-3 dark:border-gray-800">
-              <BrainCircuit className="h-4 w-4 text-brand-600" />
-              <h3 className="text-xs font-extrabold uppercase tracking-widest text-gray-500">Brand Context Rules</h3>
+          <Card className="p-5 border border-border/60 space-y-4 shadow-sm">
+            <div className="flex items-center gap-2.5 border-b border-border/60 pb-3 border-border">
+              <BrainCircuit className="h-4 w-4 text-primary" />
+              <h3 className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Brand Context Rules</h3>
             </div>
 
             {!selectedBrandId ? (
-              <div className="text-xs text-gray-400 text-center py-6 leading-relaxed">
+              <div className="text-xs text-muted-foreground text-center py-6 leading-relaxed">
                 Brand positioning context will dynamically display here.
               </div>
             ) : isBrandContextLoading ? (
               <div className="space-y-3">
-                <div className="h-4 w-2/3 bg-gray-100 rounded animate-pulse dark:bg-gray-800" />
-                <div className="h-10 w-full bg-gray-50 dark:bg-gray-950 rounded animate-pulse dark:bg-gray-850" />
+                <div className="h-4 w-2/3 bg-surface-2 rounded animate-pulse bg-surface-2" />
+                <div className="h-10 w-full bg-surface-1 bg-background rounded animate-pulse dark:bg-gray-850" />
               </div>
             ) : brandContext ? (
               <div className="space-y-4 text-xs leading-relaxed">
                 <div>
-                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">Active Voice Tone</span>
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block">Active Voice Tone</span>
                   <div className="flex flex-wrap gap-1.5 mt-1.5">
                     {(brandContext.brand?.tone || ['professional']).map((t: string) => (
-                      <span key={t} className="rounded bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-600 dark:bg-gray-800 dark:text-gray-400 capitalize">
+                      <span key={t} className="rounded bg-surface-2 px-2 py-0.5 text-[10px] font-bold text-muted-foreground bg-surface-2 text-muted-foreground capitalize">
                         {t}
                       </span>
                     ))}
@@ -500,19 +500,19 @@ export default function ContentGeneratorPage() {
 
                 {brandContext.brand?.positioning && (
                   <div>
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">Core Positioning</span>
-                    <p className="mt-1 font-medium text-gray-700 dark:text-gray-300">{brandContext.brand.positioning}</p>
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block">Core Positioning</span>
+                    <p className="mt-1 font-medium text-foreground">{brandContext.brand.positioning}</p>
                   </div>
                 )}
 
                 {/* Vector semantic fact matches */}
                 {brandContext.knowledgeEntries?.length > 0 && (
                   <div>
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">Linked Intelligence Atom Sources</span>
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block">Linked Intelligence Atom Sources</span>
                     <div className="mt-2 space-y-2 max-h-36 overflow-y-auto pr-1">
                       {brandContext.knowledgeEntries.slice(0, 3).map((e: any, idx: number) => (
-                        <div key={idx} className="flex gap-2 p-2 bg-gray-50 dark:bg-gray-950 rounded-lg text-[10px] font-medium text-gray-500 dark:bg-gray-800/40">
-                          <FileText className="h-3.5 w-3.5 text-brand-500 flex-shrink-0" />
+                        <div key={idx} className="flex gap-2 p-2 bg-surface-1 bg-background rounded-lg text-[10px] font-medium text-muted-foreground bg-surface-2/40">
+                          <FileText className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                           <span className="line-clamp-2">{e.content || e}</span>
                         </div>
                       ))}
@@ -521,15 +521,15 @@ export default function ContentGeneratorPage() {
                 )}
               </div>
             ) : (
-              <div className="text-xs text-gray-400 text-center py-6">
+              <div className="text-xs text-muted-foreground text-center py-6">
                 Failed to resolve brand constraints context.
               </div>
             )}
           </Card>
 
           {/* Global platform compliance alert */}
-          <Card className="p-4 border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/30 text-xs text-gray-400 space-y-2">
-            <div className="flex items-center gap-2 font-bold text-gray-500 uppercase tracking-wider text-[10px]">
+          <Card className="p-4 border border-dashed border-border bg-surface-1 dark:bg-gray-950/30 text-xs text-muted-foreground space-y-2">
+            <div className="flex items-center gap-2 font-bold text-muted-foreground uppercase tracking-wider text-[10px]">
               <AlertTriangle className="h-4 w-4 text-amber-500" /> Compliance guard active
             </div>
             <p className="leading-relaxed">

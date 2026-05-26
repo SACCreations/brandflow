@@ -21,4 +21,5 @@ export type { EmptyStateProps } from './components/empty-state';
 export { PageSkeleton } from './components/page-skeleton';
 export type { PageSkeletonProps } from './components/page-skeleton';
 export { ErrorBoundary } from './components/error-boundary';
+export * from './components/table';
 export { cn } from './lib/utils';

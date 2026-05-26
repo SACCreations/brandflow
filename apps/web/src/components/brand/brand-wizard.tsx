@@ -146,35 +146,35 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-gray-50/50 dark:bg-gray-950/50 backdrop-blur-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-surface-1/50 dark:bg-gray-950/50 backdrop-blur-2xl flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="h-20 border-b border-white/20 dark:border-white/5 bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl sticky top-0 z-50 px-8 flex items-center justify-between shadow-sm">
+      <header className="h-20 border-b border-white/20 dark:border-white/5 bg-background/40 bg-background/40 backdrop-blur-xl sticky top-0 z-50 px-8 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <motion.div 
             initial={{ scale: 0.8, rotate: -10 }}
             animate={{ scale: 1, rotate: 0 }}
-            className="w-10 h-10 rounded-2xl bg-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/20"
+            className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-foreground shadow-lg shadow-brand-500/20"
           >
             <Sparkles className="w-6 h-6" />
           </motion.div>
           <div>
-            <h1 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white">{title}</h1>
-            <p className="text-[10px] font-bold text-gray-400">Step {currentStepIdx + 1} of {STEPS.length}: {currentStep.label}</p>
+            <h1 className="text-sm font-black uppercase tracking-widest text-foreground">{title}</h1>
+            <p className="text-[10px] font-bold text-muted-foreground">Step {currentStepIdx + 1} of {STEPS.length}: {currentStep.label}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-6 w-full max-w-md mx-8">
           <div className="flex-1 space-y-1.5">
-             <div className="flex justify-between text-[8px] font-black uppercase tracking-tighter text-gray-400">
+             <div className="flex justify-between text-[8px] font-black uppercase tracking-tighter text-muted-foreground">
                 <span>Onboarding Progress</span>
                 <span>{Math.round(progress)}%</span>
              </div>
-             <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Wizard progress">
+             <div className="h-1.5 w-full bg-surface-3 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Wizard progress">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.5, ease: "circOut" }}
-                  className="h-full bg-brand-600"
+                  className="h-full bg-primary"
                 />
              </div>
           </div>
@@ -185,7 +185,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
             <Button 
               variant="ghost" 
               size="sm" 
-              className="rounded-xl font-bold text-[10px] uppercase tracking-widest text-gray-500"
+              className="rounded-xl font-bold text-[10px] uppercase tracking-widest text-muted-foreground"
               onClick={onClose}
             >
               Cancel
@@ -208,7 +208,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
 
       <div className="flex-1 flex overflow-hidden p-4 gap-4">
         {/* Sidebar Nav */}
-        <aside className="w-72 flex-shrink-0 rounded-3xl border border-white/20 dark:border-white/5 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md p-6 hidden lg:block overflow-y-auto custom-scrollbar shadow-xl">
+        <aside className="w-72 flex-shrink-0 rounded-3xl border border-white/20 dark:border-white/5 bg-background/40 bg-background/40 backdrop-blur-md p-6 hidden lg:block overflow-y-auto custom-scrollbar shadow-xl">
           <nav aria-label="Wizard steps" role="tablist" aria-orientation="vertical" className="space-y-2">
             {STEPS.map((step, idx) => {
               const isActive = currentStepIdx === idx;
@@ -225,35 +225,35 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
                   className={cn(
                     "w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left group relative",
                     isActive 
-                      ? "bg-white/60 dark:bg-gray-800/60 shadow-lg border border-white/40 dark:border-white/10" 
-                      : "hover:bg-white/40 dark:hover:bg-gray-800/40 border border-transparent",
+                      ? "bg-background/60 bg-surface-2/60 shadow-lg border border-white/40 dark:border-white/10" 
+                      : "hover:bg-background/40 dark:hover:bg-surface-1/40 border border-transparent",
                     !isVisited && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   {isActive && (
                     <motion.div 
                       layoutId="active-step-indicator"
-                      className="absolute -left-px top-1/2 -translate-y-1/2 w-1 h-8 bg-brand-600 rounded-r-full"
+                      className="absolute -left-px top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full"
                     />
                   )}
                   <div className={cn(
                     "w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center transition-all",
                     isActive 
-                      ? "bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-500/30" 
+                      ? "bg-gradient-to-br from-brand-500 to-brand-700 text-foreground shadow-lg shadow-brand-500/30" 
                       : isVisited 
-                        ? "bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-md shadow-emerald-500/20" 
-                        : "bg-white/50 dark:bg-gray-800/50 text-gray-400 group-hover:text-gray-900 dark:text-white dark:group-hover:text-white backdrop-blur-sm"
+                        ? "bg-gradient-to-br from-emerald-400 to-emerald-600 text-foreground shadow-md shadow-emerald-500/20" 
+                        : "bg-background/50 bg-surface-2/50 text-muted-foreground group-hover:text-foreground dark:group-hover:text-white backdrop-blur-sm"
                   )}>
                     {isVisited && !isActive ? <CheckCircle2 className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
                   </div>
                   <div className="flex-1 py-0.5 min-w-0">
                     <p className={cn(
                       "text-[10px] font-black uppercase tracking-widest leading-none mb-1",
-                      isActive ? "text-brand-600 dark:text-brand-400" : "text-gray-400"
+                      isActive ? "text-primary dark:text-brand-400" : "text-muted-foreground"
                     )}>Step {idx + 1}</p>
                     <p className={cn(
                       "text-xs font-bold truncate",
-                      isActive ? "text-gray-900 dark:text-white" : "text-gray-500"
+                      isActive ? "text-foreground" : "text-muted-foreground"
                     )}>{step.label}</p>
                   </div>
                 </button>
@@ -263,7 +263,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
         </aside>
 
         {/* Main Form Area */}
-        <main className="flex-1 min-w-0 overflow-y-auto rounded-3xl border border-white/20 dark:border-white/5 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md px-6 sm:px-12 py-8 sm:py-12 custom-scrollbar relative shadow-xl"
+        <main className="flex-1 min-w-0 overflow-y-auto rounded-3xl border border-white/20 dark:border-white/5 bg-background/40 bg-background/40 backdrop-blur-md px-6 sm:px-12 py-8 sm:py-12 custom-scrollbar relative shadow-xl"
           role="tabpanel"
           id={`step-panel-${currentStep.id}`}
           aria-labelledby={`step-tab-${currentStep.id}`}
@@ -275,7 +275,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
                  key={idx}
                  className={cn(
                    "h-1.5 flex-1 rounded-full transition-colors",
-                   idx <= currentStepIdx ? "bg-brand-600" : "bg-gray-200 dark:bg-gray-800"
+                   idx <= currentStepIdx ? "bg-primary" : "bg-surface-3 bg-surface-2"
                  )}
                />
              ))}
@@ -302,12 +302,12 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
               </AnimatePresence>
 
               {/* Navigation Actions */}
-              <div className="mt-12 pt-6 border-t border-white/20 dark:border-white/5 flex items-center justify-between sticky bottom-0 bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl pb-6 z-10 -mx-6 px-6 sm:-mx-12 sm:px-12">
+              <div className="mt-12 pt-6 border-t border-white/20 dark:border-white/5 flex items-center justify-between sticky bottom-0 bg-background/40 bg-background/40 backdrop-blur-xl pb-6 z-10 -mx-6 px-6 sm:-mx-12 sm:px-12">
                  <Button
                     variant="ghost"
                     onClick={handleBack}
                     disabled={currentStepIdx === 0}
-                    className="rounded-xl font-bold h-12 px-6 sm:px-8 text-gray-500 hover:text-gray-900 dark:text-white dark:hover:text-white transition-colors"
+                    className="rounded-xl font-bold h-12 px-6 sm:px-8 text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors"
                  >
                     <ChevronLeft className="w-4 h-4 mr-2" /> Back
                  </Button>
@@ -315,7 +315,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
                  <Button
                     onClick={handleNext}
                     disabled={isLoading || isSubmitting}
-                    className="rounded-xl font-black h-12 px-8 sm:px-12 bg-brand-600 hover:bg-brand-700 text-white shadow-xl shadow-brand-500/20 uppercase tracking-tight transition-all"
+                    className="rounded-xl font-black h-12 px-8 sm:px-12 bg-primary hover:bg-brand-700 text-foreground shadow-xl shadow-brand-500/20 uppercase tracking-tight transition-all"
                  >
                     {isSubmitting ? (
                       <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {isEditMode ? 'Saving...' : 'Creating...'}</>
@@ -330,7 +330,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
         </main>
 
         {/* Preview Panel */}
-        <aside className="w-[450px] flex-shrink-0 hidden xl:block rounded-3xl border border-white/20 dark:border-white/5 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md overflow-hidden shadow-xl">
+        <aside className="w-[450px] flex-shrink-0 hidden xl:block rounded-3xl border border-white/20 dark:border-white/5 bg-background/40 bg-background/40 backdrop-blur-md overflow-hidden shadow-xl">
            <LivePreview data={formData} />
         </aside>
       </div>

@@ -11,7 +11,7 @@ export function AutomationStats({ automations }: AutomationStatsProps) {
       <AutoStat 
         label="Active Rules" 
         value={automations?.filter(a => a.isActive).length.toString() || '0'} 
-        icon={<Zap className="h-4 w-4 text-brand-500" />} 
+        icon={<Zap className="h-4 w-4 text-primary" />} 
       />
       <AutoStat 
         label="Tasks Automated" 
@@ -36,12 +36,12 @@ function AutoStat({ label, value, icon }: { label: string; value: string; icon: 
   return (
     <div className="glass-panel p-4">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-gray-50/50 dark:bg-gray-900/50 p-2 border border-gray-100 dark:border-gray-800">
+        <div className="rounded-lg bg-surface-1/50 bg-background/50 p-2 border border-border/60">
           {icon}
         </div>
         <div>
-          <div className="text-lg font-black text-gray-900 dark:text-white">{value}</div>
-          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</div>
+          <div className="text-lg font-black text-foreground">{value}</div>
+          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</div>
         </div>
       </div>
     </div>

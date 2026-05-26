@@ -76,19 +76,19 @@ export default function LlmSettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">LLM Settings</h1>
-        <p className="text-gray-500 dark:text-gray-400">Configure the AI brains behind your brand content.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">LLM Settings</h1>
+        <p className="text-muted-foreground">Configure the AI brains behind your brand content.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Card className="p-6">
+        <Card className="p-6 glass-premium border-border/60 rounded-[1.25rem] shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-brand-50 dark:bg-brand-900/20 rounded-lg">
-              <Cpu className="w-5 h-5 text-brand-600" />
+            <div className="p-2 bg-[hsl(var(--ai))]/10 border border-[hsl(var(--ai))]/20 shadow-sm rounded-xl">
+              <Cpu className="w-5 h-5 text-[hsl(var(--ai))]" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold">Model Configuration</h2>
-              <p className="text-sm text-gray-500">Select your preferred provider and model.</p>
+              <h2 className="text-lg font-bold text-foreground">Model Configuration</h2>
+              <p className="text-sm text-muted-foreground">Select your preferred provider and model.</p>
             </div>
           </div>
 
@@ -97,7 +97,7 @@ export default function LlmSettingsPage() {
               <label className="text-sm font-medium">Provider</label>
               <select
                 {...register('provider')}
-                className="w-full h-10 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-sm outline-none focus:ring-2 focus:ring-brand-500 transition-all"
+                className="w-full h-10 px-3 py-2 bg-background border border-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm hover:border-border-strong"
               >
                 <option value="openai">OpenAI (ChatGPT)</option>
                 <option value="anthropic">Anthropic (Claude)</option>
@@ -123,9 +123,9 @@ export default function LlmSettingsPage() {
                 max="2"
                 step="0.1"
                 {...register('temperature', { valueAsNumber: true })}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-600"
+                className="w-full h-2 bg-surface-3 rounded-lg appearance-none cursor-pointer accent-brand-600"
               />
-              <div className="flex justify-between text-xs text-gray-500">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Predictable</span>
                 <span>Creative</span>
               </div>
@@ -142,26 +142,26 @@ export default function LlmSettingsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 glass-premium border-border/60 rounded-[1.25rem] shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <Key className="w-5 h-5 text-amber-600" />
+            <div className="p-2 bg-amber-500/10 border border-amber-500/20 shadow-sm rounded-xl">
+              <Key className="w-5 h-5 text-amber-500" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-semibold">Custom API Key</h2>
-                <Badge variant="outline" className="text-[10px] uppercase font-bold text-amber-600 border-amber-600/20 bg-amber-600/5">Optional</Badge>
+                <h2 className="text-lg font-bold text-foreground">Custom API Key</h2>
+                <Badge variant="outline" className="text-[10px] uppercase font-bold text-amber-500 border-amber-500/20 bg-amber-500/5">Optional</Badge>
               </div>
-              <p className="text-sm text-gray-500">Use your own billing instead of platform credits.</p>
+              <p className="text-sm text-muted-foreground">Use your own billing instead of platform credits.</p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-              <AlertCircle className="w-5 h-5 text-gray-400 mt-0.5" />
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-start gap-3 p-4 bg-surface-2 rounded-xl border border-border shadow-sm">
+              <AlertCircle className="w-5 h-5 text-muted-foreground mt-0.5" />
+              <div className="text-sm text-foreground">
                 If provided, we will use your API key for all generation requests for this business. 
-                Your key is <strong>encrypted at rest</strong> and never shared.
+                Your key is <strong className="text-foreground">encrypted at rest</strong> and never shared.
               </div>
             </div>
 
@@ -209,9 +209,9 @@ export default function LlmSettingsPage() {
                 type="checkbox"
                 id="isFallbackEnabled"
                 {...register('isFallbackEnabled')}
-                className="w-4 h-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                className="w-4 h-4 text-primary border-border rounded focus:ring-primary/20"
               />
-              <label htmlFor="isFallbackEnabled" className="text-sm text-gray-600 dark:text-gray-400">
+              <label htmlFor="isFallbackEnabled" className="text-sm text-muted-foreground">
                 Allow fallback to platform keys if my key fails
               </label>
             </div>

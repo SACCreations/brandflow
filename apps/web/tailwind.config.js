@@ -9,10 +9,16 @@ module.exports = {
     extend: {
       colors: {
         border: "hsl(var(--border) / <alpha-value>)",
+        "border-strong": "hsl(var(--border-strong) / <alpha-value>)",
         input: "hsl(var(--input) / <alpha-value>)",
         ring: "hsl(var(--ring) / <alpha-value>)",
         background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
+        surface: {
+          1: "hsl(var(--surface-1) / <alpha-value>)",
+          2: "hsl(var(--surface-2) / <alpha-value>)",
+          3: "hsl(var(--surface-3) / <alpha-value>)",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary) / <alpha-value>)",
           foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
@@ -32,6 +38,10 @@ module.exports = {
         accent: {
           DEFAULT: "hsl(var(--accent) / <alpha-value>)",
           foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
+        },
+        ai: {
+          DEFAULT: "hsl(var(--ai) / <alpha-value>)",
+          foreground: "hsl(var(--ai-foreground) / <alpha-value>)",
         },
         popover: {
           DEFAULT: "hsl(var(--popover) / <alpha-value>)",
@@ -59,6 +69,10 @@ module.exports = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
@@ -91,12 +105,17 @@ module.exports = {
           "0%, 100%": { opacity: 1 },
           "50%": { opacity: .5 },
         },
+        "stream-pulse": {
+          "0%, 100%": { opacity: 1, transform: "scale(1)" },
+          "50%": { opacity: 0.6, transform: "scale(0.98)" },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in-up": "fade-in-up 0.4s ease-out forwards",
         "pulse-glow": "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "stream-pulse": "stream-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
     },
   },
