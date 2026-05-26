@@ -115,6 +115,32 @@ export const brandAnalysisBrandSchema = z.object({
       type: z.string().max(50).nullish(),
       name: z.string().max(100).nullish(),
     })).max(20).nullish(),
+    typographySystem: z.object({
+      headingFont: z.string().nullish(),
+      bodyFont: z.string().nullish(),
+      supportingFont: z.string().nullish(),
+      pairings: z.array(z.string()).nullish(),
+      hierarchy: z.string().nullish(),
+      personality: z.string().nullish(),
+      recommendations: z.array(z.string()).nullish(),
+    }).nullish(),
+    colorSystem: z.object({
+      primary: z.string().nullish(),
+      secondary: z.string().nullish(),
+      accent: z.string().nullish(),
+      neutral: z.string().nullish(),
+      surface: z.string().nullish(),
+      gradient: z.string().nullish(),
+      accessibilityValidation: z.string().nullish(),
+      emotionalMeaning: z.string().nullish(),
+      psychology: z.string().nullish(),
+    }).nullish(),
+    visualExtraction: z.object({
+      heroImages: z.array(z.string()).nullish(),
+      productVisuals: z.array(z.string()).nullish(),
+      uiScreenshots: z.array(z.string()).nullish(),
+      designConsistencyScore: z.number().min(0).max(10).nullish(),
+    }).nullish(),
   }).nullish(),
   identity: z.object({
     mission: z.string().max(1000).nullish(),
@@ -122,6 +148,21 @@ export const brandAnalysisBrandSchema = z.object({
     values: z.array(z.string()).nullish(),
     promise: z.string().max(500).nullish(),
     personality: z.string().max(500).nullish(),
+    businessOverview: z.object({
+      executiveSummary: z.string().nullish(),
+      marketPositioning: z.string().nullish(),
+      customerTargeting: z.string().nullish(),
+      businessModel: z.string().nullish(),
+      coreOfferings: z.array(z.string()).nullish(),
+    }).nullish(),
+    brandDNA: z.object({
+      emotionalIdentity: z.array(z.string()).nullish(),
+      designLanguage: z.string().nullish(),
+      photographyStyle: z.string().nullish(),
+      illustrationStyle: z.string().nullish(),
+      uiStyle: z.string().nullish(),
+      dnaMoodboardDescriptors: z.array(z.string()).nullish(),
+    }).nullish(),
   }).nullish(),
   designTokens: z.object({
     borderRadius: z.string().nullish(),
@@ -144,6 +185,13 @@ export const brandAnalysisBrandSchema = z.object({
     referenceLinks: z.array(z.string().url()).nullish(),
     imageStyle: z.enum(['Minimal', 'Corporate', '3D', 'Modern']).nullish(),
     animationRequirement: z.boolean().nullish(),
+    aestheticAnalysis: z.object({
+      classification: z.string().nullish(),
+      visualExplanation: z.string().nullish(),
+      moodAnalysis: z.string().nullish(),
+      creativeDirection: z.string().nullish(),
+      styleReasoning: z.string().nullish(),
+    }).nullish(),
   }).nullish(),
   approvalWorkflow: z.object({
     reviewerName: z.string().max(255).nullish().or(z.literal('')),
@@ -248,6 +296,32 @@ export const createBrandSchema = z.object({
         )
         .max(20)
         .nullish(),
+      typographySystem: z.object({
+        headingFont: z.string().nullish(),
+        bodyFont: z.string().nullish(),
+        supportingFont: z.string().nullish(),
+        pairings: z.array(z.string()).nullish(),
+        hierarchy: z.string().nullish(),
+        personality: z.string().nullish(),
+        recommendations: z.array(z.string()).nullish(),
+      }).nullish(),
+      colorSystem: z.object({
+        primary: z.string().nullish(),
+        secondary: z.string().nullish(),
+        accent: z.string().nullish(),
+        neutral: z.string().nullish(),
+        surface: z.string().nullish(),
+        gradient: z.string().nullish(),
+        accessibilityValidation: z.string().nullish(),
+        emotionalMeaning: z.string().nullish(),
+        psychology: z.string().nullish(),
+      }).nullish(),
+      visualExtraction: z.object({
+        heroImages: z.array(z.string()).nullish(),
+        productVisuals: z.array(z.string()).nullish(),
+        uiScreenshots: z.array(z.string()).nullish(),
+        designConsistencyScore: z.number().min(0).max(10).nullish(),
+      }).nullish(),
     })
     .nullish(),
     
@@ -258,6 +332,21 @@ export const createBrandSchema = z.object({
       values: z.array(z.string()).nullish(),
       promise: z.string().max(500).nullish(),
       personality: z.string().max(500).nullish(),
+      businessOverview: z.object({
+        executiveSummary: z.string().nullish(),
+        marketPositioning: z.string().nullish(),
+        customerTargeting: z.string().nullish(),
+        businessModel: z.string().nullish(),
+        coreOfferings: z.array(z.string()).nullish(),
+      }).nullish(),
+      brandDNA: z.object({
+        emotionalIdentity: z.array(z.string()).nullish(),
+        designLanguage: z.string().nullish(),
+        photographyStyle: z.string().nullish(),
+        illustrationStyle: z.string().nullish(),
+        uiStyle: z.string().nullish(),
+        dnaMoodboardDescriptors: z.array(z.string()).nullish(),
+      }).nullish(),
     })
     .nullish(),
     
@@ -298,6 +387,13 @@ export const createBrandSchema = z.object({
       referenceLinks: z.array(z.string().url()).nullish(),
       imageStyle: z.enum(['Minimal', 'Corporate', '3D', 'Modern']).nullish(),
       animationRequirement: z.boolean().default(false),
+      aestheticAnalysis: z.object({
+        classification: z.string().nullish(),
+        visualExplanation: z.string().nullish(),
+        moodAnalysis: z.string().nullish(),
+        creativeDirection: z.string().nullish(),
+        styleReasoning: z.string().nullish(),
+      }).nullish(),
     })
     .nullish(),
 

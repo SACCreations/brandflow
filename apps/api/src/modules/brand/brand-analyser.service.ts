@@ -40,6 +40,7 @@ interface ExtractedPageSignals {
   supportingFonts: string[];
   backupFonts: string[];
   colors: string[];
+  imageUrls: string[];
 }
 
 @Injectable()
@@ -107,6 +108,32 @@ export class BrandAnalyserService {
             supportingFont: 'string | null',
             backupFont: 'string | null',
             logoUrls: [{ url: 'string | null', type: 'string | null', name: 'string | null' }],
+            typographySystem: {
+              headingFont: 'string | null',
+              bodyFont: 'string | null',
+              supportingFont: 'string | null',
+              pairings: ['string'],
+              hierarchy: 'string | null',
+              personality: 'string | null',
+              recommendations: ['string']
+            },
+            colorSystem: {
+              primary: 'string | null',
+              secondary: 'string | null',
+              accent: 'string | null',
+              neutral: 'string | null',
+              surface: 'string | null',
+              gradient: 'string | null',
+              accessibilityValidation: 'string | null',
+              emotionalMeaning: 'string | null',
+              psychology: 'string | null'
+            },
+            visualExtraction: {
+              heroImages: ['string'],
+              productVisuals: ['string'],
+              uiScreenshots: ['string'],
+              designConsistencyScore: 'number | null'
+            }
           },
           identity: {
             mission: 'string | null',
@@ -114,6 +141,21 @@ export class BrandAnalyserService {
             values: ['string'],
             promise: 'string | null',
             personality: 'string | null',
+            businessOverview: {
+              executiveSummary: 'string | null',
+              marketPositioning: 'string | null',
+              customerTargeting: 'string | null',
+              businessModel: 'string | null',
+              coreOfferings: ['string']
+            },
+            brandDNA: {
+              emotionalIdentity: ['string'],
+              designLanguage: 'string | null',
+              photographyStyle: 'string | null',
+              illustrationStyle: 'string | null',
+              uiStyle: 'string | null',
+              dnaMoodboardDescriptors: ['string']
+            }
           },
           designTokens: {
             borderRadius: 'string | null',
@@ -136,6 +178,13 @@ export class BrandAnalyserService {
             referenceLinks: ['string'],
             imageStyle: 'Minimal | Corporate | 3D | Modern | null',
             animationRequirement: 'boolean',
+            aestheticAnalysis: {
+              classification: 'string | null',
+              visualExplanation: 'string | null',
+              moodAnalysis: 'string | null',
+              creativeDirection: 'string | null',
+              styleReasoning: 'string | null'
+            }
           },
           approvalWorkflow: {
             reviewerName: 'string | null',
@@ -500,6 +549,9 @@ export class BrandAnalyserService {
           type: this.normalizeString(l?.type, 50),
           name: this.normalizeString(l?.name, 100),
         })) : logoUrlFallbacks.length > 0 ? logoUrlFallbacks : null,
+        typographySystem: visualRules?.['typographySystem'] ? this.asObject(visualRules['typographySystem']) as any : null,
+        colorSystem: visualRules?.['colorSystem'] ? this.asObject(visualRules['colorSystem']) as any : null,
+        visualExtraction: visualRules?.['visualExtraction'] ? this.asObject(visualRules['visualExtraction']) as any : null,
       }),
       identity: this.compactObject({
         mission: this.normalizeString(identity?.['mission'], 1000),
@@ -507,6 +559,8 @@ export class BrandAnalyserService {
         values: this.normalizeStringArray(identity?.['values'], 10, 100),
         promise: this.normalizeString(identity?.['promise'], 500),
         personality: this.normalizeString(identity?.['personality'], 500),
+        businessOverview: identity?.['businessOverview'] ? this.asObject(identity['businessOverview']) as any : null,
+        brandDNA: identity?.['brandDNA'] ? this.asObject(identity['brandDNA']) as any : null,
       }),
       designTokens: this.compactObject({
         borderRadius: this.normalizeString(designTokens?.['borderRadius'], 50),
@@ -529,6 +583,7 @@ export class BrandAnalyserService {
         referenceLinks: this.normalizeStringArray(designPreferences?.['referenceLinks'], 5, 1000),
         imageStyle: this.normalizeEnum(designPreferences?.['imageStyle'], ['Minimal', 'Corporate', '3D', 'Modern'] as const),
         animationRequirement: this.normalizeBoolean(designPreferences?.['animationRequirement']),
+        aestheticAnalysis: designPreferences?.['aestheticAnalysis'] ? this.asObject(designPreferences['aestheticAnalysis']) as any : null,
       }),
       approvalWorkflow: this.compactObject({
         reviewerName: this.normalizeString(approvalWorkflow?.['reviewerName'], 255),
@@ -751,6 +806,10 @@ export class BrandAnalyserService {
       ...jsonLdSignals.socialLinks,
       ...this.extractSocialLinks(html, baseUrl),
     ])).slice(0, 10);
+    const imageUrls = Array.from(new Set([
+      ...this.extractAssetUrls(html, baseUrl, /<img[^>]+src=["']([^"']+)["'][^>]*>/gi),
+      ...this.extractAssetUrls(html, baseUrl, /background-image:\s*url\(["']?([^"')]+)["']?\)/gi)
+    ])).filter((url) => !/logo|brand|icon/i.test(url)).slice(0, 15);
 
     return {
       brandName: this.normalizeString(jsonLdSignals.brandName, 255)
@@ -772,6 +831,7 @@ export class BrandAnalyserService {
       supportingFonts,
       backupFonts,
       colors,
+      imageUrls,
     };
   }
 
@@ -792,6 +852,7 @@ export class BrandAnalyserService {
       signals.supportingFonts.length > 0 ? `Detected supporting fonts: ${signals.supportingFonts.join(', ')}` : null,
       signals.backupFonts.length > 0 ? `Detected backup fonts: ${signals.backupFonts.join(', ')}` : null,
       signals.colors.length > 0 ? `Detected colors: ${signals.colors.join(', ')}` : null,
+      signals.imageUrls.length > 0 ? `Image candidates (for hero/product visuals): ${signals.imageUrls.join(', ')}` : null,
     ].filter(Boolean).join('\n');
   }
 
