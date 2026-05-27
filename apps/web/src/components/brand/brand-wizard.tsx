@@ -16,7 +16,8 @@ import {
   Sparkles,
   CheckCircle2,
   X,
-  Loader2
+  Loader2,
+  Image as ImageIcon
 } from 'lucide-react';
 import { cn, Button, Progress, useToast } from '@brandflow/ui';
 import { BrandForm } from './brand-form';
@@ -35,6 +36,7 @@ interface BrandWizardProps {
 const STEPS = [
   { id: 'basics', label: 'Core Basics', icon: Building2, description: 'Name, Industry, Description' },
   { id: 'visuals', label: 'Identity', icon: Palette, description: 'Logos & Visual Style' },
+  { id: 'dna', label: 'Brand DNA & Assets', icon: ImageIcon, description: 'Moodboard & Keywords' },
   { id: 'voice', label: 'Voice & Intelligence', icon: MessageSquare, description: 'Tone & Knowledge' },
   { id: 'strategy', label: 'Market Strategy', icon: Users, description: 'Audience & Competitors' },
   { id: 'design-prefs', label: 'Design Direction', icon: Layout, description: 'Visual Styles & Animation' },

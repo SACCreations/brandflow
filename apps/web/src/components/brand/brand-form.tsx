@@ -48,7 +48,8 @@ import {
   Info,
   Maximize2,
   CheckCircle2,
-  Loader2
+  Loader2,
+  Image as ImageIcon
 } from 'lucide-react';
 import { ColorGovernance } from './color-governance';
 import { TypographyGovernance } from './typography-governance';
@@ -315,6 +316,9 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
     register('socialAccess.youtubeChannel');
     register('socialAccess.twitterHandle');
     register('competitors');
+    register('identity.brandDNA');
+    register('identity.brandDNA.dnaMoodboardDescriptors');
+    register('assetCatalog.images');
   }, [register]);
 
   React.useEffect(() => {
@@ -335,6 +339,8 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         return ['name', 'slug', 'tagline', 'description', 'industry', 'website', 'foundedYear', 'headquarters', 'contactInfo.personName', 'contactInfo.phoneNumber', 'contactInfo.email', 'contactInfo.officeAddress'];
       case 'visuals':
         return ['visualRules.primaryColor', 'visualRules.secondaryColor', 'visualRules.accentColor', 'visualRules.neutralColor', 'visualRules.semanticColor', 'visualRules.fontFamily', 'visualRules.headingFont', 'visualRules.bodyFont', 'visualRules.supportingFont', 'visualRules.backupFont', 'visualRules.logoUrls'];
+      case 'dna':
+        return ['identity.brandDNA', 'assetCatalog.images'];
       case 'voice':
         return ['tone', 'positioning', 'differentiators', 'identity.mission', 'identity.vision', 'identity.promise', 'identity.personality', 'identity.values'];
       case 'strategy':
@@ -426,6 +432,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
     const mapping: Record<string, string[]> = {
       basics: ['basics'],
       visuals: ['visuals', 'typography', 'colors', 'logos', 'documents'],
+      dna: ['dna'],
       voice: ['voice', 'knowledge'],
       strategy: ['audience', 'competitors', 'content-strategy'],
       'design-prefs': ['design-prefs'],
@@ -621,6 +628,117 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           colors={values.visualRules?.colorTokens ?? []}
           onChange={(val) => setValue('visualRules.colorTokens', val, { shouldDirty: true })}
         />
+      </section>
+      )}
+
+      {/* 4.5 Brand DNA & Assets */}
+      {isSectionVisible('dna') && (
+        <section id="dna" className="space-y-8 scroll-mt-24 animate-fade-in-up" style={{ animationDelay: '350ms' }}>
+        <div className="space-y-3 mb-6 px-1">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-700 text-foreground flex items-center justify-center font-black text-sm shadow-xl shadow-pink-500/30">
+              <ImageIcon className="w-6 h-6" />
+            </div>
+            <div className="space-y-0.5">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-foreground leading-none">Brand DNA & Assets</h2>
+              <p className="text-[10px] font-black text-pink-500 uppercase tracking-widest">Visual moodboard & core aesthetic keywords</p>
+            </div>
+          </div>
+        </div>
+
+        <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Moodboard Keywords (DNA Descriptors)</label>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {values.identity?.brandDNA?.dnaMoodboardDescriptors?.map((t: string, i: number) => (
+                <Badge key={i} variant="secondary" className="px-3 py-1.5 gap-2 bg-pink-50/80 text-pink-700 border-pink-100 uppercase font-black text-xs rounded-xl shadow-sm">
+                  {t}
+                  <button type="button" onClick={() => {
+                    const current = [...(values.identity?.brandDNA?.dnaMoodboardDescriptors || [])];
+                    current.splice(i, 1);
+                    setValue('identity.brandDNA.dnaMoodboardDescriptors', current, { shouldDirty: true });
+                  }} className="hover:text-red-500 transition-colors ml-1">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-3">
+              <Input 
+                placeholder="e.g. Minimalist glassmorphism, Cyberpunk neon" 
+                className="h-14 bg-background/60 border-border/50 rounded-2xl text-base shadow-sm focus-visible:ring-pink-500 px-5"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const val = (e.target as HTMLInputElement).value;
+                    if (val) {
+                      const current = values.identity?.brandDNA?.dnaMoodboardDescriptors || [];
+                      if (!current.includes(val)) {
+                        setValue('identity.brandDNA.dnaMoodboardDescriptors', [...current, val], { shouldDirty: true });
+                      }
+                      (e.target as HTMLInputElement).value = '';
+                    }
+                  }
+                }}
+              />
+            </div>
+          </div>
+          
+          <div className="pt-8 border-t border-border/60">
+             <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h4 className="text-sm font-black uppercase tracking-tight text-foreground">Extracted Imagery (Moodboard)</h4>
+                  <p className="text-xs text-muted-foreground">Manage images extracted from the URL or add your own.</p>
+                </div>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-xl font-bold gap-2 border-border"
+                  onClick={() => {
+                    const images = [...(values.assetCatalog?.images || [])];
+                    images.push({ url: '', assetType: 'image', usage: 'general' });
+                    setValue('assetCatalog.images', images);
+                  }}
+                >
+                  <PlusCircle className="w-4 h-4" /> Add Image
+                </Button>
+             </div>
+
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {values.assetCatalog?.images?.map((img: any, idx: number) => (
+                  <div key={idx} className="relative group rounded-2xl overflow-hidden border border-border/60 aspect-square bg-surface-1">
+                    {img.url ? (
+                      <img src={img.url} alt={`Moodboard ${idx}`} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                        <Input 
+                          placeholder="Image URL" 
+                          className="h-8 text-xs bg-background/60"
+                          onBlur={(e) => {
+                            const images = [...values.assetCatalog.images];
+                            images[idx].url = e.target.value;
+                            setValue('assetCatalog.images', images);
+                          }}
+                        />
+                      </div>
+                    )}
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const images = [...values.assetCatalog.images];
+                        images.splice(idx, 1);
+                        setValue('assetCatalog.images', images);
+                      }}
+                      className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-red-500/90 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 scale-90 group-hover:scale-100"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+             </div>
+          </div>
+        </Card>
       </section>
       )}
 

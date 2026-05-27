@@ -215,13 +215,10 @@ export default function CampaignsPage() {
         </div>
       </div>
 
-      <CampaignSummaryStats campaigns={campaigns} activeTab={activeTab} />
+      <CampaignSummaryStats campaignsCount={campaigns.length} avgHealthScore={85} />
 
       <CampaignList 
         campaigns={campaigns} 
-        onArchive={(id) => archiveMutation.mutate(id)}
-        onDelete={(id) => deleteMutation.mutate(id)}
-        onClone={(id, name) => cloneMutation.mutate({ id, name })}
       />
 
       <CreateCampaignModal 

@@ -181,15 +181,22 @@ export default function BrandAnalysePage() {
 
   // Safe extraction helper for Visual Rules arrays
   const getVisualExtractionUrls = () => {
-    if (!extractedData?.brand?.visualRules) return [];
-    // @ts-ignore
-    const extraction = extractedData.brand.visualRules.visualExtraction;
-    if (!extraction) return [];
-    return [
-      ...(Array.isArray(extraction.heroImages) ? extraction.heroImages : []),
-      ...(Array.isArray(extraction.productVisuals) ? extraction.productVisuals : []),
-      ...(Array.isArray(extraction.uiScreenshots) ? extraction.uiScreenshots : [])
-    ].filter(Boolean);
+    if (!extractedData?.brand) return [];
+    const extraction = (extractedData.brand.visualRules as any)?.visualExtraction;
+    const catalog = ((extractedData.brand as any).assetCatalog as any)?.images;
+    const urls = new Set<string>();
+
+    if (extraction) {
+      if (Array.isArray((extraction as any).heroImages)) (extraction as any).heroImages.forEach((url: string) => url && urls.add(url));
+      if (Array.isArray((extraction as any).productVisuals)) (extraction as any).productVisuals.forEach((url: string) => url && urls.add(url));
+      if (Array.isArray((extraction as any).uiScreenshots)) (extraction as any).uiScreenshots.forEach((url: string) => url && urls.add(url));
+    }
+    
+    if (Array.isArray(catalog)) {
+      catalog.forEach((img: any) => img?.url && urls.add(img.url));
+    }
+    
+    return Array.from(urls);
   };
 
   return (
@@ -454,12 +461,12 @@ export default function BrandAnalysePage() {
                     <Sparkles className="w-7 h-7 text-primary" /> Brand DNA & Visual Moodboard
                   </h3>
                   
-                  {/* @ts-ignore */}
+                  {/* @ts-expect-error - ignore typing for now */}
                   {extractedData.brand.identity?.brandDNA?.dnaMoodboardDescriptors && extractedData.brand.identity.brandDNA.dnaMoodboardDescriptors.length > 0 && (
                     <div className="mb-10 p-6 bg-surface-1/60 rounded-3xl border border-border/40">
                        <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">AI Creative Direction Keywords</h4>
                        <div className="flex flex-wrap gap-3">
-                         {/* @ts-ignore */}
+                         {/* @ts-expect-error - ignore typing for now */}
                          {extractedData.brand.identity.brandDNA.dnaMoodboardDescriptors.map((desc: string, i: number) => (
                             <Badge key={i} className="px-5 py-2.5 bg-background text-foreground hover:bg-surface-2 transition-colors border border-border shadow-sm text-sm font-semibold rounded-xl">
                               {desc}
@@ -506,7 +513,8 @@ export default function BrandAnalysePage() {
                       { label: 'Secondary', value: extractedData.brand.visualRules?.secondaryColor },
                       { label: 'Accent', value: extractedData.brand.visualRules?.accentColor },
                       { label: 'Neutral', value: (extractedData.brand.visualRules as any)?.neutralColor },
-                    ].map((color, idx) => (
+                      { label: 'Semantic', value: (extractedData.brand.visualRules as any)?.semanticColor },
+                    ].filter(c => c.value).map((color, idx) => (
                       <div key={idx} className="space-y-3 group/color">
                         <div 
                           className="w-full aspect-square rounded-3xl border border-border/30 shadow-inner flex items-end p-4 transition-transform group-hover/color:scale-[1.02]"
@@ -524,13 +532,13 @@ export default function BrandAnalysePage() {
                     ))}
                   </div>
                   
-                  {/* @ts-ignore */}
+                  {/* @ts-expect-error - ignore typing for now */}
                   {extractedData.brand.visualRules?.colorSystem?.psychology && (
                     <div className="p-6 bg-surface-1 rounded-3xl border border-border/50 relative z-10">
                       <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
                         <Zap className="w-4 h-4" /> Color Psychology
                       </h4>
-                      {/* @ts-ignore */}
+                      {/* @ts-expect-error - ignore typing for now */}
                       <p className="text-base font-medium text-foreground leading-relaxed">{extractedData.brand.visualRules.colorSystem.psychology}</p>
                     </div>
                   )}
@@ -560,9 +568,29 @@ export default function BrandAnalysePage() {
                       <div className="text-3xl text-foreground truncate" style={{ fontFamily: extractedData.brand.visualRules?.bodyFont || 'inherit' }}>
                         {extractedData.brand.visualRules?.bodyFont || 'System Default'}
                       </div>
+                      
+                      <div className="mt-6 flex flex-wrap gap-4">
+                        {(extractedData.brand.visualRules as any)?.supportingFont && (
+                          <div className="bg-surface-1 px-4 py-2 rounded-xl border border-border/50">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Supporting Font</div>
+                            <div className="text-sm text-foreground font-medium truncate" style={{ fontFamily: (extractedData.brand.visualRules as any).supportingFont }}>
+                              {(extractedData.brand.visualRules as any).supportingFont}
+                            </div>
+                          </div>
+                        )}
+                        {(extractedData.brand.visualRules as any)?.backupFont && (
+                          <div className="bg-surface-1 px-4 py-2 rounded-xl border border-border/50">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Backup Font</div>
+                            <div className="text-sm text-foreground font-medium truncate" style={{ fontFamily: (extractedData.brand.visualRules as any).backupFont }}>
+                              {(extractedData.brand.visualRules as any).backupFont}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
                       <div className="p-5 bg-surface-1 rounded-2xl border border-border/50 mt-6">
                         <p className="text-sm font-medium text-muted-foreground font-sans leading-relaxed">
-                          {/* @ts-ignore */}
+                          {/* @ts-expect-error - ignore typing for now */}
                           {extractedData.brand.visualRules?.typographySystem?.personality || 'Clean and highly readable typography ideal for continuous long-form content.'}
                         </p>
                       </div>
@@ -588,10 +616,38 @@ export default function BrandAnalysePage() {
                         <p className="text-xs uppercase tracking-widest text-muted-foreground mt-4 font-bold">Primary Tagline</p>
                       </div>
                     )}
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Market Positioning</h4>
-                      <p className="text-foreground leading-relaxed text-lg font-medium">{extractedData.brand.positioning || 'N/A'}</p>
+                    
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {extractedData.brand.positioning && (
+                        <div>
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Market Positioning</h4>
+                          <p className="text-foreground leading-relaxed text-lg font-medium">{extractedData.brand.positioning}</p>
+                        </div>
+                      )}
+                      
+                      {extractedData.brand.differentiators && (
+                        <div>
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Key Differentiators</h4>
+                          <p className="text-foreground leading-relaxed text-lg font-medium">{extractedData.brand.differentiators}</p>
+                        </div>
+                      )}
                     </div>
+                    
+                    <div className="grid md:grid-cols-2 gap-8 pt-6 border-t border-border/50">
+                      {(extractedData.brand.identity as any)?.mission && (
+                        <div>
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Mission</h4>
+                          <p className="text-foreground leading-relaxed text-base font-medium">{(extractedData.brand.identity as any).mission}</p>
+                        </div>
+                      )}
+                      {(extractedData.brand.identity as any)?.vision && (
+                        <div>
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Vision</h4>
+                          <p className="text-foreground leading-relaxed text-base font-medium">{(extractedData.brand.identity as any).vision}</p>
+                        </div>
+                      )}
+                    </div>
+
                     <div>
                       <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Target Audience</h4>
                       <p className="text-foreground leading-relaxed text-lg font-medium">{
@@ -621,14 +677,14 @@ export default function BrandAnalysePage() {
                     <Droplet className="w-7 h-7 text-primary" /> Brand Aesthetics
                   </h3>
                   
-                  {/* @ts-ignore */}
+                  {/* @ts-expect-error - ignore typing for now */}
                   {extractedData.brand.designPreferences?.aestheticAnalysis?.classification ? (
                     <div className="space-y-8">
                       <div>
                         <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-3">Primary Classification</h4>
                         <div className="inline-block px-5 py-3 bg-background rounded-2xl border border-primary/30 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
                           <span className="text-2xl font-black text-foreground">
-                            {/* @ts-ignore */}
+                            {/* @ts-expect-error - ignore typing for now */}
                             {extractedData.brand.designPreferences.aestheticAnalysis.classification}
                           </span>
                         </div>
@@ -638,14 +694,14 @@ export default function BrandAnalysePage() {
                         <div>
                           <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Visual Mood</h4>
                           <p className="text-foreground font-medium text-lg leading-relaxed">
-                            {/* @ts-ignore */}
+                            {/* @ts-expect-error - ignore typing for now */}
                             {extractedData.brand.designPreferences.aestheticAnalysis.moodAnalysis}
                           </p>
                         </div>
                         <div className="pt-6 border-t border-border/50">
                           <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Design Reasoning</h4>
                           <p className="text-muted-foreground font-medium text-base leading-relaxed">
-                            {/* @ts-ignore */}
+                            {/* @ts-expect-error - ignore typing for now */}
                             {extractedData.brand.designPreferences.aestheticAnalysis.styleReasoning}
                           </p>
                         </div>
@@ -676,10 +732,19 @@ export default function BrandAnalysePage() {
                   
                   <div className="grid md:grid-cols-2 gap-12">
                     <div>
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Company Description</h4>
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Company Details</h4>
                       <p className="text-foreground leading-relaxed text-lg font-medium">
                         {extractedData.brand.description || 'Not enough context found to generate a thorough description.'}
                       </p>
+                      
+                      {(extractedData.brand.identity as any)?.personality && (
+                         <div className="pt-6 mt-6 border-t border-border/50">
+                            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Brand Personality</h4>
+                            <p className="text-foreground leading-relaxed text-base font-medium">
+                              {(extractedData.brand.identity as any).personality}
+                            </p>
+                         </div>
+                      )}
                     </div>
                     
                     <div className="space-y-8">
@@ -696,12 +761,12 @@ export default function BrandAnalysePage() {
                          </div>
                        )}
 
-                        {/* @ts-ignore */}
-                       {extractedData.brand.identity?.businessOverview?.coreOfferings && (
+                        {/* @ts-expect-error - ignore typing for now */}
+                       {extractedData.brand.identity?.businessOverview?.coreOfferings && extractedData.brand.identity.businessOverview.coreOfferings.length > 0 && (
                          <div className="pt-6 border-t border-border/50">
                             <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Detected Offerings</h4>
                             <ul className="space-y-3">
-                              {/* @ts-ignore */}
+                              {/* @ts-expect-error - ignore typing for now */}
                               {extractedData.brand.identity.businessOverview.coreOfferings.map((o: string, idx: number) => (
                                 <li key={idx} className="flex items-start gap-3 text-foreground font-medium">
                                   <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />

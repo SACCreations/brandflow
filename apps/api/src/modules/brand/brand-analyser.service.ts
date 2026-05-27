@@ -96,6 +96,7 @@ export class BrandAnalyserService {
       'For Target Audience and Market Intelligence, confidently infer age groups, interests, and competitors from context based on the industry if explicit data is missing.',
       'For brandDNA, generate highly descriptive, visual keywords for moodboard generation (e.g. "Minimalist glassmorphism on deep slate", "Cyberpunk neon accents").',
       'Ensure visualExtraction accurately categorizes the provided Image candidates into heroImages, productVisuals, and uiScreenshots.',
+      'Do not duplicate textual content between sections like identity.businessOverview and designPreferences.aestheticAnalysis. Ensure mission, vision, and differentiators are populated distinctly.',
       'The brand object must use this shape:',
       JSON.stringify({
         brand: {
@@ -641,7 +642,13 @@ export class BrandAnalyserService {
         })) : logoUrlFallbacks.length > 0 ? logoUrlFallbacks : null,
         typographySystem: context.typographyResult?.typographySystem ?? (visualRules?.['typographySystem'] ? this.asObject(visualRules['typographySystem']) as any : null),
         colorSystem: visualRules?.['colorSystem'] ? this.asObject(visualRules['colorSystem']) as any : null,
-        visualExtraction: context.visionResult?.visualExtraction ?? (visualRules?.['visualExtraction'] ? this.asObject(visualRules['visualExtraction']) as any : null),
+        visualExtraction: {
+          ...(visualRules?.['visualExtraction'] ? this.asObject(visualRules['visualExtraction']) : {}),
+          ...context.visionResult?.visualExtraction,
+          heroImages: context.visionResult?.visualExtraction?.heroImages || visualRules?.['visualExtraction']?.heroImages || primarySignals?.imageUrls?.slice(0, 5) || [],
+          productVisuals: context.visionResult?.visualExtraction?.productVisuals || visualRules?.['visualExtraction']?.productVisuals || primarySignals?.imageUrls?.slice(5, 10) || [],
+          uiScreenshots: context.visionResult?.visualExtraction?.uiScreenshots || visualRules?.['visualExtraction']?.uiScreenshots || primarySignals?.imageUrls?.slice(10, 15) || [],
+        } as any,
       }),
       identity: this.compactObject({
         mission: this.normalizeString(identity?.['mission'], 1000),
@@ -656,7 +663,9 @@ export class BrandAnalyserService {
         } : (identity?.['brandDNA'] ? this.asObject(identity['brandDNA']) as any : null),
       }),
       brandIntelligenceScore: rawBrand['brandIntelligenceScore'] ? this.asObject(rawBrand['brandIntelligenceScore']) as any : null,
-      assetCatalog: context.catalogResult?.assetCatalog ?? (rawBrand['assetCatalog'] ? this.asObject(rawBrand['assetCatalog']) as any : null),
+      assetCatalog: context.catalogResult?.assetCatalog ?? (rawBrand['assetCatalog'] ? this.asObject(rawBrand['assetCatalog']) as any : {
+        images: (primarySignals?.imageUrls || []).map(url => ({ url, assetType: 'image', usage: 'general' }))
+      }),
       designTokens: this.compactObject({
         borderRadius: this.normalizeString(designTokens?.['borderRadius'], 50),
         shadows: this.normalizeString(designTokens?.['shadows'], 50),
@@ -907,7 +916,7 @@ export class BrandAnalyserService {
     const imageUrls = Array.from(new Set([
       ...this.extractAssetUrls(html, baseUrl, /<img[^>]+src=["']([^"']+)["'][^>]*>/gi),
       ...this.extractAssetUrls(html, baseUrl, /background-image:\s*url\(["']?([^"')]+)["']?\)/gi)
-    ])).filter((url) => !/logo|brand|icon/i.test(url)).slice(0, 15);
+    ])).filter((url) => !/logo|brand|icon/i.test(url)).slice(0, 30);
 
     return {
       brandName: this.normalizeString(jsonLdSignals.brandName, 255)
