@@ -1,11 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { chromium, Browser, Page } from 'playwright';
 
+export interface ComputedStyles {
+  headingFonts: string[];
+  bodyFonts: string[];
+}
+
 export interface ScreenshotResult {
   homepageBase64: string | null;
   mobileBase64: string | null;
   pricingBase64: string | null;
   aboutBase64: string | null;
+  computedStyles?: ComputedStyles;
 }
 
 @Injectable()
@@ -19,7 +25,7 @@ export class ScreenshotService {
     try {
       browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
       
-      const homepageBase64 = await this.capturePage(browser, baseUrl, { width: 1440, height: 900 });
+      const { base64: homepageBase64, computedStyles } = await this.capturePageWithStyles(browser, baseUrl, { width: 1440, height: 900 });
       const mobileBase64 = await this.capturePage(browser, baseUrl, { width: 390, height: 844 }, true);
       
       // Try to find pricing and about pages
@@ -33,7 +39,8 @@ export class ScreenshotService {
         homepageBase64,
         mobileBase64,
         pricingBase64,
-        aboutBase64
+        aboutBase64,
+        computedStyles
       };
     } catch (error: any) {
       this.logger.error(`Failed to capture screenshots for ${baseUrl}: ${error.message}`);
@@ -68,6 +75,42 @@ export class ScreenshotService {
     } catch (error) {
       this.logger.warn(`Failed to capture page ${url}`);
       return null;
+    } finally {
+      if (page) {
+        await page.close();
+      }
+    }
+  }
+
+  private async capturePageWithStyles(browser: Browser, url: string, viewport: {width: number, height: number}): Promise<{ base64: string | null, computedStyles?: ComputedStyles }> {
+    let page: Page | null = null;
+    try {
+      const context = await browser.newContext({ viewport });
+      page = await context.newPage();
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+      await page.waitForTimeout(2000);
+      
+      const computedStyles = await page.evaluate(() => {
+        const getFonts = (selector: string) => {
+          const els = Array.from(document.querySelectorAll(selector)).slice(0, 50);
+          return Array.from(new Set(els.map(el => {
+            const computed = (window as any).getComputedStyle(el);
+            const ff = computed ? computed.fontFamily : null;
+            return ff ? ff.replace(/["']/g, '').split(',')[0].trim() : null;
+          }).filter(Boolean))).slice(0, 5) as string[];
+        };
+        
+        return {
+          headingFonts: getFonts('h1, h2, h3, h4, h5, h6'),
+          bodyFonts: getFonts('p, span, a')
+        };
+      }).catch(() => undefined);
+      
+      const buffer = await page.screenshot({ type: 'jpeg', quality: 60, fullPage: false });
+      return { base64: buffer.toString('base64'), computedStyles };
+    } catch (error) {
+      this.logger.warn(`Failed to capture page with styles ${url}`);
+      return { base64: null };
     } finally {
       if (page) {
         await page.close();

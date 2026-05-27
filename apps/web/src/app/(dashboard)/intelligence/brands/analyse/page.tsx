@@ -594,7 +594,11 @@ export default function BrandAnalysePage() {
                     </div>
                     <div>
                       <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Target Audience</h4>
-                      <p className="text-foreground leading-relaxed text-lg font-medium">{extractedData.brand.audience || 'N/A'}</p>
+                      <p className="text-foreground leading-relaxed text-lg font-medium">{
+                        typeof extractedData.brand.audience === 'object' && extractedData.brand.audience !== null
+                          ? (extractedData.brand.audience as any).primaryAudience || 'N/A'
+                          : extractedData.brand.audience || 'N/A'
+                      }</p>
                     </div>
                     <div className="pt-6 border-t border-border/50">
                       <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Tone of Voice</h4>

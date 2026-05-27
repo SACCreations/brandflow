@@ -484,7 +484,7 @@ function buildInitialForm(
       : project
         ? `Drive measurable growth for ${project.name}`
         : '',
-    audience: brand?.audience || project?.customer?.company || project?.customer?.name || '',
+    audience: (typeof brand?.audience === 'object' && brand?.audience !== null ? (brand.audience as any).primaryAudience : brand?.audience) || project?.customer?.company || project?.customer?.name || '',
     cta: ctaPreference || '',
     tone: inferredTone,
     campaignTheme: brand?.positioning || project?.name || '',

@@ -26,6 +26,7 @@ interface ResolvedAnalysisSource {
   label: string;
   url?: string;
   text: string;
+  baseText?: string;
   evidenceCount: number;
   status?: string;
   warnings: string[];
@@ -253,14 +254,30 @@ export class BrandAnalyserService {
       }),
     ].join('\n');
 
-    const userPrompt = this.buildUserPrompt(resolvedSources);
-
-    // Orchestrate Sub-services
     const baseUrl = resolvedSources.find((s) => s.url)?.url;
-    let screenshots = null;
+    let screenshots: any = null;
     if (baseUrl) {
       screenshots = await this.screenshotService.captureScreenshots(baseUrl);
+      
+      // Inject computed styles (like true rendered fonts) directly into the evidence signals
+      if (screenshots?.computedStyles) {
+        const primarySource = resolvedSources.find((source) => source.url === baseUrl);
+        if (primarySource?.signals && primarySource.baseText) {
+           primarySource.signals.headingFonts = Array.from(new Set([...screenshots.computedStyles.headingFonts, ...primarySource.signals.headingFonts])).filter(Boolean).slice(0, 5);
+           primarySource.signals.bodyFonts = Array.from(new Set([...screenshots.computedStyles.bodyFonts, ...primarySource.signals.bodyFonts])).filter(Boolean).slice(0, 5);
+           primarySource.signals.fonts = Array.from(new Set([...primarySource.signals.headingFonts, ...primarySource.signals.bodyFonts, ...primarySource.signals.fonts])).filter(Boolean).slice(0, 10);
+           
+           primarySource.text = [
+             this.formatPageSignalsForPrompt(primarySource.signals),
+             'Readable page excerpt:',
+             primarySource.baseText
+           ].filter(Boolean).join('\n\n');
+        }
+      }
     }
+
+    const userPrompt = this.buildUserPrompt(resolvedSources);
+
     const primarySignals = resolvedSources.find((source) => source.signals)?.signals;
     const imageUrls = primarySignals?.imageUrls || [];
     const combinedText = resolvedSources.map(s => s.text).join('\n').slice(0, 10000);
@@ -477,6 +494,7 @@ export class BrandAnalyserService {
       label,
       url: normalizedUrl,
       text,
+      baseText,
       evidenceCount: 1,
       status: 'fetched',
       warnings: [],

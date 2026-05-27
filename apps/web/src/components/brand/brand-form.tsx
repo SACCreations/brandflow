@@ -134,7 +134,7 @@ const sanitizeInitialData = (data: any) => {
     website: cleaned.website || '',
     differentiators: cleaned.differentiators || '',
     positioning: cleaned.positioning || '',
-    audience: cleaned.audience || '',
+    audience: typeof cleaned.audience === 'object' && cleaned.audience !== null ? cleaned.audience : { primaryAudience: cleaned.audience || '' },
     tone: Array.isArray(cleaned.tone) ? cleaned.tone : [],
     visualRules: {
       ...cleaned.visualRules,
@@ -711,7 +711,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            <div className="space-y-3">
              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Target Customers</label>
              <Textarea 
-               {...register('audience')} 
+               {...register('audience.primaryAudience')} 
                placeholder="Describe your ideal customers, demographics, and pain points..." 
                className="min-h-[140px] bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base p-4 shadow-sm focus-visible:ring-emerald-500 leading-relaxed" 
              />
