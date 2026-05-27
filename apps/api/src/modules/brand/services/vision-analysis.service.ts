@@ -82,18 +82,33 @@ Return a JSON object with:
         {
           provider: provider as any,
           apiKey,
-          model: model || 'gpt-4o', // prefer vision model
-          jsonMode: true,
-          temperature: 0.1,
-          maxTokens: 1500
+          model,
+          temperature: 0.2,
+          maxTokens: 1500,
+          jsonMode: true
         }
       );
-      
-      const parsed = JSON.parse(result.response.content);
-      return parsed;
+      return JSON.parse(result.response.content);
     } catch (e: any) {
-      this.logger.error(`Vision analysis failed: ${e.message}`);
-      return null;
+      this.logger.error('Vision analysis failed with primary provider: ' + e.message + '. Attempting fallback to OpenAI.');
+      try {
+        // Fallback to OpenAI gpt-4o which is multimodal, in case the user's selected provider (e.g. nvidia text model) doesn't support images
+        const fallbackResult = await gateway.complete(
+          systemPrompt,
+          [{ role: 'user', content }] as any,
+          {
+            provider: 'openai',
+            model: 'gpt-4o', // known multimodal model
+            temperature: 0.2,
+            maxTokens: 1500,
+            jsonMode: true
+          }
+        );
+        return JSON.parse(fallbackResult.response.content);
+      } catch (fallbackErr: any) {
+        this.logger.error('Vision analysis fallback also failed: ' + fallbackErr.message);
+        return null;
+      }
     }
   }
 }

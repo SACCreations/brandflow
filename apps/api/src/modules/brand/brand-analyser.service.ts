@@ -283,17 +283,23 @@ export class BrandAnalyserService {
 
     const primarySignals = resolvedSources.find((source) => source.signals)?.signals;
     const imageUrls = primarySignals?.imageUrls || [];
-    const combinedText = resolvedSources.map(s => s.text).join('\n').slice(0, 20000); // Optimized for speed
-    const fullHtml = resolvedSources.map(s => s.baseText).join(' ').slice(0, 40000); // Limit HTML as well
+    const combinedText = resolvedSources.map(s => s.text).join('\n').slice(0, 10000); // Reduced for faster LLM processing
+    const fullHtml = resolvedSources.map(s => s.baseText).join(' ').slice(0, 15000); // Reduced to prevent hanging on huge HTML
 
-    // Sequence LLM calls to prevent extreme rate-limiting / timeouts from concurrent massive context payloads
+    // Sequence heavy LLM calls, but parallelize the lightweight text ones to shave off 30-40 seconds
     let visionResult = null;
     if (screenshots) {
       visionResult = await this.visionAnalysisService.analyzeVisuals(this.gateway, screenshots, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
     }
+    
     const typographyResult = await this.fontDetectionService.detectFonts(this.gateway, fullHtml, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
-    const audienceResult = await this.audienceDetectionService.inferAudience(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
-    const personalityResult = await this.personalityEngineService.inferPersonality(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
+    
+    // These two are purely text-based and lightweight, safe to run concurrently
+    const [audienceResult, personalityResult] = await Promise.all([
+      this.audienceDetectionService.inferAudience(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
+      this.personalityEngineService.inferPersonality(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined)
+    ]);
+    
     const catalogResult = await this.assetCatalogService.buildCatalog(this.gateway, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
 
     let gatewayResult;

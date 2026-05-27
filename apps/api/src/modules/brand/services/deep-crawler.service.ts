@@ -97,9 +97,9 @@ export class DeepCrawlerService {
       
       try {
         const url = new URL(href, baseUrl);
-        // Only keep links to the same origin
-        if (url.origin === new URL(baseUrl).origin) {
-          links.add(url.toString().split('#')[0]); // ignore hashes
+        const urlStr = url.toString().split('#')[0];
+        if (urlStr && url.origin === new URL(baseUrl).origin) {
+          links.add(urlStr); // ignore hashes
         }
       } catch (e) {
         // invalid URL
