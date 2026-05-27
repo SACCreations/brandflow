@@ -9,8 +9,7 @@ export interface ComputedStyles {
 export interface ScreenshotResult {
   homepageBase64: string | null;
   mobileBase64: string | null;
-  pricingBase64: string | null;
-  aboutBase64: string | null;
+  subpagesBase64: string[];
   computedStyles?: ComputedStyles;
 }
 
@@ -18,37 +17,36 @@ export interface ScreenshotResult {
 export class ScreenshotService {
   private readonly logger = new Logger(ScreenshotService.name);
 
-  async captureScreenshots(baseUrl: string): Promise<ScreenshotResult> {
-    this.logger.log(`Capturing screenshots for ${baseUrl}`);
+  async captureScreenshots(mainUrl: string, subUrls: string[] = []): Promise<ScreenshotResult> {
+    this.logger.log(`Capturing screenshots for ${mainUrl} and ${subUrls.length} subpages`);
     let browser: Browser | null = null;
     
     try {
       browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
       
-      const { base64: homepageBase64, computedStyles } = await this.capturePageWithStyles(browser, baseUrl, { width: 1440, height: 900 });
-      const mobileBase64 = await this.capturePage(browser, baseUrl, { width: 390, height: 844 }, true);
+      const { base64: homepageBase64, computedStyles } = await this.capturePageWithStyles(browser, mainUrl, { width: 1440, height: 900 });
+      const mobileBase64 = await this.capturePage(browser, mainUrl, { width: 390, height: 844 }, true);
       
-      // Try to find pricing and about pages
-      const pricingUrl = this.resolveUrl(baseUrl, '/pricing');
-      const pricingBase64 = await this.capturePage(browser, pricingUrl, { width: 1440, height: 900 }).catch(() => null);
+      const subpagesBase64: string[] = [];
+      const urlsToCapture = subUrls.slice(0, 3); // Max 3 subpages to avoid massive payloads
       
-      const aboutUrl = this.resolveUrl(baseUrl, '/about');
-      const aboutBase64 = await this.capturePage(browser, aboutUrl, { width: 1440, height: 900 }).catch(() => null);
+      for (const url of urlsToCapture) {
+        const base64 = await this.capturePage(browser, url, { width: 1440, height: 900 }).catch(() => null);
+        if (base64) subpagesBase64.push(base64);
+      }
 
       return {
         homepageBase64,
         mobileBase64,
-        pricingBase64,
-        aboutBase64,
+        subpagesBase64,
         computedStyles
       };
     } catch (error: any) {
-      this.logger.error(`Failed to capture screenshots for ${baseUrl}: ${error.message}`);
+      this.logger.error(`Failed to capture screenshots for ${mainUrl}: ${error.message}`);
       return {
         homepageBase64: null,
         mobileBase64: null,
-        pricingBase64: null,
-        aboutBase64: null
+        subpagesBase64: []
       };
     } finally {
       if (browser) {

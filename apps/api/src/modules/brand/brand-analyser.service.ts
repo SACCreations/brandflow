@@ -18,6 +18,7 @@ import { FontDetectionService } from './services/font-detection.service';
 import { AudienceDetectionService } from './services/audience-detection.service';
 import { AssetCatalogService } from './services/asset-catalog.service';
 import { PersonalityEngineService } from './services/personality-engine.service';
+import { DeepCrawlerService } from './services/deep-crawler.service';
 
 const dnsLookup = promisify(dns.lookup);
 
@@ -64,6 +65,7 @@ export class BrandAnalyserService {
     private readonly audienceDetectionService: AudienceDetectionService,
     private readonly assetCatalogService: AssetCatalogService,
     private readonly personalityEngineService: PersonalityEngineService,
+    private readonly deepCrawlerService: DeepCrawlerService,
   ) {
     this.gateway = new LLMGateway({
       defaultProvider: (this.config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic'),
@@ -257,7 +259,8 @@ export class BrandAnalyserService {
     const baseUrl = resolvedSources.find((s) => s.url)?.url;
     let screenshots: any = null;
     if (baseUrl) {
-      screenshots = await this.screenshotService.captureScreenshots(baseUrl);
+      const subUrls = resolvedSources.filter((s) => s.url && s.url !== baseUrl).map((s) => s.url as string);
+      screenshots = await this.screenshotService.captureScreenshots(baseUrl, subUrls);
       
       // Inject computed styles (like true rendered fonts) directly into the evidence signals
       if (screenshots?.computedStyles) {
@@ -280,13 +283,15 @@ export class BrandAnalyserService {
 
     const primarySignals = resolvedSources.find((source) => source.signals)?.signals;
     const imageUrls = primarySignals?.imageUrls || [];
-    const combinedText = resolvedSources.map(s => s.text).join('\n').slice(0, 10000);
+    const combinedText = resolvedSources.map(s => s.text).join('\n').slice(0, 30000); // Increased for crawler data
+    const fullHtml = resolvedSources.map(s => s.baseText).join(' ');
 
-    const [visionResult, audienceResult, catalogResult, personalityResult] = await Promise.all([
+    const [visionResult, audienceResult, catalogResult, personalityResult, typographyResult] = await Promise.all([
       screenshots ? this.visionAnalysisService.analyzeVisuals(this.gateway, screenshots, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined) : Promise.resolve(null),
       this.audienceDetectionService.inferAudience(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
       this.assetCatalogService.buildCatalog(this.gateway, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
       this.personalityEngineService.inferPersonality(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
+      this.fontDetectionService.detectFonts(this.gateway, fullHtml, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
     ]);
 
     let gatewayResult;
@@ -313,7 +318,8 @@ export class BrandAnalyserService {
       visionResult,
       audienceResult,
       catalogResult,
-      personalityResult
+      personalityResult,
+      typographyResult
     });
   }
 
@@ -422,20 +428,20 @@ export class BrandAnalyserService {
     const settled = await Promise.allSettled(
       (sources ?? []).map(async (source) => {
         if (source.type === 'text') {
-          return {
+          return [{
             type: 'text' as const,
             label: source.label ?? 'Manual text source',
             text: this.limitText(this.normalizeText(source.value), 6_000),
             evidenceCount: 1,
             warnings: [],
-          };
+          }];
         }
 
-        return this.fetchUrlSource(source.value, source.label ?? source.value);
+        return this.fetchUrlSources(source.value, source.label ?? source.value);
       }),
     );
 
-    const resolved = settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+    const resolved = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
     const warnings = settled.flatMap((result) => (result.status === 'rejected'
       ? [result.reason instanceof Error ? result.reason.message : String(result.reason)]
       : []));
@@ -453,53 +459,50 @@ export class BrandAnalyserService {
     return resolved;
   }
 
-  private async fetchUrlSource(urlValue: string, label: string): Promise<ResolvedAnalysisSource> {
+  private async fetchUrlSources(urlValue: string, label: string): Promise<ResolvedAnalysisSource[]> {
     const normalizedUrl = this.normalizeUrl(urlValue);
     if (!normalizedUrl) {
       throw new BadRequestException(`Invalid source URL: ${urlValue}`);
     }
 
-    // SSRF protection: validate URL resolves to a public IP
-    await this.validateUrlSafety(normalizedUrl);
-
-    const response = await fetch(normalizedUrl, {
-      signal: AbortSignal.timeout(15_000),
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        Accept: 'text/html, text/plain, application/xhtml+xml',
-      },
-      redirect: 'follow',
-    });
-
-    if (!response.ok) {
-      throw new BadRequestException(`Failed to fetch ${normalizedUrl} (${response.status})`);
+    const crawledPages = await this.deepCrawlerService.crawl(normalizedUrl, 5);
+    
+    if (crawledPages.length === 0) {
+      throw new BadRequestException(`Failed to crawl ${normalizedUrl}`);
     }
 
-    const rawContent = await response.text();
-    const signals = this.extractPageSignals(rawContent, normalizedUrl);
-    const baseText = this.limitText(this.extractReadableText(rawContent), 6_000);
+    const sources: ResolvedAnalysisSource[] = [];
 
-    const text = [
-      this.formatPageSignalsForPrompt(signals),
-      'Readable page excerpt:',
-      baseText,
-    ].filter(Boolean).join('\n\n');
+    for (const page of crawledPages) {
+      const signals = this.extractPageSignals(page.html, page.url);
+      const baseText = this.limitText(this.extractReadableText(page.html), 6_000);
 
-    if (text.length < 200) {
+      const text = [
+        page.isMainPage ? this.formatPageSignalsForPrompt(signals) : `Subpage Signals (${page.url}):\n${this.formatPageSignalsForPrompt(signals)}`,
+        'Readable page excerpt:',
+        baseText,
+      ].filter(Boolean).join('\n\n');
+
+      if (text.length >= 200) {
+        sources.push({
+          type: 'url',
+          label: page.isMainPage ? label : `${label} (${new URL(page.url).pathname})`,
+          url: page.url,
+          text,
+          baseText,
+          evidenceCount: 1,
+          status: 'fetched',
+          warnings: [],
+          signals,
+        });
+      }
+    }
+
+    if (sources.length === 0) {
       throw new BadRequestException(`Source ${normalizedUrl} did not contain enough readable text to analyze.`);
     }
 
-    return {
-      type: 'url',
-      label,
-      url: normalizedUrl,
-      text,
-      baseText,
-      evidenceCount: 1,
-      status: 'fetched',
-      warnings: [],
-      signals,
-    };
+    return sources;
   }
 
   private buildUserPrompt(sources: ResolvedAnalysisSource[]): string {
@@ -539,6 +542,7 @@ export class BrandAnalyserService {
       audienceResult?: any;
       catalogResult?: any;
       personalityResult?: any;
+      typographyResult?: any;
     },
   ): BrandAnalysisResult {
     const parsed = this.extractJsonObject(content);
@@ -629,7 +633,7 @@ export class BrandAnalyserService {
           type: this.normalizeString(l?.type, 50),
           name: this.normalizeString(l?.name, 100),
         })) : logoUrlFallbacks.length > 0 ? logoUrlFallbacks : null,
-        typographySystem: visualRules?.['typographySystem'] ? this.asObject(visualRules['typographySystem']) as any : null,
+        typographySystem: context.typographyResult?.typographySystem ?? (visualRules?.['typographySystem'] ? this.asObject(visualRules['typographySystem']) as any : null),
         colorSystem: visualRules?.['colorSystem'] ? this.asObject(visualRules['colorSystem']) as any : null,
         visualExtraction: context.visionResult?.visualExtraction ?? (visualRules?.['visualExtraction'] ? this.asObject(visualRules['visualExtraction']) as any : null),
       }),
@@ -699,11 +703,14 @@ export class BrandAnalyserService {
         youtubeChannel: this.normalizeString(socialAccess?.['youtubeChannel'], 255) ?? socialSignals.youtubeChannel ?? null,
         twitterHandle: this.normalizeString(socialAccess?.['twitterHandle'], 100) ?? socialSignals.twitterHandle ?? null,
       }),
-      competitors: competitors.map((c: any) => ({
+      competitors: Array.isArray(context.personalityResult?.competitors) ? context.personalityResult.competitors : competitors.map((c: any) => ({
         name: this.normalizeString(c?.name, 255) || 'Unknown',
         website: this.normalizeUrl(this.normalizeString(c?.website, 500)),
         strengths: this.normalizeString(c?.strengths, 1000),
         weaknesses: this.normalizeString(c?.weaknesses, 1000),
+        visualSimilarity: this.normalizeString(c?.visualSimilarity, 1000),
+        positioningSimilarity: this.normalizeString(c?.positioningSimilarity, 1000),
+        categoryOverlap: this.normalizeString(c?.categoryOverlap, 1000),
       })),
       contactInfo: contactInfo ? {
         personName: this.normalizeString(contactInfo?.['personName'], 255),

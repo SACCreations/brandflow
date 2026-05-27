@@ -13,37 +13,49 @@ export class AssetCatalogService {
     model?: string
   ): Promise<any> {
     if (!imageUrls || imageUrls.length === 0) return null;
-    this.logger.log('Building asset catalog');
-    const systemPrompt = `You are an asset librarian. Categorize these image URLs into a catalog.
-Return JSON:
+    this.logger.log(`Building advanced asset catalog from ${imageUrls.length} images`);
+    
+    // We pass the raw urls and ask the LLM to categorize them into our strict taxonomy
+    const systemPrompt = `You are a digital asset librarian and brand identity manager.
+Given this list of discovered image URLs from a brand's website, categorize them logically into a persistent Asset Catalog structure.
+
+Return a JSON object:
 {
   "assetCatalog": {
-    "images": [
-      {
-        "url": "url",
-        "assetType": "logo | hero-image | icon | illustration | product-shot | team-photo | generic",
-        "usage": "string"
-      }
-    ]
+    "logos": {
+      "primary": ["urls"],
+      "secondary": ["urls"],
+      "symbol": ["urls"],
+      "favicon": ["urls"]
+    },
+    "brandImages": {
+      "hero": ["urls"],
+      "product": ["urls"],
+      "team": ["urls"],
+      "ui": ["urls"],
+      "marketing": ["urls"]
+    },
+    "illustrations": ["urls"],
+    "motion": ["urls of gifs or videos"]
   }
 }`;
 
     try {
       const result = await gateway.complete(
         systemPrompt,
-        `Image URLs:\n${imageUrls.join('\n')}`,
+        `Discovered Image URLs:\n${imageUrls.join('\n')}`,
         {
           provider: provider as any,
           apiKey,
           model,
           jsonMode: true,
           temperature: 0.1,
-          maxTokens: 800
+          maxTokens: 1500
         }
       );
       return JSON.parse(result.response.content);
     } catch (e: any) {
-      this.logger.error('Asset catalog failed: ' + e.message);
+      this.logger.error('Asset catalog generation failed: ' + e.message);
       return null;
     }
   }

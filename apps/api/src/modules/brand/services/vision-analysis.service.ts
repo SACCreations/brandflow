@@ -30,14 +30,11 @@ export class VisionAnalysisService {
       content.push({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${screenshots.mobileBase64}` } });
     }
 
-    if (screenshots.pricingBase64) {
-      content.push({ type: 'text', text: 'Pricing Page:' });
-      content.push({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${screenshots.pricingBase64}` } });
-    }
-
-    if (screenshots.aboutBase64) {
-      content.push({ type: 'text', text: 'About Page:' });
-      content.push({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${screenshots.aboutBase64}` } });
+    if (screenshots.subpagesBase64 && screenshots.subpagesBase64.length > 0) {
+      screenshots.subpagesBase64.forEach((base64, index) => {
+        content.push({ type: 'text', text: `Subpage ${index + 1}:` });
+        content.push({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } });
+      });
     }
 
     for (const url of imageUrls.slice(0, 5)) {
@@ -60,13 +57,21 @@ Return a JSON object with:
     "uiLanguage": "string | null",
     "shapeLanguage": "string | null",
     "motionStyle": "string | null",
-    "brandMaturity": "string | null"
+    "brandMaturity": "string | null",
+    "dnaMoodboardDescriptors": ["string array of rich descriptive visual keywords like 'Minimalist glassmorphism on deep slate' or 'Cyberpunk neon accents'"]
   },
   "visualExtraction": {
     "heroImages": ["urls"],
     "productVisuals": ["urls"],
     "uiScreenshots": ["urls"],
+    "marketingImages": ["urls"],
     "designConsistencyScore": 8.5
+  },
+  "logoVariants": {
+    "primary": ["urls of primary full logos"],
+    "secondary": ["urls of secondary or alternate logos"],
+    "symbol": ["urls of icon marks or logomarks"],
+    "favicon": ["urls of tiny app icons or favicons"]
   }
 }`;
 

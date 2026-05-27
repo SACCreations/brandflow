@@ -14,6 +14,7 @@ import { FontDetectionService } from './services/font-detection.service';
 import { AudienceDetectionService } from './services/audience-detection.service';
 import { AssetCatalogService } from './services/asset-catalog.service';
 import { PersonalityEngineService } from './services/personality-engine.service';
+import { DeepCrawlerService } from './services/deep-crawler.service';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { PersonalityEngineService } from './services/personality-engine.service'
     FontDetectionService,
     AudienceDetectionService,
     AssetCatalogService,
-    PersonalityEngineService
+    PersonalityEngineService,
+    DeepCrawlerService
   ],
   exports: [BrandService, BrandAnalyserService],
 })

@@ -243,6 +243,9 @@ export const brandAnalysisBrandSchema = z.object({
     website: z.string().url().nullish().or(z.literal('')),
     strengths: z.string().max(1000).nullish().or(z.literal('')),
     weaknesses: z.string().max(1000).nullish().or(z.literal('')),
+    visualSimilarity: z.string().nullish(),
+    positioningSimilarity: z.string().nullish(),
+    categoryOverlap: z.string().nullish(),
   })).nullish(),
   contactInfo: z.object({
     personName: z.string().max(255).nullish().or(z.literal('')),
@@ -260,30 +263,31 @@ export const brandAnalysisBrandSchema = z.object({
     modernDesignScore: z.number().nullish(),
   }).nullish(),
   assetCatalog: z.object({
-    images: z.array(z.object({
-      url: z.string(),
-      assetType: z.string().nullish(),
-      style: z.string().nullish(),
-      dominantColors: z.array(z.string()).nullish(),
-      usage: z.string().nullish(),
-      emotion: z.string().nullish(),
-      qualityScore: z.number().nullish(),
-    })).nullish(),
-    videos: z.array(z.object({
-      url: z.string(),
-      assetType: z.string().nullish(),
-      usage: z.string().nullish(),
-    })).nullish(),
-    documents: z.array(z.object({
-      url: z.string(),
-      assetType: z.string().nullish(),
-      usage: z.string().nullish(),
-    })).nullish(),
-    fonts: z.array(z.object({
-      url: z.string(),
+    logos: z.object({
+      primary: z.array(z.string()).nullish(),
+      secondary: z.array(z.string()).nullish(),
+      symbol: z.array(z.string()).nullish(),
+      favicon: z.array(z.string()).nullish(),
+    }).nullish(),
+    brandImages: z.object({
+      hero: z.array(z.string()).nullish(),
+      product: z.array(z.string()).nullish(),
+      team: z.array(z.string()).nullish(),
+      ui: z.array(z.string()).nullish(),
+      marketing: z.array(z.string()).nullish(),
+    }).nullish(),
+    typography: z.array(z.object({
+      url: z.string().nullish(),
       family: z.string().nullish(),
       weight: z.string().nullish(),
     })).nullish(),
+    colors: z.array(z.object({
+      hex: z.string().nullish(),
+      usage: z.string().nullish(),
+    })).nullish(),
+    illustrations: z.array(z.string()).nullish(),
+    motion: z.array(z.string()).nullish(),
+    documents: z.array(z.string()).nullish(),
   }).nullish(),
 });
 export type BrandAnalysisBrandDto = z.infer<typeof brandAnalysisBrandSchema>;
@@ -512,6 +516,9 @@ export const createBrandSchema = z.object({
         website: z.string().url().nullish().or(z.literal('')),
         strengths: z.string().max(1000).nullish().or(z.literal('')),
         weaknesses: z.string().max(1000).nullish().or(z.literal('')),
+        visualSimilarity: z.string().nullish(),
+        positioningSimilarity: z.string().nullish(),
+        categoryOverlap: z.string().nullish(),
       }),
     )
     .nullish(),
@@ -534,30 +541,31 @@ export const createBrandSchema = z.object({
     modernDesignScore: z.number().nullish(),
   }).nullish(),
   assetCatalog: z.object({
-    images: z.array(z.object({
-      url: z.string(),
-      assetType: z.string().nullish(),
-      style: z.string().nullish(),
-      dominantColors: z.array(z.string()).nullish(),
-      usage: z.string().nullish(),
-      emotion: z.string().nullish(),
-      qualityScore: z.number().nullish(),
-    })).nullish(),
-    videos: z.array(z.object({
-      url: z.string(),
-      assetType: z.string().nullish(),
-      usage: z.string().nullish(),
-    })).nullish(),
-    documents: z.array(z.object({
-      url: z.string(),
-      assetType: z.string().nullish(),
-      usage: z.string().nullish(),
-    })).nullish(),
-    fonts: z.array(z.object({
-      url: z.string(),
+    logos: z.object({
+      primary: z.array(z.string()).nullish(),
+      secondary: z.array(z.string()).nullish(),
+      symbol: z.array(z.string()).nullish(),
+      favicon: z.array(z.string()).nullish(),
+    }).nullish(),
+    brandImages: z.object({
+      hero: z.array(z.string()).nullish(),
+      product: z.array(z.string()).nullish(),
+      team: z.array(z.string()).nullish(),
+      ui: z.array(z.string()).nullish(),
+      marketing: z.array(z.string()).nullish(),
+    }).nullish(),
+    typography: z.array(z.object({
+      url: z.string().nullish(),
       family: z.string().nullish(),
       weight: z.string().nullish(),
     })).nullish(),
+    colors: z.array(z.object({
+      hex: z.string().nullish(),
+      usage: z.string().nullish(),
+    })).nullish(),
+    illustrations: z.array(z.string()).nullish(),
+    motion: z.array(z.string()).nullish(),
+    documents: z.array(z.string()).nullish(),
   }).nullish(),
 });
 
