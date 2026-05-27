@@ -283,16 +283,18 @@ export class BrandAnalyserService {
 
     const primarySignals = resolvedSources.find((source) => source.signals)?.signals;
     const imageUrls = primarySignals?.imageUrls || [];
-    const combinedText = resolvedSources.map(s => s.text).join('\n').slice(0, 30000); // Increased for crawler data
-    const fullHtml = resolvedSources.map(s => s.baseText).join(' ');
+    const combinedText = resolvedSources.map(s => s.text).join('\n').slice(0, 20000); // Optimized for speed
+    const fullHtml = resolvedSources.map(s => s.baseText).join(' ').slice(0, 40000); // Limit HTML as well
 
-    const [visionResult, audienceResult, catalogResult, personalityResult, typographyResult] = await Promise.all([
-      screenshots ? this.visionAnalysisService.analyzeVisuals(this.gateway, screenshots, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined) : Promise.resolve(null),
-      this.audienceDetectionService.inferAudience(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
-      this.assetCatalogService.buildCatalog(this.gateway, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
-      this.personalityEngineService.inferPersonality(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
-      this.fontDetectionService.detectFonts(this.gateway, fullHtml, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
-    ]);
+    // Sequence LLM calls to prevent extreme rate-limiting / timeouts from concurrent massive context payloads
+    let visionResult = null;
+    if (screenshots) {
+      visionResult = await this.visionAnalysisService.analyzeVisuals(this.gateway, screenshots, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
+    }
+    const typographyResult = await this.fontDetectionService.detectFonts(this.gateway, fullHtml, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
+    const audienceResult = await this.audienceDetectionService.inferAudience(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
+    const personalityResult = await this.personalityEngineService.inferPersonality(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
+    const catalogResult = await this.assetCatalogService.buildCatalog(this.gateway, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
 
     let gatewayResult;
     try {

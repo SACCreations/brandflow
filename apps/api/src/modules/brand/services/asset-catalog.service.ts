@@ -50,7 +50,7 @@ Return a JSON object:
           model,
           jsonMode: true,
           temperature: 0.1,
-          maxTokens: 1500
+          maxTokens: 4000
         }
       );
       return JSON.parse(result.response.content);

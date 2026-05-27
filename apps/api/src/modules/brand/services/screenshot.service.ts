@@ -24,14 +24,19 @@ export class ScreenshotService {
     try {
       browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
       
-      const { base64: homepageBase64, computedStyles } = await this.capturePageWithStyles(browser, mainUrl, { width: 1440, height: 900 });
-      const mobileBase64 = await this.capturePage(browser, mainUrl, { width: 390, height: 844 }, true);
+      const [{ base64: homepageBase64, computedStyles }, mobileBase64] = await Promise.all([
+        this.capturePageWithStyles(browser, mainUrl, { width: 1440, height: 900 }),
+        this.capturePage(browser, mainUrl, { width: 390, height: 844 }, true)
+      ]);
       
       const subpagesBase64: string[] = [];
       const urlsToCapture = subUrls.slice(0, 3); // Max 3 subpages to avoid massive payloads
       
-      for (const url of urlsToCapture) {
-        const base64 = await this.capturePage(browser, url, { width: 1440, height: 900 }).catch(() => null);
+      const subpageResults = await Promise.all(
+        urlsToCapture.map(url => this.capturePage(browser!, url, { width: 1440, height: 900 }).catch(() => null))
+      );
+      
+      for (const base64 of subpageResults) {
         if (base64) subpagesBase64.push(base64);
       }
 
@@ -64,9 +69,9 @@ export class ScreenshotService {
         isMobile
       });
       page = await context.newPage();
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
-      // Wait a bit for animations/fonts
-      await page.waitForTimeout(2000);
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
+      // Wait a bit for animations/fonts, but keep it brief for speed
+      await page.waitForTimeout(1000);
       
       const buffer = await page.screenshot({ type: 'jpeg', quality: 60, fullPage: false });
       return buffer.toString('base64');
@@ -85,8 +90,8 @@ export class ScreenshotService {
     try {
       const context = await browser.newContext({ viewport });
       page = await context.newPage();
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
-      await page.waitForTimeout(2000);
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
+      await page.waitForTimeout(1000);
       
       const computedStyles = await page.evaluate(() => {
         const getFonts = (selector: string) => {
