@@ -3,7 +3,7 @@
 import { useAuthStore } from '@/store/auth.store';
 import { apiClient } from '@/lib/api-client';
 import { NotificationCenter } from '../notifications/notification-center';
-import { Moon, Sun, Search } from 'lucide-react';
+import { Moon, Sun, Search, Building2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function Header() {
