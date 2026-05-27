@@ -31,13 +31,13 @@ export class VisionAnalysisService {
     }
 
     if (screenshots.subpagesBase64 && screenshots.subpagesBase64.length > 0) {
-      screenshots.subpagesBase64.forEach((base64, index) => {
+      screenshots.subpagesBase64.slice(0, 1).forEach((base64, index) => {
         content.push({ type: 'text', text: `Subpage ${index + 1}:` });
         content.push({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } });
       });
     }
 
-    for (const url of imageUrls.slice(0, 5)) {
+    for (const url of imageUrls.slice(0, 2)) {
       content.push({ type: 'text', text: `Image candidate: ${url}` });
       content.push({ type: 'image_url', image_url: { url } });
     }

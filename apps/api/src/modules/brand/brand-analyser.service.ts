@@ -286,21 +286,19 @@ export class BrandAnalyserService {
     const combinedText = resolvedSources.map(s => s.text).join('\n').slice(0, 10000); // Reduced for faster LLM processing
     const fullHtml = resolvedSources.map(s => s.baseText).join(' ').slice(0, 15000); // Reduced to prevent hanging on huge HTML
 
-    // Sequence heavy LLM calls, but parallelize the lightweight text ones to shave off 30-40 seconds
-    let visionResult = null;
-    if (screenshots) {
-      visionResult = await this.visionAnalysisService.analyzeVisuals(this.gateway, screenshots, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
-    }
-    
-    const typographyResult = await this.fontDetectionService.detectFonts(this.gateway, fullHtml, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
-    
-    // These two are purely text-based and lightweight, safe to run concurrently
-    const [audienceResult, personalityResult] = await Promise.all([
+    const parallelTasks = await Promise.allSettled([
+      screenshots ? this.visionAnalysisService.analyzeVisuals(this.gateway, screenshots, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined) : Promise.resolve(null),
+      this.fontDetectionService.detectFonts(this.gateway, fullHtml, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
       this.audienceDetectionService.inferAudience(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
-      this.personalityEngineService.inferPersonality(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined)
+      this.personalityEngineService.inferPersonality(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
+      this.assetCatalogService.buildCatalog(this.gateway, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined)
     ]);
-    
-    const catalogResult = await this.assetCatalogService.buildCatalog(this.gateway, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined);
+
+    const visionResult = parallelTasks[0].status === 'fulfilled' ? parallelTasks[0].value : null;
+    const typographyResult = parallelTasks[1].status === 'fulfilled' ? parallelTasks[1].value : null;
+    const audienceResult = parallelTasks[2].status === 'fulfilled' ? parallelTasks[2].value : null;
+    const personalityResult = parallelTasks[3].status === 'fulfilled' ? parallelTasks[3].value : null;
+    const catalogResult = parallelTasks[4].status === 'fulfilled' ? parallelTasks[4].value : null;
 
     let gatewayResult;
     try {

@@ -78,9 +78,15 @@ export class DeepCrawlerService {
         redirect: 'follow',
       });
 
-      if (!response.ok) return null;
+      if (!response.ok) {
+        if (response.status === 403 || response.status === 401) {
+          throw new Error(`Failed to fetch ${url} (${response.status}): The site may be blocking bots.`);
+        }
+        return null;
+      }
       return await response.text();
-    } catch (err) {
+    } catch (err: any) {
+      if (err.message?.includes('blocking bots')) throw err;
       return null;
     }
   }
