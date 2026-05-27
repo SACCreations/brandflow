@@ -315,14 +315,14 @@ export type BrandAnalysisResultDto = z.infer<typeof brandAnalysisResultSchema>;
 // ─── Brand ────────────────────────────────────────────────────────
 export const createBrandSchema = z.object({
   name: z.string().min(1).max(255),
-  slug: z.string().min(2).max(100).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens only').nullish(),
-  tagline: z.string().max(255).nullish(),
-  description: z.string().max(2000).nullish(),
-  industry: z.string().max(100).nullish(),
+  slug: z.string().min(2).max(100).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens only').nullish().or(z.literal('')),
+  tagline: z.string().max(255).nullish().or(z.literal('')),
+  description: z.string().max(2000).nullish().or(z.literal('')),
+  industry: z.string().max(100).nullish().or(z.literal('')),
   website: z.string().url().or(z.string().regex(/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/, 'Invalid URL format')).nullish().or(z.literal('')),
   differentiators: z.string().max(2000).nullish().or(z.literal('')),
-  foundedYear: z.number().int().min(1800).max(new Date().getFullYear()).nullish(),
-  headquarters: z.string().max(255).nullish(),
+  foundedYear: z.union([z.number().int().min(1800).max(new Date().getFullYear()), z.literal('')]).nullish(),
+  headquarters: z.string().max(255).nullish().or(z.literal('')),
   status: z.enum(['draft', 'published', 'archived']).default('published'),
   
   positioning: z.string().max(2000).nullish().or(z.literal('')),

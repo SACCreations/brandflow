@@ -48,10 +48,10 @@ const STEPS = [
 export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, isEditMode }: BrandWizardProps) {
   const [currentStepIdx, setCurrentStepIdx] = React.useState(0);
   const [maxVisitedStepIdx, setMaxVisitedStepIdx] = React.useState(0);
-  const [formData, setFormData] = React.useState<any>(initialData || {});
+  const { draft, saveDraft, clearDraft } = useDraft<any>('brand_wizard');
+  const [formData, setFormData] = React.useState<any>(initialData || draft || {});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
-  const { saveDraft, clearDraft } = useDraft<any>('brand_wizard');
   
   const triggerValidationRef = React.useRef<(() => Promise<boolean>) | undefined>(undefined);
 
@@ -74,8 +74,12 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
   }, [currentStepIdx]);
 
   React.useEffect(() => {
-    setFormData(initialData || {});
-  }, [initialData]);
+    if (initialData && Object.keys(initialData).length > 0) {
+      setFormData(initialData);
+    } else if (draft) {
+      setFormData(draft);
+    }
+  }, [initialData, draft]);
 
   const handleNext = async () => {
     if (triggerValidationRef.current) {

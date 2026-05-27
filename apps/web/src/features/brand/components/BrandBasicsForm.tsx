@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Card, Input, Textarea, Button, useToast } from '@brandflow/ui';
+import { Card, Input, Textarea, Button, useToast, cn } from '@brandflow/ui';
 import { Sparkles } from 'lucide-react';
 
 export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible: (id: string) => boolean, values: any }) {
@@ -50,12 +50,12 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-3">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">Brand Name <span className="text-red-500">*</span></label>
-            <Input {...register('name')} placeholder="e.g. Acme Corp" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all" />
+            <Input {...register('name')} placeholder="e.g. Acme Corp" className={cn("h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all", errors['name'] && "border-red-500 ring-1 ring-red-500/50")} />
             {errors['name'] && <p className="text-xs text-red-500 font-bold">{errors['name'].message as string}</p>}
           </div>
           <div className="space-y-3">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">Industry <span className="text-red-500">*</span></label>
-            <Input {...register('industry')} placeholder="e.g. Technology" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all" />
+            <Input {...register('industry')} placeholder="e.g. Technology" className={cn("h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all", errors['industry'] && "border-red-500 ring-1 ring-red-500/50")} />
             {errors['industry'] && <p className="text-xs text-red-500 font-bold">{errors['industry']?.message as string}</p>}
           </div>
         </div>
@@ -81,19 +81,19 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
               <Sparkles className="w-3.5 h-3.5 mr-2 text-primary" /> Generate with AI
             </Button>
           </div>
-          <Input {...register('tagline')} placeholder="The future of branding..." className="h-14 bg-background/80 bg-background/80 border-primary/10 border-border rounded-2xl text-base shadow-sm focus-visible:ring-primary/20" />
+          <Input {...register('tagline')} placeholder="The future of branding..." className={cn("h-14 bg-background/80 bg-background/80 border-primary/10 border-border rounded-2xl text-base shadow-sm focus-visible:ring-primary/20", errors['tagline'] && "border-red-500 ring-1 ring-red-500/50")} />
           {errors['tagline'] && <p className="text-xs text-red-500 font-bold">{errors['tagline']?.message as string}</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-3">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Website</label>
-            <Input {...register('website')} placeholder="https://acme.com" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all" />
+            <Input {...register('website')} placeholder="https://acme.com" className={cn("h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all", errors['website'] && "border-red-500 ring-1 ring-red-500/50")} />
             {errors['website'] && <p className="text-xs text-red-500 font-bold">{errors['website']?.message as string}</p>}
           </div>
           <div className="space-y-3">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Slug</label>
-            <Input {...register('slug')} placeholder="acme-corp" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all" />
+            <Input {...register('slug')} placeholder="acme-corp" className={cn("h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all", errors['slug'] && "border-red-500 ring-1 ring-red-500/50")} />
             {errors['slug'] && <p className="text-xs text-red-500 font-bold">{errors['slug']?.message as string}</p>}
           </div>
         </div>
@@ -122,7 +122,7 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
           <Textarea 
             {...register('description')} 
             placeholder="Tell us about your brand..." 
-            className="min-h-[140px] bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base p-4 shadow-sm focus-visible:ring-primary/20 transition-all leading-relaxed"
+            className={cn("min-h-[140px] bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base p-4 shadow-sm focus-visible:ring-primary/20 transition-all leading-relaxed", errors['description'] && "border-red-500 ring-1 ring-red-500/50")}
           />
           {errors['description'] && <p className="text-xs text-red-500 font-bold">{errors['description']?.message as string}</p>}
         </div>
@@ -131,20 +131,20 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Business Contact (Internal)</label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Input {...register('contactInfo.personName')} placeholder="Full Name" className="h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl" />
+                  <Input {...register('contactInfo.personName')} placeholder="Full Name" className={cn("h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl", (errors['contactInfo'] as any)?.personName && "border-red-500 ring-1 ring-red-500/50")} />
                   {(errors['contactInfo'] as any)?.personName && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).personName.message as string}</p>}
               </div>
               <div className="space-y-2">
-                  <Input {...register('contactInfo.phoneNumber')} placeholder="Phone (+1...)" className="h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl" />
+                  <Input {...register('contactInfo.phoneNumber')} placeholder="Phone (+1...)" className={cn("h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl", (errors['contactInfo'] as any)?.phoneNumber && "border-red-500 ring-1 ring-red-500/50")} />
                   {(errors['contactInfo'] as any)?.phoneNumber && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).phoneNumber.message as string}</p>}
               </div>
               <div className="space-y-2">
-                  <Input {...register('contactInfo.email')} placeholder="Email Address" className="h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl" />
+                  <Input {...register('contactInfo.email')} placeholder="Email Address" className={cn("h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl", (errors['contactInfo'] as any)?.email && "border-red-500 ring-1 ring-red-500/50")} />
                   {(errors['contactInfo'] as any)?.email && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).email.message as string}</p>}
               </div>
             </div>
             <div className="space-y-2">
-              <Input {...register('contactInfo.officeAddress')} placeholder="Office Address (123 Business St, Suite 400...)" className="h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl" />
+              <Input {...register('contactInfo.officeAddress')} placeholder="Office Address (123 Business St, Suite 400...)" className={cn("h-12 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-xl", (errors['contactInfo'] as any)?.officeAddress && "border-red-500 ring-1 ring-red-500/50")} />
               {(errors['contactInfo'] as any)?.officeAddress && <p className="text-xs text-red-500 font-bold">{(errors['contactInfo'] as any).officeAddress.message as string}</p>}
             </div>
         </div>

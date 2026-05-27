@@ -10,17 +10,32 @@ export class BrandService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
   ) {}
+  private mapBrandToDto(brand: any) {
+    if (brand && typeof brand.visualRules === 'object' && brand.visualRules !== null) {
+      if (brand.visualRules.assetCatalog) {
+        brand.assetCatalog = brand.visualRules.assetCatalog;
+        delete brand.visualRules.assetCatalog;
+      }
+      if (brand.visualRules.brandIntelligenceScore) {
+        brand.brandIntelligenceScore = brand.visualRules.brandIntelligenceScore;
+        delete brand.visualRules.brandIntelligenceScore;
+      }
+    }
+    return brand;
+  }
+
   async findAll(businessId: string) {
-    return this.prisma.client.brand.findMany({
+    const brands = await this.prisma.client.brand.findMany({
       where: { businessId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
+    return brands.map(b => this.mapBrandToDto(b));
   }
 
   async findById(id: string, businessId: string) {
     const brand = await this.prisma.client.brand.findFirst({ where: { id, businessId, deletedAt: null } });
     if (!brand) throw new NotFoundException('Brand not found');
-    return brand;
+    return this.mapBrandToDto(brand);
   }
 
   private calculateHealthScore(brand: any): number {
@@ -50,9 +65,12 @@ export class BrandService {
 
     // Strategy & Intelligence (6 points)
     totalPossible += weights.strategy;
-    if (brand.positioning?.trim()) score += weights.strategy;
+    if (brand.positioning && typeof brand.positioning === 'string' && brand.positioning.trim()) score += weights.strategy;
     totalPossible += weights.strategy;
-    if (brand.audience?.trim()) score += weights.strategy;
+    if (brand.audience) {
+      if (typeof brand.audience === 'string' && brand.audience.trim()) score += weights.strategy;
+      else if (typeof brand.audience === 'object' && Object.keys(brand.audience).length > 0) score += weights.strategy;
+    }
     
     const strategy = typeof brand.strategy === 'object' ? brand.strategy : undefined;
     totalPossible += weights.strategy;
@@ -84,11 +102,39 @@ export class BrandService {
   async create(businessId: string, dto: CreateBrandDto) {
     const healthScore = this.calculateHealthScore(dto);
     const slug = dto.slug?.trim() || dto.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const { slug: _slug, ...rest } = dto;
+    const { slug: _slug, assetCatalog, brandIntelligenceScore, ...rest } = dto as any;
+    
+    if (rest.audience && typeof rest.audience === 'object') {
+      rest.audience = JSON.stringify(rest.audience);
+    }
+    
+    if (assetCatalog || brandIntelligenceScore) {
+      rest.visualRules = typeof rest.visualRules === 'object' && rest.visualRules !== null ? rest.visualRules : {};
+      if (assetCatalog) rest.visualRules.assetCatalog = assetCatalog;
+      if (brandIntelligenceScore) rest.visualRules.brandIntelligenceScore = brandIntelligenceScore;
+    }
+    
+    // Ensure slug uniqueness
+    let finalSlug = slug;
+    if (finalSlug) {
+      let counter = 1;
+      let existing = await this.prisma.client.brand.findUnique({
+        where: { businessId_slug: { businessId, slug: finalSlug } }
+      });
+      while (existing) {
+        finalSlug = `${slug}-${Math.floor(Math.random() * 10000)}`;
+        existing = await this.prisma.client.brand.findUnique({
+          where: { businessId_slug: { businessId, slug: finalSlug } }
+        });
+        counter++;
+        if (counter > 10) break;
+      }
+    }
+
     const brand = await this.prisma.client.brand.create({
       data: {
         ...rest,
-        slug: slug || null,
+        slug: finalSlug || null,
         businessId,
         healthScore,
       } as Prisma.BrandUncheckedCreateInput
@@ -106,12 +152,22 @@ export class BrandService {
     const merged = { ...before, ...dto, _knowledgeEntryCount: knowledgeEntryCount };
     const healthScore = this.calculateHealthScore(merged);
     
-    const { ...updateDto } = dto;
+    const { assetCatalog, brandIntelligenceScore, ...updateDto } = dto as any;
     Object.keys(updateDto).forEach(key => {
       if ((updateDto as Record<string, unknown>)[key] === null) {
         delete (updateDto as Record<string, unknown>)[key];
       }
     });
+
+    if (updateDto.audience && typeof updateDto.audience === 'object') {
+      updateDto.audience = JSON.stringify(updateDto.audience);
+    }
+
+    if (assetCatalog || brandIntelligenceScore) {
+      updateDto.visualRules = typeof updateDto.visualRules === 'object' && updateDto.visualRules !== null ? updateDto.visualRules : (before.visualRules || {});
+      if (assetCatalog) (updateDto.visualRules as any).assetCatalog = assetCatalog;
+      if (brandIntelligenceScore) (updateDto.visualRules as any).brandIntelligenceScore = brandIntelligenceScore;
+    }
 
     if (updateDto.slug !== undefined) {
       const nameForSlug = updateDto.name || before.name;
