@@ -39,7 +39,7 @@ export function ImpactAttribution({ impactSummary, isImpactLoading, topSource }:
         )}
       </div>
 
-      <div className="mt-8 rounded-xl bg-surface-1/50 bg-background/50 border border-border/60/50 p-4">
+      <div className="mt-8 rounded-xl bg-surface-2/50 border border-border/50 p-4">
         <p className="text-xs font-medium text-muted-foreground">
           Top source ROI contribution
         </p>

@@ -235,7 +235,7 @@ export default function ProjectsPage() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-background p-4 border-border bg-background md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 glass-panel p-4 md:flex-row md:items-center md:justify-between">
         <div className="relative w-full md:max-w-sm">
           <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -243,14 +243,14 @@ export default function ProjectsPage() {
             placeholder="Search projects or clients..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+            className="w-full rounded-xl border border-border/50 bg-surface-1/50 py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20"
           />
         </div>
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
-            className="rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+            className="rounded-xl border border-border/50 bg-surface-1/50 px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20"
           >
             <option value="all">All statuses</option>
             <option value="active">Active</option>
@@ -260,7 +260,7 @@ export default function ProjectsPage() {
           <select
             value={customerFilter}
             onChange={(event) => setCustomerFilter(event.target.value)}
-            className="rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+            className="rounded-xl border border-border/50 bg-surface-1/50 px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20"
           >
             <option value="all">All clients</option>
             {customers?.map((customer) => (
@@ -272,7 +272,7 @@ export default function ProjectsPage() {
 
       {/* Stats Mini-Bar */}
       <div className="grid gap-6 md:grid-cols-4">
-        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
+        <div className="glass-panel p-4">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-2 dark:bg-blue-500/10"><LayoutIcon className="h-5 w-5 text-blue-600" /></div>
             <div>
@@ -281,7 +281,7 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
+        <div className="glass-panel p-4">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-emerald-50 p-2 dark:bg-emerald-500/10"><CheckIcon className="h-5 w-5 text-emerald-600" /></div>
             <div>
@@ -290,7 +290,7 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
+        <div className="glass-panel p-4">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-amber-50 p-2 dark:bg-amber-500/10"><DollarIcon className="h-5 w-5 text-amber-600" /></div>
             <div>
@@ -301,7 +301,7 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
+        <div className="glass-panel p-4">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-purple-50 p-2 dark:bg-purple-500/10"><UsersIcon className="h-5 w-5 text-purple-600" /></div>
             <div>
@@ -315,7 +315,7 @@ export default function ProjectsPage() {
       {/* Projects Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {projects?.map((project) => (
-          <div key={project.id} className="group relative overflow-hidden rounded-3xl border border-border/60 bg-background p-6 transition-all hover:shadow-2xl border-border bg-background hover:-translate-y-1">
+          <div key={project.id} className="group relative overflow-hidden glass-premium p-6 transition-all hover:shadow-2xl hover:-translate-y-1">
             <div className="flex items-start justify-between">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-primary/100/10">
                 <ProjectIcon className="h-6 w-6" />
@@ -375,7 +375,7 @@ export default function ProjectsPage() {
             <div className="mt-6 flex items-center justify-between">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-8 w-8 rounded-full border-2 border-white bg-surface-2 border-border bg-surface-2 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                  <div key={i} className="h-8 w-8 rounded-full border-2 border-surface-1 bg-surface-2 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
                     U{i}
                   </div>
                 ))}
@@ -383,7 +383,7 @@ export default function ProjectsPage() {
               <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${
                 project.status === 'active' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' : 
                 project.status === 'completed' ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10' :
-                'bg-surface-2 text-muted-foreground bg-surface-2'
+                'bg-surface-2 text-muted-foreground'
               }`}>
                 {project.status}
               </span>
@@ -392,8 +392,8 @@ export default function ProjectsPage() {
         ))}
 
         {projects?.length === 0 && (
-          <div className="col-span-full rounded-3xl border border-dashed border-border bg-background/60 p-12 text-center border-border bg-background/70">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface-1 bg-background text-muted-foreground bg-surface-2">
+          <div className="col-span-full rounded-3xl border border-dashed border-border/50 bg-surface-2/10 p-12 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full glass-panel text-muted-foreground">
               <ProjectIcon className="h-8 w-8" />
             </div>
             <h3 className="mt-4 text-lg font-bold text-foreground">No projects match these filters</h3>
@@ -405,13 +405,13 @@ export default function ProjectsPage() {
       {/* Project Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full max-w-xl rounded-3xl border border-border/60 bg-background p-8 shadow-2xl border-border bg-background animate-in zoom-in-95 duration-300">
+          <div className="w-full max-w-xl glass-premium p-8 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-2xl font-bold text-foreground">{editingProject ? 'Edit Project' : 'Initiate New Project'}</h2>
                 <p className="text-sm text-muted-foreground">Configure your project parameters and timeline.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-surface-1 bg-background p-2 text-muted-foreground hover:bg-surface-3 dark:hover:bg-gray-700">
+              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-surface-2/50 p-2 text-muted-foreground hover:bg-surface-3 dark:hover:bg-gray-700">
                 <XIcon className="h-5 w-5" />
               </button>
             </div>
@@ -423,7 +423,7 @@ export default function ProjectsPage() {
                   <input 
                     type="text" 
                     placeholder="e.g. Q3 Marketing Blitz"
-                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
@@ -431,7 +431,7 @@ export default function ProjectsPage() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Assign Client</label>
                   <select 
-                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                     value={formData.customerId}
                     onChange={(e) => setFormData({...formData, customerId: e.target.value})}
                   >
@@ -448,7 +448,7 @@ export default function ProjectsPage() {
                 <textarea 
                   rows={3}
                   placeholder="What are the main objectives?"
-                  className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                  className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
@@ -459,7 +459,7 @@ export default function ProjectsPage() {
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Start Date</label>
                   <input 
                     type="date" 
-                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                     value={formData.startDate}
                     onChange={(e) => setFormData({...formData, startDate: e.target.value})}
                   />
@@ -468,7 +468,7 @@ export default function ProjectsPage() {
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">End Date</label>
                   <input 
                     type="date" 
-                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                     value={formData.endDate}
                     onChange={(e) => setFormData({...formData, endDate: e.target.value})}
                   />
@@ -481,7 +481,7 @@ export default function ProjectsPage() {
                   <input 
                     type="number" 
                     placeholder="0.00"
-                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                     value={formData.budget}
                     onChange={(e) => setFormData({...formData, budget: e.target.value})}
                   />
@@ -489,7 +489,7 @@ export default function ProjectsPage() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</label>
                   <select 
-                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                     value={formData.status}
                     onChange={(e) => setFormData({...formData, status: e.target.value})}
                   >
@@ -503,7 +503,7 @@ export default function ProjectsPage() {
               <div className="pt-6 flex gap-4">
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl border border-border/60 py-3.5 text-sm font-bold text-muted-foreground hover:bg-surface-1 bg-background border-border"
+                  className="flex-1 rounded-xl border border-border/50 py-3.5 text-sm font-bold text-muted-foreground hover:bg-surface-1"
                 >
                   Cancel
                 </button>

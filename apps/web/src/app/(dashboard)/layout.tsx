@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header />
           <ScopeSwitcher />
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
+          <main className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-10">{children}</main>
         </div>
         <GlobalCommandPalette />
       </div>

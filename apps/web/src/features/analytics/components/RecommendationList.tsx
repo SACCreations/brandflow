@@ -9,13 +9,13 @@ export function RecommendationList({ recommendations, isRecLoading }: Recommenda
   return (
     <div className="lg:col-span-12">
       <div className="rounded-2xl border border-primary/10 dark:border-primary/20 bg-brand-50/50 dark:bg-primary/100/5 p-8 backdrop-blur-sm shadow-sm">
-        <h3 className="text-xl font-bold text-brand-900 text-foreground flex items-center gap-2 mb-6">
+        <h3 className="text-xl font-bold text-foreground flex items-center gap-2 mb-6">
           <Sparkles className="h-6 w-6 text-primary dark:text-brand-400" />
           Strategic Learning Loop
         </h3>
         <div className="grid gap-6 md:grid-cols-2">
           {isRecLoading ? (
-            [1, 2].map((i) => <div key={i} className="h-40 animate-pulse rounded-2xl bg-background/50 bg-surface-2/50" />)
+            [1, 2].map((i) => <div key={i} className="h-40 animate-pulse rounded-2xl bg-surface-2/50" />)
           ) : recommendations?.length ? (
             recommendations.map((rec, i) => (
               <RecommendationCard

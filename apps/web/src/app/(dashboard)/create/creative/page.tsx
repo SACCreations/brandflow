@@ -313,12 +313,12 @@ export default function CreativeBuilderPage() {
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 pb-16">
       
       {/* ────────────────── TOP CONTROL BAR ────────────────── */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-32 bg-primary/100/10 rounded-full blur-3xl" />
+      <div className="glass-premium rounded-[2.5rem] p-8 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-32 bg-primary/10 rounded-full blur-3xl" />
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="bg-primary/100/10 border border-primary/20 text-brand-400 text-[10px] font-black tracking-widest px-2.5 py-1 rounded-md uppercase">
+              <span className="bg-primary/10 border border-primary/20 text-primary text-[10px] font-black tracking-widest px-2.5 py-1 rounded-md uppercase">
                 Enterprise AI Studio
               </span>
               <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/10">
@@ -326,18 +326,18 @@ export default function CreativeBuilderPage() {
               </span>
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight text-foreground">BrandFlow Creative Studio</h1>
-            <p className="mt-1.5 text-slate-400 text-xs font-medium max-w-xl">
+            <p className="mt-1.5 text-muted-foreground text-xs font-medium max-w-xl">
               Construct high-fidelity layouts, inject dynamic brand tokens, run identity compliance vision gates, and manage collaboration review.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex flex-col">
-              <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Brand Identity</label>
+              <label className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-widest mb-1.5">Brand Identity</label>
               <select 
                 value={selectedBrand} 
                 onChange={(e) => setSelectedBrand(e.target.value)}
-                className="bg-slate-950 border border-slate-800 text-slate-300 text-xs font-bold rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary/20 cursor-pointer outline-none transition-all"
+                className="bg-surface-1/50 border border-border/50 text-foreground/80 text-xs font-bold rounded-xl px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary/20 cursor-pointer outline-none transition-all"
               >
                 <option value="BrandFlow Corporate">BrandFlow Corporate</option>
                 <option value="SaaSify Global">SaaSify Global Pro</option>
@@ -346,10 +346,10 @@ export default function CreativeBuilderPage() {
             </div>
 
             <div className="flex flex-col">
-              <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Status Workflow</label>
-              <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-300 text-xs font-bold">
-                <Clock className="h-3.5 w-3.5 text-brand-400" />
-                <span className="uppercase text-[10px] tracking-wider font-extrabold text-brand-400">DRAFT STAGE</span>
+              <label className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-widest mb-1.5">Status Workflow</label>
+              <div className="flex items-center gap-1 bg-surface-1/50 border border-border/50 rounded-xl px-3 py-2 text-foreground/80 text-xs font-bold">
+                <Clock className="h-3.5 w-3.5 text-primary" />
+                <span className="uppercase text-[10px] tracking-wider font-extrabold text-primary">DRAFT STAGE</span>
               </div>
             </div>
           </div>
@@ -362,13 +362,13 @@ export default function CreativeBuilderPage() {
         <div className="lg:col-span-4 space-y-6">
           
           {/* STEP 1: CONTENT SOURCE SELECTION */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <div className="glass-panel border-border/50 rounded-[2rem] p-6 shadow-lg">
             <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <span className="h-5 w-5 bg-primary/100/10 text-brand-400 rounded-lg flex items-center justify-center font-bold text-[10px]">1</span>
+              <span className="h-5 w-5 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold text-[10px]">1</span>
               Content Source Selection
             </h3>
             
-            <div className="grid grid-cols-4 gap-1.5 bg-slate-950 border border-slate-800 p-1 rounded-xl mb-4">
+            <div className="grid grid-cols-4 gap-1.5 bg-surface-1/50 border border-border/50 p-1 rounded-xl mb-4">
               {[
                 { id: 'manual', label: 'Manual' },
                 { id: 'approved', label: 'Approved' },
@@ -380,8 +380,8 @@ export default function CreativeBuilderPage() {
                   onClick={() => setContentSource(src.id as any)}
                   className={`text-[10px] font-black py-2 rounded-lg transition-all uppercase tracking-wider ${
                     contentSource === src.id 
-                      ? 'bg-slate-800 text-brand-400 shadow-md border border-slate-700/50' 
-                      : 'text-slate-500 hover:text-slate-300'
+                      ? 'bg-surface-3 text-primary shadow-md border border-slate-700/50' 
+                      : 'text-muted-foreground/80 hover:text-foreground/80'
                   }`}
                 >
                   {src.label}
@@ -392,9 +392,9 @@ export default function CreativeBuilderPage() {
             <div className="space-y-3">
               {contentSource === 'manual' && (
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Manual Marketing Copy</label>
+                  <label className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-widest">Manual Marketing Copy</label>
                   <textarea 
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs text-slate-300 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 p-3 text-xs text-foreground/80 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all"
                     rows={3}
                     placeholder="Type customized promotional text blocks..."
                     value={marketingText}
@@ -409,7 +409,7 @@ export default function CreativeBuilderPage() {
               {contentSource === 'approved' && (
                 <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3 space-y-2">
                   <span className="text-[9px] font-black text-emerald-400 uppercase tracking-wider block">✓ Fetching from Content Hub</span>
-                  <p className="text-slate-300 text-xs font-medium leading-relaxed italic">
+                  <p className="text-foreground/80 text-xs font-medium leading-relaxed italic">
                     [No Approved Content Found]
                   </p>
                   <button 
@@ -417,7 +417,7 @@ export default function CreativeBuilderPage() {
                       setMarketingText('');
                       handleLayerContentChange('layer-text', '');
                     }}
-                    className="text-[10px] font-black text-brand-400 hover:text-brand-300 flex items-center gap-1"
+                    className="text-[10px] font-black text-primary hover:text-brand-300 flex items-center gap-1"
                   >
                     Select this approved block <ChevronRight className="h-3 w-3" />
                   </button>
@@ -425,11 +425,11 @@ export default function CreativeBuilderPage() {
               )}
 
               {contentSource === 'campaign' && (
-                <div className="space-y-2 bg-slate-950 border border-slate-850 p-3 rounded-xl">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Linked Campaign Brief</span>
+                <div className="space-y-2 bg-surface-1/50 border border-border/50 p-3 rounded-xl">
+                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-wider block">Linked Campaign Brief</span>
                   <div className="border-l-2 border-primary pl-3">
                     <h5 className="text-xs font-bold text-foreground">No Linked Campaign</h5>
-                    <p className="text-[11px] text-slate-400 mt-1">Select a campaign to import briefs.</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">Select a campaign to import briefs.</p>
                   </div>
                 </div>
               )}
@@ -443,7 +443,7 @@ export default function CreativeBuilderPage() {
                         setMarketingText(t.toUpperCase());
                         handleLayerContentChange('layer-text', t.toUpperCase());
                       }}
-                      className="border border-slate-850 hover:border-slate-700 bg-slate-950 text-slate-400 hover:text-white rounded-lg p-2 text-left text-[10px] font-bold"
+                      className="border border-border/50 hover:border-slate-700 bg-surface-1/50 text-muted-foreground hover:text-white rounded-lg p-2 text-left text-[10px] font-bold"
                     >
                       {t}
                     </button>
@@ -454,18 +454,18 @@ export default function CreativeBuilderPage() {
           </div>
 
           {/* STEP 2: BRAND CONTEXT CONNECTION SWATCHES */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
+          <div className="glass-panel border-border/50 rounded-[2rem] p-6 shadow-lg space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-2">
-                <span className="h-5 w-5 bg-primary/100/10 text-brand-400 rounded-lg flex items-center justify-center font-bold text-[10px]">2</span>
+                <span className="h-5 w-5 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold text-[10px]">2</span>
                 Brand Visual Swatches
               </h3>
-              <span className="text-[9px] text-slate-400 uppercase font-black">Connected</span>
+              <span className="text-[9px] text-muted-foreground uppercase font-black">Connected</span>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2">Palette swatches</span>
+                <span className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-widest block mb-2">Palette swatches</span>
                 <div className="flex items-center gap-1.5">
                   {brandColors.map((color, i) => (
                     <button 
@@ -477,7 +477,7 @@ export default function CreativeBuilderPage() {
                       style={{ backgroundColor: color }}
                       title={`Inject ${color}`}
                     >
-                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 bg-slate-950 text-[8px] text-foreground px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity font-mono pointer-events-none mb-1">
+                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 bg-surface-1/50 text-[8px] text-foreground px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity font-mono pointer-events-none mb-1">
                         {color}
                       </span>
                     </button>
@@ -486,7 +486,7 @@ export default function CreativeBuilderPage() {
               </div>
 
               <div>
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2">Brand Logos</span>
+                <span className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-widest block mb-2">Brand Logos</span>
                 <div className="flex items-center gap-2">
                   {brandLogos.map((logo, i) => (
                     <button 
@@ -497,7 +497,7 @@ export default function CreativeBuilderPage() {
                           return l;
                         }));
                       }}
-                      className="h-7 w-12 border border-slate-800 rounded-md bg-slate-950 p-1 flex items-center justify-center hover:border-primary transition-all overflow-hidden"
+                      className="h-7 w-12 border border-border/50 rounded-md bg-surface-1/50 p-1 flex items-center justify-center hover:border-primary transition-all overflow-hidden"
                     >
                       <img src={logo.url} alt={logo.name} className="h-full object-contain filter brightness-150" />
                     </button>
@@ -515,31 +515,31 @@ export default function CreativeBuilderPage() {
           </div>
 
           {/* STEP 3 & 4: IMAGE CATEGORY & GENERATION SETTINGS */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
+          <div className="glass-panel border-border/50 rounded-[2rem] p-6 shadow-lg space-y-4">
             <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-2">
-              <span className="h-5 w-5 bg-primary/100/10 text-brand-400 rounded-lg flex items-center justify-center font-bold text-[10px]">3</span>
+              <span className="h-5 w-5 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold text-[10px]">3</span>
               Image Settings & Category
             </h3>
 
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Image Category Structure</label>
+                <label className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-widest">Image Category Structure</label>
                 <select 
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs font-bold rounded-xl px-3 py-2.5 focus:border-primary outline-none cursor-pointer"
+                  className="w-full bg-surface-1/50 border border-border/50 text-foreground/80 text-xs font-bold rounded-xl px-3 py-2.5 focus:border-primary outline-none cursor-pointer"
                 >
                   {categories.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
-                <span className="text-[9px] text-slate-400 font-bold block pl-1">
+                <span className="text-[9px] text-muted-foreground font-bold block pl-1">
                   {categories.find(c => c.id === selectedCategory)?.desc}
                 </span>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Aspect Ratio / Layout Sizes</label>
+                <label className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-widest">Aspect Ratio / Layout Sizes</label>
                 <div className="grid grid-cols-2 gap-2">
                   {formats.map(f => (
                     <button
@@ -547,18 +547,18 @@ export default function CreativeBuilderPage() {
                       onClick={() => setSelectedFormat(f.id)}
                       className={`flex items-center justify-between border rounded-xl p-2.5 transition-all text-left ${
                         selectedFormat === f.id 
-                          ? 'border-primary bg-primary/100/5 ring-1 ring-primary/20 text-foreground' 
-                          : 'border-slate-800 bg-slate-950 hover:border-slate-700 text-slate-400 hover:text-slate-350'
+                          ? 'border-primary bg-primary/5 ring-1 ring-primary/20 text-foreground' 
+                          : 'border-border/50 bg-surface-1/50 hover:border-slate-700 text-muted-foreground hover:text-slate-350'
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         {f.icon}
                         <div>
                           <p className="text-[10px] font-black tracking-wide leading-none">{f.name}</p>
-                          <p className="text-[8px] text-slate-500 mt-1 font-bold">{f.width} × {f.height} px</p>
+                          <p className="text-[8px] text-muted-foreground/80 mt-1 font-bold">{f.width} × {f.height} px</p>
                         </div>
                       </div>
-                      <span className="text-[9px] font-black font-mono bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded text-brand-400">
+                      <span className="text-[9px] font-black font-mono bg-surface-2/50 border border-border/50 px-1.5 py-0.5 rounded text-primary">
                         {f.ratio}
                       </span>
                     </button>
@@ -568,8 +568,8 @@ export default function CreativeBuilderPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Visual Mood & Style</label>
-                  <span className="text-[9px] text-brand-400 font-extrabold uppercase">{styleMood}</span>
+                  <label className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-widest">Visual Mood & Style</label>
+                  <span className="text-[9px] text-primary font-extrabold uppercase">{styleMood}</span>
                 </div>
                 <div className="grid grid-cols-5 gap-1.5">
                   {[
@@ -584,8 +584,8 @@ export default function CreativeBuilderPage() {
                       onClick={() => setStyleMood(m.id)}
                       className={`text-[9px] font-black py-2 rounded-lg border text-center transition-all ${
                         styleMood === m.id 
-                          ? 'border-primary bg-primary/100/10 text-brand-400' 
-                          : 'border-slate-850 bg-slate-950 text-slate-500 hover:text-slate-350'
+                          ? 'border-primary bg-primary/10 text-primary' 
+                          : 'border-border/50 glass-premium text-muted-foreground/80 hover:text-slate-350'
                       }`}
                     >
                       {m.label}
@@ -596,8 +596,8 @@ export default function CreativeBuilderPage() {
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest">
-                  <span className="text-slate-500">AI Creativity Strength</span>
-                  <span className="text-brand-400 font-mono">{creativityLevel}%</span>
+                  <span className="text-muted-foreground/80">AI Creativity Strength</span>
+                  <span className="text-primary font-mono">{creativityLevel}%</span>
                 </div>
                 <input 
                   type="range" 
@@ -605,31 +605,31 @@ export default function CreativeBuilderPage() {
                   max="100" 
                   value={creativityLevel}
                   onChange={(e) => setCreativityLevel(Number(e.target.value))}
-                  className="w-full accent-brand-500 h-1.5 bg-slate-950 rounded-lg cursor-pointer"
+                  className="w-full accent-brand-500 h-1.5 bg-surface-1/50 rounded-lg cursor-pointer"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4 bg-slate-950 border border-slate-850 p-3 rounded-xl">
+              <div className="grid grid-cols-2 gap-4 bg-surface-1/50 border border-border/50 p-3 rounded-xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Safe Gen Mode</span>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Safe Gen Mode</span>
                   <button 
                     onClick={() => setSafeMode(!safeMode)}
-                    className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors ${safeMode ? 'bg-primary' : 'bg-slate-800'}`}
+                    className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors ${safeMode ? 'bg-primary' : 'bg-surface-3'}`}
                   >
                     <span className={`inline-block h-3 w-3 transform rounded-full bg-background transition-transform ${safeMode ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between border-l border-slate-800 pl-4">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Image Count</span>
+                <div className="flex items-center justify-between border-l border-border/50 pl-4">
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Image Count</span>
                   <select 
                     value={imageCount} 
                     onChange={(e) => setImageCount(Number(e.target.value))}
-                    className="bg-transparent text-slate-300 font-extrabold text-[10px] outline-none cursor-pointer border-none p-0"
+                    className="bg-transparent text-foreground/80 font-extrabold text-[10px] outline-none cursor-pointer border-none p-0"
                   >
-                    <option value="1" className="bg-slate-900">1</option>
-                    <option value="2" className="bg-slate-900">2</option>
-                    <option value="4" className="bg-slate-900">4</option>
+                    <option value="1" className="bg-surface-2/50">1</option>
+                    <option value="2" className="bg-surface-2/50">2</option>
+                    <option value="4" className="bg-surface-2/50">4</option>
                   </select>
                 </div>
               </div>
@@ -662,43 +662,43 @@ export default function CreativeBuilderPage() {
           
           {/* MOCK QUEUE ENGINE PIPELINE PROGRESS STATE */}
           {isGenerating && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-md animate-pulse">
+            <div className="bg-surface-2/50 border border-border/50 rounded-2xl p-5 shadow-md animate-pulse">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-brand-400" />
+                  <Sparkles className="h-4 w-4 text-primary" />
                   <span className="text-xs font-black text-slate-200 uppercase tracking-widest">
                     Image Generation Pipeline
                   </span>
                 </div>
-                <span className="text-[10px] font-mono font-bold text-brand-400 bg-primary/100/10 px-2 py-0.5 rounded border border-primary/20">
+                <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                   {jobStage}
                 </span>
               </div>
               
-              <div className="h-2 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-850 mb-3">
+              <div className="h-2 w-full bg-surface-1/50 rounded-full overflow-hidden border border-border/50 mb-3">
                 <div className="h-full bg-gradient-to-r from-brand-500 to-indigo-500 rounded-full transition-all duration-700" style={{ width: `${jobProgress}%` }} />
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-extrabold flex items-center gap-1.5">
+                <span className="text-[10px] text-muted-foreground font-extrabold flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-brand-400 animate-ping" />
                   {getStageLabel(jobStage)}
                 </span>
-                <span className="text-[10px] text-slate-400 font-bold">{jobProgress}%</span>
+                <span className="text-[10px] text-muted-foreground font-bold">{jobProgress}%</span>
               </div>
             </div>
           )}
 
           {/* MAIN SIMULATED CANVAS EDITOR (Canva style) */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-950 flex flex-col overflow-hidden shadow-2xl relative">
+          <div className="rounded-2xl border border-border/50 bg-surface-1/50 flex flex-col overflow-hidden shadow-2xl relative">
             
             {/* Editor Top Bar */}
-            <div className="flex flex-wrap items-center justify-between border-b border-slate-850 px-5 py-3.5 bg-slate-900/60 backdrop-blur-md">
+            <div className="flex flex-wrap items-center justify-between border-b border-border/50 px-5 py-3.5 bg-surface-2/50/60 backdrop-blur-md">
               <div className="flex items-center gap-4">
                 <span className="text-xs font-extrabold text-foreground flex items-center gap-1.5">
-                  <Layout className="h-3.5 w-3.5 text-slate-400" /> Creative Canvas Studio
+                  <Layout className="h-3.5 w-3.5 text-muted-foreground" /> Creative Canvas Studio
                 </span>
-                <div className="flex items-center gap-1 bg-slate-950 border border-slate-850 px-2.5 py-1 rounded-lg text-[9px] font-bold text-slate-400">
+                <div className="flex items-center gap-1 bg-surface-1/50 border border-border/50 px-2.5 py-1 rounded-lg text-[9px] font-bold text-muted-foreground">
                   <span>SCALE:</span>
                   <span className="text-foreground">100% (Render downscale)</span>
                 </div>
@@ -709,7 +709,7 @@ export default function CreativeBuilderPage() {
                 <button 
                   onClick={handleUndo} 
                   disabled={historyPointer === 0}
-                  className="p-2 text-slate-400 hover:text-white disabled:opacity-30 hover:bg-slate-850 rounded-lg transition-all"
+                  className="p-2 text-muted-foreground hover:text-white disabled:opacity-30 hover:bg-surface-2 rounded-lg transition-all"
                   title="Undo"
                 >
                   <Undo2 className="h-3.5 w-3.5" />
@@ -717,18 +717,18 @@ export default function CreativeBuilderPage() {
                 <button 
                   onClick={handleRedo} 
                   disabled={historyPointer === layersHistory.length - 1}
-                  className="p-2 text-slate-400 hover:text-white disabled:opacity-30 hover:bg-slate-850 rounded-lg transition-all"
+                  className="p-2 text-muted-foreground hover:text-white disabled:opacity-30 hover:bg-surface-2 rounded-lg transition-all"
                   title="Redo"
                 >
                   <Redo2 className="h-3.5 w-3.5" />
                 </button>
-                <div className="h-4 w-px bg-slate-800 mx-1" />
+                <div className="h-4 w-px bg-surface-3 mx-1" />
                 
                 <button 
                   onClick={handleAddText} 
-                  className="flex items-center gap-1 text-[10px] font-black text-slate-400 hover:text-white bg-slate-950 border border-slate-850 px-2.5 py-1.5 rounded-lg hover:border-slate-700 transition-all uppercase tracking-wider"
+                  className="flex items-center gap-1 text-[10px] font-black text-muted-foreground hover:text-white bg-surface-1/50 border border-border/50 px-2.5 py-1.5 rounded-lg hover:border-slate-700 transition-all uppercase tracking-wider"
                 >
-                  <Type className="h-3 w-3 text-brand-400" /> Add Text
+                  <Type className="h-3 w-3 text-primary" /> Add Text
                 </button>
 
                 <button 
@@ -747,19 +747,19 @@ export default function CreativeBuilderPage() {
                       }
                     ]);
                   }}
-                  className="flex items-center gap-1 text-[10px] font-black text-slate-400 hover:text-white bg-slate-950 border border-slate-850 px-2.5 py-1.5 rounded-lg hover:border-slate-700 transition-all uppercase tracking-wider"
+                  className="flex items-center gap-1 text-[10px] font-black text-muted-foreground hover:text-white bg-surface-1/50 border border-border/50 px-2.5 py-1.5 rounded-lg hover:border-slate-700 transition-all uppercase tracking-wider"
                 >
                   <Sliders className="h-3 w-3 text-indigo-400" /> Add Accent Shape
                 </button>
 
-                <div className="h-4 w-px bg-slate-800 mx-1" />
+                <div className="h-4 w-px bg-surface-3 mx-1" />
 
                 <button 
                   onClick={() => setSnappingGuides(!snappingGuides)}
                   className={`p-1.5 rounded-lg border transition-all text-[9px] font-bold ${
                     snappingGuides 
-                      ? 'border-primary/20 bg-primary/100/10 text-brand-400' 
-                      : 'border-slate-850 bg-slate-950 text-slate-500'
+                      ? 'border-primary/20 bg-primary/10 text-primary' 
+                      : 'border-border/50 bg-surface-1/50 text-muted-foreground/80'
                   }`}
                   title="Toggle Snap Guides"
                 >
@@ -771,8 +771,8 @@ export default function CreativeBuilderPage() {
             <div className="flex-1 flex flex-col md:flex-row min-h-[460px]">
               
               {/* LAYERS MANAGER SIDEBAR */}
-              <div className="w-full md:w-56 border-r border-slate-850 p-4 bg-slate-900/20 space-y-4">
-                <div className="flex items-center justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              <div className="w-full md:w-56 border-r border-border/50 p-4 bg-surface-2/50/20 space-y-4">
+                <div className="flex items-center justify-between text-[10px] font-black text-muted-foreground/80 uppercase tracking-widest">
                   <span className="flex items-center gap-1.5"><Layers3 className="h-3.5 w-3.5" /> Layer List</span>
                   <span>{currentLayers.length} total</span>
                 </div>
@@ -785,7 +785,7 @@ export default function CreativeBuilderPage() {
                       className={`flex items-center justify-between p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                         selectedLayerId === layer.id
                           ? 'border-primary bg-primary/100/5 text-foreground'
-                          : 'border-slate-850 hover:border-slate-800 bg-slate-950/40 text-slate-400'
+                          : 'border-border/50 hover:border-border/50 bg-surface-1/50/40 text-muted-foreground'
                       }`}
                     >
                       <div className="flex items-center gap-2 overflow-hidden">
@@ -798,7 +798,7 @@ export default function CreativeBuilderPage() {
                             e.stopPropagation();
                             handleLockToggle(layer.id);
                           }}
-                          className={`p-1 rounded text-[10px] ${layer.isLocked ? 'text-brand-400' : 'text-slate-600 hover:text-slate-400'}`}
+                          className={`p-1 rounded text-[10px] ${layer.isLocked ? 'text-primary' : 'text-slate-600 hover:text-muted-foreground'}`}
                         >
                           {layer.isLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
                         </button>
@@ -820,15 +820,15 @@ export default function CreativeBuilderPage() {
 
                 {/* LAYER PROPERTIES INSPECTOR */}
                 {selectedLayerId && (
-                  <div className="border-t border-slate-850 pt-4 space-y-3">
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Layer Inspector</span>
+                  <div className="border-t border-border/50 pt-4 space-y-3">
+                    <span className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-widest block">Layer Inspector</span>
                     
                     {currentLayers.find(l => l.id === selectedLayerId)?.type === 'text' && (
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-wider block">Content Editor</label>
+                        <label className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-wider block">Content Editor</label>
                         <input 
                           type="text"
-                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-foreground outline-none"
+                          className="w-full bg-surface-1/50 border border-border/50 rounded-lg p-2 text-xs text-foreground outline-none"
                           value={currentLayers.find(l => l.id === selectedLayerId)?.content ?? ''}
                           onChange={(e) => handleLayerContentChange(selectedLayerId, e.target.value)}
                         />
@@ -837,7 +837,7 @@ export default function CreativeBuilderPage() {
 
                     {currentLayers.find(l => l.id === selectedLayerId)?.type === 'shape' && (
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-wider block">Accent Color Swatches</label>
+                        <label className="text-[9px] font-black text-muted-foreground/80 uppercase tracking-wider block">Accent Color Swatches</label>
                         <div className="grid grid-cols-4 gap-1.5">
                           {brandColors.map(c => (
                             <button
@@ -853,34 +853,34 @@ export default function CreativeBuilderPage() {
 
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <span className="text-[8px] font-bold text-slate-500 block uppercase mb-1">Position (X, Y)</span>
+                        <span className="text-[8px] font-bold text-muted-foreground/80 block uppercase mb-1">Position (X, Y)</span>
                         <div className="flex items-center gap-1">
                           <button 
                             onClick={() => handleLayerMove(selectedLayerId, -10, 0)} 
-                            className="bg-slate-950 border border-slate-850 px-2 py-1 rounded text-[10px] text-slate-400 hover:text-white"
+                            className="bg-surface-1/50 border border-border/50 px-2 py-1 rounded text-[10px] text-muted-foreground hover:text-white"
                           >
                             ←
                           </button>
                           <button 
                             onClick={() => handleLayerMove(selectedLayerId, 10, 0)} 
-                            className="bg-slate-950 border border-slate-850 px-2 py-1 rounded text-[10px] text-slate-400 hover:text-white"
+                            className="bg-surface-1/50 border border-border/50 px-2 py-1 rounded text-[10px] text-muted-foreground hover:text-white"
                           >
                             →
                           </button>
                         </div>
                       </div>
                       <div>
-                        <span className="text-[8px] font-bold text-slate-500 block uppercase mb-1">Shift (Up, Down)</span>
+                        <span className="text-[8px] font-bold text-muted-foreground/80 block uppercase mb-1">Shift (Up, Down)</span>
                         <div className="flex items-center gap-1">
                           <button 
                             onClick={() => handleLayerMove(selectedLayerId, 0, -10)} 
-                            className="bg-slate-950 border border-slate-850 px-2 py-1 rounded text-[10px] text-slate-400 hover:text-white"
+                            className="bg-surface-1/50 border border-border/50 px-2 py-1 rounded text-[10px] text-muted-foreground hover:text-white"
                           >
                             ↑
                           </button>
                           <button 
                             onClick={() => handleLayerMove(selectedLayerId, 0, 10)} 
-                            className="bg-slate-950 border border-slate-850 px-2 py-1 rounded text-[10px] text-slate-400 hover:text-white"
+                            className="bg-surface-1/50 border border-border/50 px-2 py-1 rounded text-[10px] text-muted-foreground hover:text-white"
                           >
                             ↓
                           </button>
@@ -892,12 +892,12 @@ export default function CreativeBuilderPage() {
               </div>
 
               {/* CANVAS WORKSPACE VIEW */}
-              <div className="flex-1 bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
+              <div className="flex-1 bg-surface-1/50 flex items-center justify-center p-6 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:24px_24px] opacity-25" />
                 
                 {/* ACTIVE DESIGN CANVAS BODY */}
                 <div 
-                  className={`relative bg-slate-900 border border-slate-800 shadow-2xl rounded-xl overflow-hidden select-none transition-all duration-300 ${
+                  className={`relative bg-surface-2/50 border border-border/50 shadow-2xl rounded-xl overflow-hidden select-none transition-all duration-300 ${
                     selectedFormat === 'square' ? 'aspect-square w-[340px]' : 
                     selectedFormat === 'portrait' ? 'aspect-[4/5] h-[400px]' : 
                     selectedFormat === 'landscape' ? 'aspect-[16/9] w-[420px]' : 
@@ -933,7 +933,7 @@ export default function CreativeBuilderPage() {
                           onClick={(e) => { e.stopPropagation(); setSelectedLayerId(layer.id); }}
                           style={{ left: `${x}px`, top: `${y}px` }}
                           className={`absolute z-20 cursor-move transition-shadow ${
-                            selectedLayerId === layer.id ? 'ring-2 ring-primary/20 p-0.5 bg-slate-950/20' : ''
+                            selectedLayerId === layer.id ? 'ring-2 ring-primary/20 p-0.5 bg-surface-1/50/20' : ''
                           }`}
                         >
                           <img src={layer.src} alt={layer.name} className="h-8 object-contain filter brightness-125 pointer-events-none" />
@@ -954,7 +954,7 @@ export default function CreativeBuilderPage() {
                           onClick={(e) => { e.stopPropagation(); setSelectedLayerId(layer.id); }}
                           style={{ left: `${x}px`, top: `${y}px`, width: `${layer.width}px` }}
                           className={`absolute z-30 cursor-move p-1 transition-shadow ${
-                            selectedLayerId === layer.id ? 'ring-2 ring-primary/20 bg-slate-950/30 backdrop-blur-[1px]' : ''
+                            selectedLayerId === layer.id ? 'ring-2 ring-primary/20 bg-surface-1/50/30 backdrop-blur-[1px]' : ''
                           }`}
                         >
                           <h4 
@@ -1028,12 +1028,12 @@ export default function CreativeBuilderPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* ────────────────── COMPARATIVE VARIANTS PANEL (Step 6) ────────────────── */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
+            <div className="bg-surface-2/50 border border-border/50 rounded-2xl p-5 shadow-lg space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-brand-400" /> Compare Generated Variants
+                  <Sparkles className="h-4 w-4 text-primary" /> Compare Generated Variants
                 </h3>
-                <span className="text-[9px] text-brand-400 font-extrabold bg-primary/100/10 px-2 py-0.5 rounded border border-primary/20">
+                <span className="text-[9px] text-primary font-extrabold bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                   {4 + generatedCount} variants
                 </span>
               </div>
@@ -1053,7 +1053,7 @@ export default function CreativeBuilderPage() {
                     className={`group relative aspect-square rounded-xl border-2 overflow-hidden transition-all text-left ${
                       activeVariantIndex === i 
                         ? 'border-primary ring-2 ring-primary/20/25 scale-[1.02]' 
-                        : 'border-slate-850 hover:border-slate-750 hover:scale-[1.01]'
+                        : 'border-border/50 hover:border-slate-750 hover:scale-[1.01]'
                     }`}
                   >
                     <img src={variant.url} alt={variant.version} className="absolute inset-0 h-full w-full object-cover filter brightness-[0.75] group-hover:scale-105 transition-transform" />
@@ -1067,22 +1067,22 @@ export default function CreativeBuilderPage() {
                 ))}
               </div>
 
-              <div className="bg-slate-950 border border-slate-850 p-3.5 rounded-xl space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-black uppercase text-slate-400 leading-none">
+              <div className="bg-surface-1/50 border border-border/50 p-3.5 rounded-xl space-y-2">
+                <div className="flex items-center justify-between text-[10px] font-black uppercase text-muted-foreground leading-none">
                   <span>Variant Metadata Log</span>
-                  <span className="text-brand-400">Telemetry logs active</span>
+                  <span className="text-primary">Telemetry logs active</span>
                 </div>
-                <p className="text-[10.5px] text-slate-400 leading-relaxed font-bold">
+                <p className="text-[10.5px] text-muted-foreground leading-relaxed font-bold">
                   {simulatedVariants[activeVariantIndex]?.desc}
                 </p>
-                <div className="text-[9px] text-slate-500 font-mono select-all truncate mt-1 bg-slate-900 p-1.5 rounded border border-slate-850">
+                <div className="text-[9px] text-muted-foreground/80 font-mono select-all truncate mt-1 bg-surface-2/50 p-1.5 rounded border border-border/50">
                   PROMPT: {simulatedVariants[activeVariantIndex]?.prompt}
                 </div>
               </div>
             </div>
 
             {/* ────────────────── APPROVAL & ANNOTATIONS PANEL (Step 8) ────────────────── */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
+            <div className="bg-surface-2/50 border border-border/50 rounded-2xl p-5 shadow-lg space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-2">
                   <Shield className="h-4 w-4 text-emerald-400" /> Review & Approvals Hub
@@ -1092,7 +1092,7 @@ export default function CreativeBuilderPage() {
                   className={`text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded transition-all ${
                     isApprovalEnabled 
                       ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' 
-                      : 'bg-slate-800 border border-slate-700 text-slate-500'
+                      : 'bg-surface-3 border border-slate-700 text-muted-foreground/80'
                   }`}
                 >
                   {isApprovalEnabled ? 'Enabled' : 'Bypassed'}
@@ -1102,7 +1102,7 @@ export default function CreativeBuilderPage() {
               {isApprovalEnabled ? (
                 <div className="space-y-4">
                   {/* Stages timeline */}
-                  <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-850 overflow-x-auto">
+                  <div className="flex items-center justify-between bg-surface-1/50 p-2.5 rounded-xl border border-border/50 overflow-x-auto">
                     {[
                       { id: 'CREATIVE', label: 'Creative' },
                       { id: 'BRAND', label: 'Brand' },
@@ -1114,8 +1114,8 @@ export default function CreativeBuilderPage() {
                         onClick={() => setApprovalStage(st.id as any)}
                         className={`flex items-center gap-1.5 text-[9px] font-black px-2.5 py-1.5 rounded-lg border transition-all uppercase ${
                           approvalStage === st.id
-                            ? 'border-primary bg-primary/100/10 text-brand-400 font-extrabold'
-                            : 'border-transparent text-slate-500 hover:text-slate-350'
+                            ? 'border-primary bg-primary/10 text-primary font-extrabold'
+                            : 'border-transparent text-muted-foreground/80 hover:text-slate-350'
                         }`}
                       >
                         {st.label}
@@ -1132,7 +1132,7 @@ export default function CreativeBuilderPage() {
                         className={`p-3 rounded-xl border transition-all cursor-pointer ${
                           activeCommentId === comm.id 
                             ? 'border-red-500 bg-red-500/5' 
-                            : 'border-slate-850 bg-slate-950/40 hover:border-slate-800'
+                            : 'border-border/50 bg-surface-1/50/40 hover:border-border/50'
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-2">
@@ -1140,11 +1140,11 @@ export default function CreativeBuilderPage() {
                           <div>
                             <div className="flex items-center gap-1.5 leading-none">
                               <span className="text-[10px] font-black text-foreground">{comm.user}</span>
-                              <span className="bg-slate-900 border border-slate-850 text-[8px] font-bold text-slate-400 px-1 py-0.25 rounded uppercase">
+                              <span className="bg-surface-2/50 border border-border/50 text-[8px] font-bold text-muted-foreground px-1 py-0.25 rounded uppercase">
                                 {comm.role}
                               </span>
                             </div>
-                            <span className="text-[8px] text-slate-500 mt-1 font-bold block">{comm.time}</span>
+                            <span className="text-[8px] text-muted-foreground/80 mt-1 font-bold block">{comm.time}</span>
                           </div>
                         </div>
                         <p className="text-[10px] text-slate-350 font-bold leading-relaxed">
@@ -1154,7 +1154,7 @@ export default function CreativeBuilderPage() {
                           <span className="text-[8px] font-mono text-red-400 font-bold uppercase tracking-wider flex items-center gap-1">
                             <MessageSquare className="h-2.5 w-2.5 text-red-500" /> Bounding Box Annotation
                           </span>
-                          <span className="text-[8px] text-slate-500 font-extrabold uppercase bg-slate-900 px-1.5 py-0.5 rounded border border-slate-850">
+                          <span className="text-[8px] text-muted-foreground/80 font-extrabold uppercase bg-surface-2/50 px-1.5 py-0.5 rounded border border-border/50">
                             {comm.stage} stage
                           </span>
                         </div>
@@ -1163,10 +1163,10 @@ export default function CreativeBuilderPage() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-slate-950 border border-slate-850 p-6 rounded-xl text-center text-slate-500">
+                <div className="bg-surface-1/50 border border-border/50 p-6 rounded-xl text-center text-muted-foreground/80">
                   <Shield className="h-8 w-8 mx-auto text-slate-650 mb-2" />
-                  <p className="text-xs font-black uppercase text-slate-400 tracking-wider">Approval workflow bypassed</p>
-                  <p className="text-[10px] text-slate-500 mt-1 leading-normal max-w-xs mx-auto">
+                  <p className="text-xs font-black uppercase text-muted-foreground tracking-wider">Approval workflow bypassed</p>
+                  <p className="text-[10px] text-muted-foreground/80 mt-1 leading-normal max-w-xs mx-auto">
                     Approved contents will generate images directly saving as completed deliverables into asset library workspace.
                   </p>
                 </div>
@@ -1176,17 +1176,17 @@ export default function CreativeBuilderPage() {
           </div>
 
           {/* ────────────────── EXPORT, CDN & PUBLISHING SUITE ────────────────── */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-4">
+          <div className="bg-surface-2/50 border border-border/50 rounded-2xl p-6 shadow-xl space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-border/50 pb-4">
               <div>
                 <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-2">
-                  <Download className="h-4 w-4 text-brand-400 animate-bounce" /> Export Deliverable Pipeline
+                  <Download className="h-4 w-4 text-primary animate-bounce" /> Export Deliverable Pipeline
                 </h3>
-                <p className="text-[10px] text-slate-400 font-bold mt-1">
+                <p className="text-[10px] text-muted-foreground font-bold mt-1">
                   Compile flat canvas layers, apply high resolution, upscale if requested, and register to CDNs.
                 </p>
               </div>
-              <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider bg-slate-950 border border-slate-850 px-3 py-1.5 rounded-lg mt-2 md:mt-0">
+              <div className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-wider bg-surface-1/50 border border-border/50 px-3 py-1.5 rounded-lg mt-2 md:mt-0">
                 Storage: <span className="text-foreground font-extrabold">2.4 GB / 10 GB limit</span>
               </div>
             </div>
@@ -1194,14 +1194,14 @@ export default function CreativeBuilderPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <button 
                 onClick={() => alert('Compiling layers into 1080x1080 high-fidelity WebP format... Uploading to Cloudflare R2... CDN caching activated!')}
-                className="flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
+                className="flex items-center justify-center gap-2 bg-surface-1/50 hover:bg-surface-2/50 border border-border/50 hover:border-slate-700 text-slate-200 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
               >
-                <Download className="h-3.5 w-3.5 text-brand-400" /> Export High-Res WebP
+                <Download className="h-3.5 w-3.5 text-primary" /> Export High-Res WebP
               </button>
 
               <button 
                 onClick={() => alert('Launching AI Super-Resolution pipeline... Upscaling vector layer shapes and generating 4x print-ready PNG...') }
-                className="flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
+                className="flex items-center justify-center gap-2 bg-surface-1/50 hover:bg-surface-2/50 border border-border/50 hover:border-slate-700 text-slate-200 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all"
               >
                 <Scale className="h-3.5 w-3.5 text-indigo-400" /> Upscale 4x PNG (Print)
               </button>
@@ -1214,9 +1214,9 @@ export default function CreativeBuilderPage() {
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between text-[10px] text-slate-500 font-bold bg-slate-950 border border-slate-850 p-3 rounded-xl leading-relaxed">
+            <div className="flex flex-wrap items-center justify-between text-[10px] text-muted-foreground/80 font-bold bg-surface-1/50 border border-border/50 p-3 rounded-xl leading-relaxed">
               <span className="flex items-center gap-1.5"><Shield className="h-3.5 w-3.5 text-emerald-400" /> Isolation checks passed. Signed URL filters active.</span>
-              <a href="#" className="text-brand-400 hover:text-brand-300 font-extrabold flex items-center gap-0.5">
+              <a href="#" className="text-primary hover:text-brand-300 font-extrabold flex items-center gap-0.5">
                 Audit Trail Logs <ExternalLink className="h-3 w-3" />
               </a>
             </div>

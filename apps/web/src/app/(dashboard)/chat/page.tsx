@@ -18,11 +18,13 @@ import {
   ArrowRightCircle,
   X,
   Check,
+  Zap,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore, type ChatMessage } from '@/store/chat.store';
+import { cn } from '@brandflow/ui';
 
 const SUGGESTIONS = [
   { icon: Lightbulb, text: 'Suggest 3 LinkedIn post ideas for my brand' },
@@ -278,17 +280,19 @@ export default function ChatPage() {
                         <Bot className="h-4 w-4" />
                       </div>
                     )}
-                    <div className="max-w-[80%]">
+                    <div className="max-w-[85%]">
                       <div
-                        className={`rounded-2xl px-4 py-3 ${
+                        className={cn(
+                          "rounded-2xl px-5 py-3.5 shadow-sm transition-all",
                           msg.role === 'user'
-                            ? 'bg-primary text-foreground'
-                            : 'bg-surface-2 text-foreground bg-surface-2 text-foreground'
-                        }`}
+                            ? 'bg-primary text-primary-foreground rounded-br-sm'
+                            : 'bg-surface-1/80 border border-border/50 text-foreground rounded-bl-sm backdrop-blur-sm'
+                        )}
                       >
-                        <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed font-medium">{msg.content}</p>
                         {msg.role === 'assistant' && msg.latency && (
-                          <p className="mt-2 text-[10px] text-muted-foreground">
+                          <p className="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+                            <Zap className="h-3 w-3" />
                             {msg.provider} · {msg.model} · {msg.latency}ms
                           </p>
                         )}
@@ -297,9 +301,9 @@ export default function ChatPage() {
                       {msg.role === 'assistant' && msg.id && !msg.id.includes('-temp') && (
                         <button
                           onClick={() => setConvertModal({ messageId: msg.id, content: msg.content })}
-                          className="mt-1 flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-muted-foreground opacity-0 transition-opacity hover:text-primary group-hover:opacity-100"
+                          className="mt-2 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-0 transition-all hover:bg-primary/10 hover:text-primary group-hover:opacity-100 border border-transparent hover:border-primary/20"
                         >
-                          <ArrowRightCircle className="h-3 w-3" />
+                          <ArrowRightCircle className="h-3.5 w-3.5" />
                           Convert to Content
                         </button>
                       )}

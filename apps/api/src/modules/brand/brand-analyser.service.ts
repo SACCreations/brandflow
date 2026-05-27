@@ -78,6 +78,8 @@ export class BrandAnalyserService {
       'Extract exact brand colors and classify them correctly into primary, secondary, accent, neutral, and semantic colors.',
       'For Voice & Intelligence, identify specific tones and phrases from the copy.',
       'For Target Audience and Market Intelligence, confidently infer age groups, interests, and competitors from context based on the industry if explicit data is missing.',
+      'For brandDNA, generate highly descriptive, visual keywords for moodboard generation (e.g. "Minimalist glassmorphism on deep slate", "Cyberpunk neon accents").',
+      'Ensure visualExtraction accurately categorizes the provided Image candidates into heroImages, productVisuals, and uiScreenshots.',
       'The brand object must use this shape:',
       JSON.stringify({
         brand: {

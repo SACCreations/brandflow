@@ -146,9 +146,9 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-surface-1/50 dark:bg-gray-950/50 backdrop-blur-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-2xl flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="h-20 border-b border-white/20 dark:border-white/5 bg-background/40 bg-background/40 backdrop-blur-xl sticky top-0 z-50 px-8 flex items-center justify-between shadow-sm">
+      <header className="h-20 border-b border-border/50 bg-surface-1/50 backdrop-blur-xl sticky top-0 z-50 px-8 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <motion.div 
             initial={{ scale: 0.8, rotate: -10 }}
@@ -208,7 +208,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
 
       <div className="flex-1 flex overflow-hidden p-4 gap-4">
         {/* Sidebar Nav */}
-        <aside className="w-72 flex-shrink-0 rounded-3xl border border-white/20 dark:border-white/5 bg-background/40 bg-background/40 backdrop-blur-md p-6 hidden lg:block overflow-y-auto custom-scrollbar shadow-xl">
+        <aside className="w-72 flex-shrink-0 rounded-3xl border border-border/50 bg-surface-1/50 backdrop-blur-md p-6 hidden lg:block overflow-y-auto custom-scrollbar shadow-xl">
           <nav aria-label="Wizard steps" role="tablist" aria-orientation="vertical" className="space-y-2">
             {STEPS.map((step, idx) => {
               const isActive = currentStepIdx === idx;
@@ -225,8 +225,8 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
                   className={cn(
                     "w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left group relative",
                     isActive 
-                      ? "bg-background/60 bg-surface-2/60 shadow-lg border border-white/40 dark:border-white/10" 
-                      : "hover:bg-background/40 dark:hover:bg-surface-1/40 border border-transparent",
+                      ? "bg-background shadow-sm border border-border/50" 
+                      : "hover:bg-surface-2 border border-transparent",
                     !isVisited && "opacity-50 cursor-not-allowed"
                   )}
                 >
@@ -239,10 +239,10 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
                   <div className={cn(
                     "w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center transition-all",
                     isActive 
-                      ? "bg-gradient-to-br from-brand-500 to-brand-700 text-foreground shadow-lg shadow-brand-500/30" 
+                      ? "bg-gradient-to-br from-primary to-indigo-600 text-primary-foreground shadow-lg shadow-primary/30" 
                       : isVisited 
-                        ? "bg-gradient-to-br from-emerald-400 to-emerald-600 text-foreground shadow-md shadow-emerald-500/20" 
-                        : "bg-background/50 bg-surface-2/50 text-muted-foreground group-hover:text-foreground dark:group-hover:text-white backdrop-blur-sm"
+                        ? "bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-md shadow-emerald-500/20" 
+                        : "bg-surface-2 text-muted-foreground group-hover:text-foreground backdrop-blur-sm"
                   )}>
                     {isVisited && !isActive ? <CheckCircle2 className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
                   </div>
@@ -263,7 +263,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
         </aside>
 
         {/* Main Form Area */}
-        <main className="flex-1 min-w-0 overflow-y-auto rounded-3xl border border-white/20 dark:border-white/5 bg-background/40 bg-background/40 backdrop-blur-md px-6 sm:px-12 py-8 sm:py-12 custom-scrollbar relative shadow-xl"
+        <main className="flex-1 min-w-0 overflow-y-auto rounded-3xl border border-border/50 bg-surface-1/50 backdrop-blur-md px-6 sm:px-12 py-8 sm:py-12 custom-scrollbar relative shadow-xl"
           role="tabpanel"
           id={`step-panel-${currentStep.id}`}
           aria-labelledby={`step-tab-${currentStep.id}`}
@@ -302,7 +302,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
               </AnimatePresence>
 
               {/* Navigation Actions */}
-              <div className="mt-12 pt-6 border-t border-white/20 dark:border-white/5 flex items-center justify-between sticky bottom-0 bg-background/40 bg-background/40 backdrop-blur-xl pb-6 z-10 -mx-6 px-6 sm:-mx-12 sm:px-12">
+              <div className="mt-12 pt-6 border-t border-border/50 flex items-center justify-between sticky bottom-0 bg-surface-1/80 backdrop-blur-xl pb-6 z-10 -mx-6 px-6 sm:-mx-12 sm:px-12">
                  <Button
                     variant="ghost"
                     onClick={handleBack}
@@ -330,7 +330,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
         </main>
 
         {/* Preview Panel */}
-        <aside className="w-[450px] flex-shrink-0 hidden xl:block rounded-3xl border border-white/20 dark:border-white/5 bg-background/40 bg-background/40 backdrop-blur-md overflow-hidden shadow-xl">
+        <aside className="w-[450px] flex-shrink-0 hidden xl:block rounded-3xl border border-border/50 bg-surface-1/50 backdrop-blur-md overflow-hidden shadow-xl">
            <LivePreview data={formData} />
         </aside>
       </div>

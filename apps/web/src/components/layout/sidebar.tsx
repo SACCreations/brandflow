@@ -132,14 +132,19 @@ export function Sidebar() {
   });
 
   return (
-    <aside className="flex h-full w-56 flex-shrink-0 flex-col border-r border-border/60 bg-surface-1">
+    <aside className="flex h-full w-64 flex-shrink-0 flex-col border-r border-border/50 bg-surface-1/50 backdrop-blur-md">
       {/* Logo */}
-      <div className="flex h-16 items-center px-6 border-b border-border/60">
-        <span className="text-xl font-bold tracking-tight text-gradient">BrandFlow</span>
+      <div className="flex h-16 items-center px-6 border-b border-border/50">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center shadow-lg shadow-primary/20">
+            <span className="text-primary-foreground font-bold text-lg leading-none tracking-tighter">B</span>
+          </div>
+          <span className="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">BrandFlow</span>
+        </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2 no-scrollbar">
         {navWithBadge.map((item) => {
           if ('href' in item) {
             return (
@@ -151,6 +156,14 @@ export function Sidebar() {
           );
         })}
       </nav>
+      
+      {/* Bottom User Area or Version */}
+      <div className="p-4 border-t border-border/50">
+        <div className="rounded-2xl bg-surface-2/50 p-4 border border-border/50">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Enterprise Edition</p>
+          <p className="text-xs font-medium text-foreground">v2.0.0-beta</p>
+        </div>
+      </div>
     </aside>
   );
 }
@@ -160,18 +173,18 @@ function CollapsibleGroup({ group, items, pathname }: { group: string; items: Na
   const [open, setOpen] = useState(hasActive);
 
   return (
-    <div className="pt-3 first:pt-0">
+    <div className="pt-4 first:pt-0">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors group"
+        className="flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors group"
       >
         {group}
         <ChevronDown className={cn('h-3.5 w-3.5 transition-transform opacity-50 group-hover:opacity-100', open ? '' : '-rotate-90')} />
       </button>
       {open && (
-        <div className="mt-1 space-y-0.5">
+        <div className="mt-2 space-y-1 relative before:absolute before:inset-y-2 before:left-5 before:w-px before:bg-border/50">
           {items.map((sub) => (
-            <NavLink key={sub.href} href={sub.href} Icon={sub.icon} label={sub.label} pathname={pathname} badge={sub.badge} />
+            <NavLink key={sub.href} href={sub.href} Icon={sub.icon} label={sub.label} pathname={pathname} badge={sub.badge} isSubItem />
           ))}
         </div>
       )}
@@ -179,22 +192,24 @@ function CollapsibleGroup({ group, items, pathname }: { group: string; items: Na
   );
 }
 
-function NavLink({ href, Icon, label, pathname, badge }: { href: string; Icon: LucideIcon; label: string; pathname: string; badge?: number }) {
+function NavLink({ href, Icon, label, pathname, badge, isSubItem }: { href: string; Icon: LucideIcon; label: string; pathname: string; badge?: number; isSubItem?: boolean }) {
   const active = pathname === href || pathname.startsWith(href + '/');
   return (
     <Link
       href={href}
       className={cn(
-        'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition-all duration-200',
+        'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-300 relative overflow-hidden',
         active
-          ? 'bg-primary/10 text-primary shadow-sm dark:bg-primary/20 dark:text-primary-foreground'
-          : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground hover:-translate-y-[1px]',
+          ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20 dark:bg-primary/90'
+          : 'text-muted-foreground hover:bg-surface-2/80 hover:text-foreground',
+        isSubItem && !active && 'ml-2 text-[13px] hover:translate-x-1'
       )}
     >
-      <Icon className="h-4 w-4 shrink-0" />
-      <span className="flex-1">{label}</span>
+      {active && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] animate-shimmer" />}
+      <Icon className={cn("h-4 w-4 shrink-0 transition-transform duration-300", active ? "scale-110" : "group-hover:scale-110")} />
+      <span className="flex-1 relative z-10">{label}</span>
       {badge != null && badge > 0 && (
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-foreground">
+        <span className="relative z-10 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white shadow-sm shadow-red-500/20">
           {badge}
         </span>
       )}

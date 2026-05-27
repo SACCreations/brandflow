@@ -9,7 +9,7 @@ interface KnowledgeImpactMatrixProps {
 export function KnowledgeImpactMatrix({ topSources }: KnowledgeImpactMatrixProps) {
   return (
     <div className="lg:col-span-12 overflow-hidden glass-panel">
-      <div className="flex items-center justify-between border-b border-border/60 bg-surface-1/50 bg-background/50 px-6 py-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between border-b border-border/50 bg-surface-2/50 px-6 py-4 backdrop-blur-sm">
         <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-foreground">
           <BrainCircuit className="h-4 w-4 text-primary dark:text-brand-400" />
           Knowledge Impact Matrix
@@ -19,7 +19,7 @@ export function KnowledgeImpactMatrix({ topSources }: KnowledgeImpactMatrixProps
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-border/60">
+            <tr className="border-b border-border/50">
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Knowledge Source</th>
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Type</th>
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Usage Count</th>

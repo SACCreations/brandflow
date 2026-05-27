@@ -61,7 +61,7 @@ export function CampaignList({ campaigns }: CampaignListProps) {
                 </div>
 
                 <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2 bg-background/50 bg-surface-2/50 px-3 py-1.5 rounded-lg border border-border/50 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 bg-surface-2/50 px-3 py-1.5 rounded-lg border border-border/50 backdrop-blur-sm">
                     <CalendarIcon className="h-4 w-4 text-primary" />
                     <span className="font-medium">
                       {new Date(campaign.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} 
@@ -108,10 +108,10 @@ export function CampaignList({ campaigns }: CampaignListProps) {
                 </div>
 
                 <div className="flex items-center gap-3 w-full mt-6">
-                  <Link href={`/campaigns/${campaign.id}`} className="flex-1 text-center py-2 bg-primary/10 hover:bg-brand-100 dark:bg-primary/100/10 dark:hover:bg-primary/100/20 text-brand-700 dark:text-brand-300 rounded-lg text-sm font-bold transition-colors">
+                  <Link href={`/campaigns/${campaign.id}`} className="flex-1 text-center py-2 bg-primary/10 hover:bg-brand-100 dark:hover:bg-primary/20 text-brand-700 dark:text-brand-300 rounded-lg text-sm font-bold transition-colors">
                     Manage
                   </Link>
-                  <button className="p-2 border border-border/50 hover:border-gray-300 dark:hover:border-gray-600 rounded-lg text-muted-foreground hover:text-gray-600 dark:hover:text-gray-300 transition-all bg-background/50 bg-surface-2/50 backdrop-blur-sm">
+                  <button className="p-2 border border-border/50 hover:border-gray-300 dark:hover:border-gray-600 rounded-lg text-muted-foreground hover:text-gray-600 dark:hover:text-gray-300 transition-all bg-surface-2/50 backdrop-blur-sm">
                     <Settings2 className="h-4 w-4" />
                   </button>
                 </div>

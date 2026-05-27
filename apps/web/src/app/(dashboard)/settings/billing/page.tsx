@@ -85,7 +85,7 @@ export default function BillingSettingsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Billing & Subscription</h1>
           <p className="mt-2 text-muted-foreground">Manage your subscription, tokens, and payment methods.</p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:bg-surface-1 bg-background border-border bg-background text-foreground">
+        <button className="inline-flex items-center gap-2 rounded-xl border border-border/50 bg-surface-1/50 px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:bg-surface-2">
           <BarChart3 className="h-4 w-4" />
           View Usage History
         </button>
@@ -93,7 +93,7 @@ export default function BillingSettingsPage() {
 
       {/* Usage Stats */}
       <div className="grid gap-6 md:grid-cols-3">
-        <div className="rounded-3xl border border-border bg-background p-8 border-border bg-background">
+        <div className="glass-premium p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary dark:bg-primary/100/10">
               <Zap className="h-5 w-5" />
@@ -110,7 +110,7 @@ export default function BillingSettingsPage() {
           <p className="mt-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Resets in {Math.max(1, 30 - new Date().getDate())} days</p>
         </div>
 
-        <div className="rounded-3xl border border-border bg-background p-8 border-border bg-background">
+        <div className="glass-premium p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 dark:bg-blue-500/10">
               <ShieldCheck className="h-5 w-5" />
@@ -127,7 +127,7 @@ export default function BillingSettingsPage() {
           <p className="mt-4 text-[10px] font-bold text-amber-600 uppercase tracking-widest">{usage.brandsUsed >= usage.brandLimit ? 'Limit reached' : 'Available'}</p>
         </div>
 
-        <div className="rounded-3xl border border-border bg-background p-8 border-border bg-background">
+        <div className="glass-premium p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 dark:bg-emerald-500/10">
               <CreditCard className="h-5 w-5" />
@@ -160,7 +160,7 @@ export default function BillingSettingsPage() {
                 "relative flex flex-col rounded-[2.5rem] border p-8 transition-all duration-300 hover:shadow-2xl",
                 plan.highlight 
                   ? "border-primary/20 bg-brand-50/30 dark:border-primary/20 dark:bg-primary/100/5 shadow-xl scale-105 z-10" 
-                  : "border-border/60 bg-background border-border bg-background"
+                  : "border-border/50 bg-surface-2/30"
               )}
             >
               {plan.highlight && (
@@ -210,7 +210,7 @@ export default function BillingSettingsPage() {
       </div>
 
       {/* Payment Method */}
-      <div className="rounded-[2.5rem] border border-border/60 bg-background p-8 border-border bg-background overflow-hidden relative">
+      <div className="glass-premium rounded-[2.5rem] p-8 overflow-hidden relative">
         <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
           <CreditCard className="w-64 h-64 -rotate-12" />
         </div>
@@ -218,7 +218,7 @@ export default function BillingSettingsPage() {
           <h3 className="text-lg font-black text-foreground uppercase tracking-tight">Payment Method</h3>
           <p className="mt-1 text-sm text-muted-foreground mb-8">Manage your credit cards and billing information.</p>
           
-          <div className="flex flex-col md:flex-row md:items-center justify-between p-6 rounded-2xl bg-surface-2 border border-border/60 border-border">
+          <div className="flex flex-col md:flex-row md:items-center justify-between p-6 glass-panel border border-border/50">
             <div className="flex items-center gap-4 mb-4 md:mb-0">
               <div className="w-12 h-8 bg-black rounded flex items-center justify-center text-foreground text-[10px] font-bold">VISA</div>
               <div>
@@ -236,9 +236,9 @@ export default function BillingSettingsPage() {
 
 function UsageCard({ title, value, helper, icon }: { title: string; value: string; helper: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border bg-background p-5 shadow-sm border-border bg-background">
+    <div className="glass-panel p-5">
       <div className="mb-3 flex items-center justify-between">
-        <div className="rounded-xl bg-surface-1 bg-background p-2.5 bg-surface-2">{icon}</div>
+        <div className="rounded-xl bg-surface-2/50 p-2.5">{icon}</div>
       </div>
       <div className="text-2xl font-black text-foreground">{value}</div>
       <div className="text-xs font-medium text-muted-foreground">{title}</div>
@@ -249,7 +249,7 @@ function UsageCard({ title, value, helper, icon }: { title: string; value: strin
 
 function ProgressPanel({ title, current, limit, percentage, description }: { title: string; current: number; limit: number; percentage: number; description: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-background p-6 shadow-sm border-border bg-background">
+    <div className="glass-panel p-6">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-bold text-foreground">{title}</h2>
@@ -269,9 +269,9 @@ function ProgressPanel({ title, current, limit, percentage, description }: { tit
 
 function FootprintCard({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className="rounded-2xl bg-surface-1 bg-background p-5 bg-surface-2/60">
+    <div className="glass-panel p-5">
       <div className="flex items-center justify-between">
-        <div className="rounded-xl bg-background p-2 bg-background">{icon}</div>
+        <div className="rounded-xl bg-surface-2/50 p-2">{icon}</div>
         <div className="text-2xl font-black text-foreground">{value}</div>
       </div>
       <div className="mt-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</div>

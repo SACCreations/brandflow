@@ -278,6 +278,16 @@ export default function ImageGeneratorPage() {
     if (promptParam) setPromptText(promptParam);
   }, [brandIdParam, campaignIdParam, promptParam]);
 
+  // Recover active job state from fetched jobs
+  useEffect(() => {
+    if (!activeJobId && jobs.length > 0) {
+      const activeJob = jobs.find((j) => j.status === 'PENDING' || j.status === 'PROCESSING');
+      if (activeJob) {
+        setActiveJobId(activeJob.id);
+      }
+    }
+  }, [jobs, activeJobId]);
+
   useEffect(() => {
     if (!selectedBrandId && brands.length > 0 && brands[0]) {
       setSelectedBrandId(brands[0].id);
@@ -970,6 +980,7 @@ export default function ImageGeneratorPage() {
                           <Button
                             onClick={() => {
                               setPromptText(job.rawPrompt);
+                              setContentSource('manual');
                               if (job.settings?.aspectRatio) setSelectedRatioId(job.settings.aspectRatio);
                               if (job.category) setSelectedCategory(job.category);
                               window.scrollTo({ top: 0, behavior: 'smooth' });

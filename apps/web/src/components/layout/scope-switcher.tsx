@@ -143,16 +143,25 @@ function ScopeSegment({
         <Icon className="h-3.5 w-3.5" />
         <span className="max-w-[120px] truncate">{value?.name ?? placeholder}</span>
         {value && (
-          <button
+          <div
+            role="button"
+            tabIndex={0}
             onClick={(e) => {
               e.stopPropagation();
               onClear();
               setOpen(false);
             }}
-            className="ml-0.5 rounded-full p-0.5 hover:bg-surface-3 dark:hover:bg-gray-700"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.stopPropagation();
+                onClear();
+                setOpen(false);
+              }
+            }}
+            className="ml-0.5 rounded-full p-0.5 hover:bg-surface-3 dark:hover:bg-gray-700 cursor-pointer"
           >
             <X className="h-2.5 w-2.5" />
-          </button>
+          </div>
         )}
       </button>
 

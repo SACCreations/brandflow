@@ -21,8 +21,8 @@ interface RecentActivityFeedProps {
 export function RecentActivityFeed({ recentActivity, isLoading, isError }: RecentActivityFeedProps) {
   return (
     <Card className="glass-premium overflow-hidden animate-fade-in-up" style={{ animationDelay: '500ms' }}>
-      <div className="px-6 py-4 border-b border-border/50">
-        <h2 className="font-semibold text-foreground">Recent Activity</h2>
+      <div className="px-6 py-4 border-b border-border/50 bg-surface-1/50">
+        <h2 className="font-bold text-foreground">Recent Activity</h2>
       </div>
 
       {isError ? (

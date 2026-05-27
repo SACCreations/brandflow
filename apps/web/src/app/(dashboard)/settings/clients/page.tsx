@@ -208,7 +208,7 @@ export default function ClientsSettingsPage() {
               placeholder="Search database..." 
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="rounded-xl border border-border/60 bg-background pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-background"
+              className="rounded-xl border border-border/50 bg-background pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
             />
           </div>
         </div>
@@ -216,7 +216,7 @@ export default function ClientsSettingsPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {clients?.map((client) => (
-          <div key={client.id} className="group relative overflow-hidden rounded-2xl border border-border/60 bg-background p-6 transition-all hover:shadow-xl border-border bg-background">
+          <div key={client.id} className="group relative overflow-hidden glass-premium p-6 transition-all hover:shadow-xl hover:-translate-y-1">
             <div className="flex items-start justify-between">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/100/10">
                 <Building2 className="h-6 w-6" />
@@ -230,7 +230,7 @@ export default function ClientsSettingsPage() {
                 </Link>
                 <button 
                   onClick={() => handleEdit(client)}
-                  className="rounded-lg p-2 text-muted-foreground hover:bg-surface-1 bg-background dark:hover:bg-surface-1"
+                  className="rounded-lg p-2 text-muted-foreground hover:bg-surface-2/50 transition-colors"
                 >
                   <Edit3 className="h-4 w-4" />
                 </button>
@@ -277,7 +277,7 @@ export default function ClientsSettingsPage() {
         
         {clients?.length === 0 && (
           <div className="col-span-full py-20 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface-1 bg-background text-muted-foreground bg-surface-2">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full glass-panel text-muted-foreground">
               <User className="h-8 w-8" />
             </div>
             <h3 className="mt-4 text-lg font-bold text-foreground">No clients found</h3>
@@ -289,13 +289,13 @@ export default function ClientsSettingsPage() {
       {/* Client Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full max-w-lg rounded-3xl border border-border/60 bg-background p-8 shadow-2xl border-border bg-background animate-in zoom-in-95 duration-300">
+          <div className="w-full max-w-lg glass-premium p-8 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-xl font-bold text-foreground">{editingClient ? 'Edit Client' : 'Add New Client'}</h2>
                 <p className="text-sm text-muted-foreground">Enter client information to save it to your database.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-surface-1 bg-background p-2 text-muted-foreground hover:bg-surface-3 dark:hover:bg-gray-700">
+              <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-surface-2/50 p-2 text-muted-foreground hover:bg-surface-3 transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -308,7 +308,7 @@ export default function ClientsSettingsPage() {
                   <input 
                     type="text" 
                     placeholder="e.g. John Doe"
-                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-10 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-10 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
@@ -321,7 +321,7 @@ export default function ClientsSettingsPage() {
                   <input 
                     type="email" 
                     placeholder="john@example.com"
-                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-10 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-10 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                   />
@@ -333,7 +333,7 @@ export default function ClientsSettingsPage() {
                   <input 
                     type="text" 
                     placeholder="Company Name"
-                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                     value={formData.company}
                     onChange={(e) => setFormData({...formData, company: e.target.value})}
                   />
@@ -343,7 +343,7 @@ export default function ClientsSettingsPage() {
                   <input 
                     type="text" 
                     placeholder="+1 (555) 000-0000"
-                    className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                    className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   />
@@ -360,7 +360,7 @@ export default function ClientsSettingsPage() {
                       className={`flex-1 rounded-xl border py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
                         formData.status === s 
                           ? 'border-primary bg-primary/10 text-primary dark:bg-primary/100/10' 
-                          : 'border-border/60 bg-surface-1 bg-background text-muted-foreground hover:bg-surface-2 border-border bg-surface-2'
+                          : 'border-border/50 bg-surface-1/50 text-muted-foreground hover:bg-surface-2'
                       }`}
                     >
                       {s}
@@ -372,7 +372,7 @@ export default function ClientsSettingsPage() {
               <div className="pt-4 flex gap-4">
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl border border-border/60 py-3 text-sm font-bold text-muted-foreground hover:bg-surface-1 bg-background border-border"
+                  className="flex-1 rounded-xl border border-border/50 py-3 text-sm font-bold text-muted-foreground hover:bg-surface-1 transition-colors"
                 >
                   Cancel
                 </button>

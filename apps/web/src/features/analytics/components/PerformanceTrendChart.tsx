@@ -26,7 +26,7 @@ export function PerformanceTrendChart({ chartData, windowDays, rangeTo }: Perfor
             Reach and engagement over the past {windowDays} days.
           </p>
         </div>
-        <div className="rounded-xl bg-surface-1/50 bg-background/50 border border-border/60 px-3 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <div className="rounded-xl bg-surface-2/50 border border-border/50 px-3 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
           {rangeTo
             ? formatDistanceToNow(new Date(rangeTo), { addSuffix: true })
             : 'Current'}

@@ -130,12 +130,12 @@ export function GeneratorConfigForm({
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`flex flex-col items-start p-3 text-left rounded-xl border backdrop-blur-sm transition-all duration-300 ${
                   selectedCategory === cat.id
-                    ? 'border-primary/50 bg-brand-50/50 text-brand-900 ring-4 ring-primary/20/10 dark:bg-primary/100/20 dark:text-brand-100 shadow-inner'
-                    : 'border-border/50 text-foreground hover:bg-surface-1/80 bg-background/40 text-muted-foreground dark:hover:bg-surface-1/60 hover:-translate-y-0.5 shadow-sm'
+                    ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20 dark:bg-primary/20 dark:text-primary-foreground shadow-inner'
+                    : 'border-border/50 bg-surface-1/50 text-muted-foreground hover:bg-surface-2 hover:text-foreground hover:-translate-y-0.5 shadow-sm'
                 }`}
               >
-                <span className="text-xs font-bold">{cat.label}</span>
-                <span className="text-[9px] text-muted-foreground/80 mt-1 line-clamp-1">{cat.desc}</span>
+                <span className="text-xs font-bold text-foreground">{cat.label}</span>
+                <span className="text-[9px] mt-1 line-clamp-1">{cat.desc}</span>
               </button>
             ))}
           </div>

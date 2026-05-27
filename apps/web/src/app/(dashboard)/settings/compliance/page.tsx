@@ -105,7 +105,7 @@ export default function CompliancePage() {
 
       {/* Main Table Section */}
       <Card className="overflow-hidden">
-        <div className="p-6 border-b border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-6 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
@@ -126,12 +126,12 @@ export default function CompliancePage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-surface-1 bg-background/50">
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/60">Timestamp</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/60">User</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/60">Action</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/60">Entity</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/60 text-right">Verification</th>
+              <tr className="bg-surface-2/50">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/50">Timestamp</th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/50">User</th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/50">Action</th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/50">Entity</th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/50 text-right">Verification</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -153,7 +153,7 @@ export default function CompliancePage() {
                 </tr>
               ) : (
                 filteredLogs?.map((log) => (
-                  <tr key={log.id} className="hover:bg-surface-1 bg-background dark:hover:bg-surface-1/50 transition-colors group">
+                  <tr key={log.id} className="hover:bg-surface-2/50 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                       {format(new Date(log.createdAt), 'MMM d, yyyy HH:mm:ss')}
                     </td>

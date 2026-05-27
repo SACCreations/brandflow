@@ -141,7 +141,7 @@ export default function TeamSettingsPage() {
 
       {/* Stats Mini-Bar */}
       <div className="grid gap-6 md:grid-cols-4">
-        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
+        <div className="glass-panel p-4">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-2 dark:bg-blue-500/10"><Users className="h-5 w-5 text-blue-600" /></div>
             <div>
@@ -150,7 +150,7 @@ export default function TeamSettingsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
+        <div className="glass-panel p-4">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-purple-50 p-2 dark:bg-purple-500/10"><Shield className="h-5 w-5 text-purple-600" /></div>
             <div>
@@ -159,7 +159,7 @@ export default function TeamSettingsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-border/60 bg-background p-4 border-border bg-background">
+        <div className="glass-panel p-4">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-emerald-50 p-2 dark:bg-emerald-500/10"><CheckCircle2 className="h-5 w-5 text-emerald-600" /></div>
             <div>
@@ -168,7 +168,7 @@ export default function TeamSettingsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-brand-50 bg-brand-50/20 p-4 dark:border-primary/20 dark:bg-primary/100/5">
+        <div className="glass-panel border-primary/20 bg-primary/5 p-4">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-brand-100 p-2 dark:bg-primary/100/20"><UserPlus className="h-5 w-5 text-primary" /></div>
             <div>
@@ -180,18 +180,18 @@ export default function TeamSettingsPage() {
       </div>
 
       {/* Members Table */}
-      <div className="overflow-hidden rounded-2xl border border-border bg-background border-border bg-background">
-        <div className="flex items-center justify-between border-b border-border/60 p-6 border-border">
+      <div className="overflow-hidden glass-premium">
+        <div className="flex items-center justify-between border-b border-border/50 p-6">
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input 
                 type="text" 
                 placeholder="Search team..." 
-                className="rounded-xl border border-border/60 bg-surface-1 dark:bg-gray-950/50 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                className="rounded-xl border border-border/50 bg-surface-1/50 pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
               />
             </div>
-            <button className="rounded-xl border border-border/60 p-2 text-muted-foreground border-border hover:bg-surface-1 bg-background dark:hover:bg-surface-1">
+            <button className="rounded-xl border border-border/50 p-2 text-muted-foreground hover:bg-surface-1 transition-colors">
               <Filter className="h-5 w-5" />
             </button>
           </div>
@@ -200,7 +200,7 @@ export default function TeamSettingsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-gray-50 bg-surface-1 dark:bg-gray-950/50 border-border bg-surface-2/30">
+              <tr className="border-b border-border/50 bg-surface-2/50">
                 <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">User</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Role</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Joined</th>
@@ -209,7 +209,7 @@ export default function TeamSettingsPage() {
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {members?.map((member) => (
-                <tr key={member.id} className="group transition-colors hover:bg-surface-1 dark:bg-gray-950/50 dark:hover:bg-surface-1/30">
+                <tr key={member.id} className="group transition-colors hover:bg-surface-2/50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 overflow-hidden rounded-xl bg-surface-3">
@@ -233,7 +233,7 @@ export default function TeamSettingsPage() {
                     <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
                       member.role.name === 'owner' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10' :
                       member.role.name === 'admin' ? 'bg-primary/10 text-primary dark:bg-primary/100/10' :
-                      'bg-surface-2 text-muted-foreground bg-surface-2 text-muted-foreground'
+                      'bg-surface-2 text-muted-foreground'
                     }`}>
                       <Shield className="h-3 w-3" />
                       {member.role.name}
@@ -267,13 +267,13 @@ export default function TeamSettingsPage() {
       {/* Invite Modal */}
       {isInviteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="w-full max-w-xl rounded-3xl border border-border/60 bg-background p-8 shadow-2xl border-border bg-background animate-in zoom-in-95 duration-300">
+          <div className="w-full max-w-xl glass-premium p-8 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-xl font-bold text-foreground">Add Team Members</h2>
                 <p className="text-sm text-muted-foreground">Collaborate with your team by adding them here.</p>
               </div>
-              <button onClick={() => setIsInviteModalOpen(false)} className="rounded-full bg-surface-1 bg-background p-2 text-muted-foreground hover:bg-surface-3 dark:hover:bg-gray-700">
+              <button onClick={() => setIsInviteModalOpen(false)} className="rounded-full bg-surface-2/50 p-2 text-muted-foreground hover:bg-surface-3 transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -292,7 +292,7 @@ export default function TeamSettingsPage() {
                         <input 
                           type="email" 
                           placeholder="coworker@company.com"
-                          className="w-full rounded-xl border border-border/60 bg-surface-1 bg-background px-10 py-3 text-sm focus:ring-2 focus:ring-primary/20 border-border bg-surface-2"
+                          className="w-full rounded-xl border border-border/50 bg-surface-1/50 px-10 py-3 text-sm focus:ring-2 focus:ring-primary/20"
                           value={email}
                           onChange={(e) => handleEmailChange(index, e.target.value)}
                         />
@@ -300,7 +300,7 @@ export default function TeamSettingsPage() {
                       {inviteEmails.length > 1 && (
                         <button 
                           onClick={() => handleRemoveEmailRow(index)}
-                          className="rounded-xl border border-border/60 p-3 text-muted-foreground hover:bg-surface-1 bg-background border-border dark:hover:bg-surface-1"
+                          className="rounded-xl border border-border/50 p-3 text-muted-foreground hover:bg-surface-1 transition-colors"
                         >
                           <X className="h-5 w-5" />
                         </button>
@@ -319,8 +319,8 @@ export default function TeamSettingsPage() {
                       onClick={() => setSelectedRole(role)}
                       className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
                         selectedRole === role 
-                          ? 'border-primary bg-brand-50/50 text-primary dark:bg-primary/100/10' 
-                          : 'border-border/60 bg-surface-1 bg-background text-muted-foreground hover:bg-surface-2 border-border bg-surface-2'
+                          ? 'border-primary bg-primary/5 text-primary' 
+                          : 'border-border/50 bg-surface-1/50 text-muted-foreground hover:bg-surface-2'
                       }`}
                     >
                       <Shield className="h-5 w-5" />
@@ -333,7 +333,7 @@ export default function TeamSettingsPage() {
               <div className="pt-4 flex gap-4">
                 <button 
                   onClick={() => setIsInviteModalOpen(false)}
-                  className="flex-1 rounded-xl border border-border/60 py-3 text-sm font-bold text-muted-foreground hover:bg-surface-1 bg-background border-border"
+                  className="flex-1 rounded-xl border border-border/50 py-3 text-sm font-bold text-muted-foreground hover:bg-surface-1 transition-colors"
                 >
                   Cancel
                 </button>

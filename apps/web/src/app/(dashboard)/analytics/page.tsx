@@ -60,7 +60,7 @@ export default function AnalyticsDashboard() {
       <div className="space-y-6 animate-in fade-in duration-300">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <div className="h-8 w-48 animate-pulse rounded-lg bg-surface-3 bg-surface-2" />
+            <div className="h-8 w-48 animate-pulse rounded-lg bg-surface-2" />
             <div className="h-4 w-72 animate-pulse rounded-lg bg-surface-3" />
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function AnalyticsDashboard() {
           </select>
           <button
             onClick={() => void refetch()}
-            className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-2 hover:border-primary transition-all micro-hover"
+            className="inline-flex items-center gap-2 rounded-xl border border-border/50 bg-surface-1/50 px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-2 hover:border-primary transition-all micro-hover"
           >
             <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
             Refresh
@@ -106,7 +106,7 @@ export default function AnalyticsDashboard() {
       <AnalyticsMetricsGrid summary={analytics?.summary} windowDays={windowDays} />
 
       {/* AI Spend Section */}
-      <div className="rounded-[1.25rem] bg-surface-1 p-8 border border-border/60 shadow-sm relative overflow-hidden">
+      <div className="glass-premium rounded-[2.5rem] p-8 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-3xl rounded-full pointer-events-none" />
         <h2 className="text-xl font-bold text-foreground mb-8 flex items-center gap-3 relative z-10">
           <DollarSign className="h-6 w-6 text-emerald-500" />

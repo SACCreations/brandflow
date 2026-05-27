@@ -42,7 +42,7 @@ function MetricCard({ title, value, helper, icon }: { title: string; value: stri
   return (
     <div className="glass-panel p-6">
       <div className="mb-4 flex items-center justify-between">
-        <div className="rounded-xl bg-surface-1/50 bg-background/50 p-2.5 border border-border/60">
+        <div className="rounded-xl bg-surface-2/50 p-2.5 border border-border/50">
           {icon}
         </div>
         <ArrowUpRight className="h-4 w-4 text-muted-foreground dark:text-gray-600" />

@@ -215,6 +215,23 @@ export default function CampaignsPage() {
         </div>
       </div>
 
+      <CampaignSummaryStats campaigns={campaigns} activeTab={activeTab} />
+
+      <CampaignList 
+        campaigns={campaigns} 
+        onArchive={(id) => archiveMutation.mutate(id)}
+        onDelete={(id) => deleteMutation.mutate(id)}
+        onClone={(id, name) => cloneMutation.mutate({ id, name })}
+      />
+
+      <CreateCampaignModal 
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        newCampaign={newCampaign}
+        setNewCampaign={setNewCampaign}
+        handleCreate={handleCreate}
+        isPending={createMutation.isPending}
+      />
     </div>
   );
 }

@@ -81,7 +81,7 @@ export default function LlmSettingsPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Card className="p-6 glass-premium border-border/60 rounded-[1.25rem] shadow-sm">
+        <Card className="glass-premium p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-[hsl(var(--ai))]/10 border border-[hsl(var(--ai))]/20 shadow-sm rounded-xl">
               <Cpu className="w-5 h-5 text-[hsl(var(--ai))]" />
@@ -97,7 +97,7 @@ export default function LlmSettingsPage() {
               <label className="text-sm font-medium">Provider</label>
               <select
                 {...register('provider')}
-                className="w-full h-10 px-3 py-2 bg-background border border-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm hover:border-border-strong"
+                className="w-full h-10 px-3 py-2 glass-panel border border-border/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm hover:border-border"
               >
                 <option value="openai">OpenAI (ChatGPT)</option>
                 <option value="anthropic">Anthropic (Claude)</option>
@@ -142,7 +142,7 @@ export default function LlmSettingsPage() {
           </div>
         </Card>
 
-        <Card className="p-6 glass-premium border-border/60 rounded-[1.25rem] shadow-sm">
+        <Card className="glass-premium p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-amber-500/10 border border-amber-500/20 shadow-sm rounded-xl">
               <Key className="w-5 h-5 text-amber-500" />
@@ -157,7 +157,7 @@ export default function LlmSettingsPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-start gap-3 p-4 bg-surface-2 rounded-xl border border-border shadow-sm">
+            <div className="flex items-start gap-3 p-4 glass-panel border border-border/50 rounded-xl shadow-sm">
               <AlertCircle className="w-5 h-5 text-muted-foreground mt-0.5" />
               <div className="text-sm text-foreground">
                 If provided, we will use your API key for all generation requests for this business. 

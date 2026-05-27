@@ -4,27 +4,27 @@
 
 @layer base {
   :root {
-    /* Premium Light Theme Base Surface Colors */
-    --background: 0 0% 99.5%; /* Extremely soft white */
-    --foreground: 220 10% 12%; /* Rich slate for text */
+    /* Premium Light Theme Base Surface Colors (Zinc/Slate blend) */
+    --background: 210 40% 98%; /* Extremely clean, soft white #F8FAFC */
+    --foreground: 240 10% 8%; /* Near black for maximum readability */
 
     /* Semantic Layers for Depth */
     --surface-1: 0 0% 100%; /* Pure white cards */
-    --surface-2: 240 5% 98%; /* Slightly offset layer */
-    --surface-3: 240 5% 96%; /* Deeper offset */
+    --surface-2: 210 40% 96.1%; /* Subtle offset for secondary surfaces (slate-100) */
+    --surface-3: 214.3 31.8% 91.4%; /* Deep offset for tertiary surfaces (slate-200) */
 
-    /* Mutable Brand Colors (Electric Indigo base) */
-    --brand-50: 238 100% 97%;
-    --brand-100: 238 100% 94%;
-    --brand-200: 238 96% 87%;
-    --brand-300: 238 94% 76%;
-    --brand-400: 238 90% 64%;
-    --brand-500: 238 85% 55%; /* Primary */
-    --brand-600: 238 77% 46%;
-    --brand-700: 238 71% 37%;
-    --brand-800: 238 67% 31%;
-    --brand-900: 238 62% 26%;
-    --brand-950: 238 60% 16%;
+    /* Premium Indigo Brand Colors */
+    --brand-50: 238 100% 98%;
+    --brand-100: 238 100% 95%;
+    --brand-200: 238 96% 88%;
+    --brand-300: 238 94% 78%;
+    --brand-400: 238 90% 68%;
+    --brand-500: 238 85% 58%; /* Primary Brand */
+    --brand-600: 238 77% 48%;
+    --brand-700: 238 71% 40%;
+    --brand-800: 238 67% 33%;
+    --brand-900: 238 62% 28%;
+    --brand-950: 238 60% 18%;
 
     /* Semantic Mappings */
     --card: var(--surface-1);
@@ -36,28 +36,28 @@
     --primary: var(--brand-600);
     --primary-foreground: 0 0% 100%;
     --secondary: 240 5% 96%;
-    --secondary-foreground: 220 10% 12%;
+    --secondary-foreground: 240 10% 15%;
     --muted: 240 5% 96%;
     --muted-foreground: 240 5% 45%;
     --accent: 240 5% 96%;
-    --accent-foreground: 220 10% 12%;
-    --ai: 270 90% 60%; /* Purple AI base */
+    --accent-foreground: 240 10% 15%;
+    --ai: 270 95% 65%; /* Vibrant Purple AI base */
     --ai-foreground: 0 0% 100%;
     
     /* System States */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-    --success: 142.1 76.2% 36.3%;
+    --success: 142.1 70% 40%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 48 96% 89%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 100%;
 
     /* Borders & Structural */
-    --border: 240 6% 90%;
-    --border-strong: 240 6% 80%;
-    --input: 240 6% 90%;
+    --border: 214.3 31.8% 91.4%; /* slate-200 */
+    --border-strong: 215 16.3% 46.9%; /* slate-500 */
+    --input: 214.3 31.8% 91.4%; /* slate-200 */
     --ring: var(--brand-500);
-    --radius: 0.5rem; /* Standard enterprise radius (8px) */
+    --radius: 0.75rem; /* Smoother, premium enterprise radius (12px) */
 
     /* Strict Enterprise Typography Sizing */
     --font-size-xs: 0.75rem; /* 12px */
@@ -72,27 +72,27 @@
   }
 
   .dark {
-    /* Premium Cinematic Dark Theme */
-    --background: 240 10% 3%; /* Extremely deep slate, almost OLED */
-    --foreground: 0 0% 98%;
+    /* Premium Cinematic Dark Theme (OLED / Deep Charcoal) */
+    --background: 240 10% 2%; /* Ultra deep, almost OLED */
+    --foreground: 0 0% 98%; /* High contrast text */
 
     /* Semantic Layers for Dark Depth */
-    --surface-1: 240 10% 6%; /* Slight elevation */
-    --surface-2: 240 10% 9%; /* Medium elevation */
+    --surface-1: 240 10% 5%; /* Slight elevation */
+    --surface-2: 240 10% 8%; /* Medium elevation */
     --surface-3: 240 10% 12%; /* High elevation */
 
     /* Mutable Brand Colors */
-    --brand-50: 238 60% 12%;
-    --brand-100: 238 60% 16%;
-    --brand-200: 238 62% 26%;
-    --brand-300: 238 67% 31%;
-    --brand-400: 238 71% 37%;
-    --brand-500: 238 77% 46%;
-    --brand-600: 238 85% 55%; /* Primary dark */
-    --brand-700: 238 90% 64%;
-    --brand-800: 238 94% 76%;
-    --brand-900: 238 96% 87%;
-    --brand-950: 238 100% 94%;
+    --brand-50: 238 60% 14%;
+    --brand-100: 238 60% 18%;
+    --brand-200: 238 62% 28%;
+    --brand-300: 238 67% 33%;
+    --brand-400: 238 71% 40%;
+    --brand-500: 238 77% 48%;
+    --brand-600: 238 85% 58%; /* Primary dark pop */
+    --brand-700: 238 90% 68%;
+    --brand-800: 238 94% 78%;
+    --brand-900: 238 96% 88%;
+    --brand-950: 238 100% 95%;
 
     /* Semantic Mappings */
     --card: var(--surface-1);
@@ -102,31 +102,32 @@
 
     /* Interactive States */
     --primary: var(--brand-600);
-    --primary-foreground: 0 0% 98%;
-    --secondary: var(--surface-2);
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 10% 12%; /* Slightly lighter than background */
     --secondary-foreground: 0 0% 98%;
-    --muted: var(--surface-2);
-    --muted-foreground: 240 5% 65%;
-    --accent: var(--surface-2);
+    --muted: 240 10% 12%;
+    --muted-foreground: 240 5% 65%; /* Improved readability */
+    --accent: 240 10% 14%;
     --accent-foreground: 0 0% 98%;
-    --ai: 270 90% 65%;
-    --ai-foreground: 0 0% 98%;
+    --ai: 270 95% 70%; /* Lighter pop for dark mode */
+    --ai-foreground: 0 0% 10%;
 
     /* System States */
-    --destructive: 0 62.8% 45.6%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
-    --success: 142.1 76.2% 35%;
+    --success: 142.1 70% 45%;
     --success-foreground: 0 0% 98%;
-    --warning: 38 92% 40%;
-    --warning-foreground: 0 0% 98%;
+    --warning: 45 93% 55%;
+    --warning-foreground: 0 0% 10%;
 
     /* Borders & Structural */
     --border: 240 6% 12%;
-    --border-strong: 240 6% 18%;
-    --input: 240 6% 14%;
+    --border-strong: 240 6% 20%;
+    --input: 240 6% 16%;
     --ring: var(--brand-600);
   }
 }
+
 
 @layer base {
   * {
@@ -182,4 +183,17 @@
 }
 .text-gradient-ai {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(var(--ai))] to-fuchsia-500;
+}
+
+/* Masonry Grid layout */
+.masonry-grid {
+  display: flex;
+  width: auto;
+  gap: 1.5rem;
+}
+.masonry-grid_column {
+  background-clip: padding-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
