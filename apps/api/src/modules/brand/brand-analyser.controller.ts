@@ -35,7 +35,7 @@ export class BrandAnalyserController {
     const job = await this.brandAnalysisQueue.add('analyse', {
       businessId: user.businessId,
       dto,
-    });
+    }, { attempts: 1 });
     return { jobId: job.id, status: 'processing' };
   }
 
