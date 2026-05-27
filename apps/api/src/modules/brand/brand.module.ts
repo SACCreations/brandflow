@@ -8,6 +8,13 @@ import { LlmSettingsModule } from '../llm-settings/llm-settings.module';
 import { BusinessModule } from '../business/business.module';
 import { BullModule } from '@nestjs/bullmq';
 
+import { ScreenshotService } from './services/screenshot.service';
+import { VisionAnalysisService } from './services/vision-analysis.service';
+import { FontDetectionService } from './services/font-detection.service';
+import { AudienceDetectionService } from './services/audience-detection.service';
+import { AssetCatalogService } from './services/asset-catalog.service';
+import { PersonalityEngineService } from './services/personality-engine.service';
+
 @Module({
   imports: [
     LlmSettingsModule, 
@@ -17,7 +24,18 @@ import { BullModule } from '@nestjs/bullmq';
     }),
   ],
   controllers: [BrandController, BrandAnalyserController],
-  providers: [BrandService, BrandAnalyserService, BrandAnalysisProcessor],
+  providers: [
+    BrandService, 
+    BrandAnalyserService, 
+    BrandAnalysisProcessor,
+    ScreenshotService,
+    VisionAnalysisService,
+    FontDetectionService,
+    AudienceDetectionService,
+    AssetCatalogService,
+    PersonalityEngineService
+  ],
   exports: [BrandService, BrandAnalyserService],
 })
 export class BrandModule {}
+

@@ -48,7 +48,7 @@ export class LLMGateway {
 
   async complete(
     systemPrompt: string,
-    userPrompt: string | Array<{role: string, content: string}>,
+    userPrompt: string | Array<{role: string, content: import('./types').MultimodalContent}>,
     options: LLMConfig = {},
   ): Promise<{ response: ProviderResponse; requestId: string; provider: string }> {
     const requestId = uuidv4();
@@ -69,10 +69,22 @@ export class LLMGateway {
         const { text } = PIISanitizer.sanitize(userPrompt);
         finalUserPrompt = text;
       } else {
-        finalUserPrompt = userPrompt.map(m => ({
-          ...m,
-          content: PIISanitizer.sanitize(m.content).text,
-        }));
+        finalUserPrompt = userPrompt.map(m => {
+          if (typeof m.content === 'string') {
+            return { ...m, content: PIISanitizer.sanitize(m.content).text };
+          } else {
+            // Complex multimodal content - sanitize only text parts
+            return {
+              ...m,
+              content: m.content.map(part => {
+                if (part.type === 'text' && part.text) {
+                  return { ...part, text: PIISanitizer.sanitize(part.text).text };
+                }
+                return part;
+              })
+            };
+          }
+        });
       }
     }
 

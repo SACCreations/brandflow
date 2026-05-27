@@ -8,9 +8,15 @@ export interface LLMProvider {
 }
 
 // ─── Provider Request/Response ────────────────────────────────────
+export type MultimodalContent = string | Array<{
+  type: 'text' | 'image_url';
+  text?: string;
+  image_url?: { url: string };
+}>;
+
 export interface ProviderRequest {
   systemPrompt: string;
-  userPrompt: string | Array<{role: string, content: string}>;
+  userPrompt: string | Array<{role: string, content: MultimodalContent}>;
   maxTokens?: number;
   temperature?: number;
   requestId: string;

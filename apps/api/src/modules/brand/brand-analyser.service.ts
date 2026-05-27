@@ -12,6 +12,13 @@ import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 import * as dns from 'dns';
 import { promisify } from 'util';
 
+import { ScreenshotService } from './services/screenshot.service';
+import { VisionAnalysisService } from './services/vision-analysis.service';
+import { FontDetectionService } from './services/font-detection.service';
+import { AudienceDetectionService } from './services/audience-detection.service';
+import { AssetCatalogService } from './services/asset-catalog.service';
+import { PersonalityEngineService } from './services/personality-engine.service';
+
 const dnsLookup = promisify(dns.lookup);
 
 interface ResolvedAnalysisSource {
@@ -50,11 +57,17 @@ export class BrandAnalyserService {
   constructor(
     private readonly config: ConfigService,
     private readonly llmSettingsService: LlmSettingsService,
+    private readonly screenshotService: ScreenshotService,
+    private readonly visionAnalysisService: VisionAnalysisService,
+    private readonly fontDetectionService: FontDetectionService,
+    private readonly audienceDetectionService: AudienceDetectionService,
+    private readonly assetCatalogService: AssetCatalogService,
+    private readonly personalityEngineService: PersonalityEngineService,
   ) {
     this.gateway = new LLMGateway({
       defaultProvider: (this.config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic'),
       fallbackProvider: (this.config.get('llm.fallbackProvider', 'anthropic') as 'openai' | 'anthropic' | 'fallback'),
-      requestTimeoutMs: this.config.get('llm.requestTimeoutMs', 120000),
+      requestTimeoutMs: 300000, // Force 5 minutes timeout to prevent analysis failures
     });
   }
 
@@ -159,6 +172,18 @@ export class BrandAnalyserService {
               dnaMoodboardDescriptors: ['string']
             }
           },
+          brandIntelligenceScore: {
+            visualConsistency: 'number | null',
+            typographySystem: 'number | null',
+            brandClarity: 'number | null',
+            uxConsistency: 'number | null',
+            audienceAlignment: 'number | null',
+            accessibility: 'number | null',
+            modernDesignScore: 'number | null'
+          },
+          assetCatalog: {
+            images: [{ url: 'string', assetType: 'string', usage: 'string' }]
+          },
           designTokens: {
             borderRadius: 'string | null',
             shadows: 'string | null',
@@ -230,6 +255,23 @@ export class BrandAnalyserService {
 
     const userPrompt = this.buildUserPrompt(resolvedSources);
 
+    // Orchestrate Sub-services
+    const baseUrl = resolvedSources.find((s) => s.url)?.url;
+    let screenshots = null;
+    if (baseUrl) {
+      screenshots = await this.screenshotService.captureScreenshots(baseUrl);
+    }
+    const primarySignals = resolvedSources.find((source) => source.signals)?.signals;
+    const imageUrls = primarySignals?.imageUrls || [];
+    const combinedText = resolvedSources.map(s => s.text).join('\n').slice(0, 10000);
+
+    const [visionResult, audienceResult, catalogResult, personalityResult] = await Promise.all([
+      screenshots ? this.visionAnalysisService.analyzeVisuals(this.gateway, screenshots, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined) : Promise.resolve(null),
+      this.audienceDetectionService.inferAudience(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
+      this.assetCatalogService.buildCatalog(this.gateway, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
+      this.personalityEngineService.inferPersonality(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
+    ]);
+
     let gatewayResult;
     try {
       gatewayResult = await this.gateway.complete(systemPrompt, userPrompt, {
@@ -251,6 +293,10 @@ export class BrandAnalyserService {
       provider,
       model: response.model,
       resolvedSources,
+      visionResult,
+      audienceResult,
+      catalogResult,
+      personalityResult
     });
   }
 
@@ -471,6 +517,10 @@ export class BrandAnalyserService {
       provider: string;
       model: string;
       resolvedSources: ResolvedAnalysisSource[];
+      visionResult?: any;
+      audienceResult?: any;
+      catalogResult?: any;
+      personalityResult?: any;
     },
   ): BrandAnalysisResult {
     const parsed = this.extractJsonObject(content);
@@ -516,9 +566,19 @@ export class BrandAnalyserService {
         ?? context.resolvedSources.find((source) => source.url)?.url
         ?? null,
       positioning: this.normalizeString(rawBrand['positioning'], 2000),
-      audience: this.normalizeString(rawBrand['audience'], 2000),
+      audience: context.audienceResult?.audience ? {
+        primaryAudience: this.normalizeString(context.audienceResult.audience.primaryAudience, 255),
+        secondaryAudience: this.normalizeString(context.audienceResult.audience.secondaryAudience, 255),
+        marketLevel: this.normalizeString(context.audienceResult.audience.marketLevel, 255),
+        brandTone: this.normalizeString(context.audienceResult.audience.brandTone, 255),
+        customerMaturity: this.normalizeString(context.audienceResult.audience.customerMaturity, 255),
+      } : {
+        primaryAudience: this.normalizeString(rawBrand['audience'], 2000),
+      },
       differentiators: this.normalizeString(rawBrand['differentiators'], 2000),
-      tone: this.normalizeStringArray(rawBrand['tone'], 12, 50),
+      tone: Array.isArray(context.personalityResult?.tone) && context.personalityResult.tone.length > 0 
+        ? context.personalityResult.tone 
+        : this.normalizeStringArray(rawBrand['tone'], 12, 50),
       governance: {
         bannedPhrases: this.normalizeStringArray(governance?.['bannedPhrases'], 20, 200),
         requiredPhrases: this.normalizeStringArray(governance?.['requiredPhrases'], 20, 200),
@@ -553,17 +613,22 @@ export class BrandAnalyserService {
         })) : logoUrlFallbacks.length > 0 ? logoUrlFallbacks : null,
         typographySystem: visualRules?.['typographySystem'] ? this.asObject(visualRules['typographySystem']) as any : null,
         colorSystem: visualRules?.['colorSystem'] ? this.asObject(visualRules['colorSystem']) as any : null,
-        visualExtraction: visualRules?.['visualExtraction'] ? this.asObject(visualRules['visualExtraction']) as any : null,
+        visualExtraction: context.visionResult?.visualExtraction ?? (visualRules?.['visualExtraction'] ? this.asObject(visualRules['visualExtraction']) as any : null),
       }),
       identity: this.compactObject({
         mission: this.normalizeString(identity?.['mission'], 1000),
         vision: this.normalizeString(identity?.['vision'], 1000),
         values: this.normalizeStringArray(identity?.['values'], 10, 100),
         promise: this.normalizeString(identity?.['promise'], 500),
-        personality: this.normalizeString(identity?.['personality'], 500),
+        personality: context.personalityResult?.personality ?? this.normalizeString(identity?.['personality'], 500),
         businessOverview: identity?.['businessOverview'] ? this.asObject(identity['businessOverview']) as any : null,
-        brandDNA: identity?.['brandDNA'] ? this.asObject(identity['brandDNA']) as any : null,
+        brandDNA: context.visionResult?.brandDNA ? {
+          ...this.asObject(identity?.['brandDNA']),
+          ...context.visionResult.brandDNA
+        } : (identity?.['brandDNA'] ? this.asObject(identity['brandDNA']) as any : null),
       }),
+      brandIntelligenceScore: rawBrand['brandIntelligenceScore'] ? this.asObject(rawBrand['brandIntelligenceScore']) as any : null,
+      assetCatalog: context.catalogResult?.assetCatalog ?? (rawBrand['assetCatalog'] ? this.asObject(rawBrand['assetCatalog']) as any : null),
       designTokens: this.compactObject({
         borderRadius: this.normalizeString(designTokens?.['borderRadius'], 50),
         shadows: this.normalizeString(designTokens?.['shadows'], 50),

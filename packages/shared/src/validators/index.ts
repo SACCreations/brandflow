@@ -90,7 +90,13 @@ export const brandAnalysisBrandSchema = z.object({
   industry: z.string().max(100).nullish(),
   website: z.string().max(500).nullish(),
   positioning: z.string().max(2000).nullish(),
-  audience: z.string().max(2000).nullish(),
+  audience: z.object({
+    primaryAudience: z.string().nullish(),
+    secondaryAudience: z.string().nullish(),
+    marketLevel: z.string().nullish(),
+    brandTone: z.string().nullish(),
+    customerMaturity: z.string().nullish(),
+  }).nullish(),
   differentiators: z.string().max(2000).nullish(),
   tone: z.array(z.string().min(1).max(50)).max(12).default([]),
   governance: z.object({
@@ -161,6 +167,16 @@ export const brandAnalysisBrandSchema = z.object({
       photographyStyle: z.string().nullish(),
       illustrationStyle: z.string().nullish(),
       uiStyle: z.string().nullish(),
+      style: z.string().nullish(),
+      mood: z.string().nullish(),
+      colorPsychology: z.string().nullish(),
+      composition: z.string().nullish(),
+      illustrationType: z.string().nullish(),
+      textureUsage: z.string().nullish(),
+      uiLanguage: z.string().nullish(),
+      shapeLanguage: z.string().nullish(),
+      motionStyle: z.string().nullish(),
+      brandMaturity: z.string().nullish(),
       dnaMoodboardDescriptors: z.array(z.string()).nullish(),
     }).nullish(),
   }).nullish(),
@@ -234,6 +250,41 @@ export const brandAnalysisBrandSchema = z.object({
     email: z.string().email().nullish().or(z.literal('')),
     officeAddress: z.string().max(500).nullish().or(z.literal('')),
   }).nullish(),
+  brandIntelligenceScore: z.object({
+    visualConsistency: z.number().nullish(),
+    typographySystem: z.number().nullish(),
+    brandClarity: z.number().nullish(),
+    uxConsistency: z.number().nullish(),
+    audienceAlignment: z.number().nullish(),
+    accessibility: z.number().nullish(),
+    modernDesignScore: z.number().nullish(),
+  }).nullish(),
+  assetCatalog: z.object({
+    images: z.array(z.object({
+      url: z.string(),
+      assetType: z.string().nullish(),
+      style: z.string().nullish(),
+      dominantColors: z.array(z.string()).nullish(),
+      usage: z.string().nullish(),
+      emotion: z.string().nullish(),
+      qualityScore: z.number().nullish(),
+    })).nullish(),
+    videos: z.array(z.object({
+      url: z.string(),
+      assetType: z.string().nullish(),
+      usage: z.string().nullish(),
+    })).nullish(),
+    documents: z.array(z.object({
+      url: z.string(),
+      assetType: z.string().nullish(),
+      usage: z.string().nullish(),
+    })).nullish(),
+    fonts: z.array(z.object({
+      url: z.string(),
+      family: z.string().nullish(),
+      weight: z.string().nullish(),
+    })).nullish(),
+  }).nullish(),
 });
 export type BrandAnalysisBrandDto = z.infer<typeof brandAnalysisBrandSchema>;
 
@@ -271,7 +322,13 @@ export const createBrandSchema = z.object({
   status: z.enum(['draft', 'published', 'archived']).default('published'),
   
   positioning: z.string().max(2000).nullish().or(z.literal('')),
-  audience: z.string().max(2000).nullish().or(z.literal('')),
+  audience: z.object({
+    primaryAudience: z.string().nullish(),
+    secondaryAudience: z.string().nullish(),
+    marketLevel: z.string().nullish(),
+    brandTone: z.string().nullish(),
+    customerMaturity: z.string().nullish(),
+  }).nullish(),
   tone: z.union([z.string(), z.array(z.string().max(50))]).nullish().or(z.literal('')),
   
   visualRules: z
@@ -345,6 +402,16 @@ export const createBrandSchema = z.object({
         photographyStyle: z.string().nullish(),
         illustrationStyle: z.string().nullish(),
         uiStyle: z.string().nullish(),
+        style: z.string().nullish(),
+        mood: z.string().nullish(),
+        colorPsychology: z.string().nullish(),
+        composition: z.string().nullish(),
+        illustrationType: z.string().nullish(),
+        textureUsage: z.string().nullish(),
+        uiLanguage: z.string().nullish(),
+        shapeLanguage: z.string().nullish(),
+        motionStyle: z.string().nullish(),
+        brandMaturity: z.string().nullish(),
         dnaMoodboardDescriptors: z.array(z.string()).nullish(),
       }).nullish(),
     })
@@ -457,6 +524,41 @@ export const createBrandSchema = z.object({
       officeAddress: z.string().max(500).nullish().or(z.literal('')),
     })
     .nullish(),
+  brandIntelligenceScore: z.object({
+    visualConsistency: z.number().nullish(),
+    typographySystem: z.number().nullish(),
+    brandClarity: z.number().nullish(),
+    uxConsistency: z.number().nullish(),
+    audienceAlignment: z.number().nullish(),
+    accessibility: z.number().nullish(),
+    modernDesignScore: z.number().nullish(),
+  }).nullish(),
+  assetCatalog: z.object({
+    images: z.array(z.object({
+      url: z.string(),
+      assetType: z.string().nullish(),
+      style: z.string().nullish(),
+      dominantColors: z.array(z.string()).nullish(),
+      usage: z.string().nullish(),
+      emotion: z.string().nullish(),
+      qualityScore: z.number().nullish(),
+    })).nullish(),
+    videos: z.array(z.object({
+      url: z.string(),
+      assetType: z.string().nullish(),
+      usage: z.string().nullish(),
+    })).nullish(),
+    documents: z.array(z.object({
+      url: z.string(),
+      assetType: z.string().nullish(),
+      usage: z.string().nullish(),
+    })).nullish(),
+    fonts: z.array(z.object({
+      url: z.string(),
+      family: z.string().nullish(),
+      weight: z.string().nullish(),
+    })).nullish(),
+  }).nullish(),
 });
 
 export type CreateBrandDto = z.infer<typeof createBrandSchema>;
