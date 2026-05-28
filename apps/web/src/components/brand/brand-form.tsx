@@ -285,6 +285,9 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
     register('visualRules.supportingFont');
     register('visualRules.backupFont');
     register('visualRules.logoUrls');
+    register('visualRules.typographySettings');
+    register('visualRules.typographyScales');
+    register('visualRules.colorTokens');
     register('tone');
     register('governance.bannedPhrases');
     register('governance.requiredPhrases');
@@ -325,12 +328,19 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
     const stringified = JSON.stringify(values);
     if (stringified !== lastValuesRef.current) {
       lastValuesRef.current = stringified;
-      onDataChange(values);
+      const timeoutId = setTimeout(() => {
+        onDataChange(values);
+      }, 300);
+      return () => clearTimeout(timeoutId);
     }
   }, [values, onDataChange]);
 
+  const hasInitialized = React.useRef(false);
   React.useEffect(() => {
-    reset(sanitizeInitialData(initialData) || defaultBrandFormValues);
+    if (!hasInitialized.current) {
+      reset(sanitizeInitialData(initialData) || defaultBrandFormValues);
+      hasInitialized.current = true;
+    }
   }, [initialData, reset]);
 
   const getFieldsForStep = (stepId: string): string[] => {
@@ -363,10 +373,25 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       triggerValidationRef.current = async () => {
         if (!activeStepId) return true;
         const fields = getFieldsForStep(activeStepId);
-        return await form.trigger(fields);
+        const result = await form.trigger(fields);
+
+        if (activeStepId === 'visuals') {
+          const vals = form.getValues();
+          const hasLogo = !!vals.visualRules?.logoUrls?.[0]?.url;
+          const hasFont = !!vals.visualRules?.typographySettings?.length || !!vals.visualRules?.headingFont || !!vals.visualRules?.fontFamily;
+          const hasColor = !!vals.visualRules?.colorTokens?.length || !!vals.visualRules?.primaryColor;
+
+          if (!hasLogo || !hasFont || !hasColor) {
+            if (!hasLogo) toast({ variant: 'destructive', title: 'Validation Error', description: 'Primary Logo Variant is required.' });
+            if (!hasFont) toast({ variant: 'destructive', title: 'Validation Error', description: 'At least one font is required in Typography System.' });
+            if (!hasColor) toast({ variant: 'destructive', title: 'Validation Error', description: 'At least one color is required in Color Governance.' });
+            return false;
+          }
+        }
+        return result;
       };
     }
-  }, [activeStepId, form, triggerValidationRef]);
+  }, [activeStepId, form, triggerValidationRef, toast]);
 
   // Keyboard Shortcuts
   const handleFormSubmit = React.useCallback((data: any) => {
@@ -687,8 +712,8 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           <div className="pt-8 border-t border-border/60">
              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h4 className="text-sm font-black uppercase tracking-tight text-foreground">Extracted Imagery (Moodboard)</h4>
-                  <p className="text-xs text-muted-foreground">Manage images extracted from the URL or add your own.</p>
+                  <h4 className="text-sm font-black uppercase tracking-tight text-foreground">Brand Assets & Moodboard</h4>
+                  <p className="text-xs text-muted-foreground">Manage files, images, videos, and documents.</p>
                 </div>
                 <Button 
                   type="button" 
@@ -701,19 +726,41 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                     setValue('assetCatalog.images', images);
                   }}
                 >
-                  <PlusCircle className="w-4 h-4" /> Add Image
+                  <PlusCircle className="w-4 h-4" /> Add via URL
                 </Button>
+             </div>
+
+             <div className="mb-6">
+                <FileUploader 
+                  label="Upload Asset (PNG, JPG, SVG, WEBP, PDF, AI, EPS, PSD, GIF, MP4, Lottie, ZIP, DOC, PPT)"
+                  accept="image/*,.pdf,.ai,.eps,.psd,.gif,video/mp4,.json,.zip,.doc,.docx,.ppt,.pptx"
+                  onUpload={(url, name) => {
+                    const images = [...(values.assetCatalog?.images || [])];
+                    const type = name.endsWith('.mp4') ? 'video' : name.endsWith('.pdf') || name.endsWith('.doc') || name.endsWith('.docx') ? 'document' : name.endsWith('.zip') ? 'archive' : 'image';
+                    images.push({ url, name, assetType: type, usage: 'general' });
+                    setValue('assetCatalog.images', images, { shouldDirty: true });
+                  }}
+                />
              </div>
 
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {values.assetCatalog?.images?.map((img: any, idx: number) => (
                   <div key={idx} className="relative group rounded-2xl overflow-hidden border border-border/60 aspect-square bg-surface-1">
                     {img.url ? (
-                      <img src={img.url} alt={`Moodboard ${idx}`} className="w-full h-full object-cover" />
+                      img.assetType === 'video' ? (
+                        <video src={img.url} className="w-full h-full object-cover" controls />
+                      ) : img.assetType === 'document' || img.assetType === 'archive' || (!img.url.startsWith('data:image') && !img.url.startsWith('http')) ? (
+                        <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-surface-2">
+                           <FileText className="w-8 h-8 mb-2 text-muted-foreground" />
+                           <span className="text-[10px] font-bold text-center truncate w-full text-muted-foreground">{img.name || 'File'}</span>
+                        </div>
+                      ) : (
+                        <img src={img.url} alt={`Asset ${idx}`} className="w-full h-full object-cover" />
+                      )
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center p-4">
                         <Input 
-                          placeholder="Image URL" 
+                          placeholder="Asset URL" 
                           className="h-8 text-xs bg-background/60"
                           onBlur={(e) => {
                             const images = [...values.assetCatalog.images];
@@ -841,12 +888,43 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-border/50 dark:border-gray-800/50">
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Target Location</label>
-                <Input {...register('strategy.targetLocation')} placeholder="e.g. Global, USA, Tamil Nadu" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-emerald-500" />
+                <Input {...register('strategy.targetLocation')} list="locations-list" placeholder="e.g. Global, USA, Tamil Nadu" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-emerald-500" />
+                <datalist id="locations-list">
+                  <option value="Global" />
+                  <option value="United States" />
+                  <option value="India" />
+                  <option value="Tamil Nadu" />
+                  <option value="Chennai" />
+                  <option value="Europe" />
+                </datalist>
                 {errors?.strategy?.targetLocation?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.strategy?.targetLocation?.message as string}</p>}
               </div>
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Age Group</label>
-                <Input {...register('strategy.ageGroup')} placeholder="e.g. 18-35, Professionals" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-emerald-500" />
+                <div className="flex flex-wrap gap-2.5 pt-1">
+                  {['13-17', '18-24', '25-34', '35-44', '45-54', '55+'].map((age) => {
+                    const currentAges = values.strategy?.ageGroup ? values.strategy.ageGroup.split(',').map((s:string) => s.trim()).filter(Boolean) : [];
+                    const isSelected = currentAges.includes(age);
+                    return (
+                      <button
+                        key={age}
+                        type="button"
+                        onClick={() => {
+                          const newAges = isSelected ? currentAges.filter((a:string) => a !== age) : [...currentAges, age];
+                          setValue('strategy.ageGroup', newAges.join(', '));
+                        }}
+                        className={cn(
+                          "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border",
+                          isSelected
+                            ? "bg-emerald-500 text-foreground border-emerald-600 shadow-md shadow-emerald-500/20"
+                            : "bg-background/60 text-muted-foreground border-border/50 hover:border-emerald-200"
+                        )}
+                      >
+                        {age}
+                      </button>
+                    )
+                  })}
+                </div>
                 {errors?.strategy?.ageGroup?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.strategy?.ageGroup?.message as string}</p>}
               </div>
            </div>
@@ -912,6 +990,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       <Input 
                         placeholder="e.g. Rival Inc." 
                         value={comp.name} 
+                        list="competitors-list"
                         onChange={(e) => {
                           const newComps = [...values.competitors];
                           newComps[idx].name = e.target.value;
@@ -919,6 +998,15 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                         }}
                         className="h-12 bg-background border-border/60 rounded-xl focus-visible:ring-rose-500" 
                       />
+                      {idx === 0 && (
+                        <datalist id="competitors-list">
+                          <option value="Apple" />
+                          <option value="Google" />
+                          <option value="Microsoft" />
+                          <option value="Amazon" />
+                          <option value="Tesla" />
+                        </datalist>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Website</label>
@@ -1119,24 +1207,95 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           </div>
         </div>
 
-        <Card className="p-8 space-y-8 glass-panel border-white/20 dark:border-white/5 shadow-2xl rounded-3xl bg-background/40 dark:bg-gray-950/40 backdrop-blur-2xl text-center flex flex-col items-center justify-center min-h-[300px]">
-           <div className="max-w-md mx-auto space-y-6">
-              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-500/20 to-cyan-700/20 flex items-center justify-center text-cyan-600 mx-auto shadow-inner">
-                <Globe className="w-10 h-10" />
+        <Card className="p-8 space-y-6 glass-panel border-white/20 dark:border-white/5 shadow-2xl rounded-3xl bg-background/40 dark:bg-gray-950/40 backdrop-blur-2xl">
+           <div className="max-w-2xl mx-auto space-y-6">
+              <div className="flex flex-col md:flex-row items-center gap-4">
+                 <Input 
+                   id="knowledge-source-input"
+                   placeholder="Enter Website URL, Help Center, or Notion link..." 
+                   className="h-12 bg-background/60 border-border/50 rounded-xl text-sm shadow-sm flex-1 focus-visible:ring-cyan-500"
+                 />
+                 <Button 
+                   type="button" 
+                   className="h-12 px-6 rounded-xl font-bold bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg w-full md:w-auto"
+                   onClick={() => {
+                     const input = document.getElementById('knowledge-source-input') as HTMLInputElement;
+                     if (!input.value) return;
+                     const newSource = { id: Math.random().toString(), url: input.value, status: 'ingesting', progress: 0 };
+                     const sources = [...(values.knowledgeSources || []), newSource];
+                     setValue('knowledgeSources', sources, { shouldDirty: true });
+                     input.value = '';
+                     
+                     // Simulate progress
+                     let currentProgress = 0;
+                     const interval = setInterval(() => {
+                       currentProgress += Math.floor(Math.random() * 20) + 10;
+                       if (currentProgress >= 100) {
+                         clearInterval(interval);
+                         const updatedSources = form.getValues().knowledgeSources.map((s: any) => 
+                           s.id === newSource.id ? { ...s, status: 'completed', progress: 100 } : s
+                         );
+                         setValue('knowledgeSources', updatedSources, { shouldDirty: true });
+                       } else {
+                         const updatedSources = form.getValues().knowledgeSources.map((s: any) => 
+                           s.id === newSource.id ? { ...s, progress: currentProgress } : s
+                         );
+                         setValue('knowledgeSources', updatedSources, { shouldDirty: false });
+                       }
+                     }, 800);
+                   }}
+                 >
+                   Connect Source
+                 </Button>
               </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-black tracking-tight text-foreground">AI Knowledge Training</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed font-medium">Index URLs, internal Wikis, and whitepapers to give your AI Co-pilot deep brand expertise.</p>
-              </div>
-              <Button 
-                type="button" 
-                variant="default" 
-                size="lg"
-                className="rounded-full font-bold h-12 px-8 bg-background hover:bg-surface-1 text-foreground shadow-xl shadow-gray-900/20 w-full sm:w-auto"
-                onClick={() => toast({ title: 'Knowledge Base', description: 'Source ingestion interface is being initialized.' })}
-              >
-                Connect Sources
-              </Button>
+
+              {values.knowledgeSources?.length > 0 && (
+                <div className="space-y-4 pt-4 border-t border-border/60">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Connected Sources</h3>
+                  <div className="space-y-3">
+                    {values.knowledgeSources.map((source: any, idx: number) => (
+                      <div key={source.id} className="p-4 rounded-2xl bg-surface-1 dark:bg-gray-950/50 border border-border/60 flex flex-col gap-3 group transition-all hover:border-cyan-500/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 overflow-hidden">
+                             <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 rounded-lg">
+                               <Globe className="w-4 h-4" />
+                             </div>
+                             <span className="text-sm font-bold truncate text-foreground">{source.url}</span>
+                          </div>
+                          {source.status === 'completed' ? (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 border border-emerald-200 dark:border-emerald-800">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span className="text-[10px] font-black uppercase tracking-widest">Trained</span>
+                            </div>
+                          ) : (
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                const sources = values.knowledgeSources.filter((s: any) => s.id !== source.id);
+                                setValue('knowledgeSources', sources, { shouldDirty: true });
+                              }}
+                              className="text-muted-foreground hover:text-red-500 transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        {source.status === 'ingesting' && (
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-cyan-600">
+                              <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Ingesting & Analyzing</span>
+                              <span>{source.progress}%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-surface-3 rounded-full overflow-hidden">
+                              <div className="h-full bg-cyan-500 transition-all duration-300" style={{ width: `${source.progress}%` }} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
            </div>
         </Card>
       </section>
@@ -1316,8 +1475,8 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <Card className="p-8 space-y-8 glass-panel border-white/20 dark:border-white/5 shadow-2xl rounded-3xl bg-background/40 dark:bg-gray-950/40 backdrop-blur-2xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-4">
-               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Preferred Design Style</label>
-               <div className="grid grid-cols-2 gap-3">
+               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground" id="overall-aesthetic-label">Overall Design Aesthetic</label>
+               <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-labelledby="overall-aesthetic-label">
                   {[
                     { name: 'Minimal', emoji: '⚪', desc: 'Clean & Simple' },
                     { name: 'Corporate', emoji: '🏢', desc: 'Trust & Power' },
@@ -1325,34 +1484,39 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                     { name: 'Modern', emoji: '✨', desc: 'Trendy & Fresh' },
                     { name: 'Playful', emoji: '🎈', desc: 'Fun & Friendly' },
                     { name: 'Luxury', emoji: '💎', desc: 'High-end feel' }
-                  ].map(style => (
+                  ].map(style => {
+                    const isSelected = values.designPreferences?.preferredStyle === style.name;
+                    return (
                     <button
                       key={style.name}
                       type="button"
+                      role="radio"
+                      aria-checked={isSelected}
                       onClick={() => setValue('designPreferences.preferredStyle', style.name, { shouldDirty: true })}
                       className={cn(
-                        "p-5 rounded-2xl border text-left transition-all group hover:-translate-y-0.5",
-                        values.designPreferences?.preferredStyle === style.name
-                          ? "bg-fuchsia-600 text-foreground border-fuchsia-600 shadow-xl shadow-fuchsia-500/30"
-                          : "bg-background/60 bg-background/60 text-muted-foreground text-foreground border-border/50 dark:border-gray-800/50 hover:border-fuchsia-300 dark:hover:border-fuchsia-800 hover:shadow-md"
+                        "p-5 rounded-2xl border text-left transition-all group hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-fuchsia-500 outline-none",
+                        isSelected
+                          ? "bg-fuchsia-600 text-white border-fuchsia-600 shadow-xl shadow-fuchsia-500/30"
+                          : "bg-background/60 text-muted-foreground border-border/50 hover:border-fuchsia-300 hover:shadow-md"
                       )}
                     >
                       <div className="text-2xl mb-2">{style.emoji}</div>
-                      <div className="text-xs font-bold uppercase tracking-wider">{style.name}</div>
-                      <div className={cn("text-[10px] font-medium mt-1", values.designPreferences?.preferredStyle === style.name ? "text-fuchsia-100" : "text-muted-foreground")}>{style.desc}</div>
+                      <div className="text-xs font-bold uppercase tracking-wider text-foreground">{style.name}</div>
+                      <div className={cn("text-[10px] font-medium mt-1", isSelected ? "text-fuchsia-100" : "text-muted-foreground")}>{style.desc}</div>
                     </button>
-                  ))}
+                    )
+                  })}
                </div>
             </div>
 
             <div className="space-y-8">
                <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Image Style</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Generated Image Style</label>
                   <Select 
                     value={values.designPreferences?.imageStyle} 
                     onValueChange={(val) => setValue('designPreferences.imageStyle', val, { shouldDirty: true })}
                   >
-                    <SelectTrigger className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-fuchsia-500">
+                    <SelectTrigger className="h-14 bg-background/60 border-border/50 rounded-2xl text-base shadow-sm focus-visible:ring-fuchsia-500">
                       <SelectValue placeholder="Select image style" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1360,6 +1524,8 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       <SelectItem value="Corporate">Corporate & Professional</SelectItem>
                       <SelectItem value="3D">3D Rendered</SelectItem>
                       <SelectItem value="Modern">Modern & Vibrant</SelectItem>
+                      <SelectItem value="Photorealistic">Photorealistic</SelectItem>
+                      <SelectItem value="Illustration">Illustration/Vector</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors?.designPreferences?.imageStyle?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.designPreferences?.imageStyle?.message as string}</p>}
@@ -1689,31 +1855,47 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
 
         <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
+               {[
                 { name: 'LinkedIn', handleField: 'socialAccess.linkedinPage', placeholder: 'LinkedIn Page URL' },
                 { name: 'Instagram', handleField: 'socialAccess.instagramHandle', placeholder: '@username' },
                 { name: 'Twitter / X', handleField: 'socialAccess.twitterHandle', placeholder: '@username' },
                 { name: 'Facebook', handleField: 'socialAccess.facebookPage', placeholder: 'Facebook Page URL' },
                 { name: 'YouTube', handleField: 'socialAccess.youtubeChannel', placeholder: 'Channel URL' },
-              ].map(plat => (
+              ].map(plat => {
+                const handleValue = values.socialAccess?.[plat.handleField.split('.')[1]];
+                const isConnected = !!handleValue;
+                
+                return (
                 <div key={plat.name} className="flex flex-col gap-3 p-4 rounded-2xl bg-surface-2 border border-border/60 transition-all hover:border-primary/20 group">
                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-xl bg-background border border-border/60 border-border flex items-center justify-center shadow-sm">
+                         <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center shadow-sm">
                             <Globe className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                          </div>
-                         <span className="text-xs font-black uppercase tracking-tight text-foreground">{plat.name}</span>
+                         <div className="flex flex-col">
+                           <span className="text-xs font-black uppercase tracking-tight text-foreground">{plat.name}</span>
+                           {isConnected ? (
+                             <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-500 flex items-center gap-1 mt-0.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"/> Syncing</span>
+                           ) : (
+                             <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5">Disconnected</span>
+                           )}
+                         </div>
                       </div>
                       <Button 
                          type="button" 
-                         variant="outline" 
+                         variant={isConnected ? "ghost" : "outline"}
                          size="sm" 
-                         className="rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all"
+                         className={cn("rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all", isConnected ? "text-muted-foreground hover:text-red-500 hover:bg-red-50" : "hover:bg-primary hover:text-white")}
                          onClick={async () => {
-                           toast({ title: 'OAuth Flow', description: `Initializing ${plat.name} connection...` });
+                           if (isConnected) {
+                             setValue(plat.handleField, '', { shouldDirty: true });
+                           } else {
+                             toast({ title: 'OAuth Flow', description: `Initializing ${plat.name} connection...` });
+                             setValue(plat.handleField, 'oauth_pending', { shouldDirty: true });
+                           }
                          }}
                       >
-                       Connect
+                       {isConnected ? 'Disconnect' : 'Connect'}
                       </Button>
                    </div>
                    <Input 
@@ -1722,7 +1904,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       className="h-9 text-[10px] bg-background border-border/60 rounded-xl" 
                    />
                 </div>
-              ))}
+              )})}
            </div>
 
            <div className="mt-8 pt-8 border-t border-border/60 space-y-6">
@@ -1809,17 +1991,44 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           <p className="text-muted-foreground font-medium px-10">AI-driven marketing workflows and content scheduling.</p>
         </div>
         <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
-           <div className="max-w-xs mx-auto space-y-4">
-              <Settings className="w-12 h-12 text-muted-foreground mx-auto" />
-              <p className="text-xs text-muted-foreground">Configure AI content engines and automated social posting rules.</p>
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="rounded-xl font-black text-[10px] tracking-widest h-10 border-border hover:bg-primary/10 hover:text-primary"
-                onClick={() => toast({ title: 'Automation Engine', description: 'Configuring AI orchestration workflows...' })}
-              >
-                Configure Engine
-              </Button>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-5 rounded-2xl bg-background/40 border border-border/50 shadow-sm transition-all hover:shadow-md">
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-foreground">Auto-Schedule Posts</label>
+                    <p className="text-xs text-muted-foreground font-medium">AI orchestrates content calendar based on frequency.</p>
+                  </div>
+                  <Switch 
+                    checked={values.strategy?.festivalPosts ?? false} 
+                    onCheckedChange={(checked) => setValue('strategy.festivalPosts', checked, { shouldDirty: true })} 
+                    className="data-[state=checked]:bg-primary"
+                  />
+                </div>
+                <div className="flex items-center justify-between p-5 rounded-2xl bg-background/40 border border-border/50 shadow-sm transition-all hover:shadow-md">
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-foreground">Community Engagement</label>
+                    <p className="text-xs text-muted-foreground font-medium">Auto-reply to common questions & DMs.</p>
+                  </div>
+                  <Switch 
+                    checked={values.strategy?.offerPosts ?? false} 
+                    onCheckedChange={(checked) => setValue('strategy.offerPosts', checked, { shouldDirty: true })} 
+                    className="data-[state=checked]:bg-primary"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col items-center justify-center p-8 bg-surface-2 rounded-3xl border border-border border-dashed text-center">
+                 <Settings className="w-10 h-10 text-primary mb-4 animate-spin-slow" />
+                 <h4 className="text-sm font-black uppercase tracking-widest text-foreground">Workflow API Linked</h4>
+                 <p className="text-xs text-muted-foreground mt-2 max-w-xs">The Brandflow AI engine is connected to your scheduled triggers.</p>
+                 <Button 
+                   type="button" 
+                   variant="outline" 
+                   className="mt-6 rounded-xl font-black text-[10px] tracking-widest h-10 border-border hover:bg-primary/10 hover:text-primary"
+                   onClick={() => toast({ title: 'Automation Engine', description: 'Re-syncing workflows...' })}
+                 >
+                   Test Trigger API
+                 </Button>
+              </div>
            </div>
         </Card>
       </section>

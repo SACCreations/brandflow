@@ -69,6 +69,7 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
           ))}
         </div>
         <Button 
+          type="button"
           size="sm" 
           onClick={addColor}
           className="bg-background dark:bg-background text-foreground dark:text-foreground hover:bg-surface-1 dark:hover:bg-surface-3 rounded-lg text-[10px] font-black uppercase shadow-sm"

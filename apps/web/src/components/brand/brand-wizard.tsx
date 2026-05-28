@@ -336,8 +336,8 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
         </main>
 
         {/* Preview Panel */}
-        <aside className="w-[450px] flex-shrink-0 hidden xl:block rounded-3xl border border-border/50 bg-surface-1/50 backdrop-blur-md overflow-hidden shadow-xl">
-           <LivePreview data={formData} />
+        <aside className="w-80 flex-shrink-0 hidden xl:flex flex-col rounded-3xl border border-border/50 bg-surface-1/50 backdrop-blur-md overflow-hidden shadow-xl">
+           <LivePreview data={formData} currentStepIdx={currentStepIdx} />
         </aside>
       </div>
     </div>

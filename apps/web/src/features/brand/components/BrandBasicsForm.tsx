@@ -3,7 +3,8 @@
 import * as React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Card, Input, Textarea, Button, useToast, cn } from '@brandflow/ui';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
 
 export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible: (id: string) => boolean, values: any }) {
   const { register, setValue, formState: { errors } } = useFormContext();
@@ -11,25 +12,43 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
 
   if (!isSectionVisible('basics')) return null;
 
-  const buildTaglineSuggestion = (data: any): string | null => {
-    const candidate = [data.tagline, data.identity?.promise, data.positioning]
-      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-      .map((value) => value.trim())[0];
+  const [isGeneratingTagline, setIsGeneratingTagline] = React.useState(false);
+  const [isGeneratingDescription, setIsGeneratingDescription] = React.useState(false);
 
-    if (!candidate) return null;
-
-    const firstSentence = candidate.split(/(?<=[.!?])\s+/)[0]?.trim() || candidate;
-    return firstSentence.length <= 120 ? firstSentence : `${firstSentence.slice(0, 117).trimEnd()}...`;
+  const handleGenerateTagline = async () => {
+    try {
+      setIsGeneratingTagline(true);
+      const res = await apiClient.post('/brands/ai/generate-tagline', values);
+      const suggestion = res.data;
+      if (suggestion) {
+        setValue('tagline', suggestion, { shouldDirty: true });
+        toast({ title: 'AI Copilot', description: 'Generated a tagline successfully.' });
+      } else {
+        toast({ title: 'AI Copilot', description: 'Could not generate a tagline. Add more details.' });
+      }
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to generate tagline.' });
+    } finally {
+      setIsGeneratingTagline(false);
+    }
   };
 
-  const buildDescriptionSuggestion = (data: any): string | null => {
-    const parts = [data.description, data.positioning, data.identity?.mission, data.differentiators]
-      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-      .map((value) => value.trim());
-
-    if (parts.length === 0) return null;
-
-    return Array.from(new Set(parts)).join(' ').slice(0, 500);
+  const handleExpandDescription = async () => {
+    try {
+      setIsGeneratingDescription(true);
+      const res = await apiClient.post('/brands/ai/expand-description', values);
+      const suggestion = res.data;
+      if (suggestion) {
+        setValue('description', suggestion, { shouldDirty: true });
+        toast({ title: 'AI Copilot', description: 'Expanded the description successfully.' });
+      } else {
+        toast({ title: 'AI Copilot', description: 'Could not expand description. Add more details.' });
+      }
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to expand description.' });
+    } finally {
+      setIsGeneratingDescription(false);
+    }
   };
 
   return (
@@ -67,18 +86,11 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
               type="button" 
               variant="outline" 
               size="sm" 
+              disabled={isGeneratingTagline}
               className="h-8 rounded-full border-primary/20 dark:border-brand-800 text-primary bg-background/50 bg-background/50 backdrop-blur hover:bg-brand-100 transition-all"
-              onClick={() => {
-                const suggestion = buildTaglineSuggestion(values);
-                if (!suggestion) {
-                  toast({ title: 'AI Copilot', description: 'Not enough analysed brand context yet to suggest a tagline.' });
-                  return;
-                }
-                toast({ title: 'AI Copilot', description: 'Generated a tagline from the analysed brand evidence already in the form.' });
-                setValue('tagline', suggestion, { shouldDirty: true });
-              }}
+              onClick={handleGenerateTagline}
             >
-              <Sparkles className="w-3.5 h-3.5 mr-2 text-primary" /> Generate with AI
+              {isGeneratingTagline ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2 text-primary" />} Generate with AI
             </Button>
           </div>
           <Input {...register('tagline')} placeholder="The future of branding..." className={cn("h-14 bg-background/80 bg-background/80 border-primary/10 border-border rounded-2xl text-base shadow-sm focus-visible:ring-primary/20", errors['tagline'] && "border-red-500 ring-1 ring-red-500/50")} />
@@ -92,7 +104,7 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
             {errors['website'] && <p className="text-xs text-red-500 font-bold">{errors['website']?.message as string}</p>}
           </div>
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Slug</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">Slug <span className="text-red-500">*</span></label>
             <Input {...register('slug')} placeholder="acme-corp" className={cn("h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-primary/20 transition-all", errors['slug'] && "border-red-500 ring-1 ring-red-500/50")} />
             {errors['slug'] && <p className="text-xs text-red-500 font-bold">{errors['slug']?.message as string}</p>}
           </div>
@@ -105,18 +117,11 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
               type="button" 
               variant="ghost" 
               size="sm" 
+              disabled={isGeneratingDescription}
               className="h-8 rounded-full text-primary hover:bg-primary/10 transition-all"
-              onClick={() => {
-                const suggestion = buildDescriptionSuggestion(values);
-                if (!suggestion) {
-                  toast({ title: 'AI Copilot', description: 'Not enough analysed brand context yet to expand the description.' });
-                  return;
-                }
-                toast({ title: 'AI Copilot', description: 'Expanded the description using analysed brand evidence already present in the form.' });
-                setValue('description', suggestion, { shouldDirty: true });
-              }}
+              onClick={handleExpandDescription}
             >
-              <Sparkles className="w-3.5 h-3.5 mr-2" /> Expand with AI
+              {isGeneratingDescription ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-2" />} Expand with AI
             </Button>
           </div>
           <Textarea 

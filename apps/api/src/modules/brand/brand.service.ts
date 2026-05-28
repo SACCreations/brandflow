@@ -250,4 +250,31 @@ export class BrandService {
       },
     });
   }
+
+  async generateTagline(data: any) {
+    // In a real implementation, this would call an LLM (OpenAI, Anthropic, etc.)
+    // For now, we simulate an AI response based on the provided data.
+    const { name, industry, positioning, promise } = data;
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate latency
+    
+    if (promise && name) return `${name}: ${promise}`;
+    if (positioning && industry) return `Redefining ${industry} through innovation.`;
+    return `The future of ${industry || 'your industry'} starts here.`;
+  }
+
+  async expandDescription(data: any) {
+    // Simulate AI generation
+    const { name, industry, description, positioning, differentiators } = data;
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const parts = [
+      name ? `${name} is a leading force in the ${industry || 'market'}.` : '',
+      description ? `Building on our foundation: ${description}` : '',
+      positioning ? `We are positioned to ${positioning}.` : '',
+      differentiators ? `What sets us apart: ${differentiators}` : '',
+      "Our commitment is to deliver exceptional value and continuous innovation to our audience."
+    ].filter(Boolean);
+    
+    return parts.join(' ');
+  }
 }

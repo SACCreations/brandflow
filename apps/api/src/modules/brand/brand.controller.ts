@@ -105,4 +105,16 @@ export class BrandController {
   ) {
     return this.brandService.connectSocial(user.businessId, dto.platform);
   }
+
+  @Post('ai/generate-tagline')
+  @ApiOperation({ summary: 'Generate a tagline using AI' })
+  async generateTagline(@Body() data: any) {
+    return this.brandService.generateTagline(data);
+  }
+
+  @Post('ai/expand-description')
+  @ApiOperation({ summary: 'Expand description using AI' })
+  async expandDescription(@Body() data: any) {
+    return this.brandService.expandDescription(data);
+  }
 }

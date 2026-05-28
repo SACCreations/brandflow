@@ -170,20 +170,30 @@ export function TypographyGovernance({
               </div>
             </div>
           ))}
+          <div className="pt-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full rounded-3xl text-[10px] font-black uppercase tracking-widest h-14 border-2 border-dashed border-border/60 hover:border-primary/50 bg-background/50 hover:bg-surface-1 transition-all"
+              onClick={() => onChange([...settings, { id: Math.random().toString(), label: 'Custom Font', fontFamily: 'Inter', weight: '400', sizeScale: '1rem', lineHeight: '1.5' }])}
+            >
+               <Plus className="w-5 h-5 mr-2 text-primary" /> Add Font
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-6">
-          <div className="p-8 rounded-3xl bg-primary text-foreground shadow-2xl shadow-brand-500/20 dark:shadow-none space-y-4 ring-1 ring-brand-400/30 overflow-hidden relative">
+          <div className="p-8 rounded-3xl bg-primary text-primary-foreground shadow-2xl shadow-brand-500/20 dark:shadow-none space-y-4 ring-1 ring-brand-400/30 overflow-hidden relative">
             <div className="absolute top-0 right-0 -mt-10 -mr-10 opacity-10">
               <Type className="w-48 h-48" />
             </div>
             <div className="flex items-center gap-3 relative z-10">
               <Sparkles className="w-5 h-5 text-brand-200" />
-              <h3 className="text-sm font-black uppercase tracking-widest">Typography Signal</h3>
+              <h3 className="text-sm font-black uppercase tracking-widest text-primary-foreground">Typography Signal</h3>
             </div>
-            <p className="text-sm font-medium text-brand-50 leading-relaxed opacity-90 relative z-10">
+            <p className="text-sm font-medium text-primary-foreground/90 leading-relaxed opacity-90 relative z-10">
               {hasDetectedPairing
-                ? <>Detected typography from your brand data: <span className="font-bold underline text-foreground">{headingFont || 'Not set'}</span> (Headings), <span className="font-bold underline text-foreground">{bodyFont || 'Not set'}</span> (Body), <span className="font-bold underline text-foreground">{supportingFont || 'Not set'}</span> (Supporting), and <span className="font-bold underline text-foreground">{backupFont || 'Not set'}</span> (Backup).</>
+                ? <>Detected typography from your brand data: <span className="font-bold underline text-white">{headingFont || 'Not set'}</span> (Headings), <span className="font-bold underline text-white">{bodyFont || 'Not set'}</span> (Body), <span className="font-bold underline text-white">{supportingFont || 'Not set'}</span> (Supporting), and <span className="font-bold underline text-white">{backupFont || 'Not set'}</span> (Backup).</>
                 : 'No typography was confidently detected from the analysed brand sources yet. Add or adjust fonts manually if needed.'}
             </p>
             <div className="relative z-10 pt-4">
@@ -236,10 +246,10 @@ export function TypographyGovernance({
                 <Button 
                   type="button" 
                   variant="outline" 
-                  className="w-full rounded-2xl text-[10px] font-black uppercase tracking-widest h-12 border-dashed border-border hover:bg-surface-1 bg-background dark:hover:bg-surface-1 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="w-full rounded-2xl text-[10px] font-black uppercase tracking-widest h-12 border-2 border-dashed border-primary/30 hover:border-primary/50 bg-background text-foreground hover:bg-surface-1 transition-all"
                   onClick={() => onScaleChange([...scales, { id: Math.random().toString(), label: 'Custom Scale', size: '16px', spacing: '0' }])}
                 >
-                   <Plus className="w-4 h-4 mr-2" /> Add custom scale
+                   <Plus className="w-4 h-4 mr-2 text-primary" /> Add custom scale
                 </Button>
              </div>
           </div>
