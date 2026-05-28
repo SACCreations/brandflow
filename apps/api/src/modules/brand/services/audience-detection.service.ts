@@ -13,16 +13,18 @@ export class AudienceDetectionService {
     model?: string
   ): Promise<any> {
     this.logger.log('Inferring audience');
-    const systemPrompt = `You are a market research expert.
-Analyze the following text and infer the target audience for this brand.
+    const systemPrompt = `You are a market research expert and senior brand strategist.
+Analyze the following text and deeply infer the target audience for this brand. Provide rich, highly descriptive insights.
+Do not use placeholder text. Be highly analytical.
+
 Return a JSON object:
 {
   "audience": {
-    "primaryAudience": "string | null",
-    "secondaryAudience": "string | null",
-    "marketLevel": "string | null",
-    "brandTone": "string | null",
-    "customerMaturity": "string | null"
+    "primaryAudience": "string | Detailed description of the primary audience (demographics, psychographics, pain points)",
+    "secondaryAudience": "string | null | Detailed description of the secondary audience",
+    "marketLevel": "string | null (e.g. B2B, B2C, Enterprise, Mid-Market, SMB)",
+    "brandTone": "string | null (e.g. authoritative, playful, clinical)",
+    "customerMaturity": "string | null (e.g. early adopters, mainstream, late majority)"
   }
 }`;
 
@@ -35,8 +37,8 @@ Return a JSON object:
           apiKey,
           model,
           jsonMode: true,
-          temperature: 0.2,
-          maxTokens: 500
+          temperature: 0.3,
+          maxTokens: 1500
         }
       );
       return JSON.parse(result.response.content);

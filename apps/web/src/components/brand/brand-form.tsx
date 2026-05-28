@@ -465,7 +465,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
         <Card className="glass-panel p-6 sm:p-8 space-y-6 border border-white/20 dark:border-white/5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Primary Logo Variant</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">Primary Logo Variant <span className="text-red-500">*</span></label>
               <LogoAssetCard 
                 label="Primary Symbol/Wordmark"
                 description="Main logo for light backgrounds."
@@ -796,6 +796,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                   placeholder="What is your unique value proposition?" 
                   className="min-h-[140px] bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base p-4 shadow-sm focus-visible:ring-indigo-500 leading-relaxed" 
                 />
+                {errors?.positioning?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.positioning?.message as string}</p>}
               </div>
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Mission Statement</label>
@@ -804,6 +805,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                   placeholder="Why do you exist?" 
                   className="min-h-[140px] bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base p-4 shadow-sm focus-visible:ring-indigo-500 leading-relaxed" 
                 />
+                {errors?.identity?.mission?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.identity?.mission?.message as string}</p>}
               </div>
            </div>
         </Card>
@@ -833,22 +835,26 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                placeholder="Describe your ideal customers, demographics, and pain points..." 
                className="min-h-[140px] bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base p-4 shadow-sm focus-visible:ring-emerald-500 leading-relaxed" 
              />
+                {errors?.audience?.primaryAudience?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.audience?.primaryAudience?.message as string}</p>}
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-border/50 dark:border-gray-800/50">
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Target Location</label>
                 <Input {...register('strategy.targetLocation')} placeholder="e.g. Global, USA, Tamil Nadu" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-emerald-500" />
+                {errors?.strategy?.targetLocation?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.strategy?.targetLocation?.message as string}</p>}
               </div>
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Age Group</label>
                 <Input {...register('strategy.ageGroup')} placeholder="e.g. 18-35, Professionals" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-emerald-500" />
+                {errors?.strategy?.ageGroup?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.strategy?.ageGroup?.message as string}</p>}
               </div>
            </div>
 
            <div className="space-y-3">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Interests & Behaviors</label>
               <Input {...register('strategy.interests')} placeholder="e.g. Tech enthusiasts, sustainable living, remote workers" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-emerald-500" />
+                {errors?.strategy?.interests?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.strategy?.interests?.message as string}</p>}
            </div>
         </Card>
       </section>
@@ -902,7 +908,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Competitor Name</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">Competitor Name <span className="text-red-500">*</span></label>
                       <Input 
                         placeholder="e.g. Rival Inc." 
                         value={comp.name} 
@@ -977,6 +983,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                 placeholder="What makes your brand stand out from the crowd?" 
                 className="min-h-[120px] bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base p-4 shadow-sm focus-visible:ring-rose-500 leading-relaxed" 
               />
+                {errors?.differentiators?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.differentiators?.message as string}</p>}
            </div>
         </Card>
       </section>
@@ -1016,6 +1023,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       <SelectItem value="monthly">Monthly</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors?.strategy?.postingFrequency?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.strategy?.postingFrequency?.message as string}</p>}
                 </div>
 
                 <div className="space-y-3">
@@ -1033,6 +1041,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       <SelectItem value="mixed">Mixed (Tanglish)</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors?.strategy?.contentLanguage?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.strategy?.contentLanguage?.message as string}</p>}
                 </div>
               </div>
               
@@ -1176,6 +1185,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
             placeholder="Legal footer, copyright info, or required disclosures..." 
             className="min-h-[160px] bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base p-5 shadow-sm focus-visible:ring-gray-500 leading-relaxed" 
           />
+                {errors?.governance?.requiredDisclaimer?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.governance?.requiredDisclaimer?.message as string}</p>}
         </Card>
       </section>
       )}
@@ -1352,6 +1362,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                       <SelectItem value="Modern">Modern & Vibrant</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors?.designPreferences?.imageStyle?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.designPreferences?.imageStyle?.message as string}</p>}
                </div>
 
                <div className="flex items-center justify-between p-5 rounded-2xl bg-background/40 bg-background/40 border border-border/50 dark:border-gray-800/50 shadow-sm">
@@ -1437,10 +1448,12 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
             <div className="space-y-3">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Content Reviewer</label>
               <Input {...register('approvalWorkflow.reviewerName')} placeholder="e.g. Marketing Manager" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-blue-500" />
+                {errors?.approvalWorkflow?.reviewerName?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.approvalWorkflow?.reviewerName?.message as string}</p>}
             </div>
             <div className="space-y-3">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Final Approver</label>
               <Input {...register('approvalWorkflow.finalApproverName')} placeholder="e.g. Business Owner / CEO" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-blue-500" />
+                {errors?.approvalWorkflow?.finalApproverName?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.approvalWorkflow?.finalApproverName?.message as string}</p>}
             </div>
           </div>
 
@@ -1448,6 +1461,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
             <div className="space-y-3">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Approval Timing</label>
               <Input {...register('approvalWorkflow.approvalTiming')} placeholder="e.g. Within 24 hours of posting" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-blue-500" />
+                {errors?.approvalWorkflow?.approvalTiming?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.approvalWorkflow?.approvalTiming?.message as string}</p>}
             </div>
             <div className="space-y-3">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Revision Limit (per post)</label>
@@ -1542,6 +1556,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                     <SelectItem value="Sales">Sales & Conversions</SelectItem>
                   </SelectContent>
                 </Select>
+                  {errors?.campaignDetails?.marketingGoal?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.campaignDetails?.marketingGoal?.message as string}</p>}
               </div>
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Monthly Budget (USD)</label>
@@ -1553,6 +1568,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Campaign Duration</label>
                 <Input {...register('campaignDetails.duration')} placeholder="e.g. 3 Months, On-going" className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-orange-500" />
+                {errors?.campaignDetails?.duration?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.campaignDetails?.duration?.message as string}</p>}
               </div>
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Target Leads / Reach (Monthly)</label>
@@ -1651,6 +1667,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                   placeholder="e.g. 20% increase in engagement, 50 new leads per month..." 
                   className="min-h-full h-[260px] bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base p-5 shadow-sm focus-visible:ring-violet-500 leading-relaxed" 
                 />
+                {errors?.analyticsConfig?.kpiExpectations?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.analyticsConfig?.kpiExpectations?.message as string}</p>}
              </div>
           </div>
         </Card>
@@ -1717,10 +1734,12 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Meta Business Manager ID</label>
                   <Input {...register('socialAccess.metaBusinessManagerId')} placeholder="e.g. 123456789012345" className="h-12 bg-surface-1 dark:bg-gray-950/50 bg-surface-2/50 border-border/60 rounded-xl" />
+                {errors?.socialAccess?.metaBusinessManagerId?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.socialAccess?.metaBusinessManagerId?.message as string}</p>}
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Ad Account ID</label>
                   <Input {...register('socialAccess.adAccountId')} placeholder="e.g. act_123456789" className="h-12 bg-surface-1 dark:bg-gray-950/50 bg-surface-2/50 border-border/60 rounded-xl" />
+                {errors?.socialAccess?.adAccountId?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.socialAccess?.adAccountId?.message as string}</p>}
                 </div>
               </div>
            </div>

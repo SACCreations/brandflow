@@ -86,17 +86,49 @@ export class BrandAnalyserService {
 
     const systemPrompt = [
       'You are BrandFlow\'s senior brand strategist and brand-governance analyst.',
+      'Perform a complete in-depth Brand DNA analysis based on the provided URL and evidence.',
+      '1. Identify the exact brand/company name from the provided evidence.',
+      '2. Detect and validate the original brand logos by matching them with the official brand assets.',
+      '3. Extract and deeply analyze:',
+      '   - Primary, secondary, monochrome, icon, and alternate logos',
+      '   - Brand color palette (primary, secondary, accent, neutral, gradient, UI colors)',
+      '   - Logo color usage and visual consistency',
+      '   - Typography system and font hierarchy',
+      '   - Brand imagery and visual language',
+      '   - Icons, illustrations, patterns, textures, mascots, shapes, and motion styles',
+      '   - Brand tone, personality, and communication style',
+      '   - Core Brand DNA and positioning',
+      '   - Mission, vision, values, and strategic messaging',
+      '   - Target audience and market positioning',
+      '   - Design consistency and governance rules',
+      '   - CTA styles, UI components, and digital branding patterns',
+      '   - Brand Intelligence Overview, Color Governance, Core Strategy & Positioning, Visual Identity System, and Brand Architecture.',
+      '',
+      'Asset Collection Requirements:',
+      '- Automatically collect and organize all discovered brand assets into the Asset Catalog section.',
+      '- Support all major asset formats (PNG, SVG, JPG/JPEG, WEBP, PDF, AI, EPS, PSD, GIF, MP4, Lottie, Figma links, etc.).',
+      '- Only retain original, verified, and brand-relevant assets and insights. Avoid duplicate, irrelevant, placeholder, stock, dummy, or low-quality assets.',
+      '- Detect and remove repeated or visually duplicated assets automatically.',
+      '',
+      'Quality & Intelligence Requirements:',
+      '- Perform a true deep analysis of the brand’s authentic identity.',
+      '- Ensure all generated insights are based on actual brand data, visual consistency, and real brand behavior across the website and digital presence.',
+      '',
+      'Expected Output:',
+      '- A complete Brand DNA profile, deep visual and strategic brand intelligence, structured governance-ready branding data, clean and categorized asset collections.',
+      '',
       'Use only the supplied evidence. Do not invent facts.',
       'Return a single JSON object with a `brand` object only. No markdown, no prose.',
       'If information is uncertain, use null for strings and empty arrays for lists.',
       'For core basics like brand name, website, and description, strongly prefer explicit page signals such as canonical URL, organization schema, title, meta description, and repeated headings.',
+      'Provide a highly detailed, deeply analyzed, and in-depth description (at least 2-3 paragraphs) for the brand overview.',
       'Never write generic placeholder copy. If the sources do not support a field, leave it null or empty.',
-      'Extract exact brand colors and classify them correctly into primary, secondary, accent, neutral, and semantic colors.',
-      'For Voice & Intelligence, identify specific tones and phrases from the copy.',
-      'For Target Audience and Market Intelligence, confidently infer age groups, interests, and competitors from context based on the industry if explicit data is missing.',
+      'Extract exact brand colors and classify them correctly into primary, secondary, accent, neutral, and semantic colors. Ensure you ONLY output the valid hex code (e.g. #FFFFFF) for color fields.',
+      'For Voice & Intelligence, identify specific tones and phrases from the copy, providing a detailed personality analysis.',
+      'For Target Audience and Market Intelligence, confidently infer in-depth demographic and psychographic profiles (age groups, interests, competitors, market positioning) based on context, even if not explicitly stated.',
       'For brandDNA, generate highly descriptive, visual keywords for moodboard generation (e.g. "Minimalist glassmorphism on deep slate", "Cyberpunk neon accents").',
       'Ensure visualExtraction accurately categorizes the provided Image candidates into heroImages, productVisuals, and uiScreenshots.',
-      'Do not duplicate textual content between sections like identity.businessOverview and designPreferences.aestheticAnalysis. Ensure mission, vision, and differentiators are populated distinctly.',
+      'Do not duplicate textual content between sections like identity.businessOverview and designPreferences.aestheticAnalysis. Ensure mission, vision, and differentiators are populated distinctly and comprehensively.',
       'The brand object must use this shape:',
       JSON.stringify({
         brand: {
@@ -306,8 +338,8 @@ export class BrandAnalyserService {
       gatewayResult = await this.gateway.complete(systemPrompt, userPrompt, {
         provider: preferredProvider as 'openai' | 'anthropic' | 'google' | 'fallback' | 'nvidia',
         model: settings.model ?? undefined,
-        temperature: 0.15,
-        maxTokens: Math.min(settings.maxTokens ?? 1800, 1800),
+        temperature: 0.25,
+        maxTokens: settings.maxTokens ?? 4000,
         apiKey: decryptedApiKey ?? undefined,
         jsonMode: true,
       });
@@ -846,7 +878,8 @@ export class BrandAnalyserService {
 
   private normalizeColor(value: string | null | undefined): string | null {
     if (!value) return null;
-    return /^#([0-9A-Fa-f]{3}){1,2}$/.test(value) ? value : null;
+    const match = value.match(/#([0-9A-Fa-f]{3}){1,2}\b/);
+    return match ? match[0] : null;
   }
 
   private compactObject<T extends Record<string, unknown>>(value: T): T | null {
