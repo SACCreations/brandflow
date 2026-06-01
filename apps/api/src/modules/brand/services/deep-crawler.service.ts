@@ -14,7 +14,7 @@ export interface CrawledPage {
 export class DeepCrawlerService {
   private readonly logger = new Logger(DeepCrawlerService.name);
 
-  async crawl(baseUrl: string, maxPages = 5): Promise<CrawledPage[]> {
+  async crawl(baseUrl: string, maxPages = 3): Promise<CrawledPage[]> {
     this.logger.log(`Starting deep crawl for ${baseUrl}`);
     
     const normalizedBaseUrl = this.normalizeUrl(baseUrl);
@@ -70,7 +70,7 @@ export class DeepCrawlerService {
   private async fetchPage(url: string): Promise<string | null> {
     try {
       const response = await fetch(url, {
-        signal: AbortSignal.timeout(15_000),
+        signal: AbortSignal.timeout(8_000),
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           Accept: 'text/html, text/plain, application/xhtml+xml',

@@ -1408,11 +1408,29 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {values.visualRules?.logoUrls?.filter((l: any) => l.url).map((logo: any, i: number) => (
                 <div key={i} className="aspect-square rounded-3xl border border-border/50 dark:border-gray-800/50 flex items-center justify-center p-6 bg-background/60 bg-background/40 relative group overflow-hidden shadow-sm transition-all hover:shadow-lg">
-                   <img src={logo.url} alt={`${logo.type || 'Brand'} logo`} className="max-w-full max-h-full object-contain z-10 transition-transform group-hover:scale-105" />
+                   <img
+                     src={logo.url}
+                     alt={`${logo.type || 'Brand'} logo`}
+                     crossOrigin="anonymous"
+                     className="max-w-full max-h-full object-contain z-10 transition-transform group-hover:scale-105"
+                     onError={(e) => {
+                       const t = e.currentTarget;
+                       t.style.display = 'none';
+                       const fb = t.nextElementSibling as HTMLElement | null;
+                       if (fb && (fb as any).dataset?.fallback) fb.style.display = 'flex';
+                     }}
+                   />
+                   <div
+                     data-fallback="true"
+                     className="items-center justify-center text-muted-foreground font-bold text-xs uppercase tracking-widest"
+                     style={{ display: 'none' }}
+                   >
+                     {logo.type || 'Logo'}
+                   </div>
                    <div className="absolute inset-0 bg-background/90 bg-background/90 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-3 backdrop-blur-sm z-20">
                       <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{logo.type}</span>
                       <Button type="button" variant="default" size="sm" className="rounded-full font-bold bg-background hover:bg-surface-1 text-foreground shadow-md" asChild>
-                        <a href={logo.url} download>Download</a>
+                        <a href={logo.url} target="_blank" rel="noopener noreferrer">View</a>
                       </Button>
                    </div>
                 </div>

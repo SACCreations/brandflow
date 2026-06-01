@@ -9,22 +9,27 @@ class OpenAIProvider {
     name = 'openai';
     client;
     model;
+    apiKey;
     constructor(apiKey, model = 'gpt-4o') {
         this.client = new openai_1.default({ apiKey });
         this.model = model;
+        this.apiKey = apiKey;
     }
     isAvailable() {
-        return Boolean(process.env['OPENAI_API_KEY']);
+        return Boolean(this.apiKey);
     }
     async complete(request) {
         const response = await this.client.chat.completions.create({
-            model: this.model,
+            model: request.model ?? this.model,
             messages: [
                 { role: 'system', content: request.systemPrompt },
-                { role: 'user', content: request.userPrompt },
+                ...(typeof request.userPrompt === 'string'
+                    ? [{ role: 'user', content: request.userPrompt }]
+                    : request.userPrompt),
             ],
             max_tokens: request.maxTokens ?? 1024,
             temperature: request.temperature ?? 0.7,
+            ...(request.jsonMode ? { response_format: { type: 'json_object' } } : {}),
         });
         const choice = response.choices[0];
         if (!choice?.message.content) {

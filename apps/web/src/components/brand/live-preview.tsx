@@ -61,12 +61,28 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality, currentStepI
              <div className="absolute inset-0 opacity-10" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }} />
              <div className="relative z-10 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-background shadow-sm border border-border/60 mb-3">
                {data.visualRules?.logoUrls?.[0]?.url ? (
-                 <img src={data.visualRules.logoUrls[0].url} alt="Logo" className="w-full h-full object-contain p-1" />
-               ) : (
-                 <div className="w-full h-full flex items-center justify-center text-foreground font-black text-xs" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}>
-                   {data.name?.[0] || 'B'}
-                 </div>
-               )}
+                 <img
+                   src={data.visualRules.logoUrls[0].url}
+                   alt="Logo"
+                   crossOrigin="anonymous"
+                   className="w-full h-full object-contain p-1"
+                   onError={(e) => {
+                     const target = e.currentTarget;
+                     target.style.display = 'none';
+                     const fallback = target.nextElementSibling as HTMLElement | null;
+                     if (fallback) fallback.style.display = 'flex';
+                   }}
+                 />
+               ) : null}
+               <div
+                 className="w-full h-full items-center justify-center text-foreground font-black text-xs"
+                 style={{
+                   display: data.visualRules?.logoUrls?.[0]?.url ? 'none' : 'flex',
+                   background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+                 }}
+               >
+                 {data.name?.[0] || 'B'}
+               </div>
              </div>
              <span className="font-black text-sm uppercase tracking-tight text-foreground" style={{ fontFamily: headingFont }}>{data.name || 'Brand Name'}</span>
              {data.industry && <span className="text-[10px] font-bold text-muted-foreground mt-1 px-2 py-0.5 rounded-full border border-border/50">{data.industry}</span>}

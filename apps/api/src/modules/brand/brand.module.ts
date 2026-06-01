@@ -22,6 +22,11 @@ import { DeepCrawlerService } from './services/deep-crawler.service';
     BusinessModule,
     BullModule.registerQueue({
       name: 'brand-analysis',
+      defaultJobOptions: {
+        attempts: 1,           // No retries — each attempt runs the full LLM pipeline
+        removeOnComplete: { count: 50 },
+        removeOnFail: { count: 100 },
+      },
     }),
   ],
   controllers: [BrandController, BrandAnalyserController],

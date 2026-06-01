@@ -70,7 +70,7 @@ export class BrandAnalyserService {
     this.gateway = new LLMGateway({
       defaultProvider: (this.config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic'),
       fallbackProvider: (this.config.get('llm.fallbackProvider', 'anthropic') as 'openai' | 'anthropic' | 'fallback'),
-      requestTimeoutMs: 60000, // Reduced to 60 seconds to fail faster on timeout
+      requestTimeoutMs: 120_000, // 2 minutes — gives the main analysis call sufficient time
     });
   }
 
@@ -289,57 +289,35 @@ export class BrandAnalyserService {
       }),
     ].join('\n');
 
-    const baseUrl = resolvedSources.find((s) => s.url)?.url;
-    let screenshots: any = null;
-    if (baseUrl) {
-      const subUrls = resolvedSources.filter((s) => s.url && s.url !== baseUrl).map((s) => s.url as string);
-      screenshots = await this.screenshotService.captureScreenshots(baseUrl, subUrls);
-      
-      // Inject computed styles (like true rendered fonts) directly into the evidence signals
-      if (screenshots?.computedStyles) {
-        const primarySource = resolvedSources.find((source) => source.url === baseUrl);
-        if (primarySource?.signals && primarySource.baseText) {
-           primarySource.signals.headingFonts = Array.from(new Set([...screenshots.computedStyles.headingFonts, ...primarySource.signals.headingFonts])).filter(Boolean).slice(0, 5);
-           primarySource.signals.bodyFonts = Array.from(new Set([...screenshots.computedStyles.bodyFonts, ...primarySource.signals.bodyFonts])).filter(Boolean).slice(0, 5);
-           primarySource.signals.fonts = Array.from(new Set([...primarySource.signals.headingFonts, ...primarySource.signals.bodyFonts, ...primarySource.signals.fonts])).filter(Boolean).slice(0, 10);
-           
-           primarySource.text = [
-             this.formatPageSignalsForPrompt(primarySource.signals),
-             'Readable page excerpt:',
-             primarySource.baseText
-           ].filter(Boolean).join('\n\n');
-        }
-      }
+    // Screenshots removed — no longer needed since vision analysis sub-task is disabled.
+    // Font/color signals are extracted from the crawled HTML directly.
+    if (false) { // keep reference to avoid unused import warning
+      const _baseUrl = resolvedSources.find((s) => s.url)?.url;
+      void _baseUrl;
     }
 
     const userPrompt = this.buildUserPrompt(resolvedSources);
 
     const primarySignals = resolvedSources.find((source) => source.signals)?.signals;
     const imageUrls = primarySignals?.imageUrls || [];
-    const combinedText = resolvedSources.map(s => s.text).join('\n').slice(0, 10000); // Reduced for faster LLM processing
-    const fullHtml = resolvedSources.map(s => s.baseText).join(' ').slice(0, 15000); // Reduced to prevent hanging on huge HTML
 
-    const parallelTasks = await Promise.allSettled([
-      screenshots ? this.visionAnalysisService.analyzeVisuals(this.gateway, screenshots, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined) : Promise.resolve(null),
-      this.fontDetectionService.detectFonts(this.gateway, fullHtml, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
-      this.audienceDetectionService.inferAudience(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
-      this.personalityEngineService.inferPersonality(this.gateway, combinedText, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined),
-      this.assetCatalogService.buildCatalog(this.gateway, imageUrls, preferredProvider, decryptedApiKey ?? undefined, settings.model ?? undefined)
-    ]);
-
-    const visionResult = parallelTasks[0].status === 'fulfilled' ? parallelTasks[0].value : null;
-    const typographyResult = parallelTasks[1].status === 'fulfilled' ? parallelTasks[1].value : null;
-    const audienceResult = parallelTasks[2].status === 'fulfilled' ? parallelTasks[2].value : null;
-    const personalityResult = parallelTasks[3].status === 'fulfilled' ? parallelTasks[3].value : null;
-    const catalogResult = parallelTasks[4].status === 'fulfilled' ? parallelTasks[4].value : null;
+    // Skip all parallel LLM sub-tasks — the main gateway.complete() call already covers
+    // fonts, audience, personality, and asset catalog in its system prompt.
+    // Running 6 concurrent LLM calls against the same API key causes rate-limiting
+    // and cascading timeouts. One well-crafted call is faster and more reliable.
+    const visionResult = null;
+    const typographyResult = null;
+    const audienceResult = null;
+    const personalityResult = null;
+    const catalogResult = null;
 
     let gatewayResult;
     try {
       gatewayResult = await this.gateway.complete(systemPrompt, userPrompt, {
         provider: preferredProvider as 'openai' | 'anthropic' | 'google' | 'fallback' | 'nvidia',
         model: settings.model ?? undefined,
-        temperature: 0.25,
-        maxTokens: settings.maxTokens ?? 4000,
+        temperature: 0.2,
+        maxTokens: settings.maxTokens ?? 3500,
         apiKey: decryptedApiKey ?? undefined,
         jsonMode: true,
       });
@@ -504,7 +482,7 @@ export class BrandAnalyserService {
       throw new BadRequestException(`Invalid source URL: ${urlValue}`);
     }
 
-    const crawledPages = await this.deepCrawlerService.crawl(normalizedUrl, 5);
+    const crawledPages = await this.deepCrawlerService.crawl(normalizedUrl, 3);
     
     if (crawledPages.length === 0) {
       throw new BadRequestException(`Failed to crawl ${normalizedUrl}`);

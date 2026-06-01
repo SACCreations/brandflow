@@ -7,6 +7,20 @@ import { GoogleProvider } from './providers/google';
 import { NvidiaProvider } from './providers/nvidia';
 import { PIISanitizer } from './sanitizer';
 
+/** Errors that indicate we should fall through to the next provider rather than fail immediately. */
+const FALLTHROUGH_STATUS_CODES = new Set([429, 502, 503, 504]);
+
+function isRateLimitOrUnavailable(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const status = (err as any).status ?? (err as any).statusCode;
+  if (typeof status === 'number' && FALLTHROUGH_STATUS_CODES.has(status)) return true;
+  const msg = (err as any).message ?? '';
+  return /rate.?limit|429|too many requests|quota|overloaded|capacity/i.test(msg);
+}
+
+/** Wait for `ms` milliseconds. */
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
 export class LLMGateway {
   private providers: Map<string, LLMProvider>;
   private config: Required<GatewayConfig>;
@@ -103,30 +117,50 @@ export class LLMGateway {
       jsonMode: options.jsonMode,
     };
 
-    // If a custom API key is provided, we must use a temporary provider instance
+    // ─── Build the ordered list of providers to try ──────────────
+    // When a custom API key is provided, start with that provider.
+    // On rate-limit (429) or unavailability, fall through to env-configured providers.
+    const providerOrder = this.buildProviderChain(preferredProvider);
+
+    // Prepend the custom-key temporary provider as the first candidate
+    let tempProvider: LLMProvider | null = null;
     if (options.apiKey) {
-      const tempProvider = this.createTemporaryProvider(preferredProvider, options.apiKey, options.model);
-      if (tempProvider) {
-        try {
-          const response = await this.withTimeout(
-            tempProvider.complete(request),
-            this.config.requestTimeoutMs,
-          );
-          return { response, requestId, provider: preferredProvider };
-        } catch (err) {
-          console.error(`[LLMGateway] Temporary provider ${preferredProvider} failed:`, err);
-          // If the user provided a custom API key, they should see why it failed 
-          // (e.g., rate limit, invalid key) rather than a generic fallback error.
-          throw err;
+      tempProvider = this.createTemporaryProvider(preferredProvider, options.apiKey, options.model);
+    }
+
+    let lastError: Error | undefined;
+
+    // ─── Try the custom-key provider first ────────────────────────
+    if (tempProvider) {
+      try {
+        const response = await this.withTimeout(
+          tempProvider.complete(request),
+          this.config.requestTimeoutMs,
+        );
+        return { response, requestId, provider: preferredProvider };
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        const shouldFallThrough = isRateLimitOrUnavailable(err);
+        console.warn(
+          `[LLMGateway] Custom-key provider ${preferredProvider} failed (${lastError.message}).`,
+          shouldFallThrough ? 'Falling through to env-configured providers.' : 'Not retrying (non-transient error).',
+        );
+
+        // For non-transient errors (invalid key, bad request, etc.) throw immediately
+        // so the user sees the actual problem.  For rate limits / server errors, fall through.
+        if (!shouldFallThrough) {
+          throw lastError;
         }
+        // Add a short back-off before hitting the next provider
+        await sleep(1500);
       }
     }
 
-    // Try preferred provider, then fallback chain
-    const providerOrder = this.buildProviderChain(preferredProvider);
-
-    let lastError: Error | undefined;
+    // ─── Try env-configured provider chain ────────────────────────
     for (const providerName of providerOrder) {
+      // Skip the preferred provider if we already tried it via the temp instance above
+      if (options.apiKey && providerName === preferredProvider) continue;
+
       const provider = this.providers.get(providerName);
       if (!provider || !provider.isAvailable()) continue;
 
@@ -135,14 +169,27 @@ export class LLMGateway {
           provider.complete(request),
           this.config.requestTimeoutMs,
         );
+        console.log(`[LLMGateway] Used fallback provider: ${providerName}`);
         return { response, requestId, provider: providerName };
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
         console.error(`[LLMGateway] Provider ${providerName} failed:`, lastError.message);
+
+        // Rate-limit on this provider too — small back-off before next
+        if (isRateLimitOrUnavailable(err)) {
+          await sleep(1000);
+        }
       }
     }
 
-    throw lastError ?? new Error('All providers failed');
+    // All providers exhausted
+    const finalMessage = lastError?.message ?? 'All AI providers failed.';
+    const isRateLimit = isRateLimitOrUnavailable(lastError);
+    throw new Error(
+      isRateLimit
+        ? `AI provider rate limit reached (429). Please wait a moment and try again, or switch to a different provider in Settings → AI Provider. (${finalMessage})`
+        : `All AI providers failed: ${finalMessage}`,
+    );
   }
 
   private createTemporaryProvider(providerName: string, apiKey: string, model?: string): LLMProvider | null {

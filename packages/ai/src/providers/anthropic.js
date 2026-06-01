@@ -9,26 +9,37 @@ class AnthropicProvider {
     name = 'anthropic';
     client;
     model;
+    apiKey;
     constructor(apiKey, model = 'claude-sonnet-4-5') {
         this.client = new sdk_1.default({ apiKey });
         this.model = model;
+        this.apiKey = apiKey;
     }
     isAvailable() {
-        return Boolean(process.env['ANTHROPIC_API_KEY']);
+        return Boolean(this.apiKey);
     }
     async complete(request) {
+        // For JSON mode, prefill the assistant response to force JSON output
+        const messages = typeof request.userPrompt === 'string'
+            ? [{ role: 'user', content: request.userPrompt }]
+            : request.userPrompt;
+        if (request.jsonMode) {
+            messages.push({ role: 'assistant', content: '{' });
+        }
         const response = await this.client.messages.create({
-            model: this.model,
+            model: request.model ?? this.model,
             max_tokens: request.maxTokens ?? 1024,
             system: request.systemPrompt,
-            messages: [{ role: 'user', content: request.userPrompt }],
+            messages,
         });
         const textBlock = response.content.find((b) => b.type === 'text');
         if (!textBlock || textBlock.type !== 'text') {
             throw new Error('Anthropic returned empty response');
         }
+        // If we prefilled with '{', prepend it to the response
+        const content = request.jsonMode ? `{${textBlock.text}` : textBlock.text;
         return {
-            content: textBlock.text,
+            content,
             model: response.model,
             inputTokens: response.usage.input_tokens,
             outputTokens: response.usage.output_tokens,
