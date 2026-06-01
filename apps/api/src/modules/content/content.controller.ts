@@ -38,7 +38,7 @@ export class ContentController {
   @Post('topics/suggest')
   @Permissions('content:read')
   @ApiOperation({ summary: 'Get AI recommended topic ideas' })
-  suggestTopics(
+  suggestTopics( // Trigger reload
     @Body('brandId') brandId: string,
     @Body('category') category: string,
     @CurrentUser() user: JwtPayload,

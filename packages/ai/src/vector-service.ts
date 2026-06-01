@@ -14,12 +14,33 @@ export class VectorService {
    * Requires a valid OpenAI API key.
    */
   async generateEmbedding(text: string, apiKey?: string): Promise<number[]> {
-    const client = apiKey ? new OpenAI({ apiKey }) : this.openai;
-    if (!client.apiKey || client.apiKey === 'undefined') {
+    // Only use the passed apiKey if it looks like an OpenAI key (starts with sk- and not Anthropic's sk-ant-, or starts with proj-)
+    const isLocalOpenAiKey = apiKey && (
+      (apiKey.startsWith('sk-') && !apiKey.startsWith('sk-ant-')) || 
+      apiKey.startsWith('proj-')
+    );
+    
+    const client = isLocalOpenAiKey ? new OpenAI({ apiKey }) : this.openai;
+    const keyToUse = client.apiKey;
+    
+    if (!keyToUse || keyToUse === 'undefined') {
       throw new Error(
         'OpenAI API key is required for embedding generation. ' +
         'Please add your API key in Settings → AI Provider.',
       );
+    }
+
+    // Mock mode for development testing
+    if (keyToUse.startsWith('sk-mock')) {
+      let hash = 0;
+      for (let i = 0; i < text.length; i++) {
+        hash = (hash << 5) - hash + text.charCodeAt(i);
+        hash |= 0;
+      }
+      return Array.from({ length: 1536 }, (_, idx) => {
+        const val = Math.sin(hash + idx);
+        return val;
+      });
     }
 
     const response = await client.embeddings.create({
