@@ -71,6 +71,8 @@ interface BrandFormProps {
 
 const defaultBrandFormValues = {
   name: '',
+  slug: '',
+  industry: '',
   status: 'published',
   tone: [],
   visualRules: {
@@ -264,11 +266,13 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
   const { toast } = useToast();
 
   const form = useForm<any>({
+    mode: 'onBlur',
     resolver: zodResolver(createBrandSchema),
     defaultValues: sanitizeInitialData(initialData) || defaultBrandFormValues
   });
 
-  const { watch, setValue, register, handleSubmit, reset, formState: { errors, isDirty } } = form;
+  const { watch, setValue, register, handleSubmit, reset, formState: { errors: rawErrors, isDirty } } = form;
+  const errors = rawErrors as any;
 
   const values = watch();
   const lastValuesRef = React.useRef(JSON.stringify(values));
@@ -348,17 +352,17 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       case 'basics':
         return ['name', 'slug', 'tagline', 'description', 'industry', 'website', 'foundedYear', 'headquarters', 'contactInfo.personName', 'contactInfo.phoneNumber', 'contactInfo.email', 'contactInfo.officeAddress'];
       case 'visuals':
-        return ['visualRules.primaryColor', 'visualRules.secondaryColor', 'visualRules.accentColor', 'visualRules.neutralColor', 'visualRules.semanticColor', 'visualRules.fontFamily', 'visualRules.headingFont', 'visualRules.bodyFont', 'visualRules.supportingFont', 'visualRules.backupFont', 'visualRules.logoUrls'];
+        return ['visualRules.primaryColor', 'visualRules.secondaryColor', 'visualRules.accentColor', 'visualRules.neutralColor', 'visualRules.semanticColor', 'visualRules.fontFamily', 'visualRules.headingFont', 'visualRules.bodyFont', 'visualRules.supportingFont', 'visualRules.backupFont', 'visualRules.logoUrls', 'visualRules.colorTokens', 'visualRules.typographySettings', 'visualRules.typographyScales'];
       case 'dna':
         return ['identity.brandDNA', 'assetCatalog.images'];
       case 'voice':
-        return ['tone', 'positioning', 'differentiators', 'identity.mission', 'identity.vision', 'identity.promise', 'identity.personality', 'identity.values'];
+        return ['tone', 'positioning', 'identity.mission', 'knowledgeSources'];
       case 'strategy':
-        return ['audience', 'strategy.targetLocation', 'strategy.ageGroup', 'strategy.interests', 'strategy.postingFrequency', 'strategy.contentLanguage', 'strategy.ctaPreference', 'competitors'];
+        return ['audience.primaryAudience', 'strategy.targetLocation', 'strategy.ageGroup', 'strategy.interests', 'strategy.postingFrequency', 'strategy.contentLanguage', 'strategy.ctaPreference', 'competitors', 'differentiators'];
       case 'design-prefs':
         return ['designPreferences.preferredStyle', 'designPreferences.imageStyle', 'designPreferences.referenceLinks', 'designPreferences.animationRequirement'];
       case 'rules':
-        return ['governance.bannedPhrases', 'governance.requiredPhrases', 'governance.requiredDisclaimer', 'approvalWorkflow.reviewerName', 'approvalWorkflow.finalApproverName', 'approvalWorkflow.revisionLimit'];
+        return ['governance.rules', 'governance.requiredDisclaimer', 'approvalWorkflow.reviewerName', 'approvalWorkflow.finalApproverName', 'approvalWorkflow.approvalTiming', 'approvalWorkflow.revisionLimit', 'approvalWorkflow.processSteps'];
       case 'social':
         return ['socialAccess.metaBusinessManagerId', 'socialAccess.adAccountId', 'socialAccess.instagramHandle', 'socialAccess.facebookPage', 'socialAccess.linkedinPage', 'socialAccess.youtubeChannel', 'socialAccess.twitterHandle', 'campaignDetails.marketingGoal', 'campaignDetails.monthlyBudget', 'campaignDetails.duration', 'campaignDetails.targetLeads', 'campaignDetails.adPlatforms'];
       case 'finish':
@@ -373,18 +377,38 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
       triggerValidationRef.current = async () => {
         if (!activeStepId) return true;
         const fields = getFieldsForStep(activeStepId);
-        const result = await form.trigger(fields);
-
+        
+        console.log("Triggering validation for step:", activeStepId);
+        console.log("Fields to validate:", fields);
+        console.log("Current form values for fields:", form.getValues());
+        
+        const result = await form.trigger(fields as any);
+        
         if (activeStepId === 'visuals') {
           const vals = form.getValues();
           const hasLogo = !!vals.visualRules?.logoUrls?.[0]?.url;
           const hasFont = !!vals.visualRules?.typographySettings?.length || !!vals.visualRules?.headingFont || !!vals.visualRules?.fontFamily;
           const hasColor = !!vals.visualRules?.colorTokens?.length || !!vals.visualRules?.primaryColor;
 
+          let manualError = false;
           if (!hasLogo || !hasFont || !hasColor) {
             if (!hasLogo) toast({ variant: 'destructive', title: 'Validation Error', description: 'Primary Logo Variant is required.' });
             if (!hasFont) toast({ variant: 'destructive', title: 'Validation Error', description: 'At least one font is required in Typography System.' });
             if (!hasColor) toast({ variant: 'destructive', title: 'Validation Error', description: 'At least one color is required in Color Governance.' });
+            manualError = true;
+          }
+
+          if (manualError) return false;
+
+          // If manual validation passes but Zod fails, find out why and tell the user!
+          if (!result) {
+            const errs = (form.formState.errors as any)?.visualRules;
+            if (errs) {
+              if (errs.primaryColor) toast({ variant: 'destructive', title: 'Invalid Primary Color', description: errs.primaryColor.message || 'Must be a valid 3 or 6 digit hex code.' });
+              if (errs.secondaryColor) toast({ variant: 'destructive', title: 'Invalid Secondary Color', description: errs.secondaryColor.message || 'Must be a valid 3 or 6 digit hex code.' });
+              if (errs.accentColor) toast({ variant: 'destructive', title: 'Invalid Accent Color', description: errs.accentColor.message || 'Must be a valid 3 or 6 digit hex code.' });
+              if (errs.logoUrls) toast({ variant: 'destructive', title: 'Invalid Logo', description: 'One of the logo variants has invalid data.' });
+            }
             return false;
           }
         }
@@ -994,10 +1018,18 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                         onChange={(e) => {
                           const newComps = [...values.competitors];
                           newComps[idx].name = e.target.value;
-                          setValue('competitors', newComps);
+                          setValue('competitors', newComps, { shouldValidate: true, shouldDirty: true });
                         }}
-                        className="h-12 bg-background border-border/60 rounded-xl focus-visible:ring-rose-500" 
+                        className={cn(
+                          "h-12 bg-background border-border/60 rounded-xl focus-visible:ring-rose-500",
+                          errors?.competitors?.[idx]?.name && "border-red-500 ring-1 ring-red-500/50"
+                        )}
                       />
+                      {errors?.competitors?.[idx]?.name?.message && (
+                        <p className="text-xs text-red-500 font-bold mt-1.5 ml-1">
+                          {(errors.competitors as any)[idx].name.message as string}
+                        </p>
+                      )}
                       {idx === 0 && (
                         <datalist id="competitors-list">
                           <option value="Apple" />
@@ -1016,10 +1048,18 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                         onChange={(e) => {
                           const newComps = [...values.competitors];
                           newComps[idx].website = e.target.value;
-                          setValue('competitors', newComps);
+                          setValue('competitors', newComps, { shouldValidate: true, shouldDirty: true });
                         }}
-                        className="h-12 bg-background border-border/60 rounded-xl focus-visible:ring-rose-500" 
+                        className={cn(
+                          "h-12 bg-background border-border/60 rounded-xl focus-visible:ring-rose-500",
+                          errors?.competitors?.[idx]?.website && "border-red-500 ring-1 ring-red-500/50"
+                        )}
                       />
+                      {errors?.competitors?.[idx]?.website?.message && (
+                        <p className="text-xs text-red-500 font-bold mt-1.5 ml-1">
+                          {(errors.competitors as any)[idx].website.message as string}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1563,29 +1603,39 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {values.designPreferences?.referenceLinks?.map((link: string, idx: number) => (
-                <div key={idx} className="flex gap-3 bg-background/60 bg-background/60 p-2 rounded-2xl border border-border/50 dark:border-gray-800/50 shadow-sm">
-                  <Input 
-                    placeholder="https://behance.net/..." 
-                    value={link}
-                    onChange={(e) => {
-                      const newLinks = [...values.designPreferences.referenceLinks];
-                      newLinks[idx] = e.target.value;
-                      setValue('designPreferences.referenceLinks', newLinks);
-                    }}
-                    className="h-12 bg-transparent border-none shadow-none focus-visible:ring-0 px-4"
-                  />
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-12 w-12 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
-                    onClick={() => {
-                      const newLinks = values.designPreferences.referenceLinks.filter((_: any, i: number) => i !== idx);
-                      setValue('designPreferences.referenceLinks', newLinks);
-                    }}
-                  >
-                    <X className="w-5 h-5" />
-                  </Button>
+                <div key={idx} className="space-y-1">
+                  <div className={cn(
+                    "flex gap-3 bg-background/60 bg-background/60 p-2 rounded-2xl border border-border/50 dark:border-gray-800/50 shadow-sm",
+                    (errors?.designPreferences?.referenceLinks as any)?.[idx] && "border-red-500 ring-1 ring-red-500/50"
+                  )}>
+                    <Input 
+                      placeholder="https://behance.net/..." 
+                      value={link}
+                      onChange={(e) => {
+                        const newLinks = [...values.designPreferences.referenceLinks];
+                        newLinks[idx] = e.target.value;
+                        setValue('designPreferences.referenceLinks', newLinks, { shouldValidate: true, shouldDirty: true });
+                      }}
+                      className="h-12 bg-transparent border-none shadow-none focus-visible:ring-0 px-4"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-12 w-12 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
+                      onClick={() => {
+                        const newLinks = values.designPreferences.referenceLinks.filter((_: any, i: number) => i !== idx);
+                        setValue('designPreferences.referenceLinks', newLinks, { shouldValidate: true, shouldDirty: true });
+                      }}
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
+                  {(errors?.designPreferences?.referenceLinks as any)?.[idx]?.message && (
+                    <p className="text-xs text-red-500 font-bold mt-1 ml-2">
+                      {(errors.designPreferences.referenceLinks as any)[idx].message as string}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -1631,7 +1681,8 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
             </div>
             <div className="space-y-3">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Revision Limit (per post)</label>
-              <Input type="number" {...register('approvalWorkflow.revisionLimit', { valueAsNumber: true })} className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-blue-500" />
+              <Input type="number" {...register('approvalWorkflow.revisionLimit', { setValueAs: (v) => (v === "" || v === null || v === undefined ? null : Number(v)) })} className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-blue-500" />
+              {errors?.approvalWorkflow?.revisionLimit?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.approvalWorkflow?.revisionLimit?.message as string}</p>}
             </div>
           </div>
 
@@ -1726,7 +1777,8 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
               </div>
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Monthly Budget (USD)</label>
-                <Input type="number" {...register('campaignDetails.monthlyBudget', { valueAsNumber: true })} className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-orange-500" />
+                <Input type="number" {...register('campaignDetails.monthlyBudget', { setValueAs: (v) => (v === "" || v === null || v === undefined ? null : Number(v)) })} className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-orange-500" />
+                {errors?.campaignDetails?.monthlyBudget?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.campaignDetails?.monthlyBudget?.message as string}</p>}
               </div>
            </div>
 
@@ -1738,7 +1790,8 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
               </div>
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Target Leads / Reach (Monthly)</label>
-                <Input type="number" {...register('campaignDetails.targetLeads', { valueAsNumber: true })} className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-orange-500" />
+                <Input type="number" {...register('campaignDetails.targetLeads', { setValueAs: (v) => (v === "" || v === null || v === undefined ? null : Number(v)) })} className="h-14 bg-background/60 bg-background/60 border-border/50 dark:border-gray-800/50 rounded-2xl text-base shadow-sm focus-visible:ring-orange-500" />
+                {errors?.campaignDetails?.targetLeads?.message && <p className="text-xs text-red-500 font-bold mt-2">{errors?.campaignDetails?.targetLeads?.message as string}</p>}
               </div>
            </div>
 
@@ -1862,7 +1915,7 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
                 { name: 'Facebook', handleField: 'socialAccess.facebookPage', placeholder: 'Facebook Page URL' },
                 { name: 'YouTube', handleField: 'socialAccess.youtubeChannel', placeholder: 'Channel URL' },
               ].map(plat => {
-                const handleValue = values.socialAccess?.[plat.handleField.split('.')[1]];
+                const handleValue = values.socialAccess?.[plat.handleField.split('.')[1] as string];
                 const isConnected = !!handleValue;
                 
                 return (

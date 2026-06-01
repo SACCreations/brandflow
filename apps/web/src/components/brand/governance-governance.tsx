@@ -12,6 +12,7 @@ import {
   Info
 } from 'lucide-react';
 import { Button, cn, Input, Badge, Textarea } from '@brandflow/ui';
+import { useFormContext } from 'react-hook-form';
 
 interface GovernanceRule {
   id: string;
@@ -26,6 +27,7 @@ interface GovernanceGovernanceProps {
 }
 
 export function GovernanceGovernance({ rules = [], onChange }: GovernanceGovernanceProps) {
+  const { formState: { errors } } = useFormContext();
   const [activeType, setActiveType] = React.useState<GovernanceRule['type']>('banned');
 
   const addRule = () => {
@@ -71,30 +73,44 @@ export function GovernanceGovernance({ rules = [], onChange }: GovernanceGoverna
           </div>
 
           <div className="space-y-4">
-            {filteredRules.map((rule) => (
-              <div key={rule.id} className="flex gap-4 group">
-                <div className="flex-1">
-                  <Input 
-                    value={rule.value}
-                    onChange={(e) => updateRule(rule.id, e.target.value)}
-                    placeholder={
-                      activeType === 'banned' ? "e.g. 'Cheap', 'Basic', 'Standard'" :
-                      activeType === 'required' ? "e.g. 'Eco-friendly', 'Cloud-native'" :
-                      activeType === 'cta' ? "e.g. 'Start Free Trial', 'Book Demo'" :
-                      "e.g. 'Terms and conditions apply...'"
-                    }
-                    className="h-12 bg-background border-border/60 rounded-xl font-bold text-sm"
-                  />
+            {filteredRules.map((rule) => {
+              const index = rules.findIndex(r => r.id === rule.id);
+              const ruleError = (errors['governance'] as any)?.rules?.[index];
+              return (
+                <div key={rule.id} className="flex flex-col gap-1.5 group">
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <Input 
+                        value={rule.value}
+                        onChange={(e) => updateRule(rule.id, e.target.value)}
+                        placeholder={
+                          activeType === 'banned' ? "e.g. 'Cheap', 'Basic', 'Standard'" :
+                          activeType === 'required' ? "e.g. 'Eco-friendly', 'Cloud-native'" :
+                          activeType === 'cta' ? "e.g. 'Start Free Trial', 'Book Demo'" :
+                          "e.g. 'Terms and conditions apply...'"
+                        }
+                        className={cn(
+                          "h-12 bg-background border-border/60 rounded-xl font-bold text-sm",
+                          ruleError?.value && "border-red-500 ring-1 ring-red-500/50"
+                        )}
+                      />
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={() => removeRule(rule.id)}
+                      className="p-3 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                  {ruleError?.value?.message && (
+                    <p className="text-xs text-red-500 font-bold ml-1">
+                      {ruleError.value.message as string}
+                    </p>
+                  )}
                 </div>
-                <button 
-                  type="button"
-                  onClick={() => removeRule(rule.id)}
-                  className="p-3 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
-              </div>
-            ))}
+              );
+            })}
             
             <Button 
               variant="outline" 

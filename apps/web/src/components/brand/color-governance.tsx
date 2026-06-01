@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Button, cn, Input, Badge } from '@brandflow/ui';
 import { ColorPicker } from './color-picker';
+import { useFormContext } from 'react-hook-form';
 
 interface ColorToken {
   id: string;
@@ -83,6 +84,7 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
           <ColorCard 
             key={color.id} 
             color={color} 
+            fullColors={colors}
             onUpdate={(u) => updateColor(color.id, u)}
             onRemove={() => removeColor(color.id)}
           />
@@ -97,13 +99,21 @@ export function ColorGovernance({ colors = [], onChange }: ColorGovernanceProps)
   );
 }
 
-function ColorCard({ color, onUpdate, onRemove }: { 
+function ColorCard({ color, fullColors, onUpdate, onRemove }: { 
   color: ColorToken; 
+  fullColors: ColorToken[];
   onUpdate: (u: Partial<ColorToken>) => void;
   onRemove: () => void;
 }) {
+  const { formState: { errors } } = useFormContext();
+  const index = fullColors.findIndex(c => c.id === color.id);
+  const tokenError = (errors['visualRules'] as any)?.colorTokens?.[index];
+
   return (
-    <div className="bg-background border border-border/60 rounded-2xl p-5 space-y-4 hover:shadow-lg transition-all group relative overflow-hidden">
+    <div className={cn(
+      "bg-background border border-border/60 rounded-2xl p-5 space-y-4 hover:shadow-lg transition-all group relative overflow-hidden",
+      tokenError && "border-red-500 ring-1 ring-red-500/50"
+    )}>
       <div className="absolute top-2 right-2 flex gap-1">
          <button 
           type="button"
@@ -120,14 +130,27 @@ function ColorCard({ color, onUpdate, onRemove }: {
           <Input 
             value={color.name} 
             onChange={(e) => onUpdate({ name: e.target.value })}
-            className="h-10 text-xs font-bold border-border/60 bg-surface-1 dark:bg-gray-950/50 bg-surface-2/50 rounded-xl px-3 text-foreground placeholder:text-gray-400"
+            className={cn(
+              "h-10 text-xs font-bold border-border/60 bg-surface-1 dark:bg-gray-950/50 bg-surface-2/50 rounded-xl px-3 text-foreground placeholder:text-gray-400",
+              tokenError?.name && "border-red-500 ring-1 ring-red-500/50"
+            )}
           />
+          {tokenError?.name?.message && (
+            <p className="text-xs text-red-500 font-bold mt-1">
+              {tokenError.name.message as string}
+            </p>
+          )}
         </div>
 
         <ColorPicker 
           value={color.value}
           onChange={(val) => onUpdate({ value: val })}
         />
+        {tokenError?.value?.message && (
+          <p className="text-xs text-red-500 font-bold mt-1">
+            {tokenError.value.message as string}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2 pt-2">

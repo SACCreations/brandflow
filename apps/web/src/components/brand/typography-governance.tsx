@@ -14,6 +14,7 @@ import {
   Info
 } from 'lucide-react';
 import { Button, cn, Input, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@brandflow/ui';
+import { useFormContext } from 'react-hook-form';
 
 interface TypographySettings {
   id: string;
@@ -60,6 +61,7 @@ export function TypographyGovernance({
   onChange, 
   onScaleChange 
 }: TypographyGovernanceProps) {
+  const { formState: { errors } } = useFormContext();
   const headingFont = settings.find((setting) => setting.id === 'h')?.fontFamily;
   const bodyFont = settings.find((setting) => setting.id === 'b')?.fontFamily;
   const supportingFont = settings.find((setting) => setting.id === 's')?.fontFamily;
@@ -87,8 +89,17 @@ export function TypographyGovernance({
     <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
-          {settings.map((setting) => (
-            <div key={setting.id} className="space-y-4 p-6 rounded-3xl bg-background/40 border border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none hover:shadow-lg transition-all group ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl">
+          {settings.map((setting) => {
+            const index = settings.findIndex(s => s.id === setting.id);
+            const settingError = (errors['visualRules'] as any)?.typographySettings?.[index];
+            return (
+              <div 
+                key={setting.id} 
+                className={cn(
+                  "space-y-4 p-6 rounded-3xl bg-background/40 border border-transparent shadow-2xl shadow-gray-200/40 dark:shadow-none hover:shadow-lg transition-all group ring-1 ring-gray-200/50 dark:ring-white/10 backdrop-blur-xl",
+                  settingError && "border-red-500 ring-1 ring-red-500/50"
+                )}
+              >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 rounded-xl bg-primary/10 dark:bg-brand-900/40 text-primary">
@@ -117,8 +128,16 @@ export function TypographyGovernance({
                       onChange={(e) => onChange(settings.map(s => s.id === setting.id ? { ...s, fontFamily: e.target.value } : s))}
                       list={`fonts-${setting.id}`}
                       placeholder="Search 1000+ fonts..."
-                      className="h-12 pl-10 rounded-2xl bg-surface-1 dark:bg-gray-950/50 bg-surface-2/30 border-border/60 dark:border-gray-700/50 shadow-inner font-bold text-sm"
+                      className={cn(
+                        "h-12 pl-10 rounded-2xl bg-surface-1 dark:bg-gray-950/50 bg-surface-2/30 border-border/60 dark:border-gray-700/50 shadow-inner font-bold text-sm",
+                        settingError?.fontFamily && "border-red-500 ring-1 ring-red-500/50"
+                      )}
                     />
+                    {settingError?.fontFamily?.message && (
+                      <p className="text-xs text-red-500 font-bold mt-1.5 ml-1">
+                        {settingError.fontFamily.message as string}
+                      </p>
+                    )}
                     <datalist id={`fonts-${setting.id}`}>
                       {COMMON_FONTS.map(font => <option key={font} value={font} />)}
                     </datalist>
@@ -167,9 +186,10 @@ export function TypographyGovernance({
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Live</span>
                 </div>
-              </div>
             </div>
-          ))}
+          </div>
+        );
+      })}
           <div className="pt-2">
             <Button 
               type="button" 

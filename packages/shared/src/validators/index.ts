@@ -314,11 +314,11 @@ export type BrandAnalysisResultDto = z.infer<typeof brandAnalysisResultSchema>;
 
 // ─── Brand ────────────────────────────────────────────────────────
 export const createBrandSchema = z.object({
-  name: z.string().min(1).max(255),
-  slug: z.string().min(2).max(100).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens only').nullish().or(z.literal('')),
+  name: z.string().trim().min(1, 'Brand name is required').max(255),
+  slug: z.string().min(2, 'Slug is required').max(100).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens only'),
   tagline: z.string().max(255).nullish().or(z.literal('')),
   description: z.string().max(2000).nullish().or(z.literal('')),
-  industry: z.string().min(1, 'Industry is required').max(100),
+  industry: z.string().trim().min(1, 'Industry is required').max(100),
   website: z.string().url().or(z.string().regex(/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/, 'Invalid URL format')).nullish().or(z.literal('')),
   differentiators: z.string().max(2000).nullish().or(z.literal('')),
   foundedYear: z.union([z.number().int().min(1800).max(new Date().getFullYear()), z.literal('')]).nullish(),
@@ -383,6 +383,38 @@ export const createBrandSchema = z.object({
         uiScreenshots: z.array(z.string()).nullish(),
         designConsistencyScore: z.number().min(0).max(10).nullish(),
       }).nullish(),
+      colorTokens: z
+        .array(
+          z.object({
+            id: z.string(),
+            name: z.string().min(1, 'Color token name is required'),
+            value: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, 'Invalid Hex Color'),
+            type: z.enum(['primary', 'secondary', 'accent', 'neutral', 'semantic']),
+          })
+        )
+        .nullish(),
+      typographySettings: z
+        .array(
+          z.object({
+            id: z.string(),
+            label: z.string().min(1, 'Label is required'),
+            fontFamily: z.string().min(1, 'Font family is required'),
+            weight: z.string().nullish(),
+            sizeScale: z.string().nullish(),
+            lineHeight: z.string().nullish(),
+          })
+        )
+        .nullish(),
+      typographyScales: z
+        .array(
+          z.object({
+            id: z.string(),
+            label: z.string().nullish(),
+            size: z.string().nullish(),
+            spacing: z.string().nullish(),
+          })
+        )
+        .nullish(),
     })
     .nullish(),
     
@@ -435,6 +467,16 @@ export const createBrandSchema = z.object({
       requiredPhrases: z.union([z.string(), z.array(z.string().max(200))]).nullish().or(z.literal('')),
       ctaPreferences: z.union([z.string(), z.array(z.string().max(100))]).nullish().or(z.literal('')),
       requiredDisclaimer: z.string().max(1000).nullish().or(z.literal('')),
+      rules: z
+        .array(
+          z.object({
+            id: z.string(),
+            type: z.enum(['banned', 'required', 'cta', 'legal']),
+            value: z.string().min(1, 'Rule detail is required'),
+            severity: z.enum(['low', 'medium', 'high']).nullish(),
+          })
+        )
+        .nullish(),
     })
     .nullish(),
 
@@ -455,8 +497,8 @@ export const createBrandSchema = z.object({
   designPreferences: z
     .object({
       preferredStyle: z.enum(['Minimal', 'Corporate', '3D', 'Modern', 'Playful', 'Luxury']).nullish(),
-      referenceLinks: z.array(z.string().url()).nullish(),
-      imageStyle: z.enum(['Minimal', 'Corporate', '3D', 'Modern']).nullish(),
+      referenceLinks: z.array(z.string().url('Invalid URL format').or(z.literal(''))).nullish(),
+      imageStyle: z.enum(['Minimal', 'Corporate', '3D', 'Modern', 'Photorealistic', 'Illustration']).nullish(),
       animationRequirement: z.boolean().default(false),
       aestheticAnalysis: z.object({
         classification: z.string().nullish(),
@@ -566,7 +608,27 @@ export const createBrandSchema = z.object({
     illustrations: z.array(z.string()).nullish(),
     motion: z.array(z.string()).nullish(),
     documents: z.array(z.string()).nullish(),
+    images: z
+      .array(
+        z.object({
+          url: z.string().url('Invalid asset URL').or(z.string().regex(/^data:/, 'Invalid Base64 format')).or(z.literal('')),
+          name: z.string().max(255).nullish(),
+          assetType: z.enum(['image', 'video', 'document', 'archive']),
+          usage: z.string().max(50).nullish(),
+        })
+      )
+      .nullish(),
   }).nullish(),
+  knowledgeSources: z
+    .array(
+      z.object({
+        id: z.string(),
+        url: z.string().url('Invalid source URL').or(z.literal('')),
+        status: z.string().nullish(),
+        progress: z.number().nullish(),
+      })
+    )
+    .nullish(),
 });
 
 export type CreateBrandDto = z.infer<typeof createBrandSchema>;
