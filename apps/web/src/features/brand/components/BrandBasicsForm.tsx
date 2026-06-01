@@ -10,10 +10,10 @@ export function BrandBasicsForm({ isSectionVisible, values }: { isSectionVisible
   const { register, setValue, formState: { errors } } = useFormContext();
   const { toast } = useToast();
 
-  if (!isSectionVisible('basics')) return null;
-
   const [isGeneratingTagline, setIsGeneratingTagline] = React.useState(false);
   const [isGeneratingDescription, setIsGeneratingDescription] = React.useState(false);
+
+  if (!isSectionVisible('basics')) return null;
 
   const handleGenerateTagline = async () => {
     try {

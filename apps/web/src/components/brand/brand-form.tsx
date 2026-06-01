@@ -169,31 +169,48 @@ const sanitizeInitialData = (data: any) => {
         if (!arr[1]) arr[1] = { url: '', type: 'dark', name: 'Dark Variant' };
         return arr;
       })(),
-      colorTokens: Array.isArray(cleaned.visualRules?.colorTokens) && cleaned.visualRules.colorTokens.length > 0
-        ? cleaned.visualRules.colorTokens
-        : [
-            cleaned.visualRules?.primaryColor ? { id: '1', name: 'Primary', value: cleaned.visualRules.primaryColor, type: 'primary' } : null,
-            cleaned.visualRules?.secondaryColor ? { id: '2', name: 'Secondary', value: cleaned.visualRules.secondaryColor, type: 'secondary' } : null,
-            cleaned.visualRules?.accentColor ? { id: '3', name: 'Accent', value: cleaned.visualRules.accentColor, type: 'accent' } : null,
-            cleaned.visualRules?.neutralColor ? { id: '4', name: 'Neutral', value: cleaned.visualRules.neutralColor, type: 'neutral' } : null,
-            cleaned.visualRules?.semanticColor ? { id: '5', name: 'Semantic', value: cleaned.visualRules.semanticColor, type: 'semantic' } : null,
-          ].filter(Boolean),
-      typographySettings: Array.isArray(cleaned.visualRules?.typographySettings) && cleaned.visualRules.typographySettings.length > 0
-        ? cleaned.visualRules.typographySettings
-        : [
-            cleaned.visualRules?.headingFont || cleaned.visualRules?.fontFamily
-              ? { id: 'h', label: 'Heading Font', fontFamily: cleaned.visualRules?.headingFont || cleaned.visualRules?.fontFamily, weight: '900', sizeScale: '1.5', lineHeight: '1.2' }
-              : null,
-            cleaned.visualRules?.bodyFont || cleaned.visualRules?.fontFamily
-              ? { id: 'b', label: 'Body Font', fontFamily: cleaned.visualRules?.bodyFont || cleaned.visualRules?.fontFamily, weight: '400', sizeScale: '1', lineHeight: '1.5' }
-              : null,
-            cleaned.visualRules?.supportingFont
-              ? { id: 's', label: 'Supporting Font', fontFamily: cleaned.visualRules?.supportingFont, weight: '400', sizeScale: '0.875', lineHeight: '1.4' }
-              : null,
-            cleaned.visualRules?.backupFont
-              ? { id: 'bs', label: 'Backup/System Font', fontFamily: cleaned.visualRules?.backupFont, weight: '400', sizeScale: '1', lineHeight: '1.5' }
-              : null,
-          ].filter(Boolean),
+      colorTokens: (() => {
+        const tokens = Array.isArray(cleaned.visualRules?.colorTokens) && cleaned.visualRules.colorTokens.length > 0
+          ? cleaned.visualRules.colorTokens
+          : [
+              cleaned.visualRules?.primaryColor ? { id: '1', name: 'Primary', value: cleaned.visualRules.primaryColor, type: 'primary' } : null,
+              cleaned.visualRules?.secondaryColor ? { id: '2', name: 'Secondary', value: cleaned.visualRules.secondaryColor, type: 'secondary' } : null,
+              cleaned.visualRules?.accentColor ? { id: '3', name: 'Accent', value: cleaned.visualRules.accentColor, type: 'accent' } : null,
+              cleaned.visualRules?.neutralColor ? { id: '4', name: 'Neutral', value: cleaned.visualRules.neutralColor, type: 'neutral' } : null,
+              cleaned.visualRules?.semanticColor ? { id: '5', name: 'Semantic', value: cleaned.visualRules.semanticColor, type: 'semantic' } : null,
+            ].filter(Boolean);
+        return tokens.length > 0 ? tokens : [
+          { id: '1', name: 'Primary Indigo', value: '#6366f1', type: 'primary' },
+          { id: '2', name: 'Secondary Slate', value: '#475569', type: 'secondary' },
+          { id: '3', name: 'Accent Pink', value: '#f43f5e', type: 'accent' },
+          { id: '4', name: 'Neutral Gray', value: '#f1f5f9', type: 'neutral' },
+          { id: '5', name: 'Semantic Red', value: '#ef4444', type: 'semantic' }
+        ];
+      })(),
+      typographySettings: (() => {
+        const settings = Array.isArray(cleaned.visualRules?.typographySettings) && cleaned.visualRules.typographySettings.length > 0
+          ? cleaned.visualRules.typographySettings
+          : [
+              cleaned.visualRules?.headingFont || cleaned.visualRules?.fontFamily
+                ? { id: 'h', label: 'Heading Font', fontFamily: cleaned.visualRules?.headingFont || cleaned.visualRules?.fontFamily, weight: '700', sizeScale: '1.5', lineHeight: '1.2' }
+                : null,
+              cleaned.visualRules?.bodyFont || cleaned.visualRules?.fontFamily
+                ? { id: 'b', label: 'Body Font', fontFamily: cleaned.visualRules?.bodyFont || cleaned.visualRules?.fontFamily, weight: '400', sizeScale: '1', lineHeight: '1.5' }
+                : null,
+              cleaned.visualRules?.supportingFont
+                ? { id: 's', label: 'Supporting Font', fontFamily: cleaned.visualRules?.supportingFont, weight: '400', sizeScale: '0.875', lineHeight: '1.4' }
+                : null,
+              cleaned.visualRules?.backupFont
+                ? { id: 'bs', label: 'Backup/System Font', fontFamily: cleaned.visualRules?.backupFont, weight: '400', sizeScale: '1', lineHeight: '1.5' }
+                : null,
+            ].filter(Boolean);
+        return settings.length > 0 ? settings : [
+          { id: 'h', label: 'Heading Font', fontFamily: 'Inter', weight: '700', sizeScale: '1.5', lineHeight: '1.2' },
+          { id: 'b', label: 'Body Font', fontFamily: 'Inter', weight: '400', sizeScale: '1', lineHeight: '1.5' },
+          { id: 's', label: 'Supporting Font', fontFamily: 'Inter', weight: '400', sizeScale: '0.875', lineHeight: '1.4' },
+          { id: 'bs', label: 'Backup/System Font', fontFamily: 'sans-serif', weight: '400', sizeScale: '1', lineHeight: '1.5' }
+        ];
+      })(),
       typographyScales: Array.isArray(cleaned.visualRules?.typographyScales) ? cleaned.visualRules.typographyScales : []
     },
     designTokens: {
@@ -423,41 +440,27 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           
           const activeErrors: string[] = [];
           
-          const getNestedError = (path: string, errObj: any): any => {
-            const parts = path.split('.');
-            let current = errObj;
-            for (const part of parts) {
-              if (!current) return null;
-              current = current[part];
+          const getErrorsRecursive = (errors: any, path: string = '') => {
+            if (!errors) return;
+            if (typeof errors === 'object' && errors.message) {
+              activeErrors.push(`${path}: ${errors.message}`);
+              return;
             }
-            return current;
+            if (Array.isArray(errors)) {
+              errors.forEach((item, index) => {
+                getErrorsRecursive(item, `${path}[${index + 1}]`);
+              });
+              return;
+            }
+            if (typeof errors === 'object') {
+              Object.keys(errors).forEach((key) => {
+                const newPath = path ? `${path}.${key}` : key;
+                getErrorsRecursive(errors[key], newPath);
+              });
+            }
           };
           
-          fields.forEach((field) => {
-            const error = getNestedError(field, formErrors);
-            if (error) {
-              const label = field.split('.').pop() || field;
-              if (error.message) {
-                activeErrors.push(`${label}: ${error.message}`);
-              } else if (Array.isArray(error)) {
-                error.forEach((item, index) => {
-                  if (item) {
-                    Object.keys(item).forEach((key) => {
-                      if (item[key]?.message) {
-                        activeErrors.push(`${label}[${index + 1}].${key}: ${item[key].message}`);
-                      }
-                    });
-                  }
-                });
-              } else if (typeof error === 'object') {
-                Object.keys(error).forEach((key) => {
-                  if (error[key]?.message) {
-                    activeErrors.push(`${label}.${key}: ${error[key].message}`);
-                  }
-                });
-              }
-            }
-          });
+          getErrorsRecursive(formErrors);
           
           if (activeErrors.length > 0) {
             toast({

@@ -11,7 +11,8 @@ import {
   Maximize2,
   Plus,
   Search,
-  Info
+  Info,
+  Trash2
 } from 'lucide-react';
 import { Button, cn, Input, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@brandflow/ui';
 import { useFormContext } from 'react-hook-form';
@@ -100,21 +101,61 @@ export function TypographyGovernance({
                   settingError && "border-red-500 ring-1 ring-red-500/50"
                 )}
               >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between border-b border-border/50 pb-4">
+                <div className="flex items-center gap-3 flex-1 mr-4">
                   <div className="p-2.5 rounded-xl bg-primary/10 dark:bg-brand-900/40 text-primary">
                     <Type className="w-4 h-4" />
                   </div>
-                  <div>
-                    <h3 className="text-xs font-black uppercase tracking-widest text-foreground leading-none">{setting.label}</h3>
-                    <p className="text-[9px] font-medium text-muted-foreground mt-1">Google Font or System Font</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Select 
+                      value={['h', 'b', 's', 'bs'].includes(setting.id) ? setting.id : 'custom'} 
+                      onValueChange={(val) => {
+                        if (val === 'custom') {
+                          onChange(settings.map(s => s.id === setting.id ? { ...s, id: Math.random().toString(), label: 'Custom Font' } : s));
+                        } else {
+                          const labelMap: Record<string, string> = {
+                            h: 'Heading Font',
+                            b: 'Body Font',
+                            s: 'Supporting Font',
+                            bs: 'Backup/System Font'
+                          };
+                          // De-duplicate: filter out any existing item with this id
+                          const filtered = settings.filter(s => s.id !== val || s.id === setting.id);
+                          onChange(filtered.map(s => s.id === setting.id ? { ...s, id: val, label: labelMap[val] || 'Custom Font' } : s));
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="h-8 w-44 text-[10px] font-black uppercase tracking-widest bg-background border-border/60">
+                        <SelectValue placeholder="Select Role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="h">Heading Font</SelectItem>
+                        <SelectItem value="b">Body Font</SelectItem>
+                        <SelectItem value="s">Supporting Font</SelectItem>
+                        <SelectItem value="bs">Backup/System Font</SelectItem>
+                        <SelectItem value="custom">Custom Font</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {!['h', 'b', 's', 'bs'].includes(setting.id) && (
+                      <Input 
+                        value={setting.label || ''}
+                        onChange={(e) => onChange(settings.map(s => s.id === setting.id ? { ...s, label: e.target.value } : s))}
+                        placeholder="Font Label Name"
+                        className="h-8 text-xs font-bold bg-surface-1 dark:bg-gray-950/50 rounded-xl px-3 w-40"
+                      />
+                    )}
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
-                  <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 text-[9px] font-black h-5 px-2">98% CONFIDENCE</Badge>
-                  <div className="flex items-center gap-1 text-[8px] font-bold text-muted-foreground">
-                    <Info className="w-3 h-3" /> Auto-detected
-                  </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    type="button"
+                    onClick={() => onChange(settings.filter(s => s.id !== setting.id))}
+                    className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-xl transition-all"
+                    title="Remove Font"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 

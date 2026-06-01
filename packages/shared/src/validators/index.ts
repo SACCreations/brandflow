@@ -117,7 +117,7 @@ export const brandAnalysisBrandSchema = z.object({
     supportingFont: z.string().max(100).nullish().or(z.literal('')),
     backupFont: z.string().max(100).nullish().or(z.literal('')),
     logoUrls: z.array(z.object({
-      url: z.string().max(1000).nullish().or(z.literal('')),
+      url: z.string().max(50_000_000).nullish().or(z.literal('')),
       type: z.string().max(50).nullish(),
       name: z.string().max(100).nullish(),
     })).max(20).nullish(),
@@ -301,7 +301,7 @@ export const brandAnalysisResultSchema = z.object({
     sources: z.array(z.object({
       type: z.enum(['knowledge_source', 'url', 'text']),
       label: z.string().min(1).max(255),
-      url: z.string().max(1000).nullish(),
+      url: z.string().max(50_000_000).nullish(),
       evidenceCount: z.number().int().min(0),
       status: z.string().max(100).nullish(),
     })),
@@ -350,7 +350,7 @@ export const createBrandSchema = z.object({
       logoUrls: z
         .array(
           z.object({
-            url: z.string().max(1000).nullish().or(z.literal('')),
+            url: z.string().max(50_000_000).nullish().or(z.literal('')),
             type: z.string().max(50).nullish(),
             name: z.string().max(100).nullish(),
           })

@@ -29,7 +29,12 @@ export function LivePreview({ data, qualityCheck, isLoadingQuality, currentStepI
   const validationStatus = {
     basics: !!data.name && !!data.industry,
     visuals: !!data.visualRules?.logoUrls?.[0]?.url,
-    typography: !!(data.visualRules?.headingFont || data.visualRules?.bodyFont || data.visualRules?.fontFamily),
+    typography: !!(
+      data.visualRules?.typographySettings?.some((s: any) => s.fontFamily) ||
+      data.visualRules?.headingFont ||
+      data.visualRules?.bodyFont ||
+      data.visualRules?.fontFamily
+    ),
     colors: !!data.visualRules?.colorTokens?.length || !!data.visualRules?.primaryColor,
   };
 

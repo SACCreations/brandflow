@@ -85,11 +85,6 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
     if (triggerValidationRef.current) {
       const isValid = await triggerValidationRef.current();
       if (!isValid) {
-        toast({
-          variant: 'destructive',
-          title: 'Validation Error',
-          description: 'Please complete all required fields correctly before moving to the next step.',
-        });
         return;
       }
     }
@@ -104,7 +99,7 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
       } catch (err: any) {
         toast({
           variant: 'destructive',
-          title: isEditMode ? 'Failed to update brand' : 'Failed to create brand',
+          title: 'Failed to create brand',
           description: err?.message || 'An unexpected error occurred. Please try again.',
         });
       } finally {
@@ -133,11 +128,6 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
       if (triggerValidationRef.current) {
         const isValid = await triggerValidationRef.current();
         if (!isValid) {
-          toast({
-            variant: 'destructive',
-            title: 'Validation Error',
-            description: 'Please complete all required fields correctly before proceeding.',
-          });
           return;
         }
       }
