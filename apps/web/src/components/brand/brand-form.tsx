@@ -80,9 +80,25 @@ const defaultBrandFormValues = {
       { url: '', type: 'primary', name: 'Primary Logo' },
       { url: '', type: 'dark', name: 'Dark Variant' }
     ],
-    colorTokens: [],
-    typographySettings: [],
-    typographyScales: [],
+    colorTokens: [
+      { id: '1', name: 'Primary Indigo', value: '#6366f1', type: 'primary' },
+      { id: '2', name: 'Secondary Slate', value: '#475569', type: 'secondary' },
+      { id: '3', name: 'Accent Pink', value: '#f43f5e', type: 'accent' },
+      { id: '4', name: 'Neutral Gray', value: '#f1f5f9', type: 'neutral' },
+      { id: '5', name: 'Semantic Red', value: '#ef4444', type: 'semantic' }
+    ],
+    typographySettings: [
+      { id: 'h', label: 'Heading Font', fontFamily: 'Inter', weight: '700', sizeScale: '1.5', lineHeight: '1.2' },
+      { id: 'b', label: 'Body Font', fontFamily: 'Inter', weight: '400', sizeScale: '1', lineHeight: '1.5' },
+      { id: 's', label: 'Supporting Font', fontFamily: 'Inter', weight: '400', sizeScale: '0.875', lineHeight: '1.4' },
+      { id: 'bs', label: 'Backup/System Font', fontFamily: 'sans-serif', weight: '400', sizeScale: '1', lineHeight: '1.5' }
+    ],
+    typographyScales: [
+      { id: 'h1', label: 'Heading 1', size: '32px', spacing: '-0.02em' },
+      { id: 'h2', label: 'Heading 2', size: '24px', spacing: '-0.01em' },
+      { id: 'h3', label: 'Heading 3', size: '20px', spacing: '0' },
+      { id: 'body', label: 'Body', size: '16px', spacing: '0' }
+    ],
   },
   identity: {
     values: []
@@ -399,17 +415,56 @@ export function BrandForm({ initialData, onSubmit, isLoading, onDataChange, last
           }
 
           if (manualError) return false;
+        }
 
-          // If manual validation passes but Zod fails, find out why and tell the user!
-          if (!result) {
-            const errs = (form.formState.errors as any)?.visualRules;
-            if (errs) {
-              if (errs.primaryColor) toast({ variant: 'destructive', title: 'Invalid Primary Color', description: errs.primaryColor.message || 'Must be a valid 3 or 6 digit hex code.' });
-              if (errs.secondaryColor) toast({ variant: 'destructive', title: 'Invalid Secondary Color', description: errs.secondaryColor.message || 'Must be a valid 3 or 6 digit hex code.' });
-              if (errs.accentColor) toast({ variant: 'destructive', title: 'Invalid Accent Color', description: errs.accentColor.message || 'Must be a valid 3 or 6 digit hex code.' });
-              if (errs.logoUrls) toast({ variant: 'destructive', title: 'Invalid Logo', description: 'One of the logo variants has invalid data.' });
+        if (!result) {
+          const formErrors = form.formState.errors;
+          console.log("Validation errors:", formErrors);
+          
+          const activeErrors: string[] = [];
+          
+          const getNestedError = (path: string, errObj: any): any => {
+            const parts = path.split('.');
+            let current = errObj;
+            for (const part of parts) {
+              if (!current) return null;
+              current = current[part];
             }
-            return false;
+            return current;
+          };
+          
+          fields.forEach((field) => {
+            const error = getNestedError(field, formErrors);
+            if (error) {
+              const label = field.split('.').pop() || field;
+              if (error.message) {
+                activeErrors.push(`${label}: ${error.message}`);
+              } else if (Array.isArray(error)) {
+                error.forEach((item, index) => {
+                  if (item) {
+                    Object.keys(item).forEach((key) => {
+                      if (item[key]?.message) {
+                        activeErrors.push(`${label}[${index + 1}].${key}: ${item[key].message}`);
+                      }
+                    });
+                  }
+                });
+              } else if (typeof error === 'object') {
+                Object.keys(error).forEach((key) => {
+                  if (error[key]?.message) {
+                    activeErrors.push(`${label}.${key}: ${error[key].message}`);
+                  }
+                });
+              }
+            }
+          });
+          
+          if (activeErrors.length > 0) {
+            toast({
+              variant: 'destructive',
+              title: 'Validation Details',
+              description: activeErrors.join(', '),
+            });
           }
         }
         return result;

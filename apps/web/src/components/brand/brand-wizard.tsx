@@ -122,13 +122,13 @@ export function BrandWizard({ onSubmit, isLoading, title, onClose, initialData, 
   const handleStepClick = async (idx: number) => {
     if (idx === currentStepIdx) return;
 
-    if (idx < currentStepIdx) {
-      // Going backward is always allowed
+    if (idx <= maxVisitedStepIdx) {
+      // Going backward or to an already visited step is always allowed
       setCurrentStepIdx(idx);
       return;
     }
 
-    // Moving forward: enforce step-by-step completion
+    // Moving forward to a new step: enforce step-by-step completion
     if (idx === currentStepIdx + 1) {
       if (triggerValidationRef.current) {
         const isValid = await triggerValidationRef.current();

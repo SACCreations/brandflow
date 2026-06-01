@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma } from '@brandflow/db';
 import { PrismaService } from '../../common/database/prisma.service';
 import { AuditService } from '../business/audit.service';
+import { KnowledgeService } from '../knowledge/knowledge.service';
 import type { CreateBrandDto, UpdateBrandDto } from '@brandflow/shared';
 
 @Injectable()
@@ -9,6 +10,7 @@ export class BrandService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    private readonly knowledgeService: KnowledgeService,
   ) {}
   private mapBrandToDto(brand: any) {
     if (brand && typeof brand.visualRules === 'object' && brand.visualRules !== null) {
@@ -102,7 +104,7 @@ export class BrandService {
   async create(businessId: string, dto: CreateBrandDto) {
     const healthScore = this.calculateHealthScore(dto);
     const slug = dto.slug?.trim() || dto.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const { slug: _slug, assetCatalog, brandIntelligenceScore, ...rest } = dto as any;
+    const { slug: _slug, assetCatalog, brandIntelligenceScore, knowledgeSources, ...rest } = dto as any;
     
     if (rest.audience && typeof rest.audience === 'object') {
       rest.audience = JSON.stringify(rest.audience);
@@ -139,6 +141,24 @@ export class BrandService {
         healthScore,
       } as Prisma.BrandUncheckedCreateInput
     });
+
+    if (Array.isArray(knowledgeSources)) {
+      for (const ks of knowledgeSources) {
+        if (ks.url && (ks.url.startsWith('http://') || ks.url.startsWith('https://'))) {
+          try {
+            await this.knowledgeService.createSource(businessId, {
+              brandId: brand.id,
+              name: new URL(ks.url).hostname || 'Website Source',
+              type: 'url',
+              sourceUrl: ks.url,
+            });
+          } catch (err) {
+            console.error('Failed to create knowledge source on brand create:', err);
+          }
+        }
+      }
+    }
+
     await this.logActivity(businessId, 'brand.created', brand.id, null, brand);
     return brand;
   }
@@ -152,7 +172,7 @@ export class BrandService {
     const merged = { ...before, ...dto, _knowledgeEntryCount: knowledgeEntryCount };
     const healthScore = this.calculateHealthScore(merged);
     
-    const { assetCatalog, brandIntelligenceScore, ...updateDto } = dto as any;
+    const { assetCatalog, brandIntelligenceScore, knowledgeSources, ...updateDto } = dto as any;
     Object.keys(updateDto).forEach(key => {
       if ((updateDto as Record<string, unknown>)[key] === null) {
         delete (updateDto as Record<string, unknown>)[key];
@@ -181,6 +201,29 @@ export class BrandService {
       where: { id },
       data: { ...updateDto, healthScore, version: { increment: 1 } } as Prisma.BrandUncheckedUpdateInput,
     });
+
+    if (Array.isArray(knowledgeSources)) {
+      for (const ks of knowledgeSources) {
+        if (ks.url && (ks.url.startsWith('http://') || ks.url.startsWith('https://'))) {
+          try {
+            const existing = await this.prisma.client.knowledgeSource.findFirst({
+              where: { brandId: id, businessId, sourceUrl: ks.url }
+            });
+            if (!existing) {
+              await this.knowledgeService.createSource(businessId, {
+                brandId: id,
+                name: new URL(ks.url).hostname || 'Website Source',
+                type: 'url',
+                sourceUrl: ks.url,
+              });
+            }
+          } catch (err) {
+            console.error('Failed to create knowledge source on brand update:', err);
+          }
+        }
+      }
+    }
+
     await this.logActivity(businessId, 'brand.updated', id, before, after);
     return after;
   }

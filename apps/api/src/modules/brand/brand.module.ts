@@ -6,6 +6,7 @@ import { BrandAnalyserService } from './brand-analyser.service';
 import { BrandAnalysisProcessor } from './brand-analysis.processor';
 import { LlmSettingsModule } from '../llm-settings/llm-settings.module';
 import { BusinessModule } from '../business/business.module';
+import { KnowledgeModule } from '../knowledge/knowledge.module';
 import { BullModule } from '@nestjs/bullmq';
 
 import { ScreenshotService } from './services/screenshot.service';
@@ -20,6 +21,7 @@ import { DeepCrawlerService } from './services/deep-crawler.service';
   imports: [
     LlmSettingsModule, 
     BusinessModule,
+    KnowledgeModule,
     BullModule.registerQueue({
       name: 'brand-analysis',
       defaultJobOptions: {
