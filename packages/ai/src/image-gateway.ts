@@ -1,5 +1,6 @@
 import { OpenAIImageProvider } from './providers/openai-image';
 import { StabilityImageProvider } from './providers/stability-image';
+import { MockImageProvider } from './providers/mock-image';
 import type { 
   ImageProvider, 
   ImageGenerationRequest, 
@@ -28,6 +29,8 @@ export class ImageGateway {
     if (openaiKey && !openaiKey.startsWith('sk-mock') && !openaiKey.includes('mock')) {
       this.providers.set('openai', new OpenAIImageProvider(openaiKey));
     }
+
+    this.providers.set('mock', new MockImageProvider());
   }
 
   async generate(
@@ -65,6 +68,9 @@ export class ImageGateway {
     const chain = [preferred];
     if (this.config.fallbackProvider && !chain.includes(this.config.fallbackProvider)) {
       chain.push(this.config.fallbackProvider);
+    }
+    if (!chain.includes('mock')) {
+      chain.push('mock');
     }
     for (const name of this.providers.keys()) {
       if (!chain.includes(name)) {

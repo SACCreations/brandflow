@@ -269,6 +269,7 @@ export class ContentService {
           metadata: {
             sourceIds: relevantFacts.map((f: any) => f.sourceId).filter(Boolean),
             requestId,
+            contentCategory: dto.type,
           } as any,
         } as any,
       });

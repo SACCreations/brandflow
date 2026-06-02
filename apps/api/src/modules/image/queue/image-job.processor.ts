@@ -73,6 +73,7 @@ export class ImageJobProcessor extends WorkerHost {
       });
 
       const enhancedPrompt = await this.enhancePrompt(rawPrompt, brand.visualRules, category, settings.style, businessId);
+      const cleanPromptForGeneration = this.extractStep3Prompt(enhancedPrompt);
       
       await this.prismaService.client.imageGenerationJob.update({
         where: { id: jobId },
@@ -86,7 +87,7 @@ export class ImageJobProcessor extends WorkerHost {
       });
 
       const imageResponse = await this.imageGateway.generate(settings.provider, {
-        prompt: enhancedPrompt,
+        prompt: cleanPromptForGeneration,
         width: settings.width,
         height: settings.height,
         quality: settings.quality,
@@ -134,6 +135,7 @@ export class ImageJobProcessor extends WorkerHost {
             model: modelUsed,
             costCents: costCentsUsed,
             category,
+            generationPrompt: cleanPromptForGeneration,
           },
         },
       });
@@ -148,12 +150,13 @@ export class ImageJobProcessor extends WorkerHost {
           width: settings.width,
           height: settings.height,
           aspectRatio: settings.aspectRatio,
-          promptUsed: enhancedPrompt,
+          promptUsed: cleanPromptForGeneration,
           metadata: {
             costCents: costCentsUsed,
             provider: providerUsed,
             model: modelUsed,
             seed: generatedImageNode.seed,
+            fullContentAnalysis: enhancedPrompt,
           },
         },
       });
@@ -222,6 +225,32 @@ export class ImageJobProcessor extends WorkerHost {
     }
   }
 
+  private extractStep3Prompt(fullPrompt: string): string {
+    const markers = [
+      '[Step 3: Final Image Prompt]',
+      'Step 3: Final Image Prompt',
+      '### Step 3: Final Image Prompt',
+      '[Step 3]',
+      'Step 3:',
+      '### Step 3',
+    ];
+    
+    for (const marker of markers) {
+      const index = fullPrompt.indexOf(marker);
+      if (index !== -1) {
+        let content = fullPrompt.substring(index + marker.length).trim();
+        // Remove leading headers/bullet/markdown indicators
+        content = content.replace(/^[:\-\s\*\#\n\r]+/, '');
+        if (content) {
+          return content;
+        }
+      }
+    }
+    
+    // Fallback if marker not found or empty
+    return fullPrompt;
+  }
+
   private async enhancePrompt(
     prompt: string,
     visualRules: any,
@@ -253,15 +282,44 @@ export class ImageJobProcessor extends WorkerHost {
       }
     }
 
-    const systemPrompt = `You are a high-fidelity Creative Automation Prompt Architect.
-Expand the user prompt into a rich, detailed, concrete description for an AI image generator (Stable Diffusion XL / DALL-E 3).
-Inject concrete styling cues aligned with the selected content category: "${category}".
+    const systemPrompt = `You are an expert Creative Director, Brand Strategist, and SaaS Marketing Designer.
+
+You are operating in CONTENT ANALYSIS MODE. Before generating the final prompt for the image generator, you MUST perform a complete content analysis.
+Your output MUST contain three distinct steps in the following exact format:
+
+[Step 1: Content Extraction]
+- Headline: [Extract or suggest a clear headline from the content]
+- Subheadline: [Extract or suggest a supporting subheadline]
+- Benefits: [Extract key benefits/value proposition]
+- Features: [Extract key features/functional components]
+- CTA: [Extract call-to-action]
+- Industry: [Identify the target industry/domain]
+- Audience: [Identify the target audience]
+
+[Step 2: Visual Strategy]
+Describe the visual strategy. Detail how visual metaphors, composition, colors, and layout will represent the extracted content and narrative. Explain how the image will communicate this strategy even if all text/words are removed.
+
+[Step 3: Final Image Prompt]
+Generate a rich, detailed, concrete description of the poster visual scene that directly represents the extracted content.
+Crucial instructions for Step 3:
+1. The visual scene MUST communicate the content, industry, and benefits even if all text is removed.
+2. Structure the poster as a premium, modern SMO (Social Media Optimization) marketing graphic with a clear layout structure matching the reference style:
+   - Split Layout: A split visual composition. The left half displays a realistic, high-fidelity hero scene showing the product or service in action (e.g. for supermarkets, a worker in a store aisle scanning shelves with a device). The right half displays a clean, modern SaaS software dashboard interface showing charts, graphs, data statistics, and an AI insights card, with a smartphone mockup showing a mobile view of the application floating nearby.
+   - Framing and Details: A clean, structured corporate advertising aesthetic. Desaturated background details, vibrant primary focuses, clean branding placeholder areas at the top for logo layouts, and a clean call-to-action bar or button layout at the bottom.
+3. Use the selected brand logo/mark layout or placement description.
+4. Respect the brand colors and visual identity if provided.
+5. Do NOT generate generic office interiors, random workspaces, or generic business scenes (like office hallways, generic desks, or people shaking hands in a meeting room). Every visual element must support the content narrative.
+6. Provide a premium, high-fidelity LinkedIn marketing advertisement or digital artwork composition.
+
+Strict output rule: Do not write conversational intro/outro text. Output only the structured steps.
+
+Selected content category: "${category}".
 
 ${knowledgeBlock}`;
 
-    const userMessage = `User Prompt: ${prompt}
+    const userMessage = `User Prompt/Content: ${prompt}
 Brand Design Tokens & Rules: Style = "${baseStyle}"; ${colors}
-Output only the finished enhanced prompt string. No chat, no intros. Focus on layout, lighting detail, texture depth, and brand consistency.`;
+Perform the 3-step Content Analysis (Extraction, Visual Strategy, Final Image Prompt) for this content.`;
 
     try {
       const apiKey = (businessId ? await this.llmSettingsService.getDecryptedApiKey(businessId) : undefined) ?? undefined;
@@ -273,7 +331,20 @@ Output only the finished enhanced prompt string. No chat, no intros. Focus on la
       return response.content;
     } catch (err) {
       this.logger.error('Failed to enhance image prompt, using fallback format', err);
-      return `${prompt}, in a high-fidelity ${baseStyle} style, tailored for ${category}`;
+      return `[Step 1: Content Extraction]
+- Headline: Marketing Poster
+- Subheadline: Professional creative
+- Benefits: High fidelity
+- Features: Automatic enhancement
+- CTA: Learn more
+- Industry: Business
+- Audience: Target clients
+
+[Step 2: Visual Strategy]
+Clean modern design showcase.
+
+[Step 3: Final Image Prompt]
+${prompt}, in a high-fidelity ${baseStyle} style, tailored for ${category}`;
     }
   }
 }

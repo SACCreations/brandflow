@@ -273,3 +273,15 @@ export const PAGINATION = {
   DEFAULT_LIMIT: 20,
   MAX_LIMIT: 100,
 } as const;
+
+// ─── Category Mapping ────────────────────────────────────────────
+export const CONTENT_CATEGORY_TO_IMAGE_CATEGORY: Record<string, string> = {
+  'SMO Poster': 'SMO_POSTER',
+  'Reel Script': 'SOCIAL_COVER',
+  'Blog': 'WEBSITE_HERO',
+  'Carousel': 'SMO_POSTER',
+  'Newsletter': 'AD_CREATIVE',
+  'SOP': 'AD_CREATIVE',
+  'Print Material': 'PRINTABLE_FLYER',
+};
+

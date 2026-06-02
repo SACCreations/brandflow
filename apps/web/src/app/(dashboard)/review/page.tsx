@@ -20,10 +20,12 @@ import {
   Info,
   Loader2,
   RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { Button, useToast, ErrorBoundary, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@brandflow/ui';
+import { CONTENT_CATEGORY_TO_IMAGE_CATEGORY } from '@brandflow/shared';
 
 interface Approval {
   id: string;
@@ -40,21 +42,25 @@ interface Approval {
     type: string;
     platform: string;
     qualityScore: number | null;
+    brandId: string;
     brand?: {
+      id: string;
       name: string;
     };
-    brief?: {
-      objective: string;
-      cta: string | null;
-    } | null;
+    campaignId?: string | null;
     campaign?: {
       id: string;
       name: string;
+    } | null;
+    brief?: {
+      objective: string;
+      cta: string | null;
     } | null;
     qualityChecks: Array<{
       confidenceScore: number;
       remediation?: string | null;
     }>;
+    metadata?: any;
   };
 }
 
@@ -90,7 +96,11 @@ export default function ReviewQueuePage() {
       queryClient.invalidateQueries({ queryKey: ['approvals'] });
       const actionMap: Record<string, string> = { approved: 'approved', rejected: 'rejected', revision_requested: 'sent back for revisions' };
       toast({ title: 'Decision Recorded', description: `Content has been ${actionMap[variables.status] || 'reviewed'}.` });
-      setActiveReview(null);
+      if (variables.status === 'approved' && activeReview) {
+        setActiveReview({ ...activeReview, status: 'approved' });
+      } else {
+        setActiveReview(null);
+      }
       setReviewNote('');
     },
     onError: (error: any) => {
@@ -385,35 +395,58 @@ export default function ReviewQueuePage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-50 border-border">
-                    <button 
-                      onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'rejected', note: reviewNote })}
-                      disabled={decideMutation.isPending}
-                      aria-label="Reject content"
-                      className="flex items-center justify-center gap-2 rounded-xl border border-red-200 min-h-[44px] py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-all dark:border-red-900 dark:hover:bg-red-900/20"
-                    >
-                      {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-                      Reject
-                    </button>
-                    <button 
-                      onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'revision_requested', note: reviewNote })}
-                      disabled={decideMutation.isPending}
-                      aria-label="Request changes on content"
-                      className="flex items-center justify-center gap-2 rounded-xl border border-amber-200 min-h-[44px] py-3 text-sm font-bold text-amber-700 hover:bg-amber-50 transition-all dark:border-amber-900 dark:hover:bg-amber-900/20"
-                    >
-                      {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-                      Changes
-                    </button>
-                    <button 
-                      onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'approved', note: reviewNote })}
-                      disabled={decideMutation.isPending}
-                      aria-label="Approve content"
-                      className="flex items-center justify-center gap-2 rounded-xl bg-primary min-h-[44px] py-3 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
-                    >
-                      {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                      Approve
-                    </button>
-                  </div>
+                  {activeReview.status === 'approved' ? (
+                    <div className="pt-4 border-t border-gray-50 border-border">
+                      {(() => {
+                        const contentCategory = activeReview.content.metadata?.contentCategory || activeReview.content.type;
+                        const mappedCategory = CONTENT_CATEGORY_TO_IMAGE_CATEGORY[contentCategory] || 'SMO_POSTER';
+                        const params = new URLSearchParams({
+                          brandId: activeReview.content.brand?.id || activeReview.content.brandId || '',
+                          campaignId: activeReview.content.campaign?.id || activeReview.content.campaignId || '',
+                          contentId: activeReview.content.id,
+                          category: mappedCategory,
+                          prompt: activeReview.content.body,
+                        });
+                        return (
+                          <Link href={`/create/image?${params.toString()}`}>
+                            <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 min-h-[44px] py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 transition-all">
+                              <Sparkles className="h-4 w-4" /> Generate AI Image
+                            </button>
+                          </Link>
+                        );
+                      })()}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-50 border-border">
+                      <button 
+                        onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'rejected', note: reviewNote })}
+                        disabled={decideMutation.isPending}
+                        aria-label="Reject content"
+                        className="flex items-center justify-center gap-2 rounded-xl border border-red-200 min-h-[44px] py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-all dark:border-red-900 dark:hover:bg-red-900/20"
+                      >
+                        {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+                        Reject
+                      </button>
+                      <button 
+                        onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'revision_requested', note: reviewNote })}
+                        disabled={decideMutation.isPending}
+                        aria-label="Request changes on content"
+                        className="flex items-center justify-center gap-2 rounded-xl border border-amber-200 min-h-[44px] py-3 text-sm font-bold text-amber-700 hover:bg-amber-50 transition-all dark:border-amber-900 dark:hover:bg-amber-900/20"
+                      >
+                        {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                        Changes
+                      </button>
+                      <button 
+                        onClick={() => decideMutation.mutate({ id: activeReview.id, status: 'approved', note: reviewNote })}
+                        disabled={decideMutation.isPending}
+                        aria-label="Approve content"
+                        className="flex items-center justify-center gap-2 rounded-xl bg-primary min-h-[44px] py-3 text-sm font-bold text-foreground shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all"
+                      >
+                        {decideMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                        Approve
+                      </button>
+                    </div>
+                  )}
                   <div className="grid grid-cols-2 gap-3">
                     <Link href={`/create/content/${activeReview.content.id}`}>
                       <Button variant="outline" className="w-full gap-2">

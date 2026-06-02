@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import { CONTENT_CATEGORY_TO_IMAGE_CATEGORY } from '@brandflow/shared';
 import { 
   Badge, 
   Button, 
@@ -128,6 +129,8 @@ export default function ImageGeneratorPage() {
   const brandIdParam = searchParams.get('brandId');
   const campaignIdParam = searchParams.get('campaignId');
   const promptParam = searchParams.get('prompt');
+  const categoryParam = searchParams.get('category');
+  const contentIdParam = searchParams.get('contentId');
 
   // --- STATE ---
   const [selectedBrandId, setSelectedBrandId] = useState<string>('');
@@ -239,6 +242,25 @@ export default function ImageGeneratorPage() {
       return res.data;
     },
   });
+  const { data: approvedContents = [], isLoading: approvedContentsLoading } = useQuery<any[]>({
+    queryKey: ['approved-contents', selectedBrandId],
+    queryFn: async () => {
+      if (!selectedBrandId) return [];
+      const res = await apiClient.get('/content', { params: { status: 'approved', brandId: selectedBrandId } });
+      return res.data;
+    },
+    enabled: !!selectedBrandId,
+  });
+
+  const { data: preselectedContent } = useQuery({
+    queryKey: ['content-item', contentIdParam],
+    queryFn: async () => {
+      if (!contentIdParam) return null;
+      const res = await apiClient.get(`/content/${contentIdParam}`);
+      return res.data;
+    },
+    enabled: !!contentIdParam,
+  });
 
   // Polling fallback — only active when WebSocket disconnected
   useQuery({
@@ -276,7 +298,24 @@ export default function ImageGeneratorPage() {
     if (brandIdParam) setSelectedBrandId(brandIdParam);
     if (campaignIdParam) setSelectedCampaignId(campaignIdParam);
     if (promptParam) setPromptText(promptParam);
-  }, [brandIdParam, campaignIdParam, promptParam]);
+    if (categoryParam) setSelectedCategory(categoryParam);
+    if (contentIdParam) {
+      setContentSource('approved');
+    }
+  }, [brandIdParam, campaignIdParam, promptParam, categoryParam, contentIdParam]);
+
+  // Handle preselected content item
+  useEffect(() => {
+    if (preselectedContent) {
+      if (preselectedContent.brandId) setSelectedBrandId(preselectedContent.brandId);
+      if (preselectedContent.campaignId) setSelectedCampaignId(preselectedContent.campaignId);
+      if (preselectedContent.body) setPromptText(preselectedContent.body);
+      
+      const contentCategory = preselectedContent.metadata?.contentCategory || preselectedContent.type;
+      const mappedCategory = CONTENT_CATEGORY_TO_IMAGE_CATEGORY[contentCategory] || 'SMO_POSTER';
+      setSelectedCategory(mappedCategory);
+    }
+  }, [preselectedContent]);
 
   // Recover active job state from fetched jobs
   useEffect(() => {
@@ -674,22 +713,64 @@ export default function ImageGeneratorPage() {
               )}
 
               {contentSource === 'approved' && (
-                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-4 space-y-3">
-                  <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider block">✓ Found linked approved content</span>
-                  <div className="bg-slate-950 border border-emerald-500/20 p-3 rounded-lg">
-                    <p className="text-slate-300 text-xs font-medium leading-relaxed italic">
-                      "Transform your business with cutting edge AI tools. Try our SaaS workspace today to boost team productivity by 300%."
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => {
-                      setPromptText('Transform your business with cutting edge AI tools. Try our SaaS workspace today to boost team productivity by 300%.');
-                      setContentSource('manual');
-                    }}
-                    className="text-[10px] font-black text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
-                  >
-                    Select & Edit <ChevronRight className="h-3 w-3" />
-                  </button>
+                <div className="space-y-3">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                    Approved Brand Assets ({approvedContents.length})
+                  </span>
+                  {approvedContentsLoading ? (
+                    <div className="space-y-2">
+                      <Skeleton className="h-16 w-full rounded-xl bg-slate-900/50" />
+                      <Skeleton className="h-16 w-full rounded-xl bg-slate-900/50" />
+                    </div>
+                  ) : approvedContents.length === 0 ? (
+                    <div className="text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl p-6 text-center">
+                      No approved content items found for this brand.
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                      {approvedContents.map((content) => {
+                        const contentCategory = content.metadata?.contentCategory || content.type;
+                        const mappedCategory = CONTENT_CATEGORY_TO_IMAGE_CATEGORY[contentCategory] || 'SMO_POSTER';
+                        const isSelected = promptText === content.body;
+                        return (
+                          <div 
+                            key={content.id}
+                            onClick={() => {
+                              setPromptText(content.body);
+                              if (content.campaignId) setSelectedCampaignId(content.campaignId);
+                              setSelectedCategory(mappedCategory);
+                              toast({
+                                title: 'Asset Loaded',
+                                description: `Loaded prompt from ${contentCategory} content.`,
+                              });
+                            }}
+                            className={`border rounded-xl p-3 cursor-pointer text-left transition-all ${
+                              isSelected 
+                                ? 'border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10' 
+                                : 'border-slate-850 bg-slate-950 hover:border-slate-700'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start gap-2 mb-1.5">
+                              <span className="text-[10px] font-black uppercase text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
+                                {contentCategory}
+                              </span>
+                              <span className="text-[9px] font-mono text-slate-500">
+                                {new Date(content.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <p className="text-slate-350 text-xs line-clamp-2 leading-relaxed">
+                              {content.body}
+                            </p>
+                            {isSelected && (
+                              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-wider block mt-2">
+                                ✓ Loaded as Prompt Source
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -729,7 +810,7 @@ export default function ImageGeneratorPage() {
                     defaultValue=""
                   >
                     <option value="" disabled>Select a document...</option>
-                    <option value="Brand Identity Guidelines 2026">Brand Identity Guidelines 2026</option>
+                    <option value={`${selectedBrand?.name || 'Brand'} Identity Guidelines`}>{selectedBrand?.name || 'Brand'} Identity Guidelines</option>
                     <option value="Product Spec Sheet v2">Product Spec Sheet v2</option>
                     <option value="Target Audience Persona Cards">Target Audience Persona Cards</option>
                   </select>
@@ -1008,7 +1089,9 @@ export default function ImageGeneratorPage() {
           <Card className="p-5 border-slate-800 bg-slate-900/50 space-y-4">
             <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
               <ImageIcon className="h-4 w-4 text-indigo-400" />
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Brand Identity Guidelines</h3>
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
+                {selectedBrand ? `${selectedBrand.name} Guidelines` : 'Brand Identity Guidelines'}
+              </h3>
             </div>
 
             {!selectedBrandId ? (

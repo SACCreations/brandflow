@@ -142,7 +142,65 @@ export default function CreativeBuilderPage() {
   // --- CANVAS EDITOR STATE (Step 7) ---
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>('layer-text');
   const [layersHistory, setLayersHistory] = useState<CanvasLayer[][]>([
-    []
+    [
+      {
+        id: 'layer-bg',
+        type: 'image',
+        name: 'Background Graphic',
+        x: 0,
+        y: 0,
+        width: 1080,
+        height: 1080,
+        src: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1080&auto=format&fit=crop&q=80',
+        isLocked: true
+      },
+      {
+        id: 'layer-logo',
+        type: 'logo',
+        name: 'Brand Logo Layer',
+        x: 20,
+        y: 20,
+        width: 120,
+        height: 40,
+        src: 'https://images.unsplash.com/photo-1618005198143-e5283b519a7f?w=150&auto=format&fit=crop&q=60',
+      },
+      {
+        id: 'layer-text',
+        type: 'text',
+        name: 'Main Headline',
+        x: 20,
+        y: 80,
+        width: 300,
+        height: 60,
+        content: 'STREAMLINE YOUR OPERATIONS',
+        fontFamily: 'Inter',
+        fontSize: 18,
+        fill: '#ffffff'
+      },
+      {
+        id: 'layer-subtext',
+        type: 'text',
+        name: 'Sub-headline',
+        x: 20,
+        y: 150,
+        width: 300,
+        height: 40,
+        content: 'Automate tracking & inventory replenishment.',
+        fontFamily: 'Inter',
+        fontSize: 12,
+        fill: '#cbd5e1'
+      },
+      {
+        id: 'layer-cta',
+        type: 'shape',
+        name: 'Book Demo Button',
+        x: 20,
+        y: 320,
+        width: 140,
+        height: 35,
+        fill: '#6366f1'
+      }
+    ]
   ]);
 
   // Hydrate actual image background once assets load
