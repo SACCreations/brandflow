@@ -4,7 +4,13 @@ import { Logger } from '@nestjs/common';
 import { BrandAnalyserService } from './brand-analyser.service';
 import { BrandAnalysisRequestDto } from '@brandflow/shared';
 
-@Processor('brand-analysis')
+@Processor('brand-analysis', {
+  // Keep the worker lock alive well beyond the 10-minute LLM timeout so
+  // BullMQ never marks a slow AI job as "stalled" and kills it.
+  lockDuration: 720_000,  // 12 minutes — must be >= AI request timeout (600s)
+  lockRenewTime: 360_000, // Renew the lock every 6 minutes
+  maxStalledCount: 0,     // Never auto-retry a stalled job (avoids duplicate LLM calls)
+})
 export class BrandAnalysisProcessor extends WorkerHost {
   private readonly logger = new Logger(BrandAnalysisProcessor.name);
 

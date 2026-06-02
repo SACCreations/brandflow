@@ -8,7 +8,12 @@ export class AnthropicProvider implements LLMProvider {
   private apiKey: string;
 
   constructor(apiKey: string, model = 'claude-sonnet-4-5') {
-    this.client = new Anthropic({ apiKey });
+    this.client = new Anthropic({
+      apiKey,
+      // SDK timeout must be longer than our gateway timeout (600s) so our
+      // withTimeout wrapper always fires first with a consistent error message.
+      timeout: 660_000, // 11 minutes — gateway cancels at 10 min
+    });
     this.model = model;
     this.apiKey = apiKey;
   }
@@ -28,26 +33,58 @@ export class AnthropicProvider implements LLMProvider {
       messages.push({ role: 'assistant', content: '{' });
     }
 
-    const response = await this.client.messages.create({
-      model: request.model ?? this.model,
-      max_tokens: request.maxTokens ?? 1024,
-      system: request.systemPrompt,
-      messages,
-    });
+    const controller = new AbortController();
 
-    const textBlock = response.content.find((b) => b.type === 'text');
-    if (!textBlock || textBlock.type !== 'text') {
+    // Use streaming so the HTTP connection stays alive during long thinking-model runs.
+    // Without streaming, a single slow response can look "idle" to network proxies and
+    // get dropped mid-generation even when the model is actively working.
+    const stream = this.client.messages.stream(
+      {
+        model: request.model ?? this.model,
+        max_tokens: request.maxTokens ?? 1024,
+        system: request.systemPrompt,
+        messages,
+      },
+      { signal: controller.signal },
+    );
+
+    let textContent = '';
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let responseModel = request.model ?? this.model;
+
+    try {
+      for await (const event of stream) {
+        // Accumulate text deltas only — skip thinking blocks from thinking models
+        if (
+          event.type === 'content_block_delta' &&
+          (event.delta as any).type === 'text_delta'
+        ) {
+          textContent += (event.delta as any).text;
+        }
+      }
+
+      const finalMsg = await stream.finalMessage();
+      inputTokens = finalMsg.usage.input_tokens;
+      outputTokens = finalMsg.usage.output_tokens;
+      responseModel = finalMsg.model;
+    } catch (err) {
+      controller.abort();
+      throw err;
+    }
+
+    if (!textContent) {
       throw new Error('Anthropic returned empty response');
     }
 
-    // If we prefilled with '{', prepend it to the response
-    const content = request.jsonMode ? `{${textBlock.text}` : textBlock.text;
+    // If we prefilled with '{', prepend it to the streamed content
+    const content = request.jsonMode ? `{${textContent}` : textContent;
 
     return {
       content,
-      model: response.model,
-      inputTokens: response.usage.input_tokens,
-      outputTokens: response.usage.output_tokens,
+      model: responseModel,
+      inputTokens,
+      outputTokens,
     };
   }
 }

@@ -70,7 +70,10 @@ export class BrandAnalyserService {
     this.gateway = new LLMGateway({
       defaultProvider: (this.config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic'),
       fallbackProvider: (this.config.get('llm.fallbackProvider', 'anthropic') as 'openai' | 'anthropic' | 'fallback'),
-      requestTimeoutMs: this.config.get<number>('llm.requestTimeoutMs') || 240_000, // 4 minutes default for large JSON output
+      requestTimeoutMs: Math.max(
+        this.config.get<number>('llm.requestTimeoutMs') ?? 0,
+        600_000, // 10 minutes — matches Anthropic's own API limit; needed for thinking models
+      ),
     });
   }
 
@@ -129,164 +132,36 @@ export class BrandAnalyserService {
       'For brandDNA, generate highly descriptive, visual keywords for moodboard generation (e.g. "Minimalist glassmorphism on deep slate", "Cyberpunk neon accents").',
       'Ensure visualExtraction accurately categorizes the provided Image candidates into heroImages, productVisuals, and uiScreenshots.',
       'Do not duplicate textual content between sections like identity.businessOverview and designPreferences.aestheticAnalysis. Ensure mission, vision, and differentiators are populated distinctly and comprehensively.',
-      'The brand object must use this shape:',
-      JSON.stringify({
-        brand: {
-          name: 'string',
-          tagline: 'string | null',
-          description: 'string | null',
-          industry: 'string | null',
-          website: 'string | null',
-          positioning: 'string | null',
-          audience: 'string | null',
-          differentiators: 'string | null',
-          tone: ['string'],
-          governance: {
-            bannedPhrases: ['string'],
-            requiredPhrases: ['string'],
-            ctaPreferences: ['string'],
-            requiredDisclaimer: 'string | null',
-          },
-          visualRules: {
-            primaryColor: 'string | null',
-            secondaryColor: 'string | null',
-            accentColor: 'string | null',
-            neutralColor: 'string | null',
-            semanticColor: 'string | null',
-            fontFamily: 'string | null',
-            headingFont: 'string | null',
-            bodyFont: 'string | null',
-            supportingFont: 'string | null',
-            backupFont: 'string | null',
-            logoUrls: [{ url: 'string | null', type: 'string | null', name: 'string | null' }],
-            typographySystem: {
-              headingFont: 'string | null',
-              bodyFont: 'string | null',
-              supportingFont: 'string | null',
-              pairings: ['string'],
-              hierarchy: 'string | null',
-              personality: 'string | null',
-              recommendations: ['string']
-            },
-            colorSystem: {
-              primary: 'string | null',
-              secondary: 'string | null',
-              accent: 'string | null',
-              neutral: 'string | null',
-              surface: 'string | null',
-              gradient: 'string | null',
-              accessibilityValidation: 'string | null',
-              emotionalMeaning: 'string | null',
-              psychology: 'string | null'
-            },
-            visualExtraction: {
-              heroImages: ['string'],
-              productVisuals: ['string'],
-              uiScreenshots: ['string'],
-              designConsistencyScore: 'number | null'
-            }
-          },
-          identity: {
-            mission: 'string | null',
-            vision: 'string | null',
-            values: ['string'],
-            promise: 'string | null',
-            personality: 'string | null',
-            businessOverview: {
-              executiveSummary: 'string | null',
-              marketPositioning: 'string | null',
-              customerTargeting: 'string | null',
-              businessModel: 'string | null',
-              coreOfferings: ['string']
-            },
-            brandDNA: {
-              emotionalIdentity: ['string'],
-              designLanguage: 'string | null',
-              photographyStyle: 'string | null',
-              illustrationStyle: 'string | null',
-              uiStyle: 'string | null',
-              dnaMoodboardDescriptors: ['string']
-            }
-          },
-          brandIntelligenceScore: {
-            visualConsistency: 'number | null',
-            typographySystem: 'number | null',
-            brandClarity: 'number | null',
-            uxConsistency: 'number | null',
-            audienceAlignment: 'number | null',
-            accessibility: 'number | null',
-            modernDesignScore: 'number | null'
-          },
-          assetCatalog: {
-            images: [{ url: 'string', assetType: 'string', usage: 'string' }]
-          },
-          designTokens: {
-            borderRadius: 'string | null',
-            shadows: 'string | null',
-            spacing: 'string | null',
-          },
-          strategy: {
-            targetLocation: 'string | null',
-            ageGroup: 'string | null',
-            interests: 'string | null',
-            postingFrequency: 'daily | weekly | bi-weekly | monthly | null',
-            festivalPosts: 'boolean',
-            offerPosts: 'boolean',
-            preferredTypes: ['string'],
-            contentLanguage: 'tamil | english | mixed | null',
-            ctaPreference: 'Call Now | DM | Visit Website | null',
-          },
-          designPreferences: {
-            preferredStyle: 'Minimal | Corporate | 3D | Modern | Playful | Luxury | null',
-            referenceLinks: ['string'],
-            imageStyle: 'Minimal | Corporate | 3D | Modern | null',
-            animationRequirement: 'boolean',
-            aestheticAnalysis: {
-              classification: 'string | null',
-              visualExplanation: 'string | null',
-              moodAnalysis: 'string | null',
-              creativeDirection: 'string | null',
-              styleReasoning: 'string | null'
-            }
-          },
-          approvalWorkflow: {
-            reviewerName: 'string | null',
-            finalApproverName: 'string | null',
-            processSteps: ['string'],
-            approvalTiming: 'string | null',
-            revisionLimit: 'number | null',
-          },
-          campaignDetails: {
-            marketingGoal: 'Brand Awareness | Leads | Sales | null',
-            monthlyBudget: 'number | null',
-            duration: 'string | null',
-            targetLeads: 'number | null',
-            adPlatforms: ['string'],
-          },
-          analyticsConfig: {
-            monthlyReport: 'boolean',
-            kpiExpectations: 'string | null',
-            leadTracking: 'boolean',
-            engagementTracking: 'boolean',
-          },
-          socialAccess: {
-            metaBusinessManagerId: 'string | null',
-            adAccountId: 'string | null',
-            instagramHandle: 'string | null',
-            facebookPage: 'string | null',
-            linkedinPage: 'string | null',
-            youtubeChannel: 'string | null',
-            twitterHandle: 'string | null',
-          },
-          competitors: [{ name: 'string', website: 'string | null', strengths: 'string | null', weaknesses: 'string | null' }],
-          contactInfo: {
-            personName: 'string | null',
-            phoneNumber: 'string | null',
-            email: 'string | null',
-            officeAddress: 'string | null',
-          },
-        },
-      }),
+      'Output a single JSON object with this exact structure (null = unknown, [] = none found):',
+      '{"brand":{',
+      '  "name":"<string>","tagline":"<string|null>","description":"<string|null>","industry":"<string|null>","website":"<string|null>",',
+      '  "positioning":"<string|null>","audience":"<string|null>","differentiators":"<string|null>","tone":["<string>"],',
+      '  "governance":{"bannedPhrases":[],"requiredPhrases":[],"ctaPreferences":[],"requiredDisclaimer":null},',
+      '  "visualRules":{',
+      '    "primaryColor":"<#hex|null>","secondaryColor":"<#hex|null>","accentColor":"<#hex|null>","neutralColor":"<#hex|null>","semanticColor":"<#hex|null>",',
+      '    "fontFamily":"<string|null>","headingFont":"<string|null>","bodyFont":"<string|null>","supportingFont":"<string|null>","backupFont":"<string|null>",',
+      '    "logoUrls":[{"url":"<string|null>","type":"<string|null>","name":"<string|null>"}],',
+      '    "typographySystem":{"headingFont":null,"bodyFont":null,"supportingFont":null,"pairings":[],"hierarchy":null,"personality":null,"recommendations":[]},',
+      '    "colorSystem":{"primary":null,"secondary":null,"accent":null,"neutral":null,"surface":null,"gradient":null,"accessibilityValidation":null,"emotionalMeaning":null,"psychology":null},',
+      '    "visualExtraction":{"heroImages":[],"productVisuals":[],"uiScreenshots":[],"designConsistencyScore":null}',
+      '  },',
+      '  "identity":{',
+      '    "mission":null,"vision":null,"values":[],"promise":null,"personality":null,',
+      '    "businessOverview":{"executiveSummary":null,"marketPositioning":null,"customerTargeting":null,"businessModel":null,"coreOfferings":[]},',
+      '    "brandDNA":{"emotionalIdentity":[],"designLanguage":null,"photographyStyle":null,"illustrationStyle":null,"uiStyle":null,"dnaMoodboardDescriptors":[]}',
+      '  },',
+      '  "brandIntelligenceScore":{"visualConsistency":null,"typographySystem":null,"brandClarity":null,"uxConsistency":null,"audienceAlignment":null,"accessibility":null,"modernDesignScore":null},',
+      '  "assetCatalog":{"images":[{"url":"<string>","assetType":"<string>","usage":"<string>"}]},',
+      '  "designTokens":{"borderRadius":null,"shadows":null,"spacing":null},',
+      '  "strategy":{"targetLocation":null,"ageGroup":null,"interests":null,"postingFrequency":null,"festivalPosts":false,"offerPosts":false,"preferredTypes":[],"contentLanguage":null,"ctaPreference":null},',
+      '  "designPreferences":{"preferredStyle":null,"referenceLinks":[],"imageStyle":null,"animationRequirement":false,"aestheticAnalysis":{"classification":null,"visualExplanation":null,"moodAnalysis":null,"creativeDirection":null,"styleReasoning":null}},',
+      '  "approvalWorkflow":{"reviewerName":null,"finalApproverName":null,"processSteps":[],"approvalTiming":null,"revisionLimit":null},',
+      '  "campaignDetails":{"marketingGoal":null,"monthlyBudget":null,"duration":null,"targetLeads":null,"adPlatforms":[]},',
+      '  "analyticsConfig":{"monthlyReport":false,"kpiExpectations":null,"leadTracking":false,"engagementTracking":false},',
+      '  "socialAccess":{"metaBusinessManagerId":null,"adAccountId":null,"instagramHandle":null,"facebookPage":null,"linkedinPage":null,"youtubeChannel":null,"twitterHandle":null},',
+      '  "competitors":[{"name":"<string>","website":null,"strengths":null,"weaknesses":null}],',
+      '  "contactInfo":{"personName":null,"phoneNumber":null,"email":null,"officeAddress":null}',
+      '}}',
     ].join('\n');
 
     // Screenshots removed — no longer needed since vision analysis sub-task is disabled.
@@ -317,7 +192,7 @@ export class BrandAnalyserService {
         provider: preferredProvider as 'openai' | 'anthropic' | 'google' | 'fallback' | 'nvidia',
         model: settings.model ?? undefined,
         temperature: 0.2,
-        maxTokens: settings.maxTokens ?? 3500,
+        maxTokens: Math.min(settings.maxTokens ?? 3000, 3000), // cap at 3000 to bound response time
         apiKey: decryptedApiKey ?? undefined,
         jsonMode: true,
       });
