@@ -70,7 +70,7 @@ export class BrandAnalyserService {
     this.gateway = new LLMGateway({
       defaultProvider: (this.config.get('llm.defaultProvider', 'openai') as 'openai' | 'anthropic'),
       fallbackProvider: (this.config.get('llm.fallbackProvider', 'anthropic') as 'openai' | 'anthropic' | 'fallback'),
-      requestTimeoutMs: 120_000, // 2 minutes — gives the main analysis call sufficient time
+      requestTimeoutMs: this.config.get<number>('llm.requestTimeoutMs') || 240_000, // 4 minutes default for large JSON output
     });
   }
 

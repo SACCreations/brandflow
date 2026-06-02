@@ -17,7 +17,9 @@ export class NvidiaProvider implements LLMProvider {
   }
 
   isAvailable(): boolean {
-    return Boolean(this.apiKey);
+    if (!this.apiKey) return false;
+    const key = this.apiKey.toLowerCase();
+    return !key.includes('mock') && !key.includes('dummy') && !key.includes('placeholder');
   }
 
   async complete(request: ProviderRequest): Promise<ProviderResponse> {

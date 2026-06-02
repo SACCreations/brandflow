@@ -195,3 +195,5 @@ bootstrap().catch((err) => {
   process.exit(1);
 });
 
+// Trigger reload to load updated @brandflow/ai package (gateway isAvailable checks added)
+

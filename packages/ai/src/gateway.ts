@@ -125,7 +125,10 @@ export class LLMGateway {
     // Prepend the custom-key temporary provider as the first candidate
     let tempProvider: LLMProvider | null = null;
     if (options.apiKey) {
-      tempProvider = this.createTemporaryProvider(preferredProvider, options.apiKey, options.model);
+      const temp = this.createTemporaryProvider(preferredProvider, options.apiKey, options.model);
+      if (temp && temp.isAvailable()) {
+        tempProvider = temp;
+      }
     }
 
     let lastError: Error | undefined;
