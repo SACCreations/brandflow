@@ -366,9 +366,83 @@ export default function ReviewQueuePage() {
                   {/* Content Preview */}
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Content Body</label>
-                    <div className="rounded-xl glass-panel border-border/50 p-4 text-sm text-foreground leading-relaxed">
-                      {activeReview.content.body}
-                    </div>
+                    {activeReview.content.body.includes('POSTER CONTENT STRUCTURE') || activeReview.content.body.includes('### Main Headline') ? (
+                      <div className="rounded-xl glass-panel border-border/50 overflow-hidden bg-gradient-to-br from-indigo-500/5 to-purple-500/5 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 relative">
+                        <div className="absolute top-0 right-0 bg-indigo-500/10 text-indigo-500 text-[10px] font-bold px-3 py-1 rounded-bl-xl border-b border-l border-indigo-500/20 uppercase tracking-widest flex items-center gap-1">
+                          <Sparkles className="h-3 w-3" />
+                          Poster Structure Preview
+                        </div>
+                        <div className="space-y-6 mt-4">
+                          {(() => {
+                            const parseSection = (title: string, body: string) => {
+                              const regex = new RegExp(`### ${title}[\\s\\S]*?(?=###|$)`, 'i');
+                              const match = body.match(regex);
+                              if (match) {
+                                return match[0].replace(new RegExp(`### ${title}`, 'i'), '').trim();
+                              }
+                              return null;
+                            };
+                            
+                            const headline = parseSection('Main Headline', activeReview.content.body);
+                            const subheading = parseSection('Sub Heading', activeReview.content.body);
+                            const benefits = parseSection('Key Benefits Section', activeReview.content.body) || parseSection('Benefits', activeReview.content.body);
+                            const features = parseSection('Feature Highlights', activeReview.content.body) || parseSection('Features', activeReview.content.body);
+                            const cta = parseSection('Call To Action', activeReview.content.body) || parseSection('CTA', activeReview.content.body);
+                            const footer = parseSection('Footer', activeReview.content.body);
+                            
+                            return (
+                              <div className="flex flex-col gap-6">
+                                {(headline || subheading) && (
+                                  <div className="text-center space-y-2 pb-4 border-b border-border/40">
+                                    {headline && <h1 className="text-2xl font-black text-foreground tracking-tight whitespace-pre-wrap">{headline}</h1>}
+                                    {subheading && <p className="text-sm font-medium text-muted-foreground whitespace-pre-wrap">{subheading}</p>}
+                                  </div>
+                                )}
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {benefits && (
+                                    <div className="bg-surface-1/50 rounded-lg p-4 border border-border/30">
+                                      <h4 className="text-xs font-bold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 mb-2">Key Benefits</h4>
+                                      <div className="text-sm text-foreground/80 whitespace-pre-line">{benefits}</div>
+                                    </div>
+                                  )}
+                                  {features && (
+                                    <div className="bg-surface-1/50 rounded-lg p-4 border border-border/30">
+                                      <h4 className="text-xs font-bold uppercase tracking-widest text-purple-500 dark:text-purple-400 mb-2">Features</h4>
+                                      <div className="text-sm text-foreground/80 whitespace-pre-line">{features}</div>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {cta && (
+                                  <div className="mt-2 text-center">
+                                    <div className="inline-block bg-primary text-primary-foreground font-bold px-6 py-2 rounded-full shadow-lg text-sm whitespace-pre-wrap">
+                                      {cta}
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {footer && (
+                                  <div className="text-xs text-center text-muted-foreground/60 whitespace-pre-line pt-4 border-t border-border/40">
+                                    {footer}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                        <details className="mt-6 pt-4 border-t border-border/30">
+                          <summary className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest cursor-pointer hover:text-foreground transition-colors">Show Raw Markdown</summary>
+                          <div className="mt-3 bg-slate-950 p-4 rounded-lg text-xs font-mono text-slate-300 whitespace-pre-wrap overflow-x-auto">
+                            {activeReview.content.body}
+                          </div>
+                        </details>
+                      </div>
+                    ) : (
+                      <div className="rounded-xl glass-panel border-border/50 p-4 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                        {activeReview.content.body}
+                      </div>
+                    )}
                   </div>
 
                   {/* Violations / Insights */}

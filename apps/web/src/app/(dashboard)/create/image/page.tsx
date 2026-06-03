@@ -495,6 +495,38 @@ export default function ImageGeneratorPage() {
                 {!selectedBrandId && promptText.trim().length > 0 && (
                   <span className="text-[10px] text-amber-400 font-bold">Brand selection required</span>
                 )}
+                
+                {/* Brand Color Tokens Preview */}
+                {selectedBrand && (
+                  <div className="mt-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Color Palette Tokens</span>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.isArray(selectedBrand.visualRules?.colorTokens) && selectedBrand.visualRules.colorTokens.length > 0 ? (
+                        selectedBrand.visualRules.colorTokens.map((t: any, idx: number) => (
+                          <div key={idx} className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-md py-1 px-2">
+                            <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: t.value }} title={t.value}></div>
+                            <span className="text-[9px] text-slate-300 font-medium">{t.name}</span>
+                          </div>
+                        ))
+                      ) : selectedBrand.visualRules?.primaryColor ? (
+                        <>
+                          <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-md py-1 px-2">
+                            <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: selectedBrand.visualRules.primaryColor }}></div>
+                            <span className="text-[9px] text-slate-300 font-medium">Primary</span>
+                          </div>
+                          {selectedBrand.visualRules?.secondaryColor && (
+                            <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-md py-1 px-2">
+                              <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: selectedBrand.visualRules.secondaryColor }}></div>
+                              <span className="text-[9px] text-slate-300 font-medium">Secondary</span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-[10px] text-slate-500 italic">No colors defined</span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

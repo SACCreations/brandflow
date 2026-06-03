@@ -227,6 +227,9 @@ export class ImageJobProcessor extends WorkerHost {
 
   private extractStep3Prompt(fullPrompt: string): string {
     const markers = [
+      '2. FLUX.1-dev Prompt',
+      'FLUX.1-dev Prompt',
+      'OUTPUT 3: AI IMAGE GENERATOR PROMPT',
       '[Step 3: Final Image Prompt]',
       'Step 3: Final Image Prompt',
       '### Step 3: Final Image Prompt',
@@ -241,6 +244,16 @@ export class ImageJobProcessor extends WorkerHost {
         let content = fullPrompt.substring(index + marker.length).trim();
         // Remove leading headers/bullet/markdown indicators
         content = content.replace(/^[:\-\s\*\#\n\r]+/, '');
+        
+        // Exclude the Negative Prompt section if it exists
+        const negMarkers = ['3. Negative Prompt', 'Negative Prompt:'];
+        for (const neg of negMarkers) {
+          const negIndex = content.indexOf(neg);
+          if (negIndex !== -1) {
+            content = content.substring(0, negIndex).trim();
+          }
+        }
+        
         if (content) {
           return content;
         }
@@ -260,7 +273,15 @@ export class ImageJobProcessor extends WorkerHost {
   ): Promise<string> {
     const rules = visualRules || {};
     const baseStyle = styleOverride || rules.style || 'modern, professional, visual harmony';
-    const colors = rules.colors ? `Respect brand visual palette: ${JSON.stringify(rules.colors)}.` : '';
+    let colorTokensString = '';
+    if (Array.isArray(rules.colorTokens) && rules.colorTokens.length > 0) {
+      colorTokensString = rules.colorTokens.map((t: any) => `${t.name} (${t.type}): ${t.value}`).join(', ');
+    } else {
+      const primaryColor = rules.primaryColor ? `Primary Color: ${rules.primaryColor}` : '';
+      const secondaryColor = rules.secondaryColor ? `Secondary Color: ${rules.secondaryColor}` : '';
+      colorTokensString = [primaryColor, secondaryColor].filter(Boolean).join(', ');
+    }
+    const colors = colorTokensString ? `Respect brand visual palette tokens: ${colorTokensString}.` : '';
 
     let knowledgeBlock = '';
     if (businessId) {

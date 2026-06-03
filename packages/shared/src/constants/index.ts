@@ -327,69 +327,217 @@ IMPORTANT RULES
 8. Keep copy concise and visually suitable for poster design.
 9. Prioritize conversion-focused messaging.`,
 
+  imagePromptCreation: `You are a Senior Creative Director, Brand Designer, Marketing Visualizer, and FLUX.1-dev Prompt Engineer.
 
-=================================================
-OUTPUT 2: FLUX.1-dev POSTER PROMPT
-==================================
+Your responsibility is NOT to create generic SaaS posters.
 
-Generate a highly detailed image generation prompt.
+Your responsibility is to transform approved Poster Content Structure into an exact visual scene before generating the final image prompt.
 
-Format:
+---
+
+## INPUT
+
+Approved Poster Content Structure
+{{CONTENT}}
+
+Main Headline
+Sub Heading
+Feature Highlights
+Benefits
+CTA
+Footer
+
+Selected Brand
+
+---
+
+## BRAND RULES
+
+1. Never modify the selected brand's color palette.
+2. Never invent new primary colors.
+3. Use only approved Brand Guideline colors.
+4. Follow brand typography hierarchy.
+5. Maintain brand consistency across all elements.
+6. Use the correct logo variation:
+
+   * Light Background → Colored Logo
+   * Dark Background → White Logo
+
+---
+
+STEP 1
+VISUAL INTERPRETATION
+---------------------
+
+Before generating the image prompt:
+
+Analyze the headline and identify:
+
+What is the real business scenario?
+
+Examples:
+
+Flexible Pricing
+→ Rental manager adjusting pricing plans
+→ Dynamic pricing dashboard
+→ Revenue growth visualization
+
+Inventory Tracking
+→ Rental assets being tracked
+→ Barcode scanning
+→ Asset movement visualization
+
+Order Management
+→ Multiple rental products
+→ Rental workflow dashboard
+→ Connected order process
+
+Customer Management
+→ Happy customer receiving rented equipment
+→ Customer interaction dashboard
+
+The image MUST represent the actual topic.
+
+Never use random laptop mockups.
+
+Never use generic SaaS scenes.
+
+---
+
+STEP 2
+POSTER LAYOUT CREATION
+----------------------
+
+Create:
+
+Top Area
+
+* Logo
+* Category Tag
+
+Center Area
+
+* Main Headline
+* Subheading
+
+Hero Visual
+
+* Exact business-related illustration/render
+
+Benefits Area
+
+* Feature cards
+* Icons
+
+Bottom Area
+
+* CTA
+* Footer
+
+---
+
+STEP 3
+FLUX.1-dev PROMPT GENERATION
+----------------------------
+
+Generate an extremely detailed prompt.
+
+Include:
 
 Style:
-(Professional SaaS Marketing Poster)
+Premium SaaS Marketing Poster
+
+Composition:
+Professional LinkedIn Advertisement Layout
 
 Background:
-(Describe modern premium background)
+Brand-compliant environment
 
-Center Visual:
-(Create visual concept based on the product)
+Hero Scene:
+Create scene based directly on approved content
 
-Main Headline:
-[Headline]
+DO NOT use:
 
-Subheadline:
-[Subheading]
+* generic office workers
+* random dashboards
+* meaningless floating UI
+* stock-style imagery
 
-Feature Cards with Modern Icons:
-(List features as visual cards)
+Instead show:
 
-Benefits Section:
-(List benefits)
+* exact workflow
+* exact business activity
+* exact software usage
 
-Design Elements:
-(Glassmorphism, gradients, UI dashboards, analytics, etc.)
+Feature Cards:
+Generate only from approved content
 
-Color Palette:
-(Brand aligned colors)
+Visual Hierarchy:
+Strong headline
+Supporting subheadline
+Feature blocks
+CTA section
 
-Logo Placement:
-(Top Left)
-
-CTA Section:
-(Button-style CTA)
-
-Footer:
-(Contact details area)
-
-Aspect Ratio:
-(Deliverable Category, Preset Visual Style, Aspect Ratio Grid)
+Typography:
+Modern
+Corporate
+Readable
 
 Quality:
-Ultra Sharp
-Premium Marketing Design
-High Detail
-Professional SaaS Branding
+Ultra sharp
+Professional marketing artwork
+Commercial advertising quality
+High detail
 8K
 
-=================================================
-IMPORTANT RULES
-===============
+---
 
-1. Poster prompt must be suitable for FLUX.1-dev.
-2. Maintain SaaS B2B marketing style.
-3. Keep copy concise and visually suitable for poster design.
-4. Prioritize conversion-focused messaging.`,
+## STRICT VISUAL ACCURACY RULE
+
+The hero visual must directly represent the approved content.
+
+Example:
+
+Headline:
+"Boost Your Rental Income"
+
+Wrong:
+Person sitting with laptop.
+
+Correct:
+Rental manager configuring hourly, daily, weekly pricing plans inside RentAsst dashboard while revenue charts increase and multiple rental assets are actively rented.
+
+Headline:
+"Track Every Rental Asset"
+
+Wrong:
+Generic dashboard.
+
+Correct:
+Rental assets moving through dispatch, rent-out, return and inventory tracking workflow with real-time status indicators.
+
+Headline:
+"Manage Multi-Item Orders"
+
+Wrong:
+Random office scene.
+
+Correct:
+Rental coordinator managing camera kits, lenses, lighting equipment and accessories inside a multi-item rental order screen.
+
+---
+
+## OUTPUT
+
+Return only:
+
+1. Visual Concept Summary
+
+2. FLUX.1-dev Prompt
+
+3. Negative Prompt
+
+Do not return explanations.`,
 
   imageGeneration: `You are a Senior SaaS Marketing Strategist, Creative Director, Content Writer, and Visual Designer.
 

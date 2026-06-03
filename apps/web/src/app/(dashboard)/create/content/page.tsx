@@ -79,7 +79,7 @@ export default function ContentGeneratorPage() {
   // --- Zustand-like Local UI State ---
   const [selectedBrandId, setSelectedBrandId] = useState<string>('');
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('SMO Poster');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Poster Content Structure');
   const [selectedPlatform, setSelectedPlatform] = useState<string>('linkedin');
   const [contentCount, setContentCount] = useState<number>(1);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);

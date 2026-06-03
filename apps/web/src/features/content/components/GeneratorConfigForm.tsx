@@ -12,6 +12,7 @@ interface CampaignOption {
 }
 
 const CATEGORIES = [
+  { id: 'Poster Content Structure', label: 'Poster Content Structure', desc: 'Structured blueprint for AI image generation' },
   { id: 'SMO Poster', label: 'SMO Poster', desc: 'Social posters with optimized copy' },
   { id: 'Reel Script', label: 'Reel & Video Script', desc: 'Engaging short-form video script' },
   { id: 'Blog', label: 'Blog Article', desc: 'SEO-optimized long-form article' },
