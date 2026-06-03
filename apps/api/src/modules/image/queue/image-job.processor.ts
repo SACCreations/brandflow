@@ -282,7 +282,17 @@ export class ImageJobProcessor extends WorkerHost {
       }
     }
 
-    const systemPrompt = `You are an expert Creative Director, Brand Strategist, and SaaS Marketing Designer.
+    const llmSettings = businessId ? await this.llmSettingsService.getSettings(businessId) : null;
+    const isNvidia = llmSettings?.provider === 'nvidia';
+    const nvidiaTaskModels = (llmSettings?.nvidiaTaskModels as any) ?? {};
+    const nvidiaSystemPrompts = (llmSettings?.nvidiaSystemPrompts as any) ?? {};
+
+    const resolvedProvider = llmSettings?.provider ?? 'openai';
+    const resolvedModel = isNvidia
+      ? (nvidiaTaskModels.imagePromptCreation || 'nvidia/nemotron-nano-8b-instruct')
+      : 'gpt-4o-mini';
+
+    let systemPrompt = `You are an expert Creative Director, Brand Strategist, and SaaS Marketing Designer.
 
 You are operating in CONTENT ANALYSIS MODE. Before generating the final prompt for the image generator, you MUST perform a complete content analysis.
 Your output MUST contain three distinct steps in the following exact format:
@@ -317,6 +327,16 @@ Selected content category: "${category}".
 
 ${knowledgeBlock}`;
 
+    if (isNvidia) {
+      if (nvidiaSystemPrompts.imagePromptCreation) {
+        let template = nvidiaSystemPrompts.imagePromptCreation;
+        const inputContent = `Category: ${category}\nPrompt/Content: ${prompt}\nStyle: "${baseStyle}"\n${colors}\n${knowledgeBlock}`;
+        template = template.replace(/\{\{CONTENT\}\}/g, inputContent);
+        template = template.replace(/\{\{[^}]+\}\}/g, '');
+        systemPrompt = template;
+      }
+    }
+
     const userMessage = `User Prompt/Content: ${prompt}
 Brand Design Tokens & Rules: Style = "${baseStyle}"; ${colors}
 Perform the 3-step Content Analysis (Extraction, Visual Strategy, Final Image Prompt) for this content.`;
@@ -324,7 +344,8 @@ Perform the 3-step Content Analysis (Extraction, Visual Strategy, Final Image Pr
     try {
       const apiKey = (businessId ? await this.llmSettingsService.getDecryptedApiKey(businessId) : undefined) ?? undefined;
       const { response } = await this.llm.complete(systemPrompt, userMessage, {
-        model: 'gpt-4o-mini',
+        provider: resolvedProvider as any,
+        model: resolvedModel,
         temperature: 0.7,
         apiKey,
       });

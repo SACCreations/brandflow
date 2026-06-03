@@ -225,6 +225,284 @@ export type Permission = (typeof PERMISSIONS)[number];
 export const AI_PROVIDERS = ['openai', 'anthropic', 'google', 'fallback', 'nvidia'] as const;
 export type AIProvider = (typeof AI_PROVIDERS)[number];
 
+// ─── NVIDIA NIM Models ────────────────────────────────────────────
+export const NVIDIA_TASK_MODELS = {
+  contentCreation: 'meta/llama-3.1-70b-instruct',
+  imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
+  socialMediaCaptions: 'meta/llama-3.1-70b-instruct',
+  campaignStrategy: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+} as const;
+
+export type NvidiaTaskKey = keyof typeof NVIDIA_TASK_MODELS;
+
+export const NVIDIA_MODEL_LIST = [
+  {
+    id: 'meta/llama-3.1-70b-instruct',
+    label: 'Llama 3.1 70B Instruct',
+    description: 'Fast, versatile instruction-following model',
+    tasks: ['contentCreation', 'socialMediaCaptions'],
+  },
+  {
+    id: 'meta/llama-3.1-8b-instruct',
+    label: 'Llama 3.1 8B Instruct',
+    description: 'Lightweight, low-latency generation',
+    tasks: ['contentCreation', 'socialMediaCaptions'],
+  },
+  {
+    id: 'nvidia/nemotron-nano-8b-instruct',
+    label: 'Nemotron Nano 8B Instruct',
+    description: 'Optimised for prompt engineering and creative tasks',
+    tasks: ['imagePromptCreation'],
+  },
+  {
+    id: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+    label: 'Llama Nemotron Ultra 253B',
+    description: 'Frontier reasoning model for deep strategy work',
+    tasks: ['campaignStrategy'],
+  },
+  {
+    id: 'meta/llama-3.3-70b-instruct',
+    label: 'Llama 3.3 70B Instruct',
+    description: 'Latest generation, improved instruction following',
+    tasks: ['contentCreation', 'socialMediaCaptions', 'imagePromptCreation'],
+  },
+  {
+    id: 'nvidia/mistral-nemo-minitron-8b-instruct',
+    label: 'Mistral Nemo Minitron 8B',
+    description: 'Compact and cost-efficient for high-volume tasks',
+    tasks: ['contentCreation', 'socialMediaCaptions'],
+  },
+] as const;
+
+export const DEFAULT_NVIDIA_SYSTEM_PROMPTS = {
+  contentCreation: `You are a Senior SaaS Marketing Strategist, Creative Director, Content Writer, and Visual Designer.
+
+Analyze the provided content and generate the following output:
+
+=================================================
+OUTPUT 1: POSTER CONTENT STRUCTURE
+==================================
+
+Create a professional SaaS poster content structure.
+
+### Main Headline
+
+Generate a powerful attention-grabbing headline.
+
+### Sub Heading
+
+Generate a concise supporting statement.
+
+### Key Benefits Section
+
+Extract and rewrite the most important benefits.
+
+### Feature Highlights
+
+Convert platform features into short marketing-friendly feature points.
+
+### Call To Action
+
+Create a compelling CTA.
+
+### Footer
+
+Include:
+Website:
+Email:
+Phone:
+Social Handles:
+
+=================================================
+IMPORTANT RULES
+===============
+
+1. Always generate Main Headline.
+2. Always generate Sub Heading.
+3. If benefits exist, create Benefits Section.
+4. If features exist, create Feature Highlights.
+5. Always generate CTA.
+6. Always generate Footer.
+7. Maintain SaaS B2B marketing style.
+8. Keep copy concise and visually suitable for poster design.
+9. Prioritize conversion-focused messaging.`,
+
+
+=================================================
+OUTPUT 2: FLUX.1-dev POSTER PROMPT
+==================================
+
+Generate a highly detailed image generation prompt.
+
+Format:
+
+Style:
+(Professional SaaS Marketing Poster)
+
+Background:
+(Describe modern premium background)
+
+Center Visual:
+(Create visual concept based on the product)
+
+Main Headline:
+[Headline]
+
+Subheadline:
+[Subheading]
+
+Feature Cards with Modern Icons:
+(List features as visual cards)
+
+Benefits Section:
+(List benefits)
+
+Design Elements:
+(Glassmorphism, gradients, UI dashboards, analytics, etc.)
+
+Color Palette:
+(Brand aligned colors)
+
+Logo Placement:
+(Top Left)
+
+CTA Section:
+(Button-style CTA)
+
+Footer:
+(Contact details area)
+
+Aspect Ratio:
+(Deliverable Category, Preset Visual Style, Aspect Ratio Grid)
+
+Quality:
+Ultra Sharp
+Premium Marketing Design
+High Detail
+Professional SaaS Branding
+8K
+
+=================================================
+IMPORTANT RULES
+===============
+
+1. Poster prompt must be suitable for FLUX.1-dev.
+2. Maintain SaaS B2B marketing style.
+3. Keep copy concise and visually suitable for poster design.
+4. Prioritize conversion-focused messaging.`,
+
+  imageGeneration: `You are a Senior SaaS Marketing Strategist, Creative Director, Content Writer, and Visual Designer.
+
+Analyze the provided content and generate the following output:
+
+=================================================
+OUTPUT 3: AI IMAGE GENERATOR PROMPT
+===================================
+
+Generate a clean AI image generation prompt optimized for:
+
+* FLUX.1-dev
+* Ideogram
+* Recraft
+* Imagen
+* Midjourney
+
+Requirements:
+
+* Modern SaaS marketing style
+* Premium LinkedIn poster
+* Corporate branding
+* High readability
+* Realistic UI dashboard
+* Professional typography hierarchy
+* Marketing-focused composition
+* White space balance
+* Conversion-oriented design
+
+=================================================
+IMPORTANT RULES
+===============
+
+1. Maintain SaaS B2B marketing style.
+2. Prioritize conversion-focused messaging.`,
+
+  socialMediaCaptions: `You are a Senior SaaS Marketing Strategist, Creative Director, Content Writer, and Visual Designer.
+
+Analyze the provided content and generate the following output:
+
+=================================================
+OUTPUT 4: SOCIAL MEDIA PUBLISH CONTENT
+======================================
+
+### LinkedIn Caption
+
+Create:
+
+* Hook
+* Value
+* Benefits
+* CTA
+
+### Hashtags
+
+Generate 15 relevant hashtags.
+
+=================================================
+IMPORTANT RULES
+===============
+
+1. Maintain SaaS B2B marketing style.
+2. Keep copy concise.
+3. Prioritize conversion-focused messaging.`,
+
+  campaignStrategy: `You are a Senior SaaS Marketing Strategist, Creative Director, Content Writer, and Visual Designer.
+
+Analyze the provided content and generate the following output:
+
+=================================================
+OUTPUT 5: CAMPAIGN STRATEGY
+===========================
+
+Campaign Objective
+
+Target Audience
+
+Key Messaging
+
+Campaign Theme
+
+Recommended Creatives
+
+* LinkedIn Poster
+* Carousel
+* Explainer Video
+* GIF
+* Customer Testimonial
+
+Ad Copy
+
+Primary Text
+
+Headline
+
+Description
+
+Campaign KPI Suggestions
+
+* Reach
+* Engagement
+* CTR
+* Leads
+* Demo Bookings
+
+=================================================
+IMPORTANT RULES
+===============
+
+1. Maintain SaaS B2B marketing style.
+2. Prioritize conversion-focused messaging.`
+} as const;
+
 // ─── Asset Types ─────────────────────────────────────────────────
 export const ASSET_TYPES = [
   'image',

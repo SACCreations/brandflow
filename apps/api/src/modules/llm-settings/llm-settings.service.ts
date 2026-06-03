@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { prisma } from '@brandflow/db';
 import { encryption } from '@brandflow/ai';
-import type { UpdateLlmSettingsDto } from '@brandflow/shared';
+import { type UpdateLlmSettingsDto, DEFAULT_NVIDIA_SYSTEM_PROMPTS } from '@brandflow/shared';
 
 @Injectable()
 export class LlmSettingsService {
@@ -26,19 +26,27 @@ export class LlmSettingsService {
         maxTokens: 2000,
         isFallbackEnabled: true,
         hasApiKey: false,
+        nvidiaTaskModels: {
+          contentCreation: 'meta/llama-3.1-70b-instruct',
+          imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
+          socialMediaCaptions: 'meta/llama-3.1-70b-instruct',
+          campaignStrategy: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+        },
+        nvidiaSystemPrompts: DEFAULT_NVIDIA_SYSTEM_PROMPTS,
       };
     }
 
     // Mask API key
     return {
       ...settings,
+      nvidiaSystemPrompts: settings.nvidiaSystemPrompts ?? DEFAULT_NVIDIA_SYSTEM_PROMPTS,
       apiKey: settings.apiKey ? '********' : null,
       hasApiKey: !!settings.apiKey,
     };
   }
 
   async updateSettings(businessId: string, dto: UpdateLlmSettingsDto) {
-    const { apiKey, ...otherSettings } = dto;
+    const { apiKey, nvidiaTaskModels, nvidiaSystemPrompts, ...otherSettings } = dto;
 
     let encryptedApiKey: string | null | undefined;
     if (apiKey === '********') {
@@ -56,8 +64,10 @@ export class LlmSettingsService {
       where: { businessId },
       update: {
         ...otherSettings,
+        ...(nvidiaTaskModels !== undefined ? { nvidiaTaskModels: nvidiaTaskModels as any } : {}),
+        ...(nvidiaSystemPrompts !== undefined ? { nvidiaSystemPrompts: nvidiaSystemPrompts as any } : {}),
         ...(encryptedApiKey !== undefined ? { apiKey: encryptedApiKey } : {}),
-      } as any, // Cast to any to bypass strict Prisma null checks if necessary
+      } as any,
       create: {
         businessId,
         provider: dto.provider ?? 'openai',
@@ -65,6 +75,8 @@ export class LlmSettingsService {
         temperature: dto.temperature ?? 0.7,
         maxTokens: dto.maxTokens ?? 2000,
         isFallbackEnabled: dto.isFallbackEnabled ?? true,
+        ...(nvidiaTaskModels ? { nvidiaTaskModels: nvidiaTaskModels as any } : {}),
+        ...(nvidiaSystemPrompts ? { nvidiaSystemPrompts: nvidiaSystemPrompts as any } : {}),
         ...(encryptedApiKey !== undefined && encryptedApiKey !== null ? { apiKey: encryptedApiKey } : {}),
       },
     });

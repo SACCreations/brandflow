@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { prisma } from '@brandflow/db';
 import type { Prisma, KnowledgeSource, KnowledgeEntry } from '@brandflow/db';
 import { LLMGateway, PromptEngine, CostTracker, VectorService, type LLMConfig } from '@brandflow/ai';
+import { DEFAULT_NVIDIA_SYSTEM_PROMPTS } from '@brandflow/shared';
 import type { GenerateContentDto, UpdateContentDto, BrandContext } from '@brandflow/shared';
 import { LlmSettingsService } from '../llm-settings/llm-settings.service';
 import { PrismaService } from '../../common/database/prisma.service';
@@ -190,25 +191,79 @@ export class ContentService {
       knowledgeEntries: relevantFacts.map((f: any) => f.content),
     };
 
-    // 3. Resolve prompt
-    const promptRecord = await this.prisma.client.prompt.findFirst({
-      where: {
-        module: 'social',
-        isActive: true,
-        OR: [{ businessId: null }, { businessId }],
-      },
-      orderBy: { version: 'desc' },
-    });
-
-    const promptTemplate = promptRecord?.template ?? this.getDefaultPromptTemplate(dto.platform);
+    // 3. Fetch LLM settings early to route correctly
+    const llmSettings = await this.llmSettingsService.getSettings(businessId);
     const sanitizedTopic = this.promptEngine.sanitizeInput(effectiveTopic);
+
+    let promptTemplate: string;
+    let resolvedModel = llmSettings.model ?? undefined;
+    let promptId = 'default';
+    let promptLayer = 'platform';
+    let promptVersion = 1;
+
+    const isNvidia = llmSettings.provider === 'nvidia';
+
+    if (isNvidia) {
+      // Determine NVIDIA task type
+      const isSocial = ['linkedin', 'instagram', 'facebook', 'twitter', 'x', 'social', 'pinterest', 'tiktok'].includes(
+        (dto.platform ?? '').toLowerCase()
+      );
+      const isImagePrompt = ['image_prompt', 'prompt', 'imageprompt'].includes(
+        (dto.type ?? '').toLowerCase()
+      );
+      const isStrategy = ['campaign', 'strategy', 'brief', 'plan'].includes(
+        (dto.type ?? '').toLowerCase()
+      );
+
+      let taskKey: 'contentCreation' | 'imagePromptCreation' | 'socialMediaCaptions' | 'campaignStrategy';
+      if (isImagePrompt) {
+        taskKey = 'imagePromptCreation';
+      } else if (isSocial) {
+        taskKey = 'socialMediaCaptions';
+      } else if (isStrategy) {
+        taskKey = 'campaignStrategy';
+      } else {
+        taskKey = 'contentCreation';
+      }
+
+      // Route model
+      const nvidiaTaskModels = (llmSettings.nvidiaTaskModels as any) ?? {};
+      resolvedModel = nvidiaTaskModels[taskKey] || resolvedModel;
+
+      // Route system prompt
+      const nvidiaSystemPrompts = (llmSettings.nvidiaSystemPrompts as any) ?? {};
+      promptTemplate = nvidiaSystemPrompts[taskKey] || DEFAULT_NVIDIA_SYSTEM_PROMPTS[taskKey];
+      promptId = `nvidia-${taskKey}`;
+    } else {
+      // Resolve prompt normally for non-NVIDIA providers
+      const promptRecord = await this.prisma.client.prompt.findFirst({
+        where: {
+          module: 'social',
+          isActive: true,
+          OR: [{ businessId: null }, { businessId }],
+        },
+        orderBy: { version: 'desc' },
+      });
+
+      promptTemplate = promptRecord?.template ?? this.getDefaultPromptTemplate(dto.platform);
+      promptId = promptRecord?.id ?? 'default';
+      promptLayer = promptRecord?.layer ?? 'platform';
+      promptVersion = promptRecord?.version ?? 1;
+    }
+
+    const inputContent = [
+      `Topic: ${sanitizedTopic}`,
+      dto.platform ? `Platform: ${dto.platform}` : null,
+      dto.type ? `Content Type: ${dto.type}` : null,
+      this.buildGenerationContext(dto.additionalContext, briefContext) ? `Context:\n${this.buildGenerationContext(dto.additionalContext, briefContext)}` : null,
+    ].filter(Boolean).join('\n');
 
     const systemPrompt = this.promptEngine.buildSystemPrompt(
       {
-        promptId: promptRecord?.id ?? 'default',
+        promptId,
         template: promptTemplate,
-        layer: promptRecord?.layer ?? 'platform',
-        version: promptRecord?.version ?? 1,
+        layer: promptLayer,
+        version: promptVersion,
       },
       {
         businessId,
@@ -220,20 +275,19 @@ export class ContentService {
           platform: dto.platform,
           type: dto.type,
           additional_context: this.buildGenerationContext(dto.additionalContext, briefContext),
+          CONTENT: inputContent, // Replaces {{CONTENT}} in NVIDIA templates
         },
       },
     );
 
     // 4. Generate content
-    const llmSettings = await this.llmSettingsService.getSettings(businessId);
-
     const requestId = randomUUID();
     const { response, provider: usedProvider } = await this.gateway.complete(
       systemPrompt,
       `Generate a ${dto.type} for ${dto.platform} about: ${sanitizedTopic}`,
       {
         provider: (llmSettings.provider as any) ?? 'openai',
-        model: llmSettings.model ?? undefined,
+        model: resolvedModel,
         temperature: dto.temperature ?? batchDto.creativity ?? llmSettings.temperature ?? 0.75,
         maxTokens: dto.maxTokens ?? llmSettings.maxTokens ?? 1024,
         apiKey: decryptedApiKey ?? undefined,
@@ -264,8 +318,8 @@ export class ContentService {
           body: response.content,
           status: 'draft',
           qualityScore: 0,
-          promptId: promptRecord?.id,
-          promptVersion: promptRecord?.version,
+          promptId,
+          promptVersion,
           metadata: {
             sourceIds: relevantFacts.map((f: any) => f.sourceId).filter(Boolean),
             requestId,

@@ -16,6 +16,7 @@ import {
   updateLlmSettingsSchema,
   type UpdateLlmSettingsDto,
   type JwtPayload,
+  NVIDIA_MODEL_LIST,
 } from '@brandflow/shared';
 
 @ApiTags('settings')
@@ -29,6 +30,12 @@ export class LlmSettingsController {
   @ApiOperation({ summary: 'Get business-specific LLM settings' })
   getSettings(@CurrentUser() user: JwtPayload) {
     return this.llmSettingsService.getSettings(user.businessId);
+  }
+
+  @Get('nvidia-models')
+  @ApiOperation({ summary: 'Get available NVIDIA NIM models for task routing' })
+  getNvidiaModels() {
+    return { models: NVIDIA_MODEL_LIST };
   }
 
   @Patch()

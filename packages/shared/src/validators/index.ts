@@ -891,5 +891,19 @@ export const updateLlmSettingsSchema = z.object({
   maxTokens: z.number().int().min(1).max(32000).nullish(),
   apiKey: z.string().max(500).nullish(),
   isFallbackEnabled: z.boolean().nullish(),
+  nvidiaTaskModels: z.object({
+    contentCreation: z.string().max(150).nullish(),
+    imagePromptCreation: z.string().max(150).nullish(),
+    socialMediaCaptions: z.string().max(150).nullish(),
+    campaignStrategy: z.string().max(150).nullish(),
+  }).nullish(),
+  nvidiaSystemPrompts: z.object({
+    contentCreation: z.string().max(20000).nullish(),
+    imagePromptCreation: z.string().max(20000).nullish(),
+    imageGeneration: z.string().max(20000).nullish(),
+    socialMediaCaptions: z.string().max(20000).nullish(),
+    campaignStrategy: z.string().max(20000).nullish(),
+  }).nullish(),
 });
 export type UpdateLlmSettingsDto = z.infer<typeof updateLlmSettingsSchema>;
+

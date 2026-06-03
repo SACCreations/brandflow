@@ -893,17 +893,19 @@ model PerformanceMetric {
 }
 
 model LlmSettings {
-  id                String   @id @default(uuid())
-  businessId        String   @unique
-  provider          String   @default("openai")
-  model             String   @default("gpt-4o")
-  temperature       Float    @default(0.7)
-  maxTokens         Int      @default(2000)
-  apiKey            String?
-  isFallbackEnabled Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  business          Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  id                  String   @id @default(uuid())
+  businessId          String   @unique
+  provider            String   @default("openai")
+  model               String   @default("gpt-4o")
+  temperature         Float    @default(0.7)
+  maxTokens           Int      @default(2000)
+  apiKey              String?
+  isFallbackEnabled   Boolean  @default(true)
+  nvidiaTaskModels    Json?    @map("nvidia_task_models")    // { contentCreation, imagePromptCreation, socialMediaCaptions, campaignStrategy }
+  nvidiaSystemPrompts Json?    @map("nvidia_system_prompts") // { contentCreation, imagePromptCreation, imageGeneration, socialMediaCaptions, campaignStrategy }
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  business            Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@map("llm_settings")
 }

@@ -186,11 +186,17 @@ export class BrandAnalyserService {
     const personalityResult = null;
     const catalogResult = null;
 
+    let resolvedModel = settings.model ?? undefined;
+    if (preferredProvider === 'nvidia') {
+      const nvidiaTaskModels = (settings.nvidiaTaskModels as any) ?? {};
+      resolvedModel = nvidiaTaskModels.campaignStrategy || 'nvidia/llama-3.1-nemotron-ultra-253b-v1';
+    }
+
     let gatewayResult;
     try {
       gatewayResult = await this.gateway.complete(systemPrompt, userPrompt, {
         provider: preferredProvider as 'openai' | 'anthropic' | 'google' | 'fallback' | 'nvidia',
-        model: settings.model ?? undefined,
+        model: resolvedModel,
         temperature: 0.2,
         maxTokens: Math.min(settings.maxTokens ?? 3000, 3000), // cap at 3000 to bound response time
         apiKey: decryptedApiKey ?? undefined,
