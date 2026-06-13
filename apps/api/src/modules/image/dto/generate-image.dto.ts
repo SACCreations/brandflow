@@ -56,11 +56,11 @@ export class GenerateImageDto {
   @IsString()
   campaignId?: string;
 
-  @ApiProperty({ description: 'Image generation prompt', minLength: 10, maxLength: 2000 })
+  @ApiProperty({ description: 'Image generation prompt', minLength: 10, maxLength: 15000 })
   @IsNotEmpty({ message: 'Prompt is required' })
   @IsString()
   @MinLength(10, { message: 'Prompt must be at least 10 characters' })
-  @MaxLength(2000, { message: 'Prompt cannot exceed 2000 characters' })
+  @MaxLength(15000, { message: 'Prompt cannot exceed 15000 characters' })
   prompt!: string;
 
   @ApiProperty({ description: 'Creative category', enum: VALID_CATEGORIES })

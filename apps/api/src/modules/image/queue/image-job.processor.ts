@@ -334,13 +334,12 @@ Describe the visual strategy. Detail how visual metaphors, composition, colors, 
 Generate a rich, detailed, concrete description of the poster visual scene that directly represents the extracted content.
 Crucial instructions for Step 3:
 1. The visual scene MUST communicate the content, industry, and benefits even if all text is removed.
-2. Structure the poster as a premium, modern SMO (Social Media Optimization) marketing graphic with a clear layout structure matching the reference style:
-   - Split Layout: A split visual composition. The left half displays a realistic, high-fidelity hero scene showing the product or service in action (e.g. for supermarkets, a worker in a store aisle scanning shelves with a device). The right half displays a clean, modern SaaS software dashboard interface showing charts, graphs, data statistics, and an AI insights card, with a smartphone mockup showing a mobile view of the application floating nearby.
-   - Framing and Details: A clean, structured corporate advertising aesthetic. Desaturated background details, vibrant primary focuses, clean branding placeholder areas at the top for logo layouts, and a clean call-to-action bar or button layout at the bottom.
-3. Use the selected brand logo/mark layout or placement description.
-4. Respect the brand colors and visual identity if provided.
-5. Do NOT generate generic office interiors, random workspaces, or generic business scenes (like office hallways, generic desks, or people shaking hands in a meeting room). Every visual element must support the content narrative.
-6. Provide a premium, high-fidelity LinkedIn marketing advertisement or digital artwork composition.
+2. Structure the graphic appropriately for the category: "${category}". 
+3. Adapt the visual composition to best fit the requested format, whether it's a social banner, a printable poster, or a hero image. Ensure the layout makes sense for its intended use case.
+4. Use the selected brand logo/mark layout or placement description.
+5. Respect the brand colors and visual identity if provided.
+6. Do NOT generate generic office interiors, random workspaces, or generic business scenes (like office hallways, generic desks, or people shaking hands in a meeting room). Every visual element must support the content narrative.
+7. Provide a premium, high-fidelity visual composition.
 
 Strict output rule: Do not write conversational intro/outro text. Output only the structured steps.
 
@@ -386,7 +385,7 @@ Perform the 3-step Content Analysis (Extraction, Visual Strategy, Final Image Pr
 Clean modern design showcase.
 
 [Step 3: Final Image Prompt]
-${prompt}, in a high-fidelity ${baseStyle} style, tailored for ${category}`;
+${prompt.substring(0, 500)}, in a high-fidelity ${baseStyle} style, tailored for ${category}`;
     }
   }
 }
