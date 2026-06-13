@@ -41,12 +41,13 @@ export class LlmSettingsService {
       ...settings,
       nvidiaSystemPrompts: settings.nvidiaSystemPrompts ?? DEFAULT_NVIDIA_SYSTEM_PROMPTS,
       apiKey: settings.apiKey ? '********' : null,
+      fluxApiKey: settings.fluxApiKey ? '********' : null,
       hasApiKey: !!settings.apiKey,
     };
   }
 
   async updateSettings(businessId: string, dto: UpdateLlmSettingsDto) {
-    const { apiKey, nvidiaTaskModels, nvidiaSystemPrompts, ...otherSettings } = dto;
+    const { apiKey, fluxApiKey, nvidiaTaskModels, nvidiaSystemPrompts, ...otherSettings } = dto;
 
     let encryptedApiKey: string | null | undefined;
     if (apiKey === '********') {
@@ -60,6 +61,15 @@ export class LlmSettingsService {
       encryptedApiKey = encryption.encrypt(apiKey, this.encryptionKey);
     }
 
+    let encryptedFluxApiKey: string | null | undefined;
+    if (fluxApiKey === '********') {
+      encryptedFluxApiKey = undefined;
+    } else if (fluxApiKey === '' || fluxApiKey === null) {
+      encryptedFluxApiKey = null;
+    } else if (fluxApiKey) {
+      encryptedFluxApiKey = encryption.encrypt(fluxApiKey, this.encryptionKey);
+    }
+
     return prisma.llmSettings.upsert({
       where: { businessId },
       update: {
@@ -67,6 +77,7 @@ export class LlmSettingsService {
         ...(nvidiaTaskModels !== undefined ? { nvidiaTaskModels: nvidiaTaskModels as any } : {}),
         ...(nvidiaSystemPrompts !== undefined ? { nvidiaSystemPrompts: nvidiaSystemPrompts as any } : {}),
         ...(encryptedApiKey !== undefined ? { apiKey: encryptedApiKey } : {}),
+        ...(encryptedFluxApiKey !== undefined ? { fluxApiKey: encryptedFluxApiKey } : {}),
       } as any,
       create: {
         businessId,
@@ -78,6 +89,7 @@ export class LlmSettingsService {
         ...(nvidiaTaskModels ? { nvidiaTaskModels: nvidiaTaskModels as any } : {}),
         ...(nvidiaSystemPrompts ? { nvidiaSystemPrompts: nvidiaSystemPrompts as any } : {}),
         ...(encryptedApiKey !== undefined && encryptedApiKey !== null ? { apiKey: encryptedApiKey } : {}),
+        ...(encryptedFluxApiKey !== undefined && encryptedFluxApiKey !== null ? { fluxApiKey: encryptedFluxApiKey } : {}),
       },
     });
   }
@@ -138,6 +150,22 @@ export class LlmSettingsService {
     }
 
     return { key: null, source: 'none' };
+  }
+
+  async getDecryptedFluxApiKey(businessId: string): Promise<string | null> {
+    const settings = await prisma.llmSettings.findUnique({
+      where: { businessId },
+      select: { fluxApiKey: true },
+    });
+
+    if (!settings?.fluxApiKey) return null;
+
+    try {
+      return encryption.decrypt(settings.fluxApiKey, this.encryptionKey);
+    } catch (err) {
+      console.error(`[LlmSettingsService] Failed to decrypt fluxApiKey for business ${businessId}:`, err);
+      return null;
+    }
   }
 
   async updateImageApiKey(businessId: string, imageApiKey: string | null): Promise<void> {

@@ -118,7 +118,8 @@ export class ImageJobProcessor extends WorkerHost {
       const nvidiaTaskModels = (llmSettings?.nvidiaTaskModels as any) ?? {};
 
       const { key: userApiKey, source: keySource } = await this.llmSettingsService.getDecryptedImageApiKey(businessId);
-      const imageGateway = this.buildImageGateway(userApiKey, resolvedProvider);
+      const fluxApiKey = await this.llmSettingsService.getDecryptedFluxApiKey(businessId);
+      const imageGateway = this.buildImageGateway(userApiKey, resolvedProvider, fluxApiKey);
 
       this.logger.log(
         `[IMAGE_JOB:${jobId}] Image API key: ${userApiKey ? `found (source=${keySource})` : 'NONE — using mock provider'}. ` +
@@ -455,11 +456,11 @@ export class ImageJobProcessor extends WorkerHost {
    *    imageApiKey (DALL-E-specific) → apiKey (if OpenAI LLM provider) → null
    *  - If userApiKey is null → only mock provider will be available
    */
-  private buildImageGateway(userApiKey: string | null, llmProvider: string): ImageGateway {
+  private buildImageGateway(userApiKey: string | null, llmProvider: string, fluxApiKey: string | null = null): ImageGateway {
     // Inject the key directly — no process.env mutation (thread-safe for concurrent jobs)
     const keys: ImageProviderKeys = {
       openai: userApiKey || null,  // Works for both 'openai' and 'nvidia' LLM providers
-      flux:   null,                // Future: extend getDecryptedImageApiKey to support flux key
+      flux:   fluxApiKey || null,  // Custom BFL key from user settings
       stability: null,             // Future: extend to support stability key
       nvidia: llmProvider === 'nvidia' ? (userApiKey || null) : null,
     };
@@ -498,7 +499,8 @@ export class ImageJobProcessor extends WorkerHost {
       const llmSettings = await this.llmSettingsService.getSettings(businessId);
       const resolvedProvider = (llmSettings?.provider as string) ?? 'openai';
       const userApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId);
-      const imageGateway = this.buildImageGateway(userApiKey, resolvedProvider);
+      const fluxApiKey = await this.llmSettingsService.getDecryptedFluxApiKey(businessId);
+      const imageGateway = this.buildImageGateway(userApiKey, resolvedProvider, fluxApiKey);
 
       await this.updateJobProgress(jobId, 30);
       this.wsGateway.emitJobProgress(businessId, { jobId, progress: 30, status: 'PROCESSING', stage: 'enhancing' });

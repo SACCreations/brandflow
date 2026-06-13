@@ -200,6 +200,7 @@ export default function LlmSettingsPage() {
       maxTokens: 2000,
       isFallbackEnabled: true,
       apiKey: undefined,
+      fluxApiKey: undefined,
       nvidiaTaskModels: {
         contentCreation: 'meta/llama-3.1-70b-instruct',
         imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
@@ -225,6 +226,7 @@ export default function LlmSettingsPage() {
       maxTokens: settings.maxTokens ?? 2000,
       isFallbackEnabled: settings.isFallbackEnabled ?? true,
       apiKey: settings.apiKey ?? undefined,
+      fluxApiKey: settings.fluxApiKey ?? undefined,
       nvidiaTaskModels: settings.nvidiaTaskModels ?? {
         contentCreation: 'meta/llama-3.1-70b-instruct',
         imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
@@ -780,6 +782,39 @@ export default function LlmSettingsPage() {
                   {validationResult.message}
                 </div>
               )}
+            </div>
+
+            {/* ── FLUX API Key ─────────────────────────────────────── */}
+            <div className="space-y-2 mt-6 pt-6 border-t border-border/50">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-orange-400" />
+                  FLUX.1-dev API Key (Black Forest Labs)
+                </label>
+                {settings?.fluxApiKey && (
+                  <span className="flex items-center gap-1 text-xs text-emerald-600">
+                    <ShieldCheck className="w-3 h-3" /> Key Configured
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">
+                Required for generating high-quality marketing creatives with the FLUX.1-dev model. Get your key from <a href="https://api.bfl.ml/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">api.bfl.ml</a>.
+              </p>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Input
+                    id="flux-api-key-input"
+                    type="password"
+                    {...register('fluxApiKey')}
+                    placeholder={
+                      settings?.fluxApiKey
+                        ? 'Enter new key to replace existing'
+                        : 'Enter your BFL API key...'
+                    }
+                    error={errors.fluxApiKey?.message}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">

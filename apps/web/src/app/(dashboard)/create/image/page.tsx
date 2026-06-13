@@ -237,6 +237,10 @@ export default function ImageGeneratorPage() {
   const [wsProgress,  setWsProgress]   = useState<ImageJobProgress | null>(null);
   const [activePlatformGroup, setActivePlatformGroup] = useState<string>('Instagram');
 
+  // Bulk Delete State
+  const [selectedJobIds, setSelectedJobIds] = useState<Set<string>>(new Set());
+  const [isSelectionMode, setIsSelectionMode] = useState<boolean>(false);
+
   // ─── Image API Key Setup Modal ────────────────────────────────────────────
   const [showKeyModal,  setShowKeyModal]  = useState<boolean>(false);
   const [imageKeyInput, setImageKeyInput] = useState<string>('');
@@ -416,6 +420,31 @@ export default function ImageGeneratorPage() {
     },
   });
 
+  const deleteSelectedMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      await Promise.all(ids.map(id => apiClient.delete(`/images/jobs/${id}`)));
+    },
+    onSuccess: () => {
+      toast({ title: 'Deleted', description: 'Selected jobs removed from history.' });
+      setSelectedJobIds(new Set());
+      setIsSelectionMode(false);
+      queryClient.invalidateQueries({ queryKey: ['image-generation-jobs'] });
+    },
+    onError: (err: any) => {
+      toast({
+        title: 'Failed to delete selected jobs',
+        description: err?.response?.data?.message || err.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const toggleJobSelection = (id: string) => {
+    const newSet = new Set(selectedJobIds);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedJobIds(newSet);
+  };
   // ─── Derived ──────────────────────────────────────────────────────────────
   const selectedBrand = brands.find(b => b.id === selectedBrandId);
   const platformSpec  = getPlatformSpec(selectedPlatform);
@@ -1118,20 +1147,51 @@ export default function ImageGeneratorPage() {
                 <History className="h-5 w-5 text-slate-400" />
                 <h2 className="text-sm font-black uppercase tracking-wider text-slate-300">Generation History ({filteredJobs.length})</h2>
               </div>
-              <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 p-0.5 rounded-lg">
-                {(['all', 'COMPLETED', 'FAILED', 'PROCESSING'] as const).map(f => (
-                  <button
-                    key={f}
-                    onClick={() => setStatusFilter(f)}
-                    className={`text-[9px] font-black px-2 py-1 rounded transition-all uppercase ${
-                      statusFilter === f
-                        ? 'bg-slate-800 text-indigo-400 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-300'
-                    }`}
+              <div className="flex items-center gap-2">
+                {isSelectionMode ? (
+                  <div className="flex gap-1">
+                    <Button
+                      onClick={() => {
+                        if (confirm(`Delete ${selectedJobIds.size} selected jobs?`)) {
+                          deleteSelectedMutation.mutate(Array.from(selectedJobIds));
+                        }
+                      }}
+                      disabled={selectedJobIds.size === 0 || deleteSelectedMutation.isPending}
+                      className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[10px] font-bold py-1 h-7 rounded px-3"
+                    >
+                      {deleteSelectedMutation.isPending ? 'Deleting...' : `Delete (${selectedJobIds.size})`}
+                    </Button>
+                    <Button
+                      onClick={() => { setIsSelectionMode(false); setSelectedJobIds(new Set()); }}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1 h-7 rounded px-3"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => setIsSelectionMode(true)}
+                    disabled={filteredJobs.length === 0}
+                    className="bg-slate-950 border border-slate-800 hover:bg-slate-900 text-slate-400 text-[10px] font-bold py-1 h-7 rounded px-3"
                   >
-                    {f === 'all' ? 'All' : f === 'COMPLETED' ? '✓ Done' : f === 'FAILED' ? '✗ Failed' : '⟳ Active'}
-                  </button>
-                ))}
+                    Select Multiple
+                  </Button>
+                )}
+                <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 p-0.5 rounded-lg">
+                  {(['all', 'COMPLETED', 'FAILED', 'PROCESSING'] as const).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setStatusFilter(f)}
+                      className={`text-[9px] font-black px-2 py-1 rounded transition-all uppercase ${
+                        statusFilter === f
+                          ? 'bg-slate-800 text-indigo-400 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-300'
+                      }`}
+                    >
+                      {f === 'all' ? 'All' : f === 'COMPLETED' ? '✓ Done' : f === 'FAILED' ? '✗ Failed' : '⟳ Active'}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -1162,8 +1222,27 @@ export default function ImageGeneratorPage() {
                   const img = job.images?.[0];
                   const headline = job.posterContext?.headline || job.rawPrompt;
                   return (
-                    <Card key={job.id} className="border-slate-800 bg-slate-900/30 overflow-hidden flex flex-col justify-between group">
-                      {job.status === 'COMPLETED' && img?.asset ? (
+                    <div key={job.id} className="relative group/card">
+                      {isSelectionMode && (
+                        <div
+                          className={`absolute inset-0 z-10 rounded-xl cursor-pointer ring-2 transition-all ${
+                            selectedJobIds.has(job.id) ? 'ring-indigo-500 bg-indigo-500/15' : 'ring-transparent bg-transparent'
+                          }`}
+                          onClick={() => toggleJobSelection(job.id)}
+                        >
+                          <div className={`absolute top-3 left-3 h-5 w-5 rounded border-2 flex items-center justify-center transition-colors ${
+                            selectedJobIds.has(job.id)
+                              ? 'bg-indigo-500 border-indigo-500 text-white'
+                              : 'bg-slate-900/50 border-slate-400/50 group-hover/card:border-slate-300'
+                          }`}>
+                            {selectedJobIds.has(job.id) && <Check className="h-3.5 w-3.5" />}
+                          </div>
+                        </div>
+                      )}
+                      <Card className={`border-slate-800 bg-slate-900/30 overflow-hidden flex flex-col justify-between group h-full ${
+                        isSelectionMode && selectedJobIds.has(job.id) ? 'opacity-80' : ''
+                      }`}>
+                        {job.status === 'COMPLETED' && img?.asset ? (
                         <div className="relative aspect-video w-full bg-slate-950 border-b border-slate-800">
                           <img
                             src={img.asset.cdnUrl}
@@ -1275,6 +1354,7 @@ export default function ImageGeneratorPage() {
                         </div>
                       </div>
                     </Card>
+                  </div>
                   );
                 })}
               </div>

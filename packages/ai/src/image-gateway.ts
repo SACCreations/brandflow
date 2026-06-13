@@ -152,7 +152,8 @@ export class ImageGateway {
       }
     }
 
-    // Mock is ALWAYS last — only reached if everything else fails
+    // MOCK FALLBACK: Since the network is blocking real APIs (FLUX) and NVIDIA lacks access,
+    // we append 'mock' so the UI doesn't crash with 404s, allowing frontend testing to continue.
     if (!chain.includes('mock')) {
       chain.push('mock');
     }

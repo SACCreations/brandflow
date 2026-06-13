@@ -890,6 +890,7 @@ export const updateLlmSettingsSchema = z.object({
   temperature: z.number().min(0).max(2).nullish(),
   maxTokens: z.number().int().min(1).max(32000).nullish(),
   apiKey: z.string().max(500).nullish(),
+  fluxApiKey: z.string().max(500).nullish(),
   isFallbackEnabled: z.boolean().nullish(),
   nvidiaTaskModels: z.object({
     contentCreation: z.string().max(150).nullish(),
