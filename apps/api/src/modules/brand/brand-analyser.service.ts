@@ -189,7 +189,7 @@ export class BrandAnalyserService {
     let resolvedModel = settings.model ?? undefined;
     if (preferredProvider === 'nvidia') {
       const nvidiaTaskModels = (settings.nvidiaTaskModels as any) ?? {};
-      resolvedModel = nvidiaTaskModels.campaignStrategy || 'nvidia/llama-3.1-nemotron-ultra-253b-v1';
+      resolvedModel = nvidiaTaskModels.campaignStrategy || 'nvidia/llama-3.1-nemotron-70b-instruct';
     }
 
     let gatewayResult;

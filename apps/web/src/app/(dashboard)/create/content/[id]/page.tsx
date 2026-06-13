@@ -433,7 +433,7 @@ export default function ContentEditorPage({ params }: { params: Promise<{ id: st
               Need a brand-aligned visual banner or post graphic? Create one instantly with AI.
             </p>
             <Link 
-              href={`/create/image?brandId=${data.brand.id}${data.campaign ? `&campaignId=${data.campaign.id}` : ''}&prompt=${encodeURIComponent(content.slice(0, 150))}`}
+              href={`/create/image?brandId=${data.brand.id}${data.campaign ? `&campaignId=${data.campaign.id}` : ''}&contentId=${data.id}`}
               className="mt-4 block"
             >
               <Button variant="outline" className="w-full gap-2 text-xs font-bold border-indigo-200 hover:bg-indigo-50 text-indigo-600 dark:border-indigo-900 dark:text-indigo-400 dark:hover:bg-indigo-950/30">

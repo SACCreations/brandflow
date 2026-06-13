@@ -30,7 +30,7 @@ export class LlmSettingsService {
           contentCreation: 'meta/llama-3.1-70b-instruct',
           imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
           socialMediaCaptions: 'meta/llama-3.1-70b-instruct',
-          campaignStrategy: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+          campaignStrategy: 'nvidia/llama-3.1-nemotron-70b-instruct',
         },
         nvidiaSystemPrompts: DEFAULT_NVIDIA_SYSTEM_PROMPTS,
       };

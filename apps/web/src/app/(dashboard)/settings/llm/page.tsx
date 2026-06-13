@@ -80,7 +80,7 @@ const NVIDIA_TASKS = [
     icon: BarChart3,
     color: 'text-amber-400',
     bg: 'bg-amber-400/10 border-amber-400/20',
-    defaultModel: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+    defaultModel: 'nvidia/llama-3.1-nemotron-70b-instruct',
   },
 ];
 
@@ -204,7 +204,7 @@ export default function LlmSettingsPage() {
         contentCreation: 'meta/llama-3.1-70b-instruct',
         imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
         socialMediaCaptions: 'meta/llama-3.1-70b-instruct',
-        campaignStrategy: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+        campaignStrategy: 'nvidia/llama-3.1-nemotron-70b-instruct',
       },
       nvidiaSystemPrompts: DEFAULT_NVIDIA_SYSTEM_PROMPTS,
     },
@@ -229,7 +229,7 @@ export default function LlmSettingsPage() {
         contentCreation: 'meta/llama-3.1-70b-instruct',
         imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
         socialMediaCaptions: 'meta/llama-3.1-70b-instruct',
-        campaignStrategy: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+        campaignStrategy: 'nvidia/llama-3.1-nemotron-70b-instruct',
       },
       nvidiaSystemPrompts: settings.nvidiaSystemPrompts ?? DEFAULT_NVIDIA_SYSTEM_PROMPTS,
     });

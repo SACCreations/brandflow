@@ -157,7 +157,7 @@ export default function ImageGeneratorPage() {
 
   // --- VALIDATION ---
   const PROMPT_MIN = 10;
-  const PROMPT_MAX = 2000;
+  const PROMPT_MAX = 15000;
   const DIM_MIN = 256;
   const DIM_MAX = 2048;
 
@@ -802,6 +802,9 @@ export default function ImageGeneratorPage() {
                         );
                       })}
                     </div>
+                  )}
+                  {promptError && contentSource === 'approved' && promptText.length > 0 && (
+                    <span className="text-[10px] text-rose-400 font-bold block mt-2">{promptError}</span>
                   )}
                 </div>
               )}

@@ -230,7 +230,7 @@ export const NVIDIA_TASK_MODELS = {
   contentCreation: 'meta/llama-3.1-70b-instruct',
   imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
   socialMediaCaptions: 'meta/llama-3.1-70b-instruct',
-  campaignStrategy: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+  campaignStrategy: 'nvidia/llama-3.1-nemotron-70b-instruct',
 } as const;
 
 export type NvidiaTaskKey = keyof typeof NVIDIA_TASK_MODELS;
@@ -255,9 +255,9 @@ export const NVIDIA_MODEL_LIST = [
     tasks: ['imagePromptCreation'],
   },
   {
-    id: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
-    label: 'Llama Nemotron Ultra 253B',
-    description: 'Frontier reasoning model for deep strategy work',
+    id: 'nvidia/llama-3.1-nemotron-70b-instruct',
+    label: 'Llama Nemotron 70B Instruct',
+    description: 'Advanced reasoning model for deep strategy work',
     tasks: ['campaignStrategy'],
   },
   {
