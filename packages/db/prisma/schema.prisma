@@ -900,6 +900,7 @@ model LlmSettings {
   temperature         Float    @default(0.7)
   maxTokens           Int      @default(2000)
   apiKey              String?
+  imageApiKey         String?  @map("image_api_key") // Separate encrypted key for image generation (e.g. OpenAI key when LLM is NVIDIA)
   isFallbackEnabled   Boolean  @default(true)
   nvidiaTaskModels    Json?    @map("nvidia_task_models")    // { contentCreation, imagePromptCreation, socialMediaCaptions, campaignStrategy }
   nvidiaSystemPrompts Json?    @map("nvidia_system_prompts") // { contentCreation, imagePromptCreation, imageGeneration, socialMediaCaptions, campaignStrategy }

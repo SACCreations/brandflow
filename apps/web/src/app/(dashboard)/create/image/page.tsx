@@ -21,33 +21,27 @@ import {
   Sparkles,
   Image as ImageIcon,
   History,
-  Sliders,
   Settings,
   Layers,
-  Heart,
   Download,
   Share2,
   AlertCircle,
   CheckCircle2,
   ExternalLink,
-  ChevronRight,
   Check,
-  Maximize2,
   Wifi,
   WifiOff,
   RefreshCw,
-  Filter,
   Zap,
   Type,
   Target,
   Palette,
   Layout,
   Monitor,
-  Instagram,
-  Linkedin,
-  Youtube,
-  Globe,
-  Mail,
+  Key,
+  X,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { useImageSocket, type ImageJobProgress } from '@/hooks/use-image-socket';
 
@@ -242,6 +236,12 @@ export default function ImageGeneratorPage() {
   const [wsProgress,  setWsProgress]   = useState<ImageJobProgress | null>(null);
   const [activePlatformGroup, setActivePlatformGroup] = useState<string>('Instagram');
 
+  // ─── Image API Key Setup Modal ────────────────────────────────────────────
+  const [showKeyModal,  setShowKeyModal]  = useState<boolean>(false);
+  const [imageKeyInput, setImageKeyInput] = useState<string>('');
+  const [showKeyInput,  setShowKeyInput]  = useState<boolean>(false);
+  const [savingKey,     setSavingKey]     = useState<boolean>(false);
+
   // ─── Validation ───────────────────────────────────────────────────────────
   const canSubmit = useMemo(() => {
     const hasContent = contentMode === 'content'
@@ -309,6 +309,17 @@ export default function ImageGeneratorPage() {
       return (await apiClient.get('/content', { params: { status: 'approved', brandId: selectedBrandId } })).data;
     },
     enabled: !!selectedBrandId && contentMode === 'content',
+  });
+
+  // ─── Image API Key Status ────────────────────────────────────────────────
+  const { data: imageKeyStatus, refetch: refetchKeyStatus } = useQuery<{
+    hasImageApiKey: boolean;
+    source: 'image_specific' | 'llm_shared' | 'none';
+    masked: string | null;
+  }>({
+    queryKey: ['image-api-key-status'],
+    queryFn: async () => (await apiClient.get('/settings/llm/image-api-key/status')).data,
+    staleTime: 30_000,
   });
 
   // Polling fallback when WS disconnected
@@ -418,8 +429,101 @@ export default function ImageGeneratorPage() {
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
+  // ─── Save image API key handler ───────────────────────────────────────────
+  const handleSaveImageKey = async () => {
+    if (!imageKeyInput.trim().startsWith('sk-')) {
+      toast({ title: 'Invalid key', description: 'OpenAI keys start with sk-', variant: 'destructive' });
+      return;
+    }
+    setSavingKey(true);
+    try {
+      await apiClient.post('/settings/llm/image-api-key', { imageApiKey: imageKeyInput.trim() });
+      toast({ title: '✅ Image API key saved', description: 'DALL-E 3 image generation is now active.' });
+      setShowKeyModal(false);
+      setImageKeyInput('');
+      refetchKeyStatus();
+    } catch (err: any) {
+      toast({ title: 'Failed to save key', description: err?.response?.data?.message || err.message, variant: 'destructive' });
+    } finally {
+      setSavingKey(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 space-y-8 animate-in fade-in duration-500">
+
+      {/* ── Image API Key Setup Modal ──────────────────────────────────────── */}
+      {showKeyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl space-y-5 mx-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-indigo-500/15 p-2.5 border border-indigo-500/25">
+                  <Key className="h-5 w-5 text-indigo-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-foreground">Configure Image Generation</h3>
+                  <p className="text-xs text-slate-400">Enter your OpenAI API key to enable DALL-E 3</p>
+                </div>
+              </div>
+              <button onClick={() => setShowKeyModal(false)} className="text-slate-500 hover:text-slate-300">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 space-y-1.5">
+              <p className="text-[11px] text-amber-400 font-bold flex items-center gap-1.5">
+                <AlertCircle className="h-3.5 w-3.5" /> Why is this needed?
+              </p>
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                BrandFlow uses OpenAI DALL-E 3 to generate branded marketing posters.
+                Your key is encrypted and stored securely — never logged or shared.
+                Without it, the system falls back to stock placeholder images.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">OpenAI API Key</label>
+              <div className="relative">
+                <input
+                  type={showKeyInput ? 'text' : 'password'}
+                  value={imageKeyInput}
+                  onChange={e => setImageKeyInput(e.target.value)}
+                  placeholder="sk-..."
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600 pr-10 font-mono"
+                  onKeyDown={e => e.key === 'Enter' && handleSaveImageKey()}
+                />
+                <button
+                  onClick={() => setShowKeyInput(!showKeyInput)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                >
+                  {showKeyInput ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="text-[9px] text-slate-600">
+                Get your key at <span className="text-indigo-400 font-bold">platform.openai.com/api-keys</span>
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                onClick={() => setShowKeyModal(false)}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl py-2.5 text-xs font-bold"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveImageKey}
+                disabled={savingKey || imageKeyInput.trim().length < 20}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl py-2.5 text-xs uppercase tracking-wider gap-2 disabled:opacity-50"
+              >
+                {savingKey ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Key className="h-3.5 w-3.5" />}
+                {savingKey ? 'Saving...' : 'Save & Enable DALL-E 3'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between border-b border-slate-800 pb-6">
@@ -455,6 +559,19 @@ export default function ImageGeneratorPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Configure API Key button */}
+          <button
+            onClick={() => setShowKeyModal(true)}
+            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border transition-all ${
+              imageKeyStatus?.hasImageApiKey
+                ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10'
+                : 'border-amber-500/40 text-amber-400 bg-amber-500/10 hover:bg-amber-500/15 animate-pulse'
+            }`}
+            title={imageKeyStatus?.hasImageApiKey ? `Key active: ${imageKeyStatus.masked}` : 'Configure OpenAI API key for DALL-E 3'}
+          >
+            <Key className="h-3.5 w-3.5" />
+            {imageKeyStatus?.hasImageApiKey ? `DALL-E 3 ✓` : 'Add API Key'}
+          </button>
           <div className="flex flex-col items-end gap-1">
             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Est. Cost</span>
             <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-black px-2.5 py-1 rounded-lg">
@@ -473,6 +590,38 @@ export default function ImageGeneratorPage() {
           </Button>
         </div>
       </div>
+
+      {/* ── Mock Mode Warning Banner ──────────────────────────────────────── */}
+      {imageKeyStatus && !imageKeyStatus.hasImageApiKey && (
+        <div className="flex items-start gap-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5">
+          <div className="rounded-xl bg-amber-500/15 p-2.5 flex-shrink-0">
+            <AlertCircle className="h-6 w-6 text-amber-400" />
+          </div>
+          <div className="flex-1 space-y-1">
+            <p className="text-sm font-black text-amber-300">⚠️ No Image API Key — Running in Mock Mode</p>
+            <p className="text-xs text-amber-200/70 leading-relaxed">
+              Without an OpenAI API key, the system returns stock placeholder images instead of
+              real AI-generated branded posters. Add your OpenAI key below to activate DALL-E 3 poster generation.
+            </p>
+            <div className="pt-2 flex gap-3 flex-wrap">
+              <button
+                onClick={() => setShowKeyModal(true)}
+                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-4 py-2 rounded-lg transition-colors"
+              >
+                <Key className="h-3.5 w-3.5" /> Add OpenAI API Key
+              </button>
+              <a
+                href="https://platform.openai.com/api-keys"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 border border-amber-500/30 px-4 py-2 rounded-lg transition-colors"
+              >
+                Get API Key <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Main Grid ─────────────────────────────────────────────────────── */}
       <div className="grid gap-8 lg:grid-cols-12">

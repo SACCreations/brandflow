@@ -64,4 +64,28 @@ export class LlmSettingsController {
     
     return { success: true };
   }
+
+  @Post('image-api-key')
+  @ApiOperation({
+    summary: 'Save a dedicated OpenAI API key for image generation',
+    description: 'Needed when the business LLM provider is NVIDIA but image generation requires an OpenAI key for DALL-E 3. The key is encrypted at rest.',
+  })
+  async saveImageApiKey(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: { imageApiKey: string | null },
+  ) {
+    await this.llmSettingsService.updateImageApiKey(user.businessId, dto.imageApiKey || null);
+    return { success: true, message: 'Image API key saved successfully' };
+  }
+
+  @Get('image-api-key/status')
+  @ApiOperation({ summary: 'Check if a dedicated image API key is configured' })
+  async getImageApiKeyStatus(@CurrentUser() user: JwtPayload) {
+    const { key, source } = await this.llmSettingsService.getDecryptedImageApiKey(user.businessId);
+    return {
+      hasImageApiKey: !!key,
+      source,
+      masked: key ? `sk-...${key.slice(-4)}` : null,
+    };
+  }
 }

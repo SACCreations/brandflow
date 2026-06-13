@@ -98,6 +98,66 @@ export class LlmSettingsService {
     }
   }
 
+  /**
+   * Resolves the best API key for IMAGE GENERATION for a business.
+   *
+   * Priority order:
+   * 1. Dedicated imageApiKey (set specifically for image generation)
+   * 2. Main LLM apiKey (if provider is 'openai' — same key works for DALL-E)
+   * 3. null (will use mock provider)
+   *
+   * This is the method the ImageJobProcessor must use — NOT getDecryptedApiKey()
+   * when the user's LLM provider is NVIDIA (those keys don't work for DALL-E).
+   */
+  async getDecryptedImageApiKey(businessId: string): Promise<{ key: string | null; source: 'image_specific' | 'llm_shared' | 'none' }> {
+    const settings = await prisma.llmSettings.findUnique({
+      where: { businessId },
+      select: { apiKey: true, imageApiKey: true, provider: true },
+    });
+
+    if (!settings) return { key: null, source: 'none' };
+
+    // Try dedicated image API key first
+    if (settings.imageApiKey) {
+      try {
+        const key = encryption.decrypt(settings.imageApiKey, this.encryptionKey);
+        if (key) return { key, source: 'image_specific' };
+      } catch (err) {
+        console.error(`[LlmSettingsService] Failed to decrypt imageApiKey for business ${businessId}:`, err);
+      }
+    }
+
+    // Fall back to main API key if provider is openai (same key works for DALL-E)
+    if (settings.apiKey && settings.provider === 'openai') {
+      try {
+        const key = encryption.decrypt(settings.apiKey, this.encryptionKey);
+        if (key) return { key, source: 'llm_shared' };
+      } catch (err) {
+        console.error(`[LlmSettingsService] Failed to decrypt apiKey for business ${businessId}:`, err);
+      }
+    }
+
+    return { key: null, source: 'none' };
+  }
+
+  async updateImageApiKey(businessId: string, imageApiKey: string | null): Promise<void> {
+    let encryptedKey: string | null = null;
+    if (imageApiKey && imageApiKey !== '********') {
+      encryptedKey = encryption.encrypt(imageApiKey, this.encryptionKey);
+    }
+
+    await prisma.llmSettings.upsert({
+      where: { businessId },
+      update: { imageApiKey: encryptedKey },
+      create: {
+        businessId,
+        provider: 'openai',
+        model: 'gpt-4o',
+        imageApiKey: encryptedKey,
+      },
+    });
+  }
+
   async validateApiKey(provider: string, apiKey: string): Promise<boolean> {
     try {
       switch (provider) {
