@@ -7,7 +7,8 @@ import { CreativeGenerationService } from './creative-generation.service';
 import { CanvasService } from './canvas.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { GenerateImageDto } from './dto/generate-image.dto';
+import { GeneratePosterDto } from './dto/generate-poster.dto';
+import { PlatformDimensionService } from './services/platform-dimension.service';
 import type { JwtPayload } from '@brandflow/shared';
 
 @ApiTags('image')
@@ -19,6 +20,7 @@ export class ImageController {
     private readonly imageService: ImageService,
     private readonly creativeGenService: CreativeGenerationService,
     private readonly canvasService: CanvasService,
+    private readonly platformDimensionService: PlatformDimensionService,
   ) {}
 
   @Get()
@@ -47,33 +49,28 @@ export class ImageController {
   }
 
   @Post('generate')
-  @ApiOperation({ summary: 'Schedule an asynchronous background image generation job' })
-  async generateImage(
+  @ApiOperation({
+    summary: 'Queue a brand-aware marketing poster generation job',
+    description:
+      'Generates a branded marketing poster using brand colors, logo, fonts, and content (headline/CTA). ' +
+      'The prompt is NOT passed raw to the image model — it is first enriched by the PosterPromptBuilder ' +
+      'and an LLM to produce a structured poster-design prompt that starts with ' +
+      '"Marketing poster creative, graphic design composition,".',
+  })
+  async generatePoster(
     @CurrentUser() user: JwtPayload,
-    @Body() data: GenerateImageDto,
+    @Body() dto: GeneratePosterDto,
   ) {
-    const width = data.settings?.width ?? 1024;
-    const height = data.settings?.height ?? 1024;
-    const aspectRatio = data.settings?.aspectRatio ?? '1:1';
-    const style = data.settings?.style ?? 'modern-creative';
-    const quality = data.settings?.quality ?? 'standard';
-    const provider = data.settings?.provider ?? 'stability';
+    return this.creativeGenService.createPosterJob(user.businessId, dto);
+  }
 
-    return this.creativeGenService.createGenerationJob(
-      user.businessId,
-      data.brandId,
-      data.campaignId,
-      data.prompt,
-      data.category,
-      {
-        width,
-        height,
-        aspectRatio,
-        style,
-        quality,
-        provider,
-      },
-    );
+  @Get('platforms')
+  @ApiOperation({
+    summary: 'List all supported platform poster formats with official dimensions',
+    description: 'Returns platform specs grouped by social network for the frontend platform selector.',
+  })
+  getPlatforms() {
+    return this.platformDimensionService.getAllPlatforms();
   }
 
   @Get('jobs')

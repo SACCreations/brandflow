@@ -1,5 +1,6 @@
 import { OpenAIImageProvider } from './providers/openai-image';
 import { StabilityImageProvider } from './providers/stability-image';
+import { FluxImageProvider } from './providers/flux-image';
 import { MockImageProvider } from './providers/mock-image';
 import type { 
   ImageProvider, 
@@ -12,22 +13,30 @@ export class ImageGateway {
   private providers: Map<string, ImageProvider> = new Map();
   private config: Required<ImageGatewayConfig>;
 
-  constructor(config: ImageGatewayConfig = { defaultProvider: 'stability' }) {
+  constructor(config: ImageGatewayConfig = { defaultProvider: 'openai' }) {
     this.config = {
       defaultProvider: config.defaultProvider,
-      fallbackProvider: config.fallbackProvider ?? 'openai',
-      requestTimeoutMs: config.requestTimeoutMs ?? 45_000,
+      fallbackProvider: config.fallbackProvider ?? 'stability',
+      requestTimeoutMs: config.requestTimeoutMs ?? 60_000, // Increased for FLUX polling
       maxRetries: config.maxRetries ?? 2,
     };
 
-    const stabilityKey = process.env['STABILITY_API_KEY'];
-    if (stabilityKey && !stabilityKey.includes('mock')) {
-      this.providers.set('stability', new StabilityImageProvider(stabilityKey));
-    }
-
+    // Register OpenAI DALL-E (best for poster creatives with vivid style)
     const openaiKey = process.env['OPENAI_API_KEY'];
     if (openaiKey && !openaiKey.startsWith('sk-mock') && !openaiKey.includes('mock')) {
       this.providers.set('openai', new OpenAIImageProvider(openaiKey));
+    }
+
+    // Register FLUX.1-dev via Black Forest Labs (premium poster quality)
+    const fluxKey = process.env['BFL_API_KEY'] || process.env['FLUX_API_KEY'];
+    if (fluxKey && !fluxKey.includes('mock')) {
+      this.providers.set('flux', new FluxImageProvider(fluxKey));
+    }
+
+    // Register Stability AI (fallback)
+    const stabilityKey = process.env['STABILITY_API_KEY'];
+    if (stabilityKey && !stabilityKey.includes('mock')) {
+      this.providers.set('stability', new StabilityImageProvider(stabilityKey));
     }
 
     this.providers.set('mock', new MockImageProvider());

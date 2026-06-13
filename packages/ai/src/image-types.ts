@@ -1,3 +1,5 @@
+export type ImageProviderName = 'openai' | 'flux' | 'stability' | 'mock';
+
 export interface ImageGenerationRequest {
   prompt: string;
   negativePrompt?: string;
@@ -5,9 +7,18 @@ export interface ImageGenerationRequest {
   height: number;
   numberOfImages?: number;
   quality?: 'standard' | 'hd';
-  style?: string; // e.g. 'photorealistic', 'minimalist', 'cyberpunk', 'luxury', 'futuristic'
+  /** Visual style preset passed to providers that support it */
+  style?: string;
   businessId: string;
   model?: string;
+  /** Brand-aware poster context — used by DALL-E style parameter and prompt prefix validation */
+  posterContext?: {
+    primaryColor?: string;
+    secondaryColor?: string;
+    category?: string;
+    platform?: string;
+    isPoster?: boolean;
+  };
 }
 
 export interface ImageGenerationResponse {

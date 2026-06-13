@@ -19,4 +19,7 @@ export type * from './types';
 export { ImageGateway } from './image-gateway';
 export { OpenAIImageProvider } from './providers/openai-image';
 export { StabilityImageProvider } from './providers/stability-image';
+export { FluxImageProvider } from './providers/flux-image';
+export { PosterPromptBuilder } from './poster-prompt-builder';
+export type { PosterContextPayload, PosterPromptResult } from './poster-prompt-builder';
 export type * from './image-types';

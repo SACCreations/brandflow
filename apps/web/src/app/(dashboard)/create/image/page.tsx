@@ -6,19 +6,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { CONTENT_CATEGORY_TO_IMAGE_CATEGORY } from '@brandflow/shared';
-import { 
-  Badge, 
-  Button, 
-  Card, 
-  useToast, 
-  Input, 
+import {
+  Badge,
+  Button,
+  Card,
+  useToast,
+  Input,
   Progress,
-  Skeleton 
+  Skeleton
 } from '@brandflow/ui';
-import { 
-  ArrowLeft, 
-  Loader2, 
-  Sparkles, 
+import {
+  ArrowLeft,
+  Loader2,
+  Sparkles,
   Image as ImageIcon,
   History,
   Sliders,
@@ -37,16 +37,29 @@ import {
   WifiOff,
   RefreshCw,
   Filter,
-  Zap
+  Zap,
+  Type,
+  Target,
+  Palette,
+  Layout,
+  Monitor,
+  Instagram,
+  Linkedin,
+  Youtube,
+  Globe,
+  Mail,
 } from 'lucide-react';
 import { useImageSocket, type ImageJobProgress } from '@/hooks/use-image-socket';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface BrandOption {
   id: string;
   name: string;
   industry?: string;
-  tone?: string[];
+  tone?: any;
   positioning?: string;
+  tagline?: string;
   visualRules?: any;
 }
 
@@ -63,7 +76,13 @@ interface ImageJob {
   rawPrompt: string;
   finalPrompt?: string;
   category: string;
+  platform?: string;
   settings: any;
+  posterContext?: {
+    headline?: string;
+    subheadline?: string;
+    cta?: string;
+  };
   error?: string;
   createdAt: string;
   images?: Array<{
@@ -76,49 +95,115 @@ interface ImageJob {
   }>;
 }
 
+// ─── Platform Definitions ────────────────────────────────────────────────────
+
+interface PlatformSpec {
+  id: string;
+  label: string;
+  group: string;
+  width: number;
+  height: number;
+  aspectRatio: string;
+  orientation: 'portrait' | 'landscape' | 'square';
+}
+
+const PLATFORMS_GROUPED: Record<string, PlatformSpec[]> = {
+  Instagram: [
+    { id: 'instagram_post',    label: 'Post (1:1)',     group: 'Instagram', width: 1080, height: 1080, aspectRatio: '1:1',    orientation: 'square' },
+    { id: 'instagram_story',   label: 'Story (9:16)',   group: 'Instagram', width: 1080, height: 1920, aspectRatio: '9:16',   orientation: 'portrait' },
+    { id: 'instagram_reel',    label: 'Reel (9:16)',    group: 'Instagram', width: 1080, height: 1920, aspectRatio: '9:16',   orientation: 'portrait' },
+    { id: 'instagram_ad',      label: 'Ad (1:1)',       group: 'Instagram', width: 1080, height: 1080, aspectRatio: '1:1',    orientation: 'square' },
+  ],
+  Facebook: [
+    { id: 'facebook_post',     label: 'Post',           group: 'Facebook',  width: 1200, height: 630,  aspectRatio: '1.91:1', orientation: 'landscape' },
+    { id: 'facebook_ad',       label: 'Ad Creative',    group: 'Facebook',  width: 1200, height: 628,  aspectRatio: '1.91:1', orientation: 'landscape' },
+    { id: 'facebook_story',    label: 'Story (9:16)',   group: 'Facebook',  width: 1080, height: 1920, aspectRatio: '9:16',   orientation: 'portrait' },
+    { id: 'facebook_cover',    label: 'Cover Photo',    group: 'Facebook',  width: 851,  height: 315,  aspectRatio: '851:315',orientation: 'landscape' },
+  ],
+  LinkedIn: [
+    { id: 'linkedin_post',     label: 'Post',           group: 'LinkedIn',  width: 1200, height: 627,  aspectRatio: '1.91:1', orientation: 'landscape' },
+    { id: 'linkedin_banner',   label: 'Banner (4:1)',   group: 'LinkedIn',  width: 1584, height: 396,  aspectRatio: '4:1',    orientation: 'landscape' },
+    { id: 'linkedin_ad',       label: 'Sponsored Ad',   group: 'LinkedIn',  width: 1200, height: 627,  aspectRatio: '1.91:1', orientation: 'landscape' },
+    { id: 'linkedin_story',    label: 'Story (9:16)',   group: 'LinkedIn',  width: 1080, height: 1920, aspectRatio: '9:16',   orientation: 'portrait' },
+  ],
+  'X (Twitter)': [
+    { id: 'x_post',            label: 'Post (16:9)',    group: 'X',         width: 1600, height: 900,  aspectRatio: '16:9',   orientation: 'landscape' },
+    { id: 'x_ad',              label: 'Ad',             group: 'X',         width: 1200, height: 675,  aspectRatio: '16:9',   orientation: 'landscape' },
+    { id: 'x_cover',           label: 'Cover (3:1)',    group: 'X',         width: 1500, height: 500,  aspectRatio: '3:1',    orientation: 'landscape' },
+  ],
+  YouTube: [
+    { id: 'youtube_thumbnail', label: 'Thumbnail',      group: 'YouTube',   width: 1280, height: 720,  aspectRatio: '16:9',   orientation: 'landscape' },
+    { id: 'youtube_banner',    label: 'Channel Art',    group: 'YouTube',   width: 2560, height: 1440, aspectRatio: '16:9',   orientation: 'landscape' },
+    { id: 'youtube_post',      label: 'Post (1:1)',     group: 'YouTube',   width: 1080, height: 1080, aspectRatio: '1:1',    orientation: 'square' },
+  ],
+  Website: [
+    { id: 'website_banner',    label: 'Hero Banner',    group: 'Website',   width: 1920, height: 600,  aspectRatio: '16:5',   orientation: 'landscape' },
+    { id: 'website_square',    label: 'Square',         group: 'Website',   width: 800,  height: 800,  aspectRatio: '1:1',    orientation: 'square' },
+    { id: 'website_blog',      label: 'Blog Cover',     group: 'Website',   width: 1200, height: 630,  aspectRatio: '1.91:1', orientation: 'landscape' },
+  ],
+  'Google Ads': [
+    { id: 'google_display',    label: 'Display (MPU)',  group: 'Google Ads',width: 300,  height: 250,  aspectRatio: '6:5',    orientation: 'square' },
+    { id: 'google_leaderboard',label: 'Leaderboard',   group: 'Google Ads',width: 728,  height: 90,   aspectRatio: '728:90', orientation: 'landscape' },
+    { id: 'google_billboard',  label: 'Billboard',     group: 'Google Ads',width: 970,  height: 250,  aspectRatio: '970:250',orientation: 'landscape' },
+  ],
+  Email: [
+    { id: 'email_header',      label: 'Email Header',   group: 'Email',     width: 600,  height: 200,  aspectRatio: '3:1',    orientation: 'landscape' },
+  ],
+};
+
+// Flat list for lookup
+const ALL_PLATFORMS = Object.values(PLATFORMS_GROUPED).flat();
+
+const getPlatformSpec = (id: string): PlatformSpec =>
+  ALL_PLATFORMS.find(p => p.id === id) || ALL_PLATFORMS[0]!;
+
+// ─── Category Definitions ────────────────────────────────────────────────────
+
 const VISUAL_CATEGORIES = [
-  { id: 'SMO_POSTER', label: 'SMO Poster', desc: 'Social platform graphics' },
-  { id: 'FESTIVAL_BANNER', label: 'Festival & Event', desc: 'Themed holiday creatives' },
-  { id: 'OFFER_CREATIVE', label: 'Promotional Offer', desc: 'High-contrast ad banners' },
-  { id: 'WEBSITE_HERO', label: 'Website Hero', desc: 'Premium desktop headers' },
-  { id: 'PRINTABLE_STANDEE', label: 'Printable Standee', desc: 'Tall layout printable assets' },
-  { id: 'PRINTABLE_BANNER', label: 'Printable Banner', desc: 'Large scale prints' },
-  { id: 'PRINTABLE_FLYER', label: 'Printable Flyer', desc: 'High density structured layouts' },
-  { id: 'PRINTABLE_BROCHURE', label: 'Printable Brochure', desc: 'Multi-fold print layouts' },
-  { id: 'AD_CREATIVE', label: 'Ad Banner', desc: 'Conversion marketing designs' },
-  { id: 'SOCIAL_COVER', label: 'Social Media Cover Images', desc: 'Platform specific cover headers' },
-  { id: 'THUMBNAIL', label: 'Thumbnail Images', desc: 'High-contrast video thumbnails' },
+  { id: 'SMO_POSTER',        label: 'SMO Poster',          desc: 'Social platform graphics' },
+  { id: 'FESTIVAL_BANNER',   label: 'Festival & Event',    desc: 'Themed holiday creatives' },
+  { id: 'OFFER_CREATIVE',    label: 'Promotional Offer',   desc: 'High-contrast ad banners' },
+  { id: 'WEBSITE_HERO',      label: 'Website Hero',        desc: 'Premium desktop headers' },
+  { id: 'PRINTABLE_STANDEE', label: 'Printable Standee',   desc: 'Tall layout printable assets' },
+  { id: 'PRINTABLE_BANNER',  label: 'Printable Banner',    desc: 'Large scale prints' },
+  { id: 'PRINTABLE_FLYER',   label: 'Printable Flyer',     desc: 'High density structured layouts' },
+  { id: 'PRINTABLE_BROCHURE',label: 'Printable Brochure',  desc: 'Multi-fold print layouts' },
+  { id: 'AD_CREATIVE',       label: 'Ad Banner',           desc: 'Conversion marketing designs' },
+  { id: 'SOCIAL_COVER',      label: 'Social Cover',        desc: 'Platform specific cover headers' },
+  { id: 'THUMBNAIL',         label: 'Thumbnail',           desc: 'High-contrast video thumbnails' },
 ];
 
 const PRESET_STYLES = [
-  { id: 'photorealistic', label: 'Photorealistic', desc: 'Cinematic studio lighting' },
-  { id: '3d-render', label: '3D Render', desc: 'Volumetric elements' },
-  { id: 'flat-vector', label: 'Flat Vector', desc: 'Modern minimal flat designs' },
-  { id: 'cyberpunk', label: 'Cyberpunk Neon', desc: 'Futuristic high-neon themes' },
-  { id: 'minimalist', label: 'Minimalist Glossy', desc: 'Elegant glossy glass textures' },
-  { id: 'fantasy-watercolor', label: 'Fantasy Watercolor', desc: 'Artistic brushstrokes' },
+  { id: 'modern-premium',    label: 'Modern Premium',      desc: 'Clean, bold, professional' },
+  { id: 'photorealistic',    label: 'Photorealistic',      desc: 'Cinematic studio lighting' },
+  { id: '3d-render',         label: '3D Render',           desc: 'Volumetric elements' },
+  { id: 'flat-vector',       label: 'Flat Vector',         desc: 'Modern minimal flat designs' },
+  { id: 'cyberpunk',         label: 'Cyberpunk Neon',      desc: 'Futuristic high-neon themes' },
+  { id: 'minimalist',        label: 'Minimalist Glossy',   desc: 'Elegant glossy glass textures' },
 ];
 
-const ASPECT_RATIOS = [
-  { id: '1:1', label: 'Square (1:1)', desc: '1080x1080 (Poster)', width: 1080, height: 1080 },
-  { id: '16:9', label: 'Landscape (16:9)', desc: '1920x1080 (Poster)', width: 1920, height: 1080 },
-  { id: '9:16', label: 'Portrait (9:16)', desc: '1080x1920 (Poster)', width: 1080, height: 1920 },
-  { id: '3:4', label: 'Portrait (3:4)', desc: '1080x1350 (Poster)', width: 1080, height: 1350 },
-  
-  { id: 'facebook_cover', label: 'Facebook Cover', desc: '851x315', width: 851, height: 315 },
-  { id: 'twitter_cover', label: 'Twitter/X Cover', desc: '1500x500', width: 1500, height: 500 },
-  { id: 'pinterest', label: 'Pinterest', desc: '734x413', width: 734, height: 413 },
-  { id: 'linkedin_profile', label: 'LinkedIn Profile Cover', desc: '1584x396', width: 1584, height: 396 },
-  { id: 'linkedin_business', label: 'LinkedIn Business Cover', desc: '1128x191', width: 1128, height: 191 },
-  { id: 'youtube_mini', label: 'YouTube Desktop Mini', desc: '1546x423', width: 1546, height: 423 },
-  { id: 'youtube_tablet', label: 'YouTube Tablet', desc: '1855x423', width: 1855, height: 423 },
-  { id: 'youtube_max', label: 'YouTube Desktop Max', desc: '2560x423', width: 2560, height: 423 },
-  { id: 'youtube_tv', label: 'YouTube TV', desc: '1546x1440', width: 1546, height: 1440 },
+const GROUP_ICONS: Record<string, string> = {
+  Instagram: '📸',
+  Facebook: '👍',
+  LinkedIn: '💼',
+  'X (Twitter)': '✕',
+  YouTube: '▶️',
+  Website: '🌐',
+  'Google Ads': '🎯',
+  Email: '📧',
+};
 
-  { id: '4:3', label: 'Standard (4:3)', desc: '1024x768', width: 1024, height: 768 },
-  { id: '2.35:1', label: 'Cinematic (2.35:1)', desc: '1920x817', width: 1920, height: 817 },
-  { id: '2:3', label: 'Portrait (2:3)', desc: '1000x1500', width: 1000, height: 1500 },
+// ─── Pipeline Stages ─────────────────────────────────────────────────────────
+
+const STAGES = [
+  { key: 'queued',     label: 'Queued' },
+  { key: 'enhancing',  label: 'Brand Analysis' },
+  { key: 'generating', label: 'Generating Poster' },
+  { key: 'finalizing', label: 'Finalizing' },
+  { key: 'done',       label: 'Complete' },
 ];
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function ImageGeneratorPage() {
   const router = useRouter();
@@ -126,70 +211,57 @@ export default function ImageGeneratorPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const brandIdParam = searchParams.get('brandId');
+  const brandIdParam    = searchParams.get('brandId');
   const campaignIdParam = searchParams.get('campaignId');
-  const promptParam = searchParams.get('prompt');
-  const categoryParam = searchParams.get('category');
-  const contentIdParam = searchParams.get('contentId');
+  const categoryParam   = searchParams.get('category');
+  const contentIdParam  = searchParams.get('contentId');
 
-  // --- STATE ---
-  const [selectedBrandId, setSelectedBrandId] = useState<string>('');
+  // ─── State ────────────────────────────────────────────────────────────────
+  const [selectedBrandId,    setSelectedBrandId]    = useState<string>('');
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('SMO_POSTER');
-  const [selectedRatioId, setSelectedRatioId] = useState<string>('1:1');
-  const [selectedStyle, setSelectedStyle] = useState<string>('photorealistic');
-  const [selectedProvider, setSelectedProvider] = useState<string>('stability');
-  const [selectedQuality, setSelectedQuality] = useState<'standard' | 'hd'>('standard');
-  const [promptText, setPromptText] = useState<string>('');
+  const [selectedCategory,   setSelectedCategory]   = useState<string>('SMO_POSTER');
+  const [selectedPlatform,   setSelectedPlatform]   = useState<string>('instagram_post');
+  const [selectedStyle,      setSelectedStyle]       = useState<string>('modern-premium');
+  const [selectedProvider,   setSelectedProvider]   = useState<string>('openai');
+  const [selectedQuality,    setSelectedQuality]    = useState<'standard' | 'hd'>('standard');
 
-  // Manual dimensions for Custom Aspect Ratio
-  const [isCustomSize, setIsCustomSize] = useState<boolean>(false);
-  const [customWidth, setCustomWidth] = useState<number>(1080);
-  const [customHeight, setCustomHeight] = useState<number>(1080);
+  // Content mode: 'content' = link approved content | 'manual' = type fields directly
+  const [contentMode,   setContentMode]   = useState<'content' | 'manual'>('manual');
+  const [selectedContentId, setSelectedContentId] = useState<string>('');
 
-  // Content Source
-  const [contentSource, setContentSource] = useState<'manual' | 'approved' | 'library' | 'knowledge' | 'sources'>('manual');
+  // Structured poster fields
+  const [headlineText,    setHeadlineText]    = useState<string>('');
+  const [subheadlineText, setSubheadlineText] = useState<string>('');
+  const [ctaText,         setCtaText]         = useState<string>('');
 
-  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  // Advanced
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'COMPLETED' | 'FAILED' | 'PROCESSING'>('all');
-  const [wsProgress, setWsProgress] = useState<ImageJobProgress | null>(null);
 
-  // --- VALIDATION ---
-  const PROMPT_MIN = 10;
-  const PROMPT_MAX = 15000;
-  const DIM_MIN = 256;
-  const DIM_MAX = 2048;
+  const [activeJobId, setActiveJobId]   = useState<string | null>(null);
+  const [wsProgress,  setWsProgress]   = useState<ImageJobProgress | null>(null);
+  const [activePlatformGroup, setActivePlatformGroup] = useState<string>('Instagram');
 
-  const promptError = useMemo(() => {
-    if (!promptText.trim()) return null; // Don't show error when empty (will be caught on submit)
-    if (promptText.trim().length < PROMPT_MIN) return `Minimum ${PROMPT_MIN} characters required`;
-    if (promptText.length > PROMPT_MAX) return `Maximum ${PROMPT_MAX} characters exceeded`;
-    return null;
-  }, [promptText]);
+  // ─── Validation ───────────────────────────────────────────────────────────
+  const canSubmit = useMemo(() => {
+    const hasContent = contentMode === 'content'
+      ? !!selectedContentId
+      : headlineText.trim().length >= 5;
+    return !!selectedBrandId && !!selectedPlatform && !!selectedCategory && hasContent && !activeJobId;
+  }, [selectedBrandId, selectedPlatform, selectedCategory, contentMode, selectedContentId, headlineText, activeJobId]);
 
-  const dimensionError = useMemo(() => {
-    if (!isCustomSize) return null;
-    if (customWidth < DIM_MIN || customWidth > DIM_MAX) return `Width must be ${DIM_MIN}–${DIM_MAX}px`;
-    if (customHeight < DIM_MIN || customHeight > DIM_MAX) return `Height must be ${DIM_MIN}–${DIM_MAX}px`;
-    return null;
-  }, [isCustomSize, customWidth, customHeight]);
-
-  // --- COST ESTIMATION ---
+  // ─── Cost Estimation ──────────────────────────────────────────────────────
   const estimatedCost = useMemo(() => {
-    if (selectedProvider === 'openai') {
-      return selectedQuality === 'hd' ? 8.0 : 4.0;
-    }
-    return 3.0; // stability
+    if (selectedProvider === 'openai') return selectedQuality === 'hd' ? 8.0 : 4.0;
+    if (selectedProvider === 'flux') return 3.5;
+    return 3.0;
   }, [selectedProvider, selectedQuality]);
 
-  // --- WEBSOCKET ---
+  // ─── WebSocket ────────────────────────────────────────────────────────────
   const { isConnected: wsConnected } = useImageSocket({
     enabled: true,
     onProgress: (payload) => {
-      if (payload.jobId === activeJobId) {
-        setWsProgress(payload);
-      }
+      if (payload.jobId === activeJobId) setWsProgress(payload);
     },
     onCompleted: (payload) => {
       if (payload.jobId === activeJobId) {
@@ -197,10 +269,7 @@ export default function ImageGeneratorPage() {
         setActiveJobId(null);
         refetchJobs();
         queryClient.invalidateQueries({ queryKey: ['image-generation-jobs'] });
-        toast({
-          title: 'Generation successful!',
-          description: 'Your creative image was added to the workspace.',
-        });
+        toast({ title: '✅ Poster Generated!', description: 'Your branded marketing poster is ready.' });
       }
     },
     onFailed: (payload) => {
@@ -208,124 +277,67 @@ export default function ImageGeneratorPage() {
         setWsProgress(payload);
         setActiveJobId(null);
         refetchJobs();
-        queryClient.invalidateQueries({ queryKey: ['image-generation-jobs'] });
         toast({
           title: 'Generation failed',
-          description: payload.error || 'An error occurred during creative generation.',
+          description: payload.error || 'An error occurred during poster generation.',
           variant: 'destructive',
         });
       }
     },
   });
 
-  // --- QUERIES ---
+  // ─── Queries ─────────────────────────────────────────────────────────────
   const { data: brands = [], isLoading: brandsLoading } = useQuery<BrandOption[]>({
     queryKey: ['workspace-brands'],
-    queryFn: async () => {
-      const res = await apiClient.get('/brands');
-      return res.data;
-    },
+    queryFn: async () => (await apiClient.get('/brands')).data,
   });
 
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery<CampaignOption[]>({
     queryKey: ['workspace-campaigns'],
-    queryFn: async () => {
-      const res = await apiClient.get('/campaigns');
-      return res.data;
-    },
+    queryFn: async () => (await apiClient.get('/campaigns')).data,
   });
 
   const { data: jobs = [], isLoading: jobsLoading, refetch: refetchJobs } = useQuery<ImageJob[]>({
     queryKey: ['image-generation-jobs'],
-    queryFn: async () => {
-      const res = await apiClient.get('/images/jobs');
-      return res.data;
-    },
+    queryFn: async () => (await apiClient.get('/images/jobs')).data,
   });
+
   const { data: approvedContents = [], isLoading: approvedContentsLoading } = useQuery<any[]>({
     queryKey: ['approved-contents', selectedBrandId],
     queryFn: async () => {
       if (!selectedBrandId) return [];
-      const res = await apiClient.get('/content', { params: { status: 'approved', brandId: selectedBrandId } });
-      return res.data;
+      return (await apiClient.get('/content', { params: { status: 'approved', brandId: selectedBrandId } })).data;
     },
-    enabled: !!selectedBrandId,
+    enabled: !!selectedBrandId && contentMode === 'content',
   });
 
-  const { data: preselectedContent } = useQuery({
-    queryKey: ['content-item', contentIdParam],
-    queryFn: async () => {
-      if (!contentIdParam) return null;
-      const res = await apiClient.get(`/content/${contentIdParam}`);
-      return res.data;
-    },
-    enabled: !!contentIdParam,
-  });
-
-  // Polling fallback — only active when WebSocket disconnected
+  // Polling fallback when WS disconnected
   useQuery({
     queryKey: ['active-image-job', activeJobId],
     queryFn: async () => {
       const res = await apiClient.get(`/images/jobs/${activeJobId}`);
       const job = res.data as ImageJob;
-
       if (job.status === 'COMPLETED' || job.status === 'FAILED') {
         setActiveJobId(null);
         refetchJobs();
         queryClient.invalidateQueries({ queryKey: ['image-generation-jobs'] });
-        
         if (job.status === 'COMPLETED') {
-          toast({
-            title: 'Generation successful!',
-            description: 'Your creative image was added to the workspace.',
-          });
-        } else {
-          toast({
-            title: 'Generation failed',
-            description: job.error || 'An error occurred during creative generation.',
-            variant: 'destructive',
-          });
+          toast({ title: '✅ Poster Generated!', description: 'Your branded marketing poster is ready.' });
         }
       }
       return job;
     },
-    enabled: !!activeJobId && !wsConnected, // Only poll when WS is down
-    refetchInterval: 5000, // Slower polling as fallback
+    enabled: !!activeJobId && !wsConnected,
+    refetchInterval: 5000,
   });
 
-  // Preloads
+  // ─── Effects ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (brandIdParam) setSelectedBrandId(brandIdParam);
     if (campaignIdParam) setSelectedCampaignId(campaignIdParam);
-    if (promptParam) setPromptText(promptParam);
     if (categoryParam) setSelectedCategory(categoryParam);
-    if (contentIdParam) {
-      setContentSource('approved');
-    }
-  }, [brandIdParam, campaignIdParam, promptParam, categoryParam, contentIdParam]);
-
-  // Handle preselected content item
-  useEffect(() => {
-    if (preselectedContent) {
-      if (preselectedContent.brandId) setSelectedBrandId(preselectedContent.brandId);
-      if (preselectedContent.campaignId) setSelectedCampaignId(preselectedContent.campaignId);
-      if (preselectedContent.body) setPromptText(preselectedContent.body);
-      
-      const contentCategory = preselectedContent.metadata?.contentCategory || preselectedContent.type;
-      const mappedCategory = CONTENT_CATEGORY_TO_IMAGE_CATEGORY[contentCategory] || 'SMO_POSTER';
-      setSelectedCategory(mappedCategory);
-    }
-  }, [preselectedContent]);
-
-  // Recover active job state from fetched jobs
-  useEffect(() => {
-    if (!activeJobId && jobs.length > 0) {
-      const activeJob = jobs.find((j) => j.status === 'PENDING' || j.status === 'PROCESSING');
-      if (activeJob) {
-        setActiveJobId(activeJob.id);
-      }
-    }
-  }, [jobs, activeJobId]);
+    if (contentIdParam) { setSelectedContentId(contentIdParam); setContentMode('content'); }
+  }, [brandIdParam, campaignIdParam, categoryParam, contentIdParam]);
 
   useEffect(() => {
     if (!selectedBrandId && brands.length > 0 && brands[0]) {
@@ -333,34 +345,30 @@ export default function ImageGeneratorPage() {
     }
   }, [selectedBrandId, brands]);
 
-  // --- MUTATIONS ---
+  useEffect(() => {
+    if (!activeJobId && jobs.length > 0) {
+      const active = jobs.find(j => j.status === 'PENDING' || j.status === 'PROCESSING');
+      if (active) setActiveJobId(active.id);
+    }
+  }, [jobs, activeJobId]);
+
+  // ─── Mutation ─────────────────────────────────────────────────────────────
   const generateMutation = useMutation({
     mutationFn: async () => {
-      if (!promptText.trim() || promptText.trim().length < PROMPT_MIN) {
-        throw new Error(`Prompt must be at least ${PROMPT_MIN} characters`);
-      }
-      if (promptText.length > PROMPT_MAX) {
-        throw new Error(`Prompt cannot exceed ${PROMPT_MAX} characters`);
-      }
-      if (isCustomSize && (customWidth < DIM_MIN || customWidth > DIM_MAX || customHeight < DIM_MIN || customHeight > DIM_MAX)) {
-        throw new Error(`Dimensions must be between ${DIM_MIN}px and ${DIM_MAX}px`);
-      }
-      const ratio = isCustomSize
-        ? { id: 'custom', width: customWidth, height: customHeight }
-        : ASPECT_RATIOS.find((r) => r.id === selectedRatioId) || ASPECT_RATIOS[0]!;
-
       const res = await apiClient.post('/images/generate', {
-        brandId: selectedBrandId,
+        brandId:    selectedBrandId,
+        platform:   selectedPlatform,
+        category:   selectedCategory,
+        contentId:  contentMode === 'content' && selectedContentId ? selectedContentId : undefined,
         campaignId: selectedCampaignId || undefined,
-        prompt: promptText.trim(),
-        category: selectedCategory,
+        // Structured fields (used in manual mode, or as overrides)
+        headline:    contentMode === 'manual' ? headlineText.trim() || undefined : undefined,
+        subheadline: contentMode === 'manual' ? subheadlineText.trim() || undefined : undefined,
+        cta:         contentMode === 'manual' ? ctaText.trim() || undefined : undefined,
         settings: {
-          width: ratio.width,
-          height: ratio.height,
-          aspectRatio: ratio.id,
-          style: selectedStyle,
           provider: selectedProvider,
-          quality: selectedQuality,
+          quality:  selectedQuality,
+          style:    selectedStyle,
         },
       });
       return res.data;
@@ -368,10 +376,7 @@ export default function ImageGeneratorPage() {
     onSuccess: (data) => {
       setActiveJobId(data.id);
       setWsProgress(null);
-      toast({
-        title: 'Job Queued Successfully',
-        description: 'Generating your brand creative in the background.',
-      });
+      toast({ title: '🚀 Job Queued', description: 'Generating your branded marketing poster...' });
     },
     onError: (err: any) => {
       toast({
@@ -382,35 +387,41 @@ export default function ImageGeneratorPage() {
     },
   });
 
-  const selectedBrand = brands.find((b) => b.id === selectedBrandId);
-  const selectedRatio = ASPECT_RATIOS.find((r) => r.id === selectedRatioId) || ASPECT_RATIOS[0]!;
-  const generating = generateMutation.isPending || !!activeJobId;
+  // ─── Derived ──────────────────────────────────────────────────────────────
+  const selectedBrand = brands.find(b => b.id === selectedBrandId);
+  const platformSpec  = getPlatformSpec(selectedPlatform);
+  const generating    = generateMutation.isPending || !!activeJobId;
 
-  // Real-time progress from WebSocket or fallback to job polling
-  const currentProgress = wsProgress?.progress ?? jobs.find((j) => j.id === activeJobId)?.progress ?? 0;
-  const currentStage = wsProgress?.stage ?? (jobs.find((j) => j.id === activeJobId)?.status === 'PROCESSING' ? 'generating' : 'queued');
-  const currentFinalPrompt = wsProgress?.finalPrompt ?? jobs.find((j) => j.id === activeJobId)?.finalPrompt;
+  const currentProgress   = wsProgress?.progress   ?? jobs.find(j => j.id === activeJobId)?.progress ?? 0;
+  const currentStage      = wsProgress?.stage       ?? (jobs.find(j => j.id === activeJobId)?.status === 'PROCESSING' ? 'generating' : 'queued');
+  const currentFinalPrompt = wsProgress?.finalPrompt ?? jobs.find(j => j.id === activeJobId)?.finalPrompt;
 
-  // Filtered jobs for gallery
   const filteredJobs = useMemo(() => {
     if (statusFilter === 'all') return jobs;
-    return jobs.filter((j) => j.status === statusFilter);
+    return jobs.filter(j => j.status === statusFilter);
   }, [jobs, statusFilter]);
 
-  // Pipeline stage labels
-  const STAGES = [
-    { key: 'queued', label: 'Queued' },
-    { key: 'enhancing', label: 'Enhancing Prompt' },
-    { key: 'generating', label: 'Generating Image' },
-    { key: 'finalizing', label: 'Finalizing' },
-    { key: 'done', label: 'Complete' },
-  ];
+  // Brand color tokens
+  const brandColors: string[] = useMemo(() => {
+    const vr = selectedBrand?.visualRules || {};
+    const tokens: Array<{ type: string; value: string; name: string }> = Array.isArray(vr.colorTokens) ? vr.colorTokens : [];
+    if (tokens.length > 0) return tokens.slice(0, 5).map(t => t.value);
+    return [vr.primaryColor, vr.secondaryColor, vr.accentColor].filter(Boolean);
+  }, [selectedBrand]);
 
-  const canSubmit = !generating && !!selectedBrandId && promptText.trim().length >= PROMPT_MIN && !promptError && !dimensionError;
+  const brandTone: string[] = useMemo(() => {
+    const t = selectedBrand?.tone;
+    if (Array.isArray(t)) return t.slice(0, 3);
+    if (typeof t === 'string') return [t];
+    return [];
+  }, [selectedBrand]);
+
+  // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 space-y-8 animate-in fade-in duration-500">
-      {/* Header Banner */}
+
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between border-b border-slate-800 pb-6">
         <div className="space-y-2">
           <Link href="/projects" className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-indigo-400 transition-colors">
@@ -422,11 +433,13 @@ export default function ImageGeneratorPage() {
             </div>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
-                AI Image Creation Workspace
-                <span className="rounded-full bg-indigo-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-indigo-400 border border-indigo-500/30">PRO GATEWAY</span>
+                AI Poster Studio
+                <span className="rounded-full bg-indigo-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-indigo-400 border border-indigo-500/30">
+                  BRAND-AWARE
+                </span>
               </h1>
               <p className="mt-1 text-sm text-slate-400 flex items-center gap-2">
-                Trigger multi-tenant background generation queues, auto-enhance prompts using Brand Visual Identity.
+                Generates branded marketing posters using your brand colors, logo & content.
                 {wsConnected ? (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400">
                     <Wifi className="h-3 w-3" /> Live
@@ -442,7 +455,6 @@ export default function ImageGeneratorPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Cost Estimation Badge */}
           <div className="flex flex-col items-end gap-1">
             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Est. Cost</span>
             <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-black px-2.5 py-1 rounded-lg">
@@ -450,118 +462,180 @@ export default function ImageGeneratorPage() {
               ~${(estimatedCost / 100).toFixed(2)}
             </span>
           </div>
-          <Button 
-            onClick={() => generateMutation.mutate()} 
-            disabled={!canSubmit} 
-            className="gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-foreground font-extrabold px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
-            aria-label="Queue creative design for generation"
+          <Button
+            onClick={() => generateMutation.mutate()}
+            disabled={!canSubmit}
+            className="gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            aria-label="Generate branded marketing poster"
           >
             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            Queue Creative Design
+            Generate Poster
           </Button>
         </div>
       </div>
 
-      {/* Main Grid */}
+      {/* ── Main Grid ─────────────────────────────────────────────────────── */}
       <div className="grid gap-8 lg:grid-cols-12">
-        {/* Left Generation Parameters Panel (8 cols) */}
-        <div className="lg:col-span-8 space-y-8">
 
-          {/* Step 1: Branding & Campaign Mapping */}
+        {/* ── Left Panel (8 cols) ──────────────────────────────────────────── */}
+        <div className="lg:col-span-8 space-y-6">
+
+          {/* Step 1: Brand & Campaign */}
           <Card className="p-6 border-slate-800 bg-slate-900/50 shadow-sm space-y-5">
             <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
               <Layers className="h-5 w-5 text-indigo-400" />
-              <h2 className="text-sm font-black uppercase tracking-wider text-slate-200">1. Brand Visual Scope</h2>
+              <h2 className="text-sm font-black uppercase tracking-wider text-slate-200">1. Brand Identity</h2>
             </div>
-            
+
             <div className="grid gap-6 md:grid-cols-2">
+              {/* Brand Selector */}
               <div className="space-y-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Active Brand Profile *</span>
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Active Brand *</span>
                 {brandsLoading ? (
                   <Skeleton className="h-12 w-full rounded-xl" />
                 ) : (
                   <select
                     className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors"
                     value={selectedBrandId}
-                    onChange={(e) => setSelectedBrandId(e.target.value)}
+                    onChange={e => setSelectedBrandId(e.target.value)}
                     aria-label="Select brand profile"
                   >
                     <option value="">-- Select Brand --</option>
-                    {brands.map((b) => (
-                      <option key={b.id} value={b.id}>{b.name}</option>
-                    ))}
+                    {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
                 )}
-                {!selectedBrandId && promptText.trim().length > 0 && (
-                  <span className="text-[10px] text-amber-400 font-bold">Brand selection required</span>
-                )}
-                
-                {/* Brand Color Tokens Preview */}
+
+                {/* Brand Color & Identity Preview */}
                 {selectedBrand && (
-                  <div className="mt-3">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Color Palette Tokens</span>
-                    <div className="flex flex-wrap gap-2">
-                      {Array.isArray(selectedBrand.visualRules?.colorTokens) && selectedBrand.visualRules.colorTokens.length > 0 ? (
-                        selectedBrand.visualRules.colorTokens.map((t: any, idx: number) => (
-                          <div key={idx} className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-md py-1 px-2">
-                            <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: t.value }} title={t.value}></div>
-                            <span className="text-[9px] text-slate-300 font-medium">{t.name}</span>
-                          </div>
-                        ))
-                      ) : selectedBrand.visualRules?.primaryColor ? (
-                        <>
-                          <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-md py-1 px-2">
-                            <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: selectedBrand.visualRules.primaryColor }}></div>
-                            <span className="text-[9px] text-slate-300 font-medium">Primary</span>
-                          </div>
-                          {selectedBrand.visualRules?.secondaryColor && (
-                            <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-md py-1 px-2">
-                              <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: selectedBrand.visualRules.secondaryColor }}></div>
-                              <span className="text-[9px] text-slate-300 font-medium">Secondary</span>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <span className="text-[10px] text-slate-500 italic">No colors defined</span>
-                      )}
+                  <div className="mt-3 space-y-2">
+                    {/* Color Swatches */}
+                    {brandColors.length > 0 && (
+                      <div className="space-y-1">
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Brand Colors</span>
+                        <div className="flex gap-2">
+                          {brandColors.map((color, i) => (
+                            <div
+                              key={i}
+                              className="h-7 w-7 rounded-lg border-2 border-slate-700/50 shadow-sm"
+                              style={{ backgroundColor: color }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Brand Tone Tags */}
+                    {brandTone.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {brandTone.map(t => (
+                          <span key={t} className="text-[9px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded-full">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {/* Visual Identity Confirmed */}
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Brand visual identity will be applied to poster
                     </div>
                   </div>
                 )}
+
+                {!selectedBrandId && headlineText.trim().length > 0 && (
+                  <span className="text-[10px] text-amber-400 font-bold">Brand selection required</span>
+                )}
               </div>
 
+              {/* Campaign Selector */}
               <div className="space-y-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Link to Campaign (Optional)</span>
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Campaign (Optional)</span>
                 {campaignsLoading ? (
                   <Skeleton className="h-12 w-full rounded-xl" />
                 ) : (
                   <select
                     className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors"
                     value={selectedCampaignId}
-                    onChange={(e) => setSelectedCampaignId(e.target.value)}
+                    onChange={e => setSelectedCampaignId(e.target.value)}
                     aria-label="Link to campaign"
                   >
-                  <option value="">Standalone Creative (No Campaign link)</option>
-                  {campaigns.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                    <option value="">Standalone Poster (No Campaign)</option>
+                    {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
                 )}
               </div>
             </div>
           </Card>
 
-          {/* Step 2: Formats & Presets */}
+          {/* Step 2: Platform + Category + Style */}
           <Card className="p-6 border-slate-800 bg-slate-900/50 shadow-sm space-y-6">
             <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-              <Sliders className="h-5 w-5 text-indigo-400" />
-              <h2 className="text-sm font-black uppercase tracking-wider text-slate-200">2. Layout Format & Presets</h2>
+              <Layout className="h-5 w-5 text-indigo-400" />
+              <h2 className="text-sm font-black uppercase tracking-wider text-slate-200">2. Format & Platform</h2>
+            </div>
+
+            {/* Platform Group Tabs */}
+            <div className="space-y-3">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Target Platform *</span>
+
+              {/* Group Tabs */}
+              <div className="flex flex-wrap gap-1.5">
+                {Object.keys(PLATFORMS_GROUPED).map(group => (
+                  <button
+                    key={group}
+                    onClick={() => setActivePlatformGroup(group)}
+                    className={`text-[10px] font-black px-2.5 py-1.5 rounded-lg transition-all ${
+                      activePlatformGroup === group
+                        ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                        : 'text-slate-500 hover:text-slate-300 border border-transparent hover:border-slate-800'
+                    }`}
+                  >
+                    {GROUP_ICONS[group] || '•'} {group}
+                  </button>
+                ))}
+              </div>
+
+              {/* Platform Options for Selected Group */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {(PLATFORMS_GROUPED[activePlatformGroup] || []).map(plat => {
+                  const isSelected = selectedPlatform === plat.id;
+                  const orientClass = plat.orientation === 'portrait' ? 'aspect-[9/16]' :
+                                      plat.orientation === 'landscape' ? 'aspect-[16/6]' : 'aspect-square';
+                  return (
+                    <button
+                      key={plat.id}
+                      onClick={() => setSelectedPlatform(plat.id)}
+                      className={`flex flex-col items-center p-3 rounded-xl border transition-all ${
+                        isSelected
+                          ? 'border-indigo-500 bg-indigo-500/10 text-foreground ring-2 ring-indigo-500/25'
+                          : 'border-slate-800 hover:border-slate-700 text-slate-400 hover:bg-slate-900'
+                      }`}
+                    >
+                      {/* Visual orientation indicator */}
+                      <div className={`${orientClass} w-8 rounded border-2 mb-2 flex-shrink-0 ${
+                        isSelected ? 'border-indigo-400 bg-indigo-400/20' : 'border-slate-700 bg-slate-800/50'
+                      }`} />
+                      <span className="text-[10px] font-bold text-center leading-tight">{plat.label}</span>
+                      <span className="text-[8px] text-slate-500 font-mono mt-0.5">{plat.width}×{plat.height}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Selected platform summary */}
+              {selectedPlatform && (
+                <div className="flex items-center gap-2 text-[10px] text-slate-400 bg-slate-950 border border-slate-800 px-3 py-2 rounded-lg">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
+                  <span><span className="font-bold text-slate-300">{platformSpec.label}</span> — {platformSpec.width}×{platformSpec.height}px ({platformSpec.aspectRatio})</span>
+                </div>
+              )}
             </div>
 
             {/* Creative Category */}
             <div className="space-y-3">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Deliverable Category</span>
-              <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
-                {VISUAL_CATEGORIES.map((cat) => (
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Deliverable Category *</span>
+              <div className="grid gap-2 grid-cols-2 sm:grid-cols-3">
+                {VISUAL_CATEGORIES.map(cat => (
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
@@ -578,11 +652,11 @@ export default function ImageGeneratorPage() {
               </div>
             </div>
 
-            {/* Presets Grid */}
+            {/* Visual Style */}
             <div className="space-y-3">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Preset Visual Style</span>
-              <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
-                {PRESET_STYLES.map((style) => (
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Visual Style Preset</span>
+              <div className="grid gap-2 grid-cols-2 sm:grid-cols-3">
+                {PRESET_STYLES.map(style => (
                   <button
                     key={style.id}
                     onClick={() => setSelectedStyle(style.id)}
@@ -598,342 +672,240 @@ export default function ImageGeneratorPage() {
                 ))}
               </div>
             </div>
-
-            {/* Aspect Ratio Selector */}
-            <div className="space-y-3">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Aspect Ratio Grid</span>
-              <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
-                {ASPECT_RATIOS.map((ratio) => (
-                  <button
-                    key={ratio.id}
-                    onClick={() => setSelectedRatioId(ratio.id)}
-                    className={`flex items-start gap-3 p-3.5 text-left rounded-xl border transition-all ${
-                      selectedRatioId === ratio.id
-                        ? 'border-indigo-500 bg-indigo-500/10 text-foreground ring-2 ring-indigo-500/25'
-                        : 'border-slate-800 hover:border-slate-700 text-slate-400 hover:bg-slate-900'
-                    }`}
-                  >
-                    <div className={`h-8 w-6 border-2 rounded transition-colors ${selectedRatioId === ratio.id ? 'border-indigo-400 bg-indigo-400/20' : 'border-slate-750'} flex-shrink-0`} style={{ 
-                      aspectRatio: ratio.id === '1:1' ? '1' : ratio.id === '16:9' ? '16/9' : '9/16',
-                      width: ratio.id === '16:9' ? '32px' : '20px'
-                    }} />
-                    <div>
-                      <span className="text-xs font-bold block">{ratio.label}</span>
-                      <span className="text-[9px] text-slate-500 font-bold uppercase">{ratio.width} x {ratio.height}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {/* Custom Size Checkbox */}
-              <div className="mt-4 flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="customSizeCheck"
-                  checked={isCustomSize}
-                  onChange={(e) => setIsCustomSize(e.target.checked)}
-                  className="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-indigo-500"
-                />
-                <label htmlFor="customSizeCheck" className="text-xs font-bold text-slate-300">
-                  Use Custom Dimensions
-                </label>
-              </div>
-
-              {/* Custom Size Inputs */}
-              {isCustomSize && (
-                <div className="space-y-2">
-                  <div className="flex gap-4 items-center">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Width (px)</label>
-                      <input
-                        type="number"
-                        value={customWidth}
-                        onChange={(e) => setCustomWidth(parseInt(e.target.value) || 0)}
-                        min={DIM_MIN}
-                        max={DIM_MAX}
-                        className={`w-24 rounded-xl border bg-slate-950 px-3 py-2 text-xs text-foreground outline-none transition-colors ${
-                          isCustomSize && (customWidth < DIM_MIN || customWidth > DIM_MAX) ? 'border-rose-500' : 'border-slate-800 focus:border-indigo-500'
-                        }`}
-                        aria-label="Custom width in pixels"
-                      />
-                    </div>
-                    <span className="text-slate-500 font-bold mt-5">×</span>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Height (px)</label>
-                      <input
-                        type="number"
-                        value={customHeight}
-                        onChange={(e) => setCustomHeight(parseInt(e.target.value) || 0)}
-                        min={DIM_MIN}
-                        max={DIM_MAX}
-                        className={`w-24 rounded-xl border bg-slate-950 px-3 py-2 text-xs text-foreground outline-none transition-colors ${
-                          isCustomSize && (customHeight < DIM_MIN || customHeight > DIM_MAX) ? 'border-rose-500' : 'border-slate-800 focus:border-indigo-500'
-                        }`}
-                        aria-label="Custom height in pixels"
-                      />
-                    </div>
-                  </div>
-                  {dimensionError && (
-                    <span className="text-[10px] text-rose-400 font-bold">{dimensionError}</span>
-                  )}
-                </div>
-              )}
-            </div>
           </Card>
 
-          {/* Step 3: Generative Directives & Content Source */}
+          {/* Step 3: Content */}
           <Card className="p-6 border-slate-800 bg-slate-900/50 shadow-sm space-y-4">
             <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-              <ImageIcon className="h-5 w-5 text-indigo-400" />
-              <h2 className="text-sm font-black uppercase tracking-wider text-slate-200">3. Generative Directives</h2>
+              <Type className="h-5 w-5 text-indigo-400" />
+              <h2 className="text-sm font-black uppercase tracking-wider text-slate-200">3. Poster Content</h2>
+              <span className="text-[9px] font-bold uppercase tracking-widest text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded ml-auto">
+                Auto-extracted by Brand Prompt Engine
+              </span>
             </div>
 
-            {/* Content Source Tabs */}
-            <div className="grid grid-cols-5 gap-1.5 bg-slate-950 border border-slate-800 p-1 rounded-xl mb-4">
-              {[
-                { id: 'manual', label: 'Manual Copy' },
-                { id: 'approved', label: 'Approved Assets' },
-                { id: 'library', label: 'Content Library' },
-                { id: 'knowledge', label: 'Knowledge Hub' },
-                { id: 'sources', label: 'Sources' }
-              ].map(src => (
+            {/* Content Mode Toggle */}
+            <div className="grid grid-cols-2 gap-1.5 bg-slate-950 border border-slate-800 p-1 rounded-xl">
+              {([
+                { id: 'manual',  label: '✏️  Manual Fields' },
+                { id: 'content', label: '📋  From Approved Content' },
+              ] as const).map(mode => (
                 <button
-                  key={src.id}
-                  onClick={() => setContentSource(src.id as any)}
-                  className={`text-[10px] font-black py-2 rounded-lg transition-all uppercase tracking-wider ${
-                    contentSource === src.id 
-                      ? 'bg-slate-800 text-indigo-400 shadow-md border border-slate-700/50' 
+                  key={mode.id}
+                  onClick={() => setContentMode(mode.id)}
+                  className={`text-[11px] font-black py-2.5 rounded-lg transition-all uppercase tracking-wider ${
+                    contentMode === mode.id
+                      ? 'bg-slate-800 text-indigo-400 shadow-md border border-slate-700/50'
                       : 'text-slate-500 hover:text-slate-300'
                   }`}
                 >
-                  {src.label}
+                  {mode.label}
                 </button>
               ))}
             </div>
 
-            <div className="space-y-3">
-              {contentSource === 'manual' && (
-                <div className="space-y-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex justify-between">
-                    <span>Core Prompt Instruction *</span>
-                    <span className="text-[9px] text-indigo-400 font-bold uppercase">Enhanced by Brand Prompt-Engine</span>
-                  </span>
-                  <textarea
-                    className={`w-full min-h-[100px] rounded-xl border bg-slate-950 px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-slate-600 ${
-                      promptError ? 'border-rose-500 focus:border-rose-400' : 'border-slate-800 focus:border-indigo-500'
-                    }`}
-                    value={promptText}
-                    onChange={(e) => setPromptText(e.target.value)}
-                    placeholder="E.g. Dynamic capture of organic product, droplets, studio light setup, visual symmetry, clean background placeholder"
-                    maxLength={PROMPT_MAX}
-                    aria-label="Image generation prompt"
-                    aria-describedby="prompt-counter"
-                  />
-                  <div className="flex justify-between items-center" id="prompt-counter">
-                    {promptError ? (
-                      <span className="text-[10px] text-rose-400 font-bold">{promptError}</span>
-                    ) : (
-                      <span className="text-[10px] text-slate-600">Min {PROMPT_MIN} characters</span>
-                    )}
-                    <span className={`text-[10px] font-mono font-bold ${
-                      promptText.length > PROMPT_MAX * 0.9 ? 'text-amber-400' : 'text-slate-600'
-                    }`}>
-                      {promptText.length}/{PROMPT_MAX}
+            {/* Manual Mode — Structured Fields */}
+            {contentMode === 'manual' && (
+              <div className="space-y-4 animate-in slide-in-from-top-2 duration-200">
+                {/* Headline */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                      Headline * <span className="text-rose-400">(required)</span>
+                    </label>
+                    <span className={`text-[9px] font-mono ${headlineText.length > 180 ? 'text-amber-400' : 'text-slate-600'}`}>
+                      {headlineText.length}/200
                     </span>
                   </div>
+                  <input
+                    type="text"
+                    value={headlineText}
+                    onChange={e => setHeadlineText(e.target.value)}
+                    maxLength={200}
+                    placeholder="e.g. Launch Your Brand Into the Future"
+                    className={`w-full rounded-xl border bg-slate-950 px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-slate-600 ${
+                      headlineText.trim().length > 0 && headlineText.trim().length < 5
+                        ? 'border-rose-500 focus:border-rose-400'
+                        : 'border-slate-800 focus:border-indigo-500'
+                    }`}
+                    aria-label="Poster headline"
+                    aria-describedby="headline-help"
+                  />
+                  <p id="headline-help" className="text-[9px] text-slate-600">
+                    The main message of your poster. This becomes the primary visual focus of the design.
+                  </p>
                 </div>
-              )}
 
-              {contentSource === 'approved' && (
-                <div className="space-y-3">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">
-                    Approved Brand Assets ({approvedContents.length})
-                  </span>
-                  {approvedContentsLoading ? (
-                    <div className="space-y-2">
-                      <Skeleton className="h-16 w-full rounded-xl bg-slate-900/50" />
-                      <Skeleton className="h-16 w-full rounded-xl bg-slate-900/50" />
-                    </div>
-                  ) : approvedContents.length === 0 ? (
-                    <div className="text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl p-6 text-center">
-                      No approved content items found for this brand.
-                    </div>
-                  ) : (
-                    <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                      {approvedContents.map((content) => {
-                        const contentCategory = content.metadata?.contentCategory || content.type;
-                        const mappedCategory = CONTENT_CATEGORY_TO_IMAGE_CATEGORY[contentCategory] || 'SMO_POSTER';
-                        const isSelected = promptText === content.body;
-                        return (
-                          <div 
-                            key={content.id}
-                            onClick={() => {
-                              setPromptText(content.body);
-                              if (content.campaignId) setSelectedCampaignId(content.campaignId);
-                              setSelectedCategory(mappedCategory);
-                              toast({
-                                title: 'Asset Loaded',
-                                description: `Loaded prompt from ${contentCategory} content.`,
-                              });
-                            }}
-                            className={`border rounded-xl p-3 cursor-pointer text-left transition-all ${
-                              isSelected 
-                                ? 'border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10' 
-                                : 'border-slate-850 bg-slate-950 hover:border-slate-700'
-                            }`}
-                          >
-                            <div className="flex justify-between items-start gap-2 mb-1.5">
-                              <span className="text-[10px] font-black uppercase text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
-                                {contentCategory}
-                              </span>
-                              <span className="text-[9px] font-mono text-slate-500">
-                                {new Date(content.createdAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <p className="text-slate-350 text-xs line-clamp-2 leading-relaxed">
-                              {content.body}
-                            </p>
-                            {isSelected && (
-                              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-wider block mt-2">
-                                ✓ Loaded as Prompt Source
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {promptError && contentSource === 'approved' && promptText.length > 0 && (
-                    <span className="text-[10px] text-rose-400 font-bold block mt-2">{promptError}</span>
-                  )}
-                </div>
-              )}
-
-              {contentSource === 'library' && (
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
-                  {[
-                    'Product Launch: High fidelity product shot with modern background', 
-                    'Seasonal Promo: Warm autumn colors, cozy aesthetic, typography space', 
-                    'Corporate Testimonial: Professional office environment, clean white space', 
-                    'Webinar Invite: Tech abstract graphics, deep blues and purples'
-                  ].map((t, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        setPromptText(t);
-                        setContentSource('manual');
-                      }}
-                      className="border border-slate-850 hover:border-indigo-500/50 bg-slate-950 text-slate-400 hover:text-white rounded-xl p-3 text-left text-[11px] font-bold transition-colors"
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {contentSource === 'knowledge' && (
-                <div className="space-y-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Select Knowledge Base Reference</span>
-                  <select
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors"
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setPromptText(`Base image on knowledge hub document: ${e.target.value}`);
-                        setContentSource('manual');
-                      }
-                    }}
-                    defaultValue=""
-                  >
-                    <option value="" disabled>Select a document...</option>
-                    <option value={`${selectedBrand?.name || 'Brand'} Identity Guidelines`}>{selectedBrand?.name || 'Brand'} Identity Guidelines</option>
-                    <option value="Product Spec Sheet v2">Product Spec Sheet v2</option>
-                    <option value="Target Audience Persona Cards">Target Audience Persona Cards</option>
-                  </select>
-                </div>
-              )}
-
-              {contentSource === 'sources' && (
-                <div className="space-y-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">External Source / Competitor URL</span>
-                  <div className="flex gap-2">
-                    <input
-                      type="url"
-                      placeholder="https://example.com/reference-image"
-                      className="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
-                      id="sourceUrlInput"
-                    />
-                    <button 
-                      className="bg-indigo-500 hover:bg-indigo-600 text-foreground px-4 py-3 rounded-xl text-xs font-bold transition-colors"
-                      onClick={() => {
-                        const val = (document.getElementById('sourceUrlInput') as HTMLInputElement)?.value;
-                        if (val) {
-                          setPromptText(`Recreate style inspired by external source: ${val}`);
-                          setContentSource('manual');
-                        }
-                      }}
-                    >
-                      Use Source
-                    </button>
+                {/* Subheadline */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Subheadline (Optional)</label>
+                    <span className={`text-[9px] font-mono ${subheadlineText.length > 260 ? 'text-amber-400' : 'text-slate-600'}`}>
+                      {subheadlineText.length}/300
+                    </span>
                   </div>
+                  <input
+                    type="text"
+                    value={subheadlineText}
+                    onChange={e => setSubheadlineText(e.target.value)}
+                    maxLength={300}
+                    placeholder="e.g. Transform your marketing with AI-powered automation"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
+                    aria-label="Poster subheadline"
+                  />
                 </div>
-              )}
-            </div>
 
-            {/* Advanced Trigger */}
+                {/* CTA */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                      <Target className="h-3.5 w-3.5 text-emerald-400" />
+                      Call-to-Action (Optional)
+                    </label>
+                    <span className={`text-[9px] font-mono ${ctaText.length > 85 ? 'text-amber-400' : 'text-slate-600'}`}>
+                      {ctaText.length}/100
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={ctaText}
+                    onChange={e => setCtaText(e.target.value)}
+                    maxLength={100}
+                    placeholder="e.g. Get Started Free  •  Book a Demo  •  Learn More"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
+                    aria-label="Call-to-action text"
+                  />
+                  <p className="text-[9px] text-slate-600">
+                    The CTA zone will be positioned prominently in the poster composition.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Content Mode — Link Approved Content */}
+            {contentMode === 'content' && (
+              <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                  Select Approved Content ({approvedContents.length})
+                </span>
+                <p className="text-[10px] text-slate-500">
+                  Headline, CTA, and campaign objective will be automatically extracted from the selected content piece.
+                </p>
+
+                {!selectedBrandId ? (
+                  <div className="text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl p-6 text-center">
+                    Select a brand first to see approved content
+                  </div>
+                ) : approvedContentsLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-16 w-full rounded-xl bg-slate-900/50" />
+                    <Skeleton className="h-16 w-full rounded-xl bg-slate-900/50" />
+                  </div>
+                ) : approvedContents.length === 0 ? (
+                  <div className="text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl p-6 text-center">
+                    No approved content found for this brand.
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {approvedContents.map(content => {
+                      const isSelected = selectedContentId === content.id;
+                      const category = content.metadata?.contentCategory || content.type;
+                      return (
+                        <div
+                          key={content.id}
+                          onClick={() => {
+                            setSelectedContentId(content.id);
+                            if (content.campaignId) setSelectedCampaignId(content.campaignId);
+                            const mapped = CONTENT_CATEGORY_TO_IMAGE_CATEGORY[category] || 'SMO_POSTER';
+                            setSelectedCategory(mapped);
+                            toast({ title: '✅ Content Linked', description: 'Headline, CTA & objective will be auto-extracted.' });
+                          }}
+                          className={`border rounded-xl p-3 cursor-pointer text-left transition-all ${
+                            isSelected
+                              ? 'border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10'
+                              : 'border-slate-850 bg-slate-950 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start gap-2 mb-1.5">
+                            <span className="text-[10px] font-black uppercase text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
+                              {category}
+                            </span>
+                            <span className="text-[9px] font-mono text-slate-500">
+                              {new Date(content.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-slate-350 text-xs line-clamp-2 leading-relaxed">{content.body}</p>
+                          {isSelected && (
+                            <span className="text-[9px] font-black text-emerald-400 uppercase tracking-wider block mt-2">
+                              ✓ Linked — Headline & CTA will be auto-extracted
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Advanced Settings Toggle */}
             <button
               onClick={() => setShowAdvanced(!showAdvanced)}
               className="flex items-center gap-2 text-xs font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-wider"
             >
               <Settings className={`h-3.5 w-3.5 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} />
-              {showAdvanced ? 'Hide advanced settings' : 'Show advanced settings'}
+              {showAdvanced ? 'Hide advanced settings' : 'Advanced settings'}
             </button>
 
             {showAdvanced && (
               <div className="grid gap-6 md:grid-cols-2 pt-4 border-t border-slate-800 animate-in slide-in-from-top-2 duration-300">
                 <div className="space-y-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Preferred AI Provider Model</span>
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">AI Image Provider</span>
                   <select
                     className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors"
                     value={selectedProvider}
-                    onChange={(e) => setSelectedProvider(e.target.value)}
+                    onChange={e => setSelectedProvider(e.target.value)}
+                    aria-label="Select AI image provider"
                   >
-                    <option value="stability">Stability AI SDXL (Base64 lossless stream)</option>
-                    <option value="openai">OpenAI DALL-E 3 (High fidelity sandboxed)</option>
+                    <option value="openai">OpenAI DALL-E 3 (Vivid — Poster Quality)</option>
+                    <option value="flux">FLUX.1-dev via BFL (Premium Quality)</option>
+                    <option value="stability">Stability AI SDXL (Fallback)</option>
                   </select>
                 </div>
-
                 <div className="space-y-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Rendering Resolution Quality</span>
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Rendering Quality</span>
                   <select
                     className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-foreground outline-none focus:border-indigo-500 transition-colors"
                     value={selectedQuality}
-                    onChange={(e) => setSelectedQuality(e.target.value as any)}
+                    onChange={e => setSelectedQuality(e.target.value as any)}
+                    aria-label="Select rendering quality"
                   >
-                    <option value="standard">Standard Quality (1 Credit)</option>
-                    <option value="hd">High-Definition rendering (2 Credits)</option>
+                    <option value="standard">Standard Quality (~$0.03–0.04)</option>
+                    <option value="hd">HD / High-Definition (~$0.08)</option>
                   </select>
                 </div>
               </div>
             )}
           </Card>
 
-          {/* Active Job Progress Visualizer */}
+          {/* ── Active Job Progress ─────────────────────────────────────────── */}
           {generating && (
             <Card className="p-6 border-indigo-500/30 bg-indigo-950/10 space-y-5 animate-in slide-in-from-bottom-2 duration-300">
-              {/* Pipeline Stage Indicators */}
+              {/* Stage Pipeline */}
               <div className="flex items-center justify-between gap-1">
                 {STAGES.map((stage, idx) => {
                   const stageIdx = STAGES.findIndex(s => s.key === currentStage);
-                  const isActive = stage.key === currentStage;
+                  const isActive    = stage.key === currentStage;
                   const isCompleted = idx < stageIdx;
                   return (
                     <div key={stage.key} className="flex items-center gap-1 flex-1">
                       <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${
-                        isActive ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 animate-pulse' :
-                        isCompleted ? 'bg-emerald-500/10 text-emerald-400' :
-                        'text-slate-600'
+                        isActive    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 animate-pulse' :
+                        isCompleted ? 'bg-emerald-500/10 text-emerald-400' : 'text-slate-600'
                       }`}>
-                        {isCompleted ? <CheckCircle2 className="h-3 w-3" /> : isActive ? <Loader2 className="h-3 w-3 animate-spin" /> : <div className="h-3 w-3 rounded-full border border-slate-700" />}
+                        {isCompleted ? <CheckCircle2 className="h-3 w-3" /> :
+                         isActive    ? <Loader2 className="h-3 w-3 animate-spin" /> :
+                         <div className="h-3 w-3 rounded-full border border-slate-700" />}
                         <span className="hidden sm:inline">{stage.label}</span>
                       </div>
                       {idx < STAGES.length - 1 && (
@@ -955,41 +927,40 @@ export default function ImageGeneratorPage() {
                   </span>
                 </div>
                 <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden" role="progressbar" aria-valuenow={currentProgress} aria-valuemin={0} aria-valuemax={100}>
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-indigo-500 to-violet-500 h-2.5 rounded-full transition-all duration-700 ease-out shadow-md shadow-indigo-500/50"
                     style={{ width: `${currentProgress}%` }}
                   />
                 </div>
               </div>
 
-              {/* Enhanced Prompt Display */}
+              {/* Final Prompt Preview */}
               {currentFinalPrompt && (
-                <div className="bg-slate-950 border border-slate-800 p-3 rounded-lg text-[10px] text-slate-500 font-mono italic">
-                  ENHANCED PROMPT: &ldquo;{currentFinalPrompt}&rdquo;
+                <div className="bg-slate-950 border border-slate-800 p-3 rounded-lg text-[10px] text-slate-500 font-mono italic leading-relaxed">
+                  <span className="text-indigo-400 font-bold not-italic">POSTER PROMPT: </span>
+                  &ldquo;{currentFinalPrompt.slice(0, 280)}{currentFinalPrompt.length > 280 ? '...' : ''}&rdquo;
                 </div>
               )}
             </Card>
           )}
 
-          {/* Historical Generations Grid */}
+          {/* ── Generation History ──────────────────────────────────────────── */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <History className="h-5 w-5 text-slate-400" />
                 <h2 className="text-sm font-black uppercase tracking-wider text-slate-300">Generation History ({filteredJobs.length})</h2>
               </div>
-              {/* Status Filter */}
               <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 p-0.5 rounded-lg">
-                {(['all', 'COMPLETED', 'FAILED', 'PROCESSING'] as const).map((f) => (
+                {(['all', 'COMPLETED', 'FAILED', 'PROCESSING'] as const).map(f => (
                   <button
                     key={f}
                     onClick={() => setStatusFilter(f)}
                     className={`text-[9px] font-black px-2 py-1 rounded transition-all uppercase ${
-                      statusFilter === f 
-                        ? 'bg-slate-800 text-indigo-400 shadow-sm' 
+                      statusFilter === f
+                        ? 'bg-slate-800 text-indigo-400 shadow-sm'
                         : 'text-slate-500 hover:text-slate-300'
                     }`}
-                    aria-label={`Filter by ${f === 'all' ? 'all statuses' : f.toLowerCase()}`}
                   >
                     {f === 'all' ? 'All' : f === 'COMPLETED' ? '✓ Done' : f === 'FAILED' ? '✗ Failed' : '⟳ Active'}
                   </button>
@@ -999,13 +970,12 @@ export default function ImageGeneratorPage() {
 
             {jobsLoading ? (
               <div className="grid gap-4 sm:grid-cols-2">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4].map(i => (
                   <Card key={i} className="border-slate-800 bg-slate-900/30 overflow-hidden">
                     <Skeleton className="aspect-video w-full" />
                     <div className="p-4 space-y-2">
                       <Skeleton className="h-4 w-24" />
                       <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-3 w-2/3" />
                     </div>
                   </Card>
                 ))}
@@ -1014,45 +984,49 @@ export default function ImageGeneratorPage() {
               <Card className="p-8 text-center border-dashed border-slate-800 bg-slate-900/15">
                 <ImageIcon className="h-8 w-8 text-slate-600 mx-auto mb-2" />
                 <span className="text-xs font-bold text-slate-500">
-                  {statusFilter === 'all' 
-                    ? 'No images generated in this workspace yet.' 
+                  {statusFilter === 'all'
+                    ? 'No posters generated in this workspace yet. Create your first branded poster above.'
                     : `No ${statusFilter.toLowerCase()} jobs found.`}
                 </span>
               </Card>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
-                {filteredJobs.map((job) => {
+                {filteredJobs.map(job => {
                   const img = job.images?.[0];
+                  const headline = job.posterContext?.headline || job.rawPrompt;
                   return (
                     <Card key={job.id} className="border-slate-800 bg-slate-900/30 overflow-hidden flex flex-col justify-between group">
                       {job.status === 'COMPLETED' && img?.asset ? (
                         <div className="relative aspect-video w-full bg-slate-950 border-b border-slate-800">
-                          <img 
-                            src={img.asset.cdnUrl} 
-                            alt={`Generated image: ${job.rawPrompt.substring(0, 100)}`}
-                            className="h-full w-full object-cover filter brightness-[0.8] group-hover:brightness-100 transition-all"
+                          <img
+                            src={img.asset.cdnUrl}
+                            alt={`Generated poster: ${headline.slice(0, 80)}`}
+                            className="h-full w-full object-cover filter brightness-[0.85] group-hover:brightness-100 transition-all"
                           />
                           <div className="absolute top-2.5 right-2.5 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button 
-                              onClick={() => {
-                                navigator.clipboard.writeText(img.asset.cdnUrl);
-                                toast({ title: 'URL copied to clipboard' });
-                              }}
+                            <button
+                              onClick={() => { navigator.clipboard.writeText(img.asset.cdnUrl); toast({ title: 'URL copied' }); }}
                               className="p-1.5 bg-slate-900/80 hover:bg-slate-900 rounded-lg text-slate-300 border border-slate-700/50 hover:text-white transition-colors"
                               aria-label="Copy image URL"
                             >
                               <Share2 className="h-3.5 w-3.5" />
                             </button>
-                            <a 
-                              href={img.asset.cdnUrl} 
+                            <a
+                              href={img.asset.cdnUrl}
                               download={img.asset.fileName}
                               target="_blank"
                               rel="noreferrer"
                               className="p-1.5 bg-slate-900/80 hover:bg-slate-900 rounded-lg text-slate-300 border border-slate-700/50 hover:text-white transition-colors"
-                              aria-label="Download image asset"
+                              aria-label="Download poster"
                             >
                               <Download className="h-3.5 w-3.5" />
                             </a>
+                          </div>
+                          {/* Poster badge */}
+                          <div className="absolute top-2.5 left-2.5">
+                            <span className="text-[8px] font-black uppercase bg-slate-900/80 border border-slate-700/50 text-emerald-400 px-2 py-0.5 rounded">
+                              ✓ Branded Poster
+                            </span>
                           </div>
                         </div>
                       ) : (
@@ -1061,12 +1035,12 @@ export default function ImageGeneratorPage() {
                             <>
                               <AlertCircle className="h-8 w-8 text-rose-500" />
                               <span className="text-xs font-extrabold text-rose-400 uppercase leading-none">Generation Failed</span>
-                              <span className="text-[10px] text-slate-500 line-clamp-2">{job.error || 'Unknown error occurred'}</span>
+                              <span className="text-[10px] text-slate-500 line-clamp-2">{job.error || 'Unknown error'}</span>
                             </>
                           ) : (
                             <>
                               <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
-                              <span className="text-[10px] font-black uppercase text-indigo-300 tracking-wider">Processing ({job.progress}%)</span>
+                              <span className="text-[10px] font-black uppercase text-indigo-300 tracking-wider">Generating Poster ({job.progress}%)</span>
                             </>
                           )}
                         </div>
@@ -1074,12 +1048,24 @@ export default function ImageGeneratorPage() {
 
                       <div className="p-4 space-y-3">
                         <div>
-                          <span className="text-[8px] font-black uppercase text-slate-500 bg-slate-950 border border-slate-800 px-2 py-0.5 rounded leading-none">
-                            {job.category} • {job.settings?.aspectRatio || '1:1'}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[8px] font-black uppercase text-slate-500 bg-slate-950 border border-slate-800 px-2 py-0.5 rounded leading-none">
+                              {job.category}
+                            </span>
+                            {job.platform && (
+                              <span className="text-[8px] font-black uppercase text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded leading-none">
+                                {job.platform.replace(/_/g, ' ')}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[11px] text-slate-300 font-bold mt-2 line-clamp-2 leading-relaxed">
-                            &ldquo;{job.rawPrompt}&rdquo;
+                            &ldquo;{headline}&rdquo;
                           </p>
+                          {job.posterContext?.cta && (
+                            <p className="text-[10px] text-emerald-400 font-bold mt-1">
+                              CTA: {job.posterContext.cta}
+                            </p>
+                          )}
                         </div>
 
                         {job.status === 'COMPLETED' && img?.asset && (
@@ -1095,16 +1081,16 @@ export default function ImageGeneratorPage() {
                         {job.status === 'FAILED' && (
                           <Button
                             onClick={() => {
-                              setPromptText(job.rawPrompt);
-                              setContentSource('manual');
-                              if (job.settings?.aspectRatio) setSelectedRatioId(job.settings.aspectRatio);
+                              if (job.platform) setSelectedPlatform(job.platform);
                               if (job.category) setSelectedCategory(job.category);
+                              if (job.posterContext?.headline) setHeadlineText(job.posterContext.headline);
+                              if (job.posterContext?.cta) setCtaText(job.posterContext.cta);
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
                             className="w-full gap-1.5 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 py-2 rounded-lg text-[10.5px] font-black uppercase tracking-wider transition-colors"
-                            aria-label="Retry this generation with the same prompt"
+                            aria-label="Retry this generation"
                           >
-                            <RefreshCw className="h-3 w-3" /> Regenerate
+                            <RefreshCw className="h-3 w-3" /> Retry Poster
                           </Button>
                         )}
                       </div>
@@ -1117,86 +1103,139 @@ export default function ImageGeneratorPage() {
 
         </div>
 
-        {/* Right Sticky Guidelines Sidebar (4 cols) */}
+        {/* ── Right Sidebar (4 cols) ──────────────────────────────────────── */}
         <div className="lg:col-span-4 self-start sticky top-6 space-y-6">
 
-          {/* Active Brand Guidelines Context */}
+          {/* Brand Context Panel */}
           <Card className="p-5 border-slate-800 bg-slate-900/50 space-y-4">
             <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
-              <ImageIcon className="h-4 w-4 text-indigo-400" />
+              <Palette className="h-4 w-4 text-indigo-400" />
               <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
-                {selectedBrand ? `${selectedBrand.name} Guidelines` : 'Brand Identity Guidelines'}
+                {selectedBrand ? `${selectedBrand.name} — Brand Context` : 'Brand Context'}
               </h3>
             </div>
 
             {!selectedBrandId ? (
               <div className="text-xs text-slate-500 text-center py-6">
-                Please select a Brand to fetch visual assets guidelines.
+                Select a brand to preview the visual identity that will be applied to your poster.
               </div>
             ) : selectedBrand ? (
               <div className="space-y-4 text-xs leading-relaxed">
-                <div>
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block leading-none">Color Palette Tokens</span>
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {(selectedBrand.visualRules?.colors || ['#6366f1', '#a855f7', '#ec4899', '#f43f5e']).map((color: string) => (
-                      <div key={color} className="flex items-center gap-1 bg-slate-950 border border-slate-800 px-2 py-0.5 rounded text-[10px] font-mono text-slate-400">
-                        <div className="h-2.5 w-2.5 rounded-full border border-slate-800" style={{ backgroundColor: color }} />
-                        {color}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block leading-none">Brand Industry Focus</span>
-                  <span className="inline-block mt-2 rounded bg-indigo-500/10 px-2.5 py-0.5 text-[10px] font-bold text-indigo-400 border border-indigo-500/20 capitalize">
-                    {selectedBrand.industry || 'SAAS Automation'}
-                  </span>
-                </div>
-
-                {selectedBrand.positioning && (
+                {/* Colors */}
+                {brandColors.length > 0 && (
                   <div>
-                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block leading-none">Visual Vibe Direction</span>
-                    <p className="mt-2 text-slate-400 font-medium leading-relaxed">
-                      {selectedBrand.positioning}
-                    </p>
+                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Brand Colors</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {brandColors.map((color, i) => (
+                        <div key={i} className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-md py-1 px-2">
+                          <div className="w-3.5 h-3.5 rounded-full border border-white/10 shadow-sm" style={{ backgroundColor: color }} />
+                          <span className="text-[9px] text-slate-300 font-mono">{color}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
-                <div className="pt-2">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase text-emerald-400 leading-none">
-                    <Check className="h-4 w-4" /> Brand-safe prompting rules active
+                {/* Industry */}
+                {selectedBrand.industry && (
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Industry</span>
+                    <span className="inline-block rounded bg-indigo-500/10 px-2.5 py-0.5 text-[10px] font-bold text-indigo-400 border border-indigo-500/20">
+                      {selectedBrand.industry}
+                    </span>
                   </div>
+                )}
+
+                {/* Tone */}
+                {brandTone.length > 0 && (
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Brand Tone</span>
+                    <div className="flex flex-wrap gap-1">
+                      {brandTone.map(t => (
+                        <span key={t} className="text-[9px] font-bold uppercase bg-violet-500/10 text-violet-400 border border-violet-500/20 px-2 py-0.5 rounded-full">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Positioning */}
+                {selectedBrand.positioning && (
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Visual Direction</span>
+                    <p className="text-slate-400 font-medium leading-relaxed text-[10px]">{selectedBrand.positioning}</p>
+                  </div>
+                )}
+
+                {/* Confirmation */}
+                <div className="pt-1 border-t border-slate-800 space-y-1.5">
+                  {[
+                    '✓ Brand colors applied to poster palette',
+                    '✓ Brand tone shapes visual language',
+                    '✓ Logo zone reserved in composition',
+                    '✓ Industry-relevant visual concepts',
+                  ].map(item => (
+                    <div key={item} className="text-[9px] font-bold text-emerald-400">{item}</div>
+                  ))}
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-slate-500 text-center py-6">
-                Resolving Brand Guidelines context...
-              </div>
+              <div className="text-xs text-slate-500 text-center py-6">Loading brand context...</div>
             )}
           </Card>
 
-          {/* Pricing Info Alerts */}
+          {/* Platform Preview Panel */}
+          {selectedPlatform && (
+            <Card className="p-5 border-slate-800 bg-slate-900/50 space-y-3">
+              <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
+                <Monitor className="h-4 w-4 text-indigo-400" />
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Platform Spec</h3>
+              </div>
+              <div className="space-y-2 text-[10px]">
+                <div className="flex justify-between text-slate-400">
+                  <span className="font-bold text-slate-300">{platformSpec.label}</span>
+                  <span className="text-indigo-400 font-mono font-bold">{platformSpec.aspectRatio}</span>
+                </div>
+                <div className="flex justify-between text-slate-500">
+                  <span>Dimensions</span>
+                  <span className="font-mono text-slate-400">{platformSpec.width} × {platformSpec.height}px</span>
+                </div>
+                <div className="flex justify-between text-slate-500">
+                  <span>Orientation</span>
+                  <span className="capitalize text-slate-400">{platformSpec.orientation}</span>
+                </div>
+                {/* Visual representation */}
+                <div className="flex justify-center pt-2">
+                  <div
+                    className="bg-indigo-500/10 border-2 border-indigo-500/30 rounded"
+                    style={{
+                      width:  platformSpec.orientation === 'landscape' ? '80px' : platformSpec.orientation === 'portrait' ? '32px' : '56px',
+                      height: platformSpec.orientation === 'landscape' ? '28px' : platformSpec.orientation === 'portrait' ? '56px' : '56px',
+                    }}
+                  />
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Billing Info */}
           <Card className="p-4 border-slate-800 bg-slate-950 text-xs text-slate-500 space-y-2.5">
             <div className="flex items-center gap-2 font-black text-slate-400 uppercase tracking-wider text-[10px]">
-              <AlertCircle className="h-4 w-4 text-amber-500" /> Platform Billing
+              <AlertCircle className="h-4 w-4 text-amber-500" /> Provider Cost
             </div>
-            <p className="leading-relaxed">
-              Each generation consumes workspace credits based on provider and quality. 
-            </p>
             <div className="bg-slate-900 border border-slate-800 p-2.5 rounded text-[10.5px] text-slate-400 font-bold space-y-1">
-              <div className="flex justify-between">
-                <span>Stability AI (Standard):</span>
-                <span className="text-foreground">~$0.03</span>
-              </div>
-              <div className="flex justify-between">
-                <span>OpenAI DALL-E 3 (Standard):</span>
-                <span className="text-foreground">~$0.04</span>
-              </div>
-              <div className="flex justify-between">
-                <span>OpenAI DALL-E 3 (HD):</span>
-                <span className="text-foreground">~$0.08</span>
-              </div>
+              {[
+                ['DALL-E 3 Standard', '~$0.04'],
+                ['DALL-E 3 HD', '~$0.08'],
+                ['FLUX.1-dev', '~$0.035'],
+                ['Stability SDXL', '~$0.03'],
+              ].map(([name, price]) => (
+                <div key={name} className="flex justify-between">
+                  <span>{name}:</span>
+                  <span className="text-foreground">{price}</span>
+                </div>
+              ))}
               <div className="border-t border-slate-800 pt-1 mt-1 flex justify-between text-indigo-400">
                 <span>Your selection:</span>
                 <span className="font-black">~${(estimatedCost / 100).toFixed(2)}</span>

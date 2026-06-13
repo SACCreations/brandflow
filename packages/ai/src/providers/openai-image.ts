@@ -39,6 +39,7 @@ export class OpenAIImageProvider implements ImageProvider {
       n: request.numberOfImages ?? 1,
       size: this.resolveSize(request.width, request.height),
       quality: quality,
+      style: 'vivid', // 'vivid' produces hyper-real, dramatic poster-quality results vs 'natural' for photography
       response_format: 'url',
     });
 

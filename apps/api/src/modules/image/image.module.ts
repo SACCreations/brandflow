@@ -9,6 +9,9 @@ import { ImageJobProcessor } from './queue/image-job.processor';
 import { CanvasService } from './canvas.service';
 import { ImageWebSocketGateway } from './image.gateway';
 import { LlmSettingsModule } from '../llm-settings/llm-settings.module';
+import { BrandContextResolverService } from './services/brand-context-resolver.service';
+import { ContentContextResolverService } from './services/content-context-resolver.service';
+import { PlatformDimensionService } from './services/platform-dimension.service';
 
 const IMAGE_GENERATION_QUEUE = 'image-generation';
 
@@ -33,7 +36,23 @@ const IMAGE_GENERATION_QUEUE = 'image-generation';
     LlmSettingsModule,
   ],
   controllers: [ImageController],
-  providers: [ImageService, CreativeGenerationService, ImageJobProcessor, CanvasService, ImageWebSocketGateway],
-  exports: [ImageService, CreativeGenerationService, CanvasService, ImageWebSocketGateway],
+  providers: [
+    ImageService,
+    CreativeGenerationService,
+    ImageJobProcessor,
+    CanvasService,
+    ImageWebSocketGateway,
+    // Poster generation services
+    BrandContextResolverService,
+    ContentContextResolverService,
+    PlatformDimensionService,
+  ],
+  exports: [
+    ImageService,
+    CreativeGenerationService,
+    CanvasService,
+    ImageWebSocketGateway,
+    PlatformDimensionService,
+  ],
 })
 export class ImageModule {}
