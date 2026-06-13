@@ -2,7 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import type { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { LLMGateway, ImageGateway, VectorService, PosterPromptBuilder } from '@brandflow/ai';
-import type { PosterContextPayload } from '@brandflow/ai';
+import type { PosterContextPayload, ImageProviderKeys } from '@brandflow/ai';
 import { PrismaService } from '../../../common/database/prisma.service';
 import { ImageWebSocketGateway } from '../image.gateway';
 import { LlmSettingsService } from '../../llm-settings/llm-settings.service';
@@ -252,7 +252,7 @@ export class ImageJobProcessor extends WorkerHost {
         : negativePrompt;
 
       const imageResponse = await imageGateway.generate(
-        settings.provider || (resolvedProvider === 'openai' ? 'openai' : 'stability'),
+        settings.provider || (resolvedProvider === 'openai' ? 'openai' : (resolvedProvider === 'nvidia' ? 'nvidia' : 'stability')),
         {
         prompt:         finalPrompt,
         negativePrompt: negativePromptFull,
@@ -436,25 +436,37 @@ export class ImageJobProcessor extends WorkerHost {
    * This is the critical fix: the system env key is a mock placeholder.
    * The real key comes from LlmSettings (encrypted in DB, set by user in Settings UI).
    */
+  /**
+   * Creates a per-job ImageGateway using the user's real API key injected directly
+   * into the constructor — no env variable mutation, fully thread-safe for concurrent jobs.
+   *
+   * Key resolution:
+   *  - userApiKey is from getDecryptedImageApiKey() which already applies priority:
+   *    imageApiKey (DALL-E-specific) → apiKey (if OpenAI LLM provider) → null
+   *  - If userApiKey is null → only mock provider will be available
+   */
   private buildImageGateway(userApiKey: string | null, llmProvider: string): ImageGateway {
-    // Temporarily override env variables for ImageGateway constructor
-    // (ImageGateway reads from process.env internally)
-    const originalOpenAI = process.env['OPENAI_API_KEY'];
-    const originalStability = process.env['STABILITY_API_KEY'];
+    // Inject the key directly — no process.env mutation (thread-safe for concurrent jobs)
+    const keys: ImageProviderKeys = {
+      openai: userApiKey || null,  // Works for both 'openai' and 'nvidia' LLM providers
+      flux:   null,                // Future: extend getDecryptedImageApiKey to support flux key
+      stability: null,             // Future: extend to support stability key
+      nvidia: llmProvider === 'nvidia' ? (userApiKey || null) : null,
+    };
 
-    if (userApiKey && llmProvider === 'openai') {
-      // Use the user's OpenAI key for both LLM and image generation
-      process.env['OPENAI_API_KEY'] = userApiKey;
-    } else if (userApiKey && llmProvider === 'nvidia') {
-      // NVIDIA is for LLM only; image generation uses OpenAI or Stability
-      // Keep the existing openai key (may be mock, so we'll fall to mock provider which is OK for now)
+    const gateway = new ImageGateway(
+      { defaultProvider: 'openai', fallbackProvider: 'stability' },
+      keys,
+    );
+
+    if (!gateway.hasRealProvider()) {
+      this.logger.warn(
+        `[ImageGateway] No real provider registered — will use mock. ` +
+        `To fix: go to Settings → AI → add your OpenAI API key.`
+      );
+    } else {
+      this.logger.log(`[ImageGateway] Active providers: ${gateway.registeredProviders().join(', ')}`);
     }
-
-    const gateway = new ImageGateway({ defaultProvider: 'openai', fallbackProvider: 'stability' });
-
-    // Restore original env
-    process.env['OPENAI_API_KEY'] = originalOpenAI;
-    process.env['STABILITY_API_KEY'] = originalStability;
 
     return gateway;
   }
@@ -473,8 +485,10 @@ export class ImageJobProcessor extends WorkerHost {
       const brand = await this.prismaService.client.brand.findUnique({ where: { id: brandId } });
       if (!brand) throw new Error('Brand not found');
 
+      const llmSettings = await this.llmSettingsService.getSettings(businessId);
+      const resolvedProvider = (llmSettings?.provider as string) ?? 'openai';
       const userApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId);
-      const imageGateway = this.buildImageGateway(userApiKey, 'openai');
+      const imageGateway = this.buildImageGateway(userApiKey, resolvedProvider);
 
       await this.updateJobProgress(jobId, 30);
       this.wsGateway.emitJobProgress(businessId, { jobId, progress: 30, status: 'PROCESSING', stage: 'enhancing' });
@@ -490,7 +504,7 @@ export class ImageJobProcessor extends WorkerHost {
         jobId, progress: 50, status: 'PROCESSING', stage: 'generating', finalPrompt: enhancedPrompt,
       });
 
-      const imageResponse = await imageGateway.generate(settings.provider, {
+      const imageResponse = await imageGateway.generate(settings.provider || (resolvedProvider === 'nvidia' ? 'nvidia' : 'openai'), {
         prompt:    cleanPromptForGeneration,
         width:     settings.width, height: settings.height,
         quality:   settings.quality, style: settings.style, businessId,

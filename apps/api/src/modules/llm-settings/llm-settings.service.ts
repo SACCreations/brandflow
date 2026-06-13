@@ -127,8 +127,8 @@ export class LlmSettingsService {
       }
     }
 
-    // Fall back to main API key if provider is openai (same key works for DALL-E)
-    if (settings.apiKey && settings.provider === 'openai') {
+    // Fall back to main API key if provider is openai or nvidia (same key works for their respective image generators)
+    if (settings.apiKey && (settings.provider === 'openai' || settings.provider === 'nvidia')) {
       try {
         const key = encryption.decrypt(settings.apiKey, this.encryptionKey);
         if (key) return { key, source: 'llm_shared' };
