@@ -251,10 +251,20 @@ export class ImageJobProcessor extends WorkerHost {
         ? `${negativePrompt}, ${settings.negativePromptExtra}`
         : negativePrompt;
 
+      const providerName = settings.provider || (resolvedProvider === 'openai' ? 'openai' : (resolvedProvider === 'nvidia' ? 'nvidia' : 'stability'));
+
+      // For DALL-E 3, the negative prompt must be enforced inside the main text because DALL-E 
+      // doesn't support negative_prompt natively.
+      // For Stable Diffusion (Nvidia), adding negative words to the main prompt degrades it,
+      // so we keep the main prompt clean and pass negativePrompt natively via extra_body or custom params.
+      const promptForGeneration = providerName === 'openai' 
+        ? `${finalPrompt}\n\nCRITICAL RULES - DO NOT INCLUDE ANY OF THE FOLLOWING: ${negativePromptFull}`
+        : finalPrompt;
+
       const imageResponse = await imageGateway.generate(
-        settings.provider || (resolvedProvider === 'openai' ? 'openai' : (resolvedProvider === 'nvidia' ? 'nvidia' : 'stability')),
+        providerName,
         {
-        prompt:         finalPrompt,
+        prompt:         promptForGeneration,
         negativePrompt: negativePromptFull,
         width:          platformSpec.width,
         height:         platformSpec.height,

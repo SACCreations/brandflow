@@ -161,4 +161,17 @@ export class CreativeGenerationService {
       include: { images: { include: { asset: true } } },
     });
   }
+
+  /** Deletes a specific generation job. */
+  async deleteJob(businessId: string, jobId: string) {
+    const job = await this.prisma.client.imageGenerationJob.findFirst({
+      where: { id: jobId, businessId },
+    });
+    if (!job) throw new NotFoundException('Generation job not found');
+
+    await this.prisma.client.imageGenerationJob.delete({
+      where: { id: jobId },
+    });
+    return { success: true };
+  }
 }

@@ -88,6 +88,15 @@ export class ImageController {
     return this.creativeGenService.getJobStatus(user.businessId, id);
   }
 
+  @Delete('jobs/:id')
+  @ApiOperation({ summary: 'Delete an image generation job from history' })
+  async deleteJob(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+  ) {
+    return this.creativeGenService.deleteJob(user.businessId, id);
+  }
+
   // ─── CANVAS LAYOUT TEMPLATES ─────────────────────────────────────
   @Post('templates')
   @ApiOperation({ summary: 'Save or update a canvas layout template' })

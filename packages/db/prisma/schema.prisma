@@ -249,6 +249,7 @@ model Brand {
   analyses            BrandAnalysis[]
   topics              ContentTopic[]
   conversations       Conversation[]
+  themes              BrandTheme[]
 
   @@unique([businessId, slug])
   @@map("brands")
@@ -575,6 +576,7 @@ model Campaign {
   contents     Content[]
   schedules    Schedule[]
   templates    Template[]
+  creatives    CampaignCreative[]
 
   @@map("campaigns")
 }
@@ -695,6 +697,7 @@ model Asset {
   campaign       Campaign?       @relation(fields: [campaignId], references: [id])
   generatedImage GeneratedImage?
   imageVariant   ImageVariant?
+  creatives      CampaignCreative[]
 
   @@map("assets")
 }
@@ -1210,4 +1213,44 @@ model AIImageLog {
   createdAt    DateTime @default(now())
 
   @@map("ai_image_logs")
+}
+
+model PosterTemplate {
+  id          String   @id @default(uuid())
+  businessId  String
+  name        String
+  category    String
+  platform    String
+  stylePrompt String
+  createdAt   DateTime @default(now())
+
+  @@map("poster_templates")
+}
+
+model BrandTheme {
+  id           String   @id @default(uuid())
+  brandId      String
+  name         String
+  primaryHex   String
+  secondaryHex String?
+  accentHex    String?
+  typography   String?
+  createdAt    DateTime @default(now())
+  
+  brand        Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@map("brand_themes")
+}
+
+model CampaignCreative {
+  id         String   @id @default(uuid())
+  campaignId String
+  assetId    String
+  objective  String
+  createdAt  DateTime @default(now())
+  
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  asset      Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_creatives")
 }

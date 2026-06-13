@@ -42,6 +42,7 @@ import {
   X,
   Eye,
   EyeOff,
+  Trash2,
 } from 'lucide-react';
 import { useImageSocket, type ImageJobProgress } from '@/hooks/use-image-socket';
 
@@ -393,6 +394,23 @@ export default function ImageGeneratorPage() {
       toast({
         title: 'Failed to queue job',
         description: err?.response?.data?.message || err.message || 'Error occurred.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/images/jobs/${id}`);
+    },
+    onSuccess: () => {
+      toast({ title: 'Deleted', description: 'Job removed from history.' });
+      queryClient.invalidateQueries({ queryKey: ['image-generation-jobs'] });
+    },
+    onError: (err: any) => {
+      toast({
+        title: 'Failed to delete',
+        description: err?.response?.data?.message || err.message,
         variant: 'destructive',
       });
     },
@@ -1217,31 +1235,44 @@ export default function ImageGeneratorPage() {
                           )}
                         </div>
 
-                        {job.status === 'COMPLETED' && img?.asset && (
-                          <div className="flex gap-2 pt-1">
-                            <Link href={`/create/creative?assetId=${img.asset.id}`} className="w-full">
+                        <div className="flex gap-2 pt-1 mt-auto">
+                          {job.status === 'COMPLETED' && img?.asset && (
+                            <Link href={`/create/creative?assetId=${img.asset.id}`} className="flex-1">
                               <Button className="w-full gap-1.5 bg-slate-950 border border-slate-800 hover:bg-slate-900 text-slate-300 py-2 rounded-lg text-[10.5px] font-black uppercase tracking-wider transition-colors">
                                 Open in Canvas <ExternalLink className="h-3 w-3 text-indigo-400" />
                               </Button>
                             </Link>
-                          </div>
-                        )}
+                          )}
 
-                        {job.status === 'FAILED' && (
+                          {job.status === 'FAILED' && (
+                            <Button
+                              onClick={() => {
+                                if (job.platform) setSelectedPlatform(job.platform);
+                                if (job.category) setSelectedCategory(job.category);
+                                if (job.posterContext?.headline) setHeadlineText(job.posterContext.headline);
+                                if (job.posterContext?.cta) setCtaText(job.posterContext.cta);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                              className="flex-1 gap-1.5 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 py-2 rounded-lg text-[10.5px] font-black uppercase tracking-wider transition-colors"
+                              aria-label="Retry this generation"
+                            >
+                              <RefreshCw className="h-3 w-3" /> Retry Poster
+                            </Button>
+                          )}
+
                           <Button
                             onClick={() => {
-                              if (job.platform) setSelectedPlatform(job.platform);
-                              if (job.category) setSelectedCategory(job.category);
-                              if (job.posterContext?.headline) setHeadlineText(job.posterContext.headline);
-                              if (job.posterContext?.cta) setCtaText(job.posterContext.cta);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                              if (confirm('Delete this poster from history?')) {
+                                deleteMutation.mutate(job.id);
+                              }
                             }}
-                            className="w-full gap-1.5 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 py-2 rounded-lg text-[10.5px] font-black uppercase tracking-wider transition-colors"
-                            aria-label="Retry this generation"
+                            disabled={deleteMutation.isPending}
+                            className="bg-slate-950 border border-slate-800 hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/30 text-slate-500 px-3 py-2 rounded-lg transition-colors shrink-0"
+                            title="Delete Job"
                           >
-                            <RefreshCw className="h-3 w-3" /> Retry Poster
+                            {deleteMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                           </Button>
-                        )}
+                        </div>
                       </div>
                     </Card>
                   );

@@ -126,9 +126,9 @@ REQUIRED DESIGN ELEMENTS IN PROMPT
 
     const negativePrompt = [
       // Generic stock scenes
-      'generic office meeting', 'business handshake', 'corporate conference room', 'office hallway',
-      'stock photo', 'stock photography', 'generic business people', 'people sitting at desk',
-      'aerial city view', 'random cityscapes', 'generic landscapes',
+      'generic office meeting', 'business handshake', 'corporate conference room', 'office hallway', 'generic workspace interior',
+      'stock photo', 'stock photography', 'generic business people', 'people sitting at desk', 'random corporate people',
+      'aerial city view', 'random cityscapes', 'generic landscapes', 'random landscape photos', 'earth from space',
       // Photography artifacts
       'photorealistic photo of people', 'candid photograph', 'documentary photo', 'selfie',
       'blurry', 'out of focus', 'motion blur', 'noise', 'grain', 'low resolution',

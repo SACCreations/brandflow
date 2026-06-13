@@ -36,13 +36,19 @@ export class NvidiaImageProvider implements ImageProvider {
     }
 
     try {
-      const response = await this.client.images.generate({
+      const payload: any = {
         model: modelToUse,
         prompt: request.prompt,
         n: request.numberOfImages ?? 1,
         size: '1024x1024',
         response_format: 'b64_json',
-      });
+      };
+      if (request.negativePrompt) {
+        // Pass as negative_prompt to the OpenAI wrapper which usually maps it appropriately for NIM SD endpoints
+        payload.negative_prompt = request.negativePrompt;
+      }
+
+      const response = await this.client.images.generate(payload);
 
       const costPerImage = 2.0; // Approx cost in cents for NIM SD3 Medium
       if (!response.data || response.data.length === 0) {
