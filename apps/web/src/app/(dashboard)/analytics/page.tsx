@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { RefreshCw, DollarSign } from 'lucide-react';
+import { RefreshCw, DollarSign, Download } from 'lucide-react';
 import { CostAnalysisDashboard } from '@/components/analytics/cost-dashboard';
 import { apiClient } from '@/lib/api-client';
 import {
@@ -16,14 +16,13 @@ import {
   AnalyticsSummary,
 } from '@/features/analytics/components';
 
-
-
 export default function AnalyticsDashboard() {
-  const [windowDays, setWindowDays] = useState<'7' | '30'>('7');
+  const [windowDays, setWindowDays] = useState<'7' | '30' | '90' | '365'>('7');
 
   const from = new Date();
   from.setDate(from.getDate() - Number(windowDays));
 
+  // Main Summary Query with React Query polling
   const {
     data: analytics,
     isLoading,
@@ -37,23 +36,67 @@ export default function AnalyticsDashboard() {
       });
       return res.data;
     },
+    refetchInterval: 15000, // Poll every 15 seconds
+    staleTime: 5000,
   });
 
+  // Knowledge Impact Query with polling
   const { data: impactData, isLoading: isImpactLoading } = useQuery({
     queryKey: ['analytics', 'impact'],
     queryFn: async () => {
       const res = await apiClient.get<any[]>('/analytics/intelligence-impact');
       return res.data;
     },
+    refetchInterval: 30000, // Poll impact metrics every 30 seconds
+    staleTime: 10000,
   });
 
+  // Recommendations Query with polling
   const { data: recommendations, isLoading: isRecLoading } = useQuery({
     queryKey: ['analytics', 'recommendations'],
     queryFn: async () => {
       const res = await apiClient.get<any[]>('/analytics/recommendations');
       return res.data;
     },
+    refetchInterval: 60000, // Poll recommendations once a minute
+    staleTime: 30000,
   });
+
+  const handleExportCsv = async () => {
+    try {
+      const res = await apiClient.get('/analytics/export/csv', {
+        params: { from: from.toISOString(), to: new Date().toISOString() },
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `performance-report-${windowDays}-days.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    try {
+      const res = await apiClient.get('/analytics/export/pdf', {
+        params: { from: from.toISOString(), to: new Date().toISOString() },
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `performance-report-${windowDays}-days.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Failed to export PDF:', err);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -84,15 +127,31 @@ export default function AnalyticsDashboard() {
             Live attribution across performance, AI cost, and your knowledge-powered content loop.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <select
             value={windowDays}
-            onChange={(e) => setWindowDays(e.target.value as '7' | '30')}
+            onChange={(e) => setWindowDays(e.target.value as any)}
             className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary/20 hover:bg-surface-2 transition-all"
           >
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="365">Last year</option>
           </select>
+          <button
+            onClick={handleExportCsv}
+            className="inline-flex items-center gap-2 rounded-xl border border-border/50 bg-surface-1/50 px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-2 hover:border-primary transition-all micro-hover"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </button>
+          <button
+            onClick={handleExportPdf}
+            className="inline-flex items-center gap-2 rounded-xl border border-border/50 bg-surface-1/50 px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-2 hover:border-primary transition-all micro-hover"
+          >
+            <Download className="h-4 w-4" />
+            Export PDF
+          </button>
           <button
             onClick={() => void refetch()}
             className="inline-flex items-center gap-2 rounded-xl border border-border/50 bg-surface-1/50 px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-2 hover:border-primary transition-all micro-hover"
@@ -144,4 +203,3 @@ export default function AnalyticsDashboard() {
     </div>
   );
 }
-

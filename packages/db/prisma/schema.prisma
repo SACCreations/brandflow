@@ -871,10 +871,19 @@ model AnalyticsEvent {
   eventType  String
   entityType String?
   entityId   String?
+  brandId    String?
+  campaignId String?
+  platform   String?
   payload    Json
   createdAt  DateTime @default(now())
   business   Business @relation(fields: [businessId], references: [id])
 
+  @@index([businessId])
+  @@index([brandId])
+  @@index([campaignId])
+  @@index([createdAt])
+  @@index([eventType])
+  @@index([platform])
   @@map("analytics_events")
 }
 
@@ -882,17 +891,28 @@ model PerformanceMetric {
   id                String   @id @default(uuid())
   businessId        String
   contentId         String
+  brandId           String?
+  campaignId        String?
   platform          String
   reach             Int      @default(0)
   impressions       Int      @default(0)
   engagement        Int      @default(0)
   clicks            Int      @default(0)
   ctr               Float    @default(0)
+  conversions       Int      @default(0)
+  spendCents        Int      @default(0)
+  revenueCents      Int      @default(0)
   roiCents          Int      @default(0)
   sourceAttribution Json?
   collectedAt       DateTime @default(now())
   business          Business @relation(fields: [businessId], references: [id])
 
+  @@index([businessId])
+  @@index([brandId])
+  @@index([campaignId])
+  @@index([contentId])
+  @@index([platform])
+  @@index([collectedAt])
   @@map("performance_metrics")
 }
 

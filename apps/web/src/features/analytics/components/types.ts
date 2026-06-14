@@ -5,6 +5,9 @@ export interface AnalyticsSummary {
     totalImpressions: number;
     totalEngagement: number;
     totalClicks: number;
+    totalConversions: number;
+    totalSpendCents: number;
+    totalRevenueCents: number;
     averageCtr: number;
     engagementRate: number;
     attributedRoiCents: number;

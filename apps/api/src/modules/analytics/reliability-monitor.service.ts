@@ -1,16 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { prisma } from '@brandflow/db';
 import { AnalyticsService } from './analytics.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PrismaService } from '../../common/database/prisma.service';
 
 @Injectable()
 export class ReliabilityMonitorService {
   private readonly logger = new Logger(ReliabilityMonitorService.name);
 
   constructor(
-    private readonly analyticsService: AnalyticsService,
-    private readonly notificationsService: NotificationsService,
+    @Inject(AnalyticsService) private readonly analyticsService: AnalyticsService,
+    @Inject(NotificationsService) private readonly notificationsService: NotificationsService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
   ) {}
 
   /**
@@ -22,7 +23,7 @@ export class ReliabilityMonitorService {
     this.logger.log('Starting reliability health check...');
 
     // 1. Check all businesses with recent activity
-    const activeBusinesses = await prisma.business.findMany({
+    const activeBusinesses = await this.prisma.client.business.findMany({
       where: { status: 'active' },
       select: { id: true, name: true, ownerId: true }
     });
@@ -34,7 +35,7 @@ export class ReliabilityMonitorService {
       if (reliability.totalJobs > 5 && reliability.successRate < 90) {
         this.logger.error(`Reliability Alert: Business ${business.name} (${business.id}) success rate at ${reliability.successRate.toFixed(1)}%`);
         
-        await prisma.analyticsEvent.create({
+        await this.prisma.client.analyticsEvent.create({
           data: {
             businessId: business.id,
             source: 'system.monitor.reliability',
@@ -65,7 +66,7 @@ export class ReliabilityMonitorService {
       if (sla.slaComplianceRate < 95) {
         this.logger.warn(`SLA Warning: Business ${business.name} (${business.id}) SLA compliance at ${sla.slaComplianceRate.toFixed(1)}%`);
         
-        await prisma.analyticsEvent.create({
+        await this.prisma.client.analyticsEvent.create({
           data: {
             businessId: business.id,
             source: 'system.monitor.sla',
@@ -100,7 +101,7 @@ export class ReliabilityMonitorService {
    */
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async analyzeFailures() {
-    const commonFailures = await prisma.publishJob.groupBy({
+    const commonFailures = await this.prisma.client.publishJob.groupBy({
       by: ['failureClass', 'businessId'],
       where: { status: 'dead_letter' },
       _count: true,
