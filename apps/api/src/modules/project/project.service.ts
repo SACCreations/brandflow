@@ -149,7 +149,7 @@ export class ProjectService {
     }
 
     const metadata = customer.metadata as Record<string, unknown> | null;
-    const clientBudgetLimit = metadata?.budget ? Number(metadata.budget) : 0;
+    const clientBudgetLimit = metadata?.['budget'] ? Number(metadata['budget']) : 0;
     if (clientBudgetLimit && clientBudgetLimit > 0) {
       const activeProjects = await this.prisma.client.project.findMany({
         where: {

@@ -63,7 +63,6 @@ export class BrandContextResolverService {
 
     // Fetch logo asset (tagged with role: 'logo')
     let logoUrl: string | undefined;
-    let logoDescription: string | undefined;
 
     try {
       const logoAsset = await this.prisma.client.asset.findFirst({
@@ -87,7 +86,7 @@ export class BrandContextResolverService {
       // Logo fetch is non-critical — proceed without it
     }
 
-    logoDescription = vr['logoDescription'] || undefined;
+    const logoDescription = vr['logoDescription'] || undefined;
 
     // Parse tone
     let tone: string[] = [];

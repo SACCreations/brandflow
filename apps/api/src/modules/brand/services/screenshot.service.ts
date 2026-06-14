@@ -103,7 +103,7 @@ export class ScreenshotService {
                   .map((el) => {
                     const computed = (window as any).getComputedStyle(el);
                     const ff = computed ? computed.fontFamily : null;
-                    return ff ? ff.replace(/[\"']/g, '').split(',')[0].trim() : null;
+                    return ff ? ff.replace(/["']/g, '').split(',')[0].trim() : null;
                   })
                   .filter(Boolean),
               ),

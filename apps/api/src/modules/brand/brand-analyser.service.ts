@@ -166,8 +166,8 @@ export class BrandAnalyserService {
 
     // Screenshots removed — no longer needed since vision analysis sub-task is disabled.
     // Font/color signals are extracted from the crawled HTML directly.
-    if (false) { // keep reference to avoid unused import warning
-      const _baseUrl = resolvedSources.find((s) => s.url)?.url;
+    const _baseUrl = resolvedSources.find((s) => s.url)?.url;
+    if (_baseUrl) {
       void _baseUrl;
     }
 
@@ -964,7 +964,7 @@ export class BrandAnalyserService {
   private deriveBrandNameFromTitle(title: string | null): string | null {
     if (!title) return null;
 
-    const segments = title.split(/\s[\-|–|—|:]\s|[\-|–|—|:]/).map((segment) => segment.trim()).filter(Boolean);
+    const segments = title.split(/\s[-|–|—|:]\s|[-|–|—|:]/).map((segment) => segment.trim()).filter(Boolean);
     return this.normalizeString(segments[0] ?? title, 255);
   }
 

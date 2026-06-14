@@ -629,7 +629,7 @@ export class ImageJobProcessor extends WorkerHost {
     for (const marker of markers) {
       const index = fullPrompt.indexOf(marker);
       if (index !== -1) {
-        let content = fullPrompt.substring(index + marker.length).trim().replace(/^[:\-\s\*\#\n\r]+/, '');
+        let content = fullPrompt.substring(index + marker.length).trim().replace(/^[:\-\s*#\n\r]+/, '');
         for (const neg of ['3. Negative Prompt', 'Negative Prompt:']) {
           const negIndex = content.indexOf(neg);
           if (negIndex !== -1) content = content.substring(0, negIndex).trim();
@@ -692,7 +692,7 @@ Output ONLY [Step 3: Final Image Prompt] starting with "Marketing poster creativ
     let sanitized = prompt;
 
     // 1. Replace full brand name (case-insensitive)
-    const escapedFull = brandName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const escapedFull = brandName.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
     sanitized = sanitized.replace(new RegExp(escapedFull, 'gi'), 'premium brand');
 
     // 2. Replace individual unique words (length >= 3, not common/generic words)
@@ -701,7 +701,7 @@ Output ONLY [Step 3: Final Image Prompt] starting with "Marketing poster creativ
     for (const word of words) {
       const cleanWord = word.replace(/[^a-zA-Z0-9]/g, '');
       if (cleanWord.length >= 3 && !genericWords.has(cleanWord.toLowerCase())) {
-        const escapedWord = cleanWord.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const escapedWord = cleanWord.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
         sanitized = sanitized.replace(new RegExp(`\\b${escapedWord}\\b`, 'gi'), 'brand');
       }
     }

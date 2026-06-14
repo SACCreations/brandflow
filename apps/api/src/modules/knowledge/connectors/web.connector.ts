@@ -163,7 +163,9 @@ export class WebConnector {
       this.logger.warn(`Playwright failed (${playwrightErr.message}), falling back to node-fetch`);
       try {
         if (browser) await browser.close();
-      } catch (_) {}
+      } catch (_) {
+        // ignore browser close failure on error fallback
+      }
     }
 
     // 3. Fallback: node-fetch + HTML → text

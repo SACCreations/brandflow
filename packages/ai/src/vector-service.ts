@@ -154,7 +154,7 @@ export class VectorService {
         const parsedResults = (fallbackResults as any[]).map((r) => {
           let emb: number[] = [];
           if (typeof r.embedding === 'string') {
-            try { emb = JSON.parse(r.embedding); } catch {}
+            try { emb = JSON.parse(r.embedding); } catch { /* ignore fallback JSON parsing error */ }
           } else if (Array.isArray(r.embedding)) {
             emb = r.embedding;
           }

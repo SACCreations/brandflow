@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { prisma } from '@brandflow/db';
-import { LLMGateway, type ProviderResponse, encryption } from '@brandflow/ai';
+import { LLMGateway, type ProviderResponse, encryption, VectorService } from '@brandflow/ai';
 import type { CreateConversationDto, ConvertToContentDto } from './dto';
 
 const MAX_CONTEXT_MESSAGES = 20;
@@ -25,12 +25,9 @@ export class ChatService {
       requestTimeoutMs: this.config.get('llm.requestTimeoutMs', 30000),
     });
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const ai = require('@brandflow/ai');
-      if (ai.VectorService) {
-        this.vectorService = new ai.VectorService();
-      }
-    } catch (err) { console.error("Error in getBusinessLlmSettings:", err);
+      this.vectorService = new VectorService();
+    } catch (err) {
+      console.error("Error initializing VectorService:", err);
       // Vector search unavailable
     }
   }
