@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { BrandAlreadyExistsException } from '../../common/exceptions/business.exceptions';
 import type { Prisma } from '@brandflow/db';
 import { PrismaService } from '../../common/database/prisma.service';
 import { AuditService } from '../business/audit.service';
@@ -192,8 +193,18 @@ export class BrandService {
     if (updateDto.slug !== undefined) {
       const nameForSlug = updateDto.name || before.name;
       updateDto.slug = updateDto.slug?.trim() || nameForSlug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      if (!updateDto.slug) {
-        updateDto.slug = null;
+      if (updateDto.slug) {
+        const existing = await this.prisma.client.brand.findFirst({
+          where: {
+            businessId,
+            slug: updateDto.slug,
+            NOT: { id },
+            deletedAt: null,
+          },
+        });
+        if (existing) {
+          throw new BrandAlreadyExistsException();
+        }
       }
     }
 

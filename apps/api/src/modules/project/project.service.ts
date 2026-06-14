@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { CampaignBudgetExceededException } from '../../common/exceptions/business.exceptions';
 import { PrismaService } from '../../common/database/prisma.service';
 import type { Prisma } from '@brandflow/db';
 import type { CreateProjectDto, UpdateProjectDto } from '@brandflow/shared';
@@ -57,9 +58,9 @@ export class ProjectService {
   }
 
   async update(id: string, businessId: string, data: UpdateProjectDto) {
-    await this.findOne(id, businessId);
+    const existing = await this.findOne(id, businessId);
 
-    const payload = await this.prepareUpdateProjectPayload(businessId, data);
+    const payload = await this.prepareUpdateProjectPayload(id, businessId, data, existing);
 
     return this.prisma.client.project.update({
       where: { id },
@@ -84,7 +85,7 @@ export class ProjectService {
     data: CreateProjectDto,
   ): Promise<Prisma.ProjectUncheckedCreateInput> {
     if (data.customerId) {
-      await this.assertCustomerOwnership(businessId, data.customerId);
+      await this.assertCustomerOwnership(businessId, data.customerId, data.budget ?? 0);
     }
 
     const payload: Prisma.ProjectUncheckedCreateInput = {
@@ -107,11 +108,16 @@ export class ProjectService {
   }
 
   private async prepareUpdateProjectPayload(
+    id: string,
     businessId: string,
     data: UpdateProjectDto,
+    existing: any,
   ): Promise<Prisma.ProjectUncheckedUpdateInput> {
-    if (data.customerId) {
-      await this.assertCustomerOwnership(businessId, data.customerId);
+    const targetCustomerId = data.customerId !== undefined ? data.customerId : existing.customerId;
+    const targetBudget = data.budget !== undefined ? data.budget : (existing.budget ?? 0);
+
+    if (targetCustomerId) {
+      await this.assertCustomerOwnership(businessId, targetCustomerId, targetBudget ?? 0, id);
     }
 
     const payload: Prisma.ProjectUncheckedUpdateInput = {
@@ -132,14 +138,34 @@ export class ProjectService {
     return payload;
   }
 
-  private async assertCustomerOwnership(businessId: string, customerId: string) {
+  private async assertCustomerOwnership(businessId: string, customerId: string, projectBudget = 0, excludeProjectId?: string) {
     const customer = await this.prisma.client.customer.findFirst({
       where: { id: customerId, businessId },
-      select: { id: true },
+      select: { id: true, metadata: true },
     });
 
     if (!customer) {
       throw new BadRequestException('Selected client does not belong to this workspace.');
+    }
+
+    const metadata = customer.metadata as Record<string, unknown> | null;
+    const clientBudgetLimit = metadata?.budget ? Number(metadata.budget) : 0;
+    if (clientBudgetLimit && clientBudgetLimit > 0) {
+      const activeProjects = await this.prisma.client.project.findMany({
+        where: {
+          customerId,
+          businessId,
+          status: 'active',
+          ...(excludeProjectId ? { NOT: { id: excludeProjectId } } : {}),
+        },
+        select: { budget: true },
+      });
+      const currentProjectsBudgetSum = activeProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
+      if (currentProjectsBudgetSum + projectBudget > clientBudgetLimit) {
+        throw new CampaignBudgetExceededException(
+          `Total allocated budget for active projects (${currentProjectsBudgetSum + projectBudget}) exceeds client budget limit (${clientBudgetLimit}).`
+        );
+      }
     }
   }
 

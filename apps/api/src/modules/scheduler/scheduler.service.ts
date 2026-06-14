@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { ScheduleAlreadyPublishedException } from '../../common/exceptions/business.exceptions';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { prisma } from '@brandflow/db';
@@ -127,6 +128,10 @@ export class SchedulerService {
   async cancel(id: string, businessId: string) {
     const schedule = await this.findById(id, businessId);
 
+    if (schedule.status === 'published') {
+      throw new ScheduleAlreadyPublishedException('Cannot cancel a schedule that has already been published.');
+    }
+
     try {
       await this.publishQueue.remove(id);
     } catch {
@@ -173,6 +178,10 @@ export class SchedulerService {
     // Allow retry if status is failed OR if there is a dead_letter job
     const hasDeadLetterJob = schedule.publishJobs.some(j => j.status === 'dead_letter');
     
+    if (schedule.status === 'published') {
+      throw new ScheduleAlreadyPublishedException('Cannot retry a schedule that has already been successfully published.');
+    }
+
     if (schedule.status !== 'failed' && !hasDeadLetterJob) {
       throw new BadRequestException('Only failed or dead-lettered schedules can be manually retried.');
     }

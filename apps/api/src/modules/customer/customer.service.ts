@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { CustomerAlreadyExistsException } from '../../common/exceptions/business.exceptions';
 import { PrismaService } from '../../common/database/prisma.service';
 import type { CreateCustomerDto, UpdateCustomerDto } from '@brandflow/shared';
 import { Prisma } from '@prisma/client';
@@ -77,7 +78,7 @@ export class CustomerService {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw new ConflictException('A client with this email already exists in the workspace.');
+        throw new CustomerAlreadyExistsException('A client with this email already exists in the workspace.');
       }
       throw error;
     }
@@ -108,7 +109,7 @@ export class CustomerService {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw new ConflictException('A client with this email already exists in the workspace.');
+        throw new CustomerAlreadyExistsException('A client with this email already exists in the workspace.');
       }
       throw error;
     }
@@ -138,7 +139,7 @@ export class CustomerService {
     });
 
     if (existing) {
-      throw new ConflictException('A client with this email already exists in the workspace.');
+      throw new CustomerAlreadyExistsException('A client with this email already exists in the workspace.');
     }
   }
 

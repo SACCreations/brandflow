@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { DuplicateKnowledgeSourceException } from '../../common/exceptions/business.exceptions';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 import { PrismaService } from '../../common/database/prisma.service';
@@ -179,7 +180,7 @@ export class KnowledgeService {
           await this.triggerIngestion(existing.id, businessId, dto.text);
           return existing;
         } else {
-          throw new BadRequestException('This source has already been added to your knowledge base.');
+          throw new DuplicateKnowledgeSourceException('This source has already been added to your knowledge base.');
         }
       }
     }

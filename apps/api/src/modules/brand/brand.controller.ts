@@ -48,16 +48,11 @@ export class BrandController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new brand' })
-  async create(
+  create(
     @CurrentUser() user: JwtPayload,
     @Body(new ZodValidationPipe(createBrandSchema)) dto: CreateBrandDto,
   ) {
-    try {
-      return await this.brandService.create(user.businessId, dto);
-    } catch (error: any) {
-      require('fs').writeFileSync('error.log', String(error) + '\\n' + (error.stack || ''));
-      throw error;
-    }
+    return this.brandService.create(user.businessId, dto);
   }
 
   @Patch(':id')

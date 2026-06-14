@@ -14,7 +14,6 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { initSentry } from './common/observability/sentry.init';
-import { SentryFilter } from './common/filters/sentry.filter';
 
 function loadEnvManual() {
   const possiblePaths = [
@@ -136,7 +135,7 @@ configure OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY.
       transformOptions: { enableImplicitConversion: true },
     }),
   );
-  app.useGlobalFilters(new SentryFilter(), new GlobalExceptionFilter());
+  app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor(), new TransformInterceptor());
 
   // ─── API Prefix ──────────────────────────────────────────────

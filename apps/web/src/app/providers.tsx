@@ -192,7 +192,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
     () =>
       new QueryClient({
         defaultOptions: {
-          queries: { staleTime: 60 * 1000, retry: 1 },
+          queries: {
+            staleTime: 60 * 1000,
+            retry: (failureCount, error: any) => {
+              if (failureCount >= 1) return false;
+              const status = error?.response?.status;
+              if (status && status >= 400 && status < 500) {
+                return false;
+              }
+              return true;
+            },
+          },
         },
       }),
   );

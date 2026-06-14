@@ -1,9 +1,9 @@
-import {
   BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ContentAlreadyApprovedException } from '../../common/exceptions/business.exceptions';
 import { PrismaService } from '../../common/database/prisma.service';
 import { APPROVAL_STATUSES, ApprovalStatus, ReviewType } from '@brandflow/shared';
 
@@ -125,7 +125,7 @@ export class ApprovalService {
 
     if (!approval) throw new NotFoundException('Approval not found');
     if (approval.status !== 'pending') {
-      throw new ConflictException('This approval has already been decided.');
+      throw new ContentAlreadyApprovedException('This approval has already been decided.');
     }
 
     // Enterprise Safety: Check for high-severity brand violations before approval

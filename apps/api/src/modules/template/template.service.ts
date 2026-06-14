@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InvalidTemplateVariableException } from '../../common/exceptions/business.exceptions';
 import { prisma, type Prisma } from '@brandflow/db';
 
 @Injectable()
@@ -19,7 +20,7 @@ export class TemplateService {
     }
     
     if (openCount !== closeCount) {
-      throw new BadRequestException('Unbalanced double curly braces {{ }} in template body.');
+      throw new InvalidTemplateVariableException('Unbalanced double curly braces {{ }} in template body.');
     }
     
     const regex = /\{\{([^}]+)\}\}/g;
@@ -30,10 +31,10 @@ export class TemplateService {
       if (!matchGroup) continue;
       const placeholder = matchGroup.trim();
       if (!placeholder) {
-        throw new BadRequestException('Empty placeholder found in template body.');
+        throw new InvalidTemplateVariableException('Empty placeholder found in template body.');
       }
       if (!/^[a-zA-Z0-9_]+$/.test(placeholder)) {
-        throw new BadRequestException(`Invalid placeholder name "${placeholder}". Placeholder names should only contain alphanumeric characters and underscores.`);
+        throw new InvalidTemplateVariableException(`Invalid placeholder name "${placeholder}". Placeholder names should only contain alphanumeric characters and underscores.`);
       }
       if (!placeholders.includes(placeholder)) {
         placeholders.push(placeholder);
