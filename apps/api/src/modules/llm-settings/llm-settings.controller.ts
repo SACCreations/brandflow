@@ -12,6 +12,7 @@ import { LlmSettingsService } from './llm-settings.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import {
   updateLlmSettingsSchema,
   type UpdateLlmSettingsDto,
@@ -48,15 +49,18 @@ export class LlmSettingsController {
   }
 
   @Post('validate')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @ApiOperation({ summary: 'Validate an API key' })
   async validateApiKey(
+    @CurrentUser() user: JwtPayload,
     @Body() dto: { provider: string; apiKey: string }
   ) {
     if (!dto.provider || !dto.apiKey) {
       throw new BadRequestException('Provider and API Key are required');
     }
     
-    const isValid = await this.llmSettingsService.validateApiKey(dto.provider, dto.apiKey);
+    const isValid = await this.llmSettingsService.validateApiKey(dto.provider, dto.apiKey, user.businessId);
     
     if (!isValid) {
       throw new BadRequestException('Invalid API Key');

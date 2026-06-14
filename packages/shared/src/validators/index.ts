@@ -909,3 +909,14 @@ export const updateLlmSettingsSchema = z.object({
 });
 export type UpdateLlmSettingsDto = z.infer<typeof updateLlmSettingsSchema>;
 
+// ─── Templates ───────────────────────────────────────────────────
+export const createTemplateSchema = z.object({
+  name: z.string().trim().min(1, 'Template name is required').max(255),
+  type: z.string().trim().min(1, 'Template type is required').max(100),
+  body: z.string().min(1, 'Template body is required').max(20000),
+  placeholders: z.record(z.unknown()).nullish(),
+});
+export type CreateTemplateDto = z.infer<typeof createTemplateSchema>;
+
+export const updateTemplateSchema = createTemplateSchema.partial();
+export type UpdateTemplateDto = z.infer<typeof updateTemplateSchema>;

@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { prisma } from '@brandflow/db';
 import { encryption } from '@brandflow/ai';
+import { RedisService } from '../../common/redis/redis.service';
 import { type UpdateLlmSettingsDto, DEFAULT_NVIDIA_SYSTEM_PROMPTS } from '@brandflow/shared';
 
 @Injectable()
 export class LlmSettingsService {
   private readonly encryptionKey: string;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly redis: RedisService,
+  ) {
     this.encryptionKey = this.config.get<string>('app.encryptionKey') || this.config.get<string>('ENCRYPTION_KEY') || process.env['ENCRYPTION_KEY']!;
   }
 
@@ -189,7 +193,26 @@ export class LlmSettingsService {
     });
   }
 
-  async validateApiKey(provider: string, apiKey: string): Promise<boolean> {
+  async validateApiKey(provider: string, apiKey: string, businessId: string): Promise<boolean> {
+    const redisKey = `rate-limit:validate-key:${businessId}`;
+    try {
+      const countStr = await this.redis.get(redisKey);
+      const count = countStr ? parseInt(countStr, 10) : 0;
+      
+      if (count >= 3) {
+        throw new BadRequestException('Too many API key validation requests. Please try again after a minute.');
+      }
+      
+      if (count === 0) {
+        await this.redis.set(redisKey, '1', 60);
+      } else {
+        await this.redis.incrBy(redisKey, 1);
+      }
+    } catch (err) {
+      if (err instanceof BadRequestException) throw err;
+      console.error('[LlmSettingsService] Redis rate limit check failed:', err);
+    }
+
     try {
       switch (provider) {
         case 'openai': {

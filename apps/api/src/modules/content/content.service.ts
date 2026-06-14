@@ -119,7 +119,7 @@ export class ContentService {
     return content;
   }
 
-  async generate(businessId: string, userId: string, dto: GenerateContentDto) {
+  async generate(businessId: string, userId: string, dto: GenerateContentDto, idempotencyKey?: string) {
     const batchDto = dto as ExtendedGenerateContentDto;
 
     // Check if background queue execution is needed
@@ -148,6 +148,35 @@ export class ContentService {
     const effectiveTopic = topicsList[0] || dto.topic;
     if (!effectiveTopic) {
       throw new BadRequestException('A topic is required to generate content.');
+    }
+
+    const requestId = idempotencyKey || randomUUID();
+
+    if (idempotencyKey) {
+      const existingContent = await this.prisma.client.content.findFirst({
+        where: {
+          businessId,
+          metadata: {
+            path: ['requestId'],
+            equals: requestId,
+          },
+        },
+        include: {
+          qualityChecks: { orderBy: { checkedAt: 'desc' }, take: 1 },
+        },
+      });
+
+      if (existingContent) {
+        const costEvent = await this.prisma.client.costEvent.findFirst({
+          where: { requestId },
+        });
+        return {
+          content: existingContent,
+          qualityCheck: existingContent.qualityChecks[0] || null,
+          provider: costEvent?.model || 'cache',
+          requestId,
+        };
+      }
     }
 
     // Enforce dynamic, plan-based entitlement and token budget limits
@@ -281,7 +310,6 @@ export class ContentService {
     );
 
     // 4. Generate content
-    const requestId = randomUUID();
     const { response, provider: usedProvider } = await this.gateway.complete(
       systemPrompt,
       `Generate a ${dto.type} for ${dto.platform} about: ${sanitizedTopic}`,
@@ -294,18 +322,24 @@ export class ContentService {
       },
     );
 
-    // 6. Track cost
-    await this.costTracker.track({
-      businessId,
-      module: 'generation',
-      model: response.model,
-      inputTokens: response.inputTokens,
-      outputTokens: response.outputTokens,
-      requestId,
-    });
-
-    // 7. Persist content first
+    // 7. Persist CostEvent, Content and ContentVersion in an atomic transaction
     const content = await this.prisma.client.$transaction(async (tx: Prisma.TransactionClient) => {
+      const costCents = this.costTracker.calculateCostCents(response.model, response.inputTokens, response.outputTokens);
+      await tx.costEvent.create({
+        data: {
+          businessId,
+          module: 'generation',
+          model: response.model,
+          inputTokens: response.inputTokens,
+          outputTokens: response.outputTokens,
+          costCents,
+          requestId,
+        },
+      });
+
+      const totalTokens = (response.inputTokens || 0) + (response.outputTokens || 0);
+      await this.budgetService.incrementUsage(businessId, totalTokens).catch(() => {});
+
       const created = await tx.content.create({
         data: {
           businessId,

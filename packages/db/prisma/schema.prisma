@@ -149,6 +149,7 @@ model Customer {
   business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   projects   Project[]
 
+  @@unique([businessId, email])
   @@map("customers")
 }
 
@@ -196,7 +197,7 @@ model CostEvent {
   inputTokens  Int
   outputTokens Int
   costCents    Int
-  requestId    String
+  requestId    String   @unique
   createdAt    DateTime @default(now())
   business     Business @relation(fields: [businessId], references: [id])
 

@@ -62,8 +62,11 @@ export class ContentQueueProcessor extends WorkerHost {
 
           itemDto.additionalContext = contextBuffer.trim() || undefined;
 
+          // Generate a deterministic idempotency key based on job ID, topic and loop index
+          const idempotencyKey = job.id ? `job-${job.id}-${topic}-${i}` : undefined;
+
           // Call the primary generation service
-          const res = await this.contentService.generate(businessId, userId, itemDto);
+          const res = await this.contentService.generate(businessId, userId, itemDto, idempotencyKey);
           
           // Tag with group ID for variant comparison
           if (generationGroupId && res.content?.id) {

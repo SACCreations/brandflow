@@ -10,12 +10,14 @@ import type { Permission } from '@brandflow/shared';
 import type { JwtPayload } from '@brandflow/shared';
 import type { RequestWithUser } from '../decorators/current-user.decorator';
 import { PrismaService } from '../database/prisma.service';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private prisma: PrismaService,
+    private redis: RedisService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -35,18 +37,37 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('No user context or role assigned');
     }
 
-    // Enterprise RBAC: Fetch role permissions
-    // In production, these should be cached in Redis for performance
-    const role = await this.prisma.client.role.findUnique({
-      where: { id: user.roleId },
-      select: { permissions: true },
-    });
+    const cacheKey = `role:permissions:${user.roleId}`;
+    let rolePermissions: string[] | null = null;
 
-    if (!role) {
-      throw new ForbiddenException('Assigned role not found');
+    try {
+      const cached = await this.redis.get(cacheKey);
+      if (cached) {
+        rolePermissions = JSON.parse(cached);
+      }
+    } catch (err) {
+      console.error('[PermissionsGuard] Redis cache read failed:', err);
     }
 
-    const rolePermissions = (role.permissions as string[]) || [];
+    if (!rolePermissions) {
+      // Enterprise RBAC: Fetch role permissions
+      const role = await this.prisma.client.role.findUnique({
+        where: { id: user.roleId },
+        select: { permissions: true },
+      });
+
+      if (!role) {
+        throw new ForbiddenException('Assigned role not found');
+      }
+
+      rolePermissions = (role.permissions as string[]) || [];
+
+      try {
+        await this.redis.set(cacheKey, JSON.stringify(rolePermissions), 300);
+      } catch (err) {
+        console.error('[PermissionsGuard] Redis cache write failed:', err);
+      }
+    }
 
     // Check for superuser or specific permission
     const hasPermission =
@@ -60,3 +81,4 @@ export class PermissionsGuard implements CanActivate {
     return true;
   }
 }
+

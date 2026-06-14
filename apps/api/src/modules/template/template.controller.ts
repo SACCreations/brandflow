@@ -5,7 +5,14 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { TemplateService } from './template.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import type { JwtPayload } from '@brandflow/shared';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import {
+  createTemplateSchema,
+  updateTemplateSchema,
+  type CreateTemplateDto,
+  type UpdateTemplateDto,
+  type JwtPayload,
+} from '@brandflow/shared';
 
 @ApiTags('template')
 @ApiBearerAuth()
@@ -30,9 +37,12 @@ export class TemplateController {
   @ApiOperation({ summary: 'Create a template' })
   create(
     @CurrentUser() user: JwtPayload,
-    @Body() data: { name: string; type: string; body: string; placeholders?: Record<string, unknown> },
+    @Body(new ZodValidationPipe(createTemplateSchema)) data: CreateTemplateDto,
   ) {
-    return this.templateService.create(user.businessId, data);
+    return this.templateService.create(user.businessId, {
+      ...data,
+      placeholders: data.placeholders ?? undefined,
+    });
   }
 
   @Patch(':id')
@@ -40,9 +50,12 @@ export class TemplateController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: JwtPayload,
-    @Body() data: { name?: string; structure?: Record<string, unknown>; isActive?: boolean },
+    @Body(new ZodValidationPipe(updateTemplateSchema)) data: UpdateTemplateDto,
   ) {
-    return this.templateService.update(id, user.businessId, data);
+    return this.templateService.update(id, user.businessId, {
+      ...data,
+      placeholders: data.placeholders ?? undefined,
+    });
   }
 
   @Delete(':id')

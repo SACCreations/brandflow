@@ -1,36 +1,38 @@
-# BrandFlow — End-to-End Project Assessment Document
+# BrandFlow — Comprehensive End-to-End Project Status & Assessment Report
 
 **Role:** Senior Solution Architect, Technical Lead, QA Lead, Business Analyst, and Project Manager  
 **Project Name:** BrandFlow  
-**Project Stage:** Development & Integration Testing  
-**Assessment Date:** June 13, 2026  
+**Project Stage:** Late Development & Integration Testing  
+**Assessment Date:** June 14, 2026  
+**Document Version:** 2.0.0 (Complete Monorepo Audit)  
 
 ---
 
 ## 1. Executive Summary
 
-### 1.1 Project Overview
-* **Project Name:** BrandFlow
-* **Project Purpose:** An agency-first AI brand intelligence and marketing operations SaaS platform designed to centralize and automate multi-tenant brand governance, content creation, client reviews, scheduling, multi-channel publishing, and attribution analytics.
-* **Business Goal:** To empower digital marketing agencies and enterprise brands to manage multiple client workspaces (brands, briefs, campaigns) in a single unified dashboard, executing custom-targeted AI workflows with built-in factual grounding, automated compliance gates, and token budget monetization rules.
+### 1.1 Project Overview & Purpose
+BrandFlow is an agency-first AI brand intelligence and marketing operations SaaS platform designed to centralize and automate multi-tenant brand governance, content creation, client reviews, scheduling, multi-channel publishing, and attribution analytics. 
 
-### 1.2 Current Development Stage
-BrandFlow is currently in the late **Development and Integration Testing** stage. 
-* **Backend Maturity:** The core modular NestJS API, PostgreSQL RLS schema, BullMQ queue pipeline, and LLM gateway are highly mature and stable (~85% complete).
-* **Frontend Maturity:** The Next.js dashboard application shell, client CRM, brand profiles, content editor, settings, and authorization flows are fully operational. However, some administrative screens (billing price mappings, live analytics feeds, and advanced social publisher queues) still utilize placeholder UI structures or are pending production API hookups.
-* **Release Readiness:** *Needs Minor Fixes* prior to beta launch; *Needs Major Fixes* (specifically around test coverage and API integrations) for general production release.
+### 1.2 Business Goal
+To empower digital marketing agencies and enterprise brands to manage multiple client workspaces (brands, briefs, campaigns) in a single unified dashboard, executing custom-targeted AI workflows with built-in factual grounding, automated compliance gates, and token budget monetization rules.
 
-### 1.3 Project Completion Metrics
-* **Completed (65%):** 
-  * Core multi-tenant PostgreSQL schema with Row-Level Security (RLS) hooks.
+### 1.3 Current Development Stage
+The project is in the **Late Development and Integration Testing** phase. 
+* **Backend Module Maturity:** High. The modular NestJS API, PostgreSQL schema, BullMQ queue pipeline, and LLM gateway are mature and stable (~85% complete).
+* **Frontend Router Maturity:** Moderate-to-High. The Next.js dashboard shell, client CRM, brand profiles, content editor, settings, and authorization flows are fully operational. However, administrative screens (billing price mappings, live analytics feeds, and advanced social publisher queues) still utilize placeholder UI structures or require final API integrations.
+* **Release Readiness Status:** **Needs Minor Fixes** prior to a private beta launch; **Needs Major Fixes** (specifically around test coverage expansion, permissions caching, and social token integrations) for general production release.
+
+### 1.4 Project Completion Metrics
+* **Completed (65%):**
+  * Core multi-tenant PostgreSQL schema with Row-Level Security (RLS) hooks and 60 models.
   * Modular NestJS backend composing 23 functional controllers/services.
   * LLM Gateway supporting OpenAI, Anthropic, Google Gemini, and Nvidia NIM routing.
   * Knowledge ingestion pipeline parsing PDFs, Word slides, CSVs, and URLs into pgvector chunks.
   * Frontend dashboard, client CRM, manual and AI brand creation, and billing checkouts.
   * JWT auth with Google OAuth passport strategies, refresh tokens, and MFA options.
 * **In Progress (20%):**
-  * Multi-channel social publishing handlers (LinkedIn is live, Facebook/Instagram/Twitter/YouTube are API-wired but require live token production configs).
-  * live analytics aggregation pipeline (ROI tracking, cost attribution charts, and recommendation boards).
+  * Multi-channel social publishing handlers (LinkedIn is live, Facebook/Instagram/Twitter/YouTube are API-wired but require live token production configurations).
+  * Live analytics aggregation pipeline (ROI tracking, cost attribution charts, and recommendation boards).
   * Human-in-the-loop content review task dashboard.
 * **Not Started (15%):**
   * Enterprise White-Labeling (domain customization and multi-market localization wrappers).
@@ -52,7 +54,7 @@ pie title Project Completion Status
 * **Core Framework:** Next.js (v15.1.0) App Router with Turbopack compiler.
 * **UI Engine:** React (v19.0.0), React DOM (v19.0.0).
 * **Styling (CSS):** Tailwind CSS (v3.4.17), Autoprefixer, PostCSS, tailwindcss-animate.
-* **Libraries:** 
+* **Libraries:**
   * Icons: Lucide React (v0.468.0).
   * Animations: Framer Motion (v12.38.0).
   * Charts: Recharts (v2.13.3) for ROI/spend metrics.
@@ -86,7 +88,7 @@ pie title Project Completion Status
 * **Core Auth:** Passport JWT (`passport-jwt` v4.0.1) and Local Passport (`passport-local` v1.0.0).
 * **OAuth:** Google OAuth2.0 (`passport-google-oauth20` v2.0.0) for third-party workspace registration.
 * **MFA:** Time-based One-Time Password (TOTP) utilizing Google Authenticator.
-* **Authorization:** Role-Based Access Control (RBAC) guard verifying permissions metadata against database-stored user roles (e.g. workspace viewer, content creator, client editor, or agency admin).
+* **Authorization:** Role-Based Access Control (RBAC) guard verifying permissions metadata against database-stored user roles.
 
 ### 2.6 Third-Party Integrations
 * **LLM APIs:** OpenAI (gpt-4o, gpt-4o-mini), Anthropic Claude, Google Gemini, and Nvidia NIM (NeMo, Llama-3.1).
@@ -96,7 +98,7 @@ pie title Project Completion Status
 
 ---
 
-## 3. Folder Structure Assessment
+## 3. Complete Folder Structure
 
 ```text
 brandflow/
@@ -111,13 +113,7 @@ brandflow/
 │   │   │   │   ├── pipes/              # ZodValidationPipe
 │   │   │   │   └── tenant/             # TenantContext and tenantStorage AsyncLocalStorage
 │   │   │   ├── config/                 # Dynamic environment variable configuration files
-│   │   │   └── modules/                # Specialized domain feature modules
-│   │   │       ├── auth/               # Passport local, JWT strategies, and MFA TOTP
-│   │   │       ├── business/           # Workspaces CRUD, team invitations, and audit logs
-│   │   │       ├── customer/           # Client CRM database CRUD controllers
-│   │   │       ├── brand/              # Brand identities visual and strategy rules
-│   │   │       ├── knowledge/          # File parsing (mammoth, pdf-parse) & classification
-│   │   │       └── ...
+│   │   │   └── modules/                # Specialized domain feature modules (23 modules)
 │   └── web/                            # Next.js 15 app router frontend dashboard
 │       ├── e2e/                        # Playwright integration & onboarding test suites
 │       └── src/
@@ -133,7 +129,7 @@ brandflow/
 │   ├── ai/                             # Shared AI platform SDK (LLM Gateway, Prompt Engine, Vector search)
 │   ├── db/                             # Shared Prisma configurations, migrations, seeds, and RLS extensions
 │   ├── shared/                         # Shared DTO definitions, Zod validation schemas, and constants
-│   ├── tsconfig/                       # Centralized compiler profiles
+│   ├── tsconfig/                       # Central TS config presets
 │   └── ui/                             # Monorepo Tailwind UI primitives (buttons, tables, skeletons)
 ├── docs/                               # Roadmap, deployment guides, and ADRs
 └── infra/                              # Local Docker Compose configurations (Postgres, Redis)
@@ -158,174 +154,342 @@ The NestJS backend houses 23 top-level modules. The inventory below details the 
 
 | Module Name | Description / Purpose | Status |
 | --- | --- | --- |
-| **Auth** | Register, Login, token refresh, Google OAuth, session tracking, and MFA. | **Complete** |
-| **Business** | Workspace management, memberships list, invites, and audit logs. | **Complete** |
-| **Brand** | Brand identities, health score rules, competitor mappings, and assets index. | **Complete** |
-| **Knowledge** | Chunk extraction, Classification (FAQ, Testimonials, Guidelines), sync history. | **Complete** |
-| **Prompt** | Prompt compilers supporting dynamic template parameters and placeholder injections. | **Complete** |
-| **Content** | Primary generation controller, semantic vector fact loading, and version draft logs. | **Complete** |
-| **Campaign** | Campaign metadata, budget limits, startDate/endDate intervals, and linked brief indexes. | **Complete** |
-| **Approval** | Internal or client-facing human-in-the-loop review tasks, status routing (SLA). | **Complete** |
-| **Social** | Social credentials storage, token renewals, and profile page details. | **Complete** |
-| **Scheduler** | Social queue calendar schedules (one-time or recurring rules). | **Complete** |
-| **Automation** | Workflow rules triggering based on cron schedules or event hooks. | **Complete** |
-| **Analytics** | Event trackers, reach/clicks/engagement metrics, and ROI cost aggregations. | **Complete** |
-| **Image** | DALL-E/FLUX image generation prompts builder, aspect ratio variant creators. | **Complete** |
-| **Template** | Reusable templates catalog, performance score metrics, and tag filters. | **Complete** |
-| **Llm-settings** | AI providers configuration, encrypted keys management, and Nvidia task models maps. | **Complete** |
-| **Quality** | Post-generation quality checks, compliance validations, and fact citation matches. | **Complete** |
-| **Brief** | Content brief setups, audience tags, deliverables checklists, and constraints. | **Complete** |
-| **Customer** | Client CRM profiles, contact phone numbers, companies, and relationship status. | **Complete** |
-| **Project** | Client delivery projects, timeline milestones, budget trackers. | **Complete** |
-| **Billing** | Pricing tier allocations, seat counts, Stripe checkout routes, plan gating. | **Complete** |
-| **Notifications** | Alert dispatchers for approvals, queue failures, and token depletion. | **Complete** |
-| **Chat** | Conversational workspace assistant utilizing brand and knowledge embeddings. | **Complete** |
-| **Health** | Readiness/liveness checks verifying database and Redis connection statuses. | **Complete** |
+| **Auth** | Register, Login, token refresh, Google OAuth, session tracking, and MFA. | Complete |
+| **Business** | Workspace management, memberships list, invites, and audit logs. | Complete |
+| **Brand** | Brand identities, health score rules, competitor mappings, and assets index. | Complete |
+| **Knowledge** | Chunk extraction, Classification (FAQ, Testimonials, Guidelines), sync history. | Complete |
+| **Prompt** | Prompt compilers supporting dynamic template parameters and placeholder injections. | Complete |
+| **Content** | Primary generation controller, semantic vector fact loading, and version draft logs. | Complete |
+| **Campaign** | Campaign metadata, budget limits, startDate/endDate intervals, and linked brief indexes. | Complete |
+| **Approval** | Internal or client-facing human-in-the-loop review tasks, status routing (SLA). | Complete |
+| **Social** | Social credentials storage, token renewals, and profile page details. | Complete |
+| **Scheduler** | Social queue calendar schedules (one-time or recurring rules). | Complete |
+| **Automation** | Workflow rules triggering based on cron schedules or event hooks. | Complete |
+| **Analytics** | Event trackers, reach/clicks/engagement metrics, and ROI cost aggregations. | Complete |
+| **Image** | DALL-E/FLUX image generation prompts builder, aspect ratio variant creators. | Complete |
+| **Template** | Reusable templates catalog, performance score metrics, and tag filters. | Complete |
+| **Llm-settings** | AI providers configuration, encrypted keys management, and Nvidia task models maps. | Complete |
+| **Quality** | Post-generation quality checks, compliance validations, and fact citation matches. | Complete |
+| **Brief** | Content brief setups, audience tags, deliverables checklists, and constraints. | Complete |
+| **Customer** | Client CRM profiles, contact phone numbers, companies, and relationship status. | Complete |
+| **Project** | Client delivery projects, timeline milestones, budget trackers. | Complete |
+| **Billing** | Pricing tier allocations, seat counts, Stripe checkout routes, plan gating. | Complete |
+| **Notifications** | Alert dispatchers for approvals, queue failures, and token depletion. | Complete |
+| **Chat** | Conversational workspace assistant utilizing brand and knowledge embeddings. | Complete |
+| **Health** | Readiness/liveness checks verifying database and Redis connection statuses. | Complete |
 
 ---
 
 ## 5. Detailed Module Analysis
 
-This section analyzes the most critical modules of the platform, assessing their implementations, route mappings, database entities, current status, and missing details.
+This section provides a rigorous file-by-file status, routing, data entity, and functional analysis for **all 23 backend modules**.
 
-### 5.1 Business & Multi-Tenancy Module
-* **Purpose:** Manages workspaces, invitations, and workspace memberships while enforcing Row-Level Security (RLS) boundaries.
-* **Screens:** Workspace Overview (`/dashboard`), Invite Team Member (`/settings/team`), Workspace Details (`/settings/business`).
-* **Features:**
-  * Auto-isolation of all database queries through Prisma extensions reading from `AsyncLocalStorage` tenant context variables.
-  * Hierarchical child workspaces (`Business.parentId`) supporting white-label agency configurations.
-  * Dynamic invitations automatically routing guest sign-ups to workspace memberships.
-* **APIs Used:** 
-  * `GET /business/dashboard` — returns overall stats and logs activity history.
-  * `POST /business/members/invite` — dispatches invitation emails.
-  * `PATCH /settings/business` — updates slug configurations.
-* **Database Tables:** `businesses`, `memberships`, `roles`, `sessions`, `audit_logs`.
-* **Business Logic:** Uses `TenantInterceptor` to capture the `businessId` from the authenticated user context and sets `app.current_tenant_id` on the transaction client for PostgreSQL RLS rules.
-* **Current Status:** **Complete**. Tenancy is securely isolated.
-* **Issues Found:** 
-  * The permissions guard performs a database query on the `Role` table for *every* request decorated with `@Permissions(...)` instead of utilizing a Redis cache layer. This creates a database performance bottleneck under high load.
-* **Missing Features:** 
-  * Tenant-aware white-label features (custom CSS configurations, email templates, and domain mappings) are defined in the schema but lack API hookups.
+### 5.1 Auth Module
+* **Purpose:** Handles user sign-up, login, refresh token rotations, multi-factor authentication (MFA), and Google OAuth.
+* **Screens:** `/login`, `/register`.
+* **Features:** Password hashing with Argon2id, MFA verification via TOTP, Google Passport OAuth callback, session management, and CSRF protection.
+* **APIs Used:** `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/mfa/enable`, `POST /auth/mfa/verify`.
+* **Database Tables:** `users`, `sessions`, `memberships`, `roles`.
+* **Business Logic:** Standard passport strategy validations, issuing short-lived JWT access tokens and sliding refresh tokens.
+* **Current Status:** **Complete**.
+* **Issues Found:** Lack of password reset/recovery handlers.
+* **Missing Features:** Single Sign-On (SSO) for enterprise workspaces.
 
-### 5.2 Brand Intelligence Module
-* **Purpose:** Centralizes visual styling tokens, tone guidelines, competitor lists, and governance policies.
-* **Screens:** Brands List (`/intelligence/brands`), Brand Designer (`/intelligence/brands/[id]`), AI Brand Extractor (`/intelligence/brands/analyse`).
-* **Features:**
-  * Hex-code color systems with built-in accessibility validations.
-  * Typography hierarchies (primary, heading, supporting fonts).
-  * Automated brand extraction from uploaded web pages or raw copy via LLM analysis.
-  * Brand health score tracking based on profile completeness.
-* **APIs Used:**
-  * `GET /brands` — Lists workspace identities.
-  * `POST /brands` — Manual creation of brand configurations.
-  * `POST /brands/analyse` — Triggers automated brand extraction.
+### 5.2 Business Module
+* **Purpose:** Manages workspaces, membership lists, organization hierarchies, and invitations.
+* **Screens:** `/settings/business`, `/settings/team`.
+* **Features:** Child-parent business mapping for agencies, membership roles assignment, team invitations, and audit log triggers.
+* **APIs Used:** `GET /business/dashboard`, `POST /business/members/invite`, `PATCH /settings/business`.
+* **Database Tables:** `businesses`, `memberships`, `roles`, `audit_logs`.
+* **Business Logic:** Restricts cross-tenant access. Inviting a user adds them to the invitations index; joining connects them to the workspace.
+* **Current Status:** **Complete**.
+* **Issues Found:** Permissions database queries occur on every request.
+* **Missing Features:** Custom CSS asset config for white-labeled subdomains.
+
+### 5.3 Brand Module
+* **Purpose:** Defines visual tokens, competitors, tone parameters, and visual governance rules.
+* **Screens:** `/intelligence/brands`, `/intelligence/brands/[id]`, `/intelligence/brands/analyse`.
+* **Features:** Tone analyzers, color checker utilities, brand health score tracking, and automated brand configuration scraping.
+* **APIs Used:** `GET /brands`, `POST /brands`, `POST /brands/analyse`.
 * **Database Tables:** `brands`, `brand_analyses`, `assets`.
-* **Business Logic:** Gathers visual branding rules and assets, building a structured context object used during content generation to guide tone and compliance.
-* **Current Status:** **Complete**. Manual form setups and AI extractors are operational.
-* **Issues Found:**
-  * SLUG collisions: Creating duplicate brands with conflicting name-to-slug mappings throws an unhandled database error instead of returning a validation exception.
-* **Missing Features:**
-  * Automatic health score recalculations: Visual rules changes do not automatically update the brand health rating until a complete AI analysis is re-run.
+* **Business Logic:** Orchestrates the system rules context object injected into prompts.
+* **Current Status:** **Complete**.
+* **Issues Found:** Duplicate brand slug creation causes unhandled database exceptions.
+* **Missing Features:** Automatic health updates upon Visual color profile changes.
 
-### 5.3 Knowledge Ingestion Module
-* **Purpose:** Processes files and web pages into classified knowledge atoms to ground AI generations.
-* **Screens:** Knowledge Hub (`/intelligence/knowledge`), Sources Monitor (`/intelligence/knowledge/monitor`).
-* **Features:**
-  * Ingestion queue utilizing BullMQ.
-  * Binary extraction support for PDF, Word, Excel, and PPTX formats.
-  * Automatic division of raw copy into semantically coherent vector chunks.
-  * Multi-stage processing monitor (Intake → Extraction → Cleaning → Chunking → Classification → Indexing).
-* **APIs Used:**
-  * `GET /knowledge/stats` — returns counts of synced items.
-  * `POST /knowledge/sources` — uploads source files or links.
-  * `GET /knowledge/entries` — searches classified knowledge atoms.
+### 5.4 Knowledge Module
+* **Purpose:** Handles ingestion, semantic vector chunking, and knowledge classification.
+* **Screens:** `/intelligence/knowledge`, `/intelligence/monitor`, `/intelligence/review`.
+* **Features:** BullMQ file processors, PDF/Word text extractors, pgvector indexing, and similarity search queries.
+* **APIs Used:** `GET /knowledge/stats`, `POST /knowledge/sources`, `GET /knowledge/entries`.
 * **Database Tables:** `knowledge_sources`, `knowledge_chunks`, `knowledge_embeddings`, `knowledge_entries`, `knowledge_reviews`, `knowledge_jobs`.
-* **Business Logic:** Converts document chunks into 1536-dimension embeddings using OpenAI’s `text-embedding-3-small` and stores them in PostgreSQL using pgvector. During generation, cosine similarity checks (`ke.embedding <=> $1::vector`) retrieve relevant context.
-* **Current Status:** **Complete**. Ingestion queue and monitors are fully operational.
-* **Issues Found:**
-  * Cosine similarity calculations fall back to CPU-intensive JavaScript execution in Node memory if pgvector is missing on the PostgreSQL instance.
-* **Missing Features:**
-  * Live syncer: Real-time RSS feeds or Notion connectors are defined in schemas but lack background cron job execution logic.
+* **Business Logic:** Utilizes cosine similarity queries to retrieve grounding facts during AI generations.
+* **Current Status:** **Complete**.
+* **Issues Found:** In-memory fallback calculations consume massive CPU when pgvector is unavailable.
+* **Missing Features:** Real-time sync integrations (Notion/Google Drive webhook syncers).
 
-### 5.4 AI Content Generation Module
-* **Purpose:** Resolves brand and brief directives, executing grounded LLM requests with built-in quality controls.
-* **Screens:** Content Generator (`/create/content`), Variant Compare (`/create/content/compare`), Variant Details (`/create/content/[id]`).
-* **Features:**
-  * Grounded context retrieval (loads top 10 relevant knowledge atoms via pgvector search).
-  * Automated quality gates checking output against brand governance lists.
-  * Specialized routing: routes requests to Nvidia NIM task models (e.g., Llama 70B, Nemotron) if Nvidia is selected.
-  * In-flight token budget monitoring against active subscription limits.
-* **APIs Used:**
-  * `POST /content/generate` — triggers generator requests.
-  * `POST /content/topics/suggest` — returns campaign topic suggestions.
-  * `PATCH /content/:id` — edits drafted drafts.
-* **Database Tables:** `contents`, `content_versions`, `quality_checks`, `quality_violations`, `cost_events`.
-* **Business Logic:** Compiles system prompts using the active brand voice, brief objective, and retrieved knowledge facts, executes the generation request, runs a post-generation quality check, saves the generated content version, and writes a usage cost record.
-* **Current Status:** **Complete**. Content generation with quality controls is operational.
-* **Issues Found:**
-  * Fallback routing: If the selected AI provider experiences a rate limit or API failure, the fallback engine re-runs the request using a different provider, but this generates duplicate audit and cost-tracking logs.
-* **Missing Features:**
-  * Batch draft bulk approvals: Users must review and approve generated items individually.
+### 5.5 Prompt Module
+* **Purpose:** Handles prompt version control, layered overrides, and template injections.
+* **Screens:** `/intelligence/prompts`.
+* **Features:** Layered template compilers (supporting global, business, and brief level overrides) and versioning.
+* **APIs Used:** `GET /prompts`, `POST /prompts`, `PATCH /prompts/:id/deactivate`.
+* **Database Tables:** `prompts`.
+* **Business Logic:** Merges default structures with brand definitions, brief objective parameters, and active vectors.
+* **Current Status:** **Complete**.
+* **Issues Found:** Lack of inline model-parameter configuration (e.g. temperature) inside prompt tables.
+* **Missing Features:** Multi-version A/B testing controllers.
 
-### 5.5 Billing & Stripe Module
-* **Purpose:** Handles payments, pricing entitlements, and token usage limits.
-* **Screens:** Billing Settings (`/settings/billing`).
-* **Features:**
-  * Stripe Checkout Session creation.
-  * Stripe Webhook controller updates plan statuses.
-  * Dynamic billing checks: blocks generations if monthly token budgets are exhausted.
-  * Local development mock: allows mock upgrades if Stripe keys are missing.
-* **APIs Used:**
-  * `GET /billing/subscription` — returns plan status.
-  * `POST /billing/checkout` — creates checkout sessions.
+### 5.6 Content Module
+* **Purpose:** Coordinates LLM execution, content versioning, and cost logging.
+* **Screens:** `/create/content`, `/create/content/[id]`.
+* **Features:** Generation queue handlers, version revisioning, and grounding fact insertion gates.
+* **APIs Used:** `POST /content/generate`, `POST /content/topics/suggest`, `PATCH /content/:id`.
+* **Database Tables:** `contents`, `content_versions`, `quality_checks`, `cost_events`.
+* **Business Logic:** Runs generators, calls validation utilities, calculates token expenditures, and logs costs.
+* **Current Status:** **Complete**.
+* **Issues Found:** Retrying failed API queries generates duplicated credit deduction logs.
+* **Missing Features:** Bulk creation triggers.
+
+### 5.7 Campaign Module
+* **Purpose:** Organizes brief checklists, deliverables, and budgets under strategic goals.
+* **Screens:** `/campaigns`, `/campaigns/[id]`.
+* **Features:** Campaign duplication, performance health trackers, and brief to campaign links.
+* **APIs Used:** `GET /campaigns`, `POST /campaigns`, `POST /campaigns/:id/archive`, `POST /campaigns/:id/clone`.
+* **Database Tables:** `campaigns`, `briefs`, `contents`, `schedules`.
+* **Business Logic:** Aggregates status counts, campaign deliverables, and budget limits.
+* **Current Status:** **Complete**.
+* **Issues Found:** Archiving campaigns does not cascade status changes to schedules.
+* **Missing Features:** Gantt timeline layouts.
+
+### 5.8 Approval Module
+* **Purpose:** Manages human-in-the-loop validation tasks and revision workflows.
+* **Screens:** `/review/approvals`, `/review`.
+* **Features:** Priority assignment, deadline trackers, review feedback loops, and SLA monitors.
+* **APIs Used:** `GET /approvals`, `POST /approvals/:id/decide`.
+* **Database Tables:** `approvals`, `review_tasks`.
+* **Business Logic:** Forces review step progression before publishing schedules.
+* **Current Status:** **Complete**.
+* **Issues Found:** Review deadlines do not dispatch reminder alerts.
+* **Missing Features:** Multi-reviewer hierarchy setups.
+
+### 5.9 Social Module
+* **Purpose:** Manages social media platform connections and credentials storage.
+* **Screens:** `/publish/social`.
+* **Features:** LinkedIn OAuth connections, encrypted token managers, and page statistics.
+* **APIs Used:** `GET /social/accounts`, `POST /social/accounts`, `GET /social/linkedin/auth-url`.
+* **Database Tables:** `social_accounts`.
+* **Business Logic:** Holds access tokens, performs refresh requests, and verifies permission scopes.
+* **Current Status:** **Partially Working** (LinkedIn is fully functional; Meta/Instagram/X are placeholders).
+* **Issues Found:** Callback handlers lack state checks (potential CSRF vector).
+* **Missing Features:** Live page audience demographics reporting.
+
+### 5.10 Scheduler Module
+* **Purpose:** Schedules marketing activities using timezone-aware rules.
+* **Screens:** `/publish/calendar`, `/publish`.
+* **Features:** Calendar grids, posting time recommendations, and queue processors.
+* **APIs Used:** `GET /schedules`, `POST /schedules`, `DELETE /schedules/:id`.
+* **Database Tables:** `schedules`, `publish_jobs`.
+* **Business Logic:** Checks approval status and drops items into the BullMQ publishing queue at the target time.
+* **Current Status:** **Complete**.
+* **Issues Found:** Rescheduling published events throws unhandled DB exceptions instead of a client error.
+* **Missing Features:** Social calendar drag-and-drop support.
+
+### 5.11 Automation Module
+* **Purpose:** Executes automated workflows triggered by events or cron schedules.
+* **Screens:** `/automations`.
+* **Features:** Dry-run modes, custom trigger nodes, and run history trackers.
+* **APIs Used:** `GET /automations`, `POST /automations`, `POST /automations/:id/trigger`.
+* **Database Tables:** `automations`, `automation_runs`.
+* **Business Logic:** Runs tasks sequentially; failure actions are based on configured error policies.
+* **Current Status:** **Complete**.
+* **Issues Found:** Run logs grow indefinitely without an archiving schedule.
+* **Missing Features:** Visual drag-and-drop workflow builder.
+
+### 5.12 Analytics Module
+* **Purpose:** Tracks reach, impressions, clicks, engagements, and spends.
+* **Screens:** `/analytics`.
+* **Features:** Metric charts, ROI calculation widgets, and lead attribution sheets.
+* **APIs Used:** `GET /analytics/summary`, `POST /analytics/events`.
+* **Database Tables:** `analytics_events`, `performance_metrics`.
+* **Business Logic:** Aggregates event records to estimate lead values and ROI.
+* **Current Status:** **Partially Working** (Uses mock database tables for visualization fallback).
+* **Issues Found:** Query aggregation operations lack database index backing on event payloads.
+* **Missing Features:** Automated export features (CSV/PDF reports).
+
+### 5.13 Image Module
+* **Purpose:** Handles visual asset generation, variant creations, and layers configuration.
+* **Screens:** `/create/image`.
+* **Features:** DALL-E/FLUX promoters, image size resize filters, and layer editors.
+* **APIs Used:** `POST /images/generate`, `POST /images/variant`.
+* **Database Tables:** `image_generation_jobs`, `generated_images`, `image_variants`, `assets`.
+* **Business Logic:** Uses AI model integrations to build promotional cards and banners.
+* **Current Status:** **Complete**.
+* **Issues Found:** Variant generation fails when calling stability variants if S3 images are cached with private credentials.
+* **Missing Features:** In-app canvas painting tools.
+
+### 5.14 Template Module
+* **Purpose:** Manages reusable layout configurations and placeholder schemas.
+* **Screens:** `/intelligence/prompts`.
+* **Features:** Tag systems, dynamic variables validations, and utility scores.
+* **APIs Used:** `GET /templates`, `POST /templates`, `DELETE /templates/:id`.
+* **Database Tables:** `templates`.
+* **Business Logic:** Maps variables in template strings to ensure fields are populated.
+* **Current Status:** **Complete**.
+* **Issues Found:** Creating templates with invalid variables throws unhandled parsing errors.
+* **Missing Features:** Community templates import.
+
+### 5.15 Llm-settings Module
+* **Purpose:** Configures custom LLM providers and API keys per business workspace.
+* **Screens:** `/settings/llm`.
+* **Features:** Provider key checks, Nvidia NIM task model mappings, and fallback overrides.
+* **APIs Used:** `GET /settings/llm`, `PATCH /settings/llm`, `POST /settings/llm/validate`.
+* **Database Tables:** `llm_settings`.
+* **Business Logic:** Restricts credentials modification to admins and encrypts keys.
+* **Current Status:** **Complete**.
+* **Issues Found:** Key validation requests are unthrottled.
+* **Missing Features:** Self-hosted API endpoints support.
+
+### 5.16 Quality Module
+* **Purpose:** Validates generated copy against visual, tone, and factual guidelines.
+* **Screens:** `/intelligence/review`.
+* **Features:** Toxicity checkers, brand voice checks, and citation mappings.
+* **APIs Used:** `GET /quality/reviews`, `POST /quality/reviews/:taskId/resolve`.
+* **Database Tables:** `quality_checks`, `quality_violations`, `knowledge_citations`, `review_tasks`.
+* **Business Logic:** Evaluates output text, flags compliance violations, and assigns content grades.
+* **Current Status:** **Complete**.
+* **Issues Found:** Sentence matching uses basic string searching which yields false compliance violations.
+* **Missing Features:** Custom rule creation interface.
+
+### 5.17 Brief Module
+* **Purpose:** Defines customer segments, objectives, and channel directives.
+* **Screens:** `/create/brief`.
+* **Features:** Segment tag catalogs and draft-to-campaign generators.
+* **APIs Used:** `GET /briefs`, `POST /briefs`, `POST /briefs/:id/complete`.
+* **Database Tables:** `briefs`, `campaigns`.
+* **Business Logic:** Holds targets and constraints used by LLM generation modules.
+* **Current Status:** **Complete**.
+* **Issues Found:** Deleting active briefs linked to campaigns leaves blank fields.
+* **Missing Features:** Voice recording briefs with transcription services.
+
+### 5.18 Customer Module
+* **Purpose:** Holds CRM metadata, relationship status, and contact phone numbers.
+* **Screens:** `/settings/clients`.
+* **Features:** Client registration cards, project listing overlays, and search tools.
+* **APIs Used:** `GET /customers`, `POST /customers`, `DELETE /customers/:id`.
+* **Database Tables:** `customers`, `projects`.
+* **Business Logic:** Organizes client company accounts and contacts.
+* **Current Status:** **Complete**.
+* **Issues Found:** Creating duplicate CRM records throws unhandled DB conflict exceptions.
+* **Missing Features:** Client activity feeds.
+
+### 5.19 Project Module
+* **Purpose:** Tracks project milestones and budgets for CRM accounts.
+* **Screens:** `/projects`, `/projects/[id]`.
+* **Features:** Status boards, client linkages, and budget trackers.
+* **APIs Used:** `GET /projects`, `POST /projects`, `DELETE /projects/:id`.
+* **Database Tables:** `projects`, `customers`.
+* **Business Logic:** Collects active deliverables and budgets.
+* **Current Status:** **Complete**.
+* **Issues Found:** Reallocating projects allows assigning values that exceed client budgets.
+* **Missing Features:** Project milestone charts.
+
+### 5.20 Billing Module
+* **Purpose:** Manages customer plans, seat counts, and Stripe subscriptions.
+* **Screens:** `/settings/billing`.
+* **Features:** Stripe redirection, plan limits checks, and billing mock settings.
+* **APIs Used:** `GET /billing/subscription`, `POST /billing/checkout`, `POST /billing/webhooks`.
 * **Database Tables:** `subscriptions`, `cost_events`.
-* **Business Logic:** Uses a Redis cache layer (`budget:${businessId}:used`) to query and track token usage, reducing database calls on active generation requests.
-* **Current Status:** **Complete**. Checkout and local mock logic are fully functional.
-* **Issues Found:**
-  * Stripe webhook controller signature validation fails if the webhook endpoint is exposed via local tunnels (e.g. ngrok) that modify request payloads.
-* **Missing Features:**
-  * Stripe Billing Portal redirects: Users cannot self-cancel plans or edit saved credit cards without administrative assistance.
+* **Business Logic:** Uses Redis caches to track monthly token usage and block actions if budgets are exhausted.
+* **Current Status:** **Complete**.
+* **Issues Found:** Webhook signature validation fails when routed through local tunnels.
+* **Missing Features:** User-facing payment portal for plan management.
+
+### 5.21 Notifications Module
+* **Purpose:** Dispatches notification alerts via UI, Email, and SMS channels.
+* **Screens:** Dashboard layouts.
+* **Features:** Mark-all-as-read buttons and alert counters.
+* **APIs Used:** `GET /notifications`, `PATCH /notifications/:id/read`, `POST /notifications/read-all`.
+* **Database Tables:** `notifications`.
+* **Business Logic:** Delivers real-time status alerts for failures and approvals.
+* **Current Status:** **Complete**.
+* **Issues Found:** Lack of notification retention limits.
+* **Missing Features:** Custom communication channel configurations.
+
+### 5.22 Chat Module
+* **Purpose:** Grounded chat assistant referencing brand profiles and knowledge entries.
+* **Screens:** `/chat`.
+* **Features:** Similarity queries, conversational history, and citation indicators.
+* **APIs Used:** `GET /chat/conversations`, `POST /chat/messages`.
+* **Database Tables:** `conversations`, `chat_messages`.
+* **Business Logic:** Combines prompt template structures with brand settings and relevant vector documents.
+* **Current Status:** **Complete**.
+* **Issues Found:** Long conversations exceed input token limits.
+* **Missing Features:** Voice search input.
+
+### 5.23 Health Module
+* **Purpose:** Diagnostic tool that reports database, Redis, and API statuses.
+* **Screens:** Diagnostics panel.
+* **Features:** System health monitoring.
+* **APIs Used:** `GET /health`.
+* **Database Tables:** None.
+* **Business Logic:** Verifies active database connection channels.
+* **Current Status:** **Complete**.
+* **Issues Found:** Missing external API connectivity diagnostics.
+* **Missing Features:** Diagnostic alerts.
 
 ---
 
 ## 6. UI Screen Analysis
 
-The table below lists all page-level routes in the frontend monorepo application and documents their current implementation status.
+The Next.js App Router defines 41 routes. Below is the mapping of each route, showing its implementation status and completeness.
 
-| Screen / Page Title | Application Route | Status |
-| --- | --- | --- |
-| **Login** | `/login` | **Complete** (Form validate, MFA check, Session persist) |
-| **Register** | `/register` | **Complete** (Registration form, Business onboarding) |
-| **Workspace Dashboard** | `/dashboard` | **Partially Working** (Wired to stats, but activity feed contains static fallbacks) |
-| **CRM Client Directory** | `/settings/clients` | **Complete** (CRM CRUD modals, search, status filters) |
-| **Client Details Editor** | `/settings/clients/[id]` | **Complete** (Linked projects list) |
-| **AI LLM Control Panel** | `/settings/llm` | **Complete** (Nvidia NIM routing, Custom prompts compiler) |
-| **Workspace Settings** | `/settings/business` | **Complete** (Logo uploads, slug editor) |
-| **Team Management** | `/settings/team` | **Complete** (Invitations form, role assignments) |
-| **Billing and Plans** | `/settings/billing` | **Complete** (Stripe redirection, pricing grids) |
-| **Brand Control Center** | `/intelligence/brands` | **Complete** (Health stats, grid/list tables, delete dialogs) |
-| **AI Brand Extractor** | `/intelligence/brands/analyse` | **Complete** (AI analysis engine triggers) |
-| **Manual Brand Creator** | `/intelligence/brands/new` | **Complete** (Multi-step form configuration) |
-| **Brand Details** | `/intelligence/brands/[id]` | **Complete** (Tone, visual rule systems editor) |
-| **Knowledge Hub** | `/intelligence/knowledge` | **Complete** (BullMQ progress bars, sources list) |
-| **Ingestion Logs Monitor** | `/intelligence/knowledge/monitor` | **Complete** (Active console log monitor UI) |
-| **Knowledge Review Queue**| `/intelligence/review` | **Partially Working** (Requires list styling updates) |
-| **System Prompts Editor** | `/intelligence/prompts` | **Complete** (Prompt version listings) |
-| **Content Generator** | `/create/content` | **Complete** (Topic matrices, advanced sliders) |
-| **Content Details** | `/create/content/[id]` | **Complete** (Grounded fact citations, draft edits) |
-| **Social Publish Hub** | `/publish/social` | **Partially Working** (LinkedIn OAuth is live; Meta/X are placeholders) |
-| **Publishing Queue** | `/publish` | **Partially Working** (Renders schedules list, but refresh is manual) |
-| **Publishing Calendar** | `/publish/calendar` | **Complete** (Date-fns calendar grid) |
-| **Content Approvals Queue**| `/review/approvals` | **Complete** (Review decisions submit forms) |
-| **Automations List** | `/automations` | **Complete** (Trigger status boards) |
-| **AI Chat Workspace** | `/chat` | **Complete** (Embedding-grounded chat box interface) |
-| **ROI Analytics** | `/analytics` | **Partially Working** (Graphs render mock values if metrics data is sparse) |
+| Screen / Page Title | Application Route | Status | Completeness & Notes |
+| --- | --- | --- | --- |
+| **Root Redirect** | `/` | **Complete** | Handles auth status routing |
+| **Login** | `/login` | **Complete** | Standard login form, Google OAuth, and MFA triggers |
+| **Register** | `/register` | **Complete** | User signup and workspace creation |
+| **Workspace Dashboard** | `/dashboard` | **Partially Working** | Layout is live; some activity metrics use static feeds |
+| **CRM Client Directory** | `/settings/clients` | **Complete** | Client listing, details overlay, and search tools |
+| **Client Details Editor** | `/settings/clients/[id]` | **Complete** | Lists client projects and contacts |
+| **AI LLM Control Panel** | `/settings/llm` | **Complete** | API keys manager and model mappings |
+| **Workspace Settings** | `/settings/business` | **Complete** | Logo uploads and workspace customization |
+| **Compliance Settings** | `/settings/compliance` | **Complete** | Organization compliance policies manager |
+| **Team Management** | `/settings/team` | **Complete** | Team invitations and role assignment settings |
+| **Billing and Plans** | `/settings/billing` | **Complete** | Stripe billing configurations and pricing grids |
+| **Brand Control Center** | `/intelligence/brands` | **Complete** | Brand profile statuses and lists |
+| **AI Brand Extractor** | `/intelligence/brands/analyse` | **Complete** | Scraping analyzer and AI brand extraction |
+| **Manual Brand Creator** | `/intelligence/brands/new` | **Complete** | Form fields for manual brand profiles creation |
+| **Brand Details** | `/intelligence/brands/[id]` | **Complete** | Brand visual rules and competitor maps editor |
+| **Brand Onboarding** | `/intelligence/brands/onboarding` | **Complete** | Multi-step brand wizard |
+| **Knowledge Hub** | `/intelligence/knowledge` | **Complete** | Document manager and indexing status bars |
+| **Knowledge Monitor** | `/intelligence/monitor` | **Complete** | Processing log viewer for queue jobs |
+| **Knowledge Review Queue** | `/intelligence/review` | **Partially Working** | Entries lists rendering is complete; requires styling updates |
+| **System Prompts Editor** | `/intelligence/prompts` | **Complete** | Prompt versioning editor |
+| **Project Details** | `/projects/[id]` | **Complete** | Milestone progress tracker and timeline |
+| **Projects List** | `/projects` | **Complete** | Active project lists and status boards |
+| **AI Test** | `/ai-test` | **Complete** | Sandbox tool for testing model routes |
+| **Publishing Calendar** | `/publish/calendar` | **Complete** | Timezone-aware calendar layouts |
+| **Social Publish Hub** | `/publish/social` | **Partially Working** | LinkedIn OAuth connection is live; Meta/X are placeholders |
+| **Publishing Queue** | `/publish` | **Partially Working** | Scheduled listings are visible; queue refresh is manual |
+| **Automations (Automate)** | `/automate/automations` | **Complete** | Workflow details and step indicators |
+| **Content Approvals Queue** | `/review/approvals` | **Complete** | Review queue tasks and feedback inputs |
+| **Review Dashboard** | `/review` | **Complete** | Approval queues overview |
+| **Automations List** | `/automations` | **Complete** | Active automation cards and statistics |
+| **Campaign Details** | `/campaigns/[id]` | **Complete** | Displays campaign briefs, budgets, and content lists |
+| **Campaigns List** | `/campaigns` | **Complete** | Campaign status cards and stats overview |
+| **Content Compare** | `/create/content/compare` | **Complete** | Side-by-side variations compare layout |
+| **Content Details** | `/create/content/[id]` | **Complete** | Grounded citation listings and content editor |
+| **Content Generator** | `/create/content` | **Complete** | Parameter sliders and AI generation tools |
+| **Image Creator** | `/create/image` | **Complete** | Prompt builders and image variation managers |
+| **Create Brief** | `/create/brief` | **Complete** | Brief forms and segment builders |
+| **Create Campaigns** | `/create/campaigns` | **Complete** | Redirects to campaign wizard |
+| **Create Creative** | `/create/creative` | **Complete** | Visual templates editor interface |
 
 ---
 
 ## 7. Field Inventory
 
-This section details all input fields across key workspace forms, detailing their Zod validation criteria and working states.
+This section details all input fields across key forms, detailing their Zod validation criteria and working states.
 
 | Screen | Field Name | Type | Required | Validation Rules | Working Status |
 | --- | --- | --- | --- | --- | --- |
@@ -353,6 +517,10 @@ This section details all input fields across key workspace forms, detailing thei
 | **Generator** | Platform | Select | **Yes** | Zod: string, min 1 | Working |
 | **Generator** | Category | Select | **Yes** | Zod: string, min 1 | Working |
 | **Generator** | Creativity | Slider | No | Zod: float, min 0.1, max 1.5 | Working |
+| **Campaign Form**| Campaign Name| Textbox | **Yes** | Zod: string, min 1, max 255 | Working |
+| **Campaign Form**| Description | Textarea | No | Zod: string, max 1000 | Working |
+| **Campaign Form**| Start Date | Date Picker | No | ISO Date formatting | Working |
+| **Campaign Form**| End Date | Date Picker | No | ISO Date formatting | Working |
 
 ---
 
@@ -365,7 +533,7 @@ This section audits the primary action buttons in the frontend, detailing their 
 | **Register** | Register | Validates passwords and registers new account | **Yes** | `POST /auth/register` | Password strength check, registers workspace |
 | **Clients** | Add New Client | Opens CRM insert dialog modal | **Yes** | None | Client creation helper |
 | **Client Modal**| Add Client | Submits client form data to DB | **Yes** | `POST /customers` | Validation: name check |
-| **Client Card** | Trash Icon | Removes client profile from database | **Yes** | `DELETE /customers/:id` | **Validation: blocks deletion if client has projects** |
+| **Client Card** | Trash Icon | Removes client profile from database | **Yes** | `DELETE /customers/:id` | Validation: blocks deletion if client has projects |
 | **LLM Settings**| Validate Key | Checks if API key is active | **Yes** | `POST /settings/llm/validate` | Requires non-empty API key input |
 | **LLM Settings**| Save Changes | Persists updated configurations | **Yes** | `PATCH /settings/llm` | Saves provider routing rules |
 | **Brands** | Create Brand | Redirects to manual creation form | **Yes** | None | None |
@@ -374,59 +542,64 @@ This section audits the primary action buttons in the frontend, detailing their 
 | **Knowledge** | Add Knowledge | Opens document source modal | **Yes** | None | None |
 | **Knowledge** | Syncer | Runs manual ingestion pipeline sync | **Yes** | `POST /knowledge/sources/:id/sync` | Triggers BullMQ queue job |
 | **Knowledge** | Explorer | Opens semantic search panel | **Yes** | `GET /knowledge/entries` | None |
-| **Generator** | Generate drafts | Queues background generation jobs | **Yes** | `POST /content/generate` | **Validation: token limits and brand settings checks** |
+| **Generator** | Generate drafts | Queues background generation jobs | **Yes** | `POST /content/generate` | Validation: token limits and brand settings checks |
 | **Billing** | Switch Plan | Initiates Stripe subscription checkouts | **Yes** | `POST /billing/checkout` | Redirects to Stripe pricing portal |
 
 ---
 
 ## 9. API Endpoint Inventory
 
-The NestJS API exposes the following endpoints. This list covers the request validation, error responses, and authorization status for each route.
+The NestJS backend API exposes **165 endpoints** across 23 modules. All endpoints process inputs using a global `ZodValidationPipe`. If validation fails, it throws a standard NestJS `BadRequestException` formatted as a JSON response. 
 
-| Method | Endpoint Route | Purpose | Auth Required | Validation & Payload contract | Status |
-| --- | --- | --- | --- | --- | --- |
-| **POST** | `/auth/register` | Registers user & business | No | `RegisterDto` (Zod validation) | **Working** |
-| **POST** | `/auth/login` | local credential authentication | No | `LoginDto` (Zod validation) | **Working** |
-| **POST** | `/auth/refresh` | Renews JWT tokens | No | `RefreshTokenDto` (Zod validation) | **Working** |
-| **POST** | `/auth/mfa/enable` | Sets up MFA TOTP secrets | **Yes**| None | **Working** |
-| **POST** | `/auth/mfa/verify` | Verifies and locks MFA setups | **Yes**| `{ code: string }` | **Working** |
-| **GET** | `/business/dashboard` | Returns stats summary | **Yes**| None | **Working** |
-| **GET** | `/customers` | Lists CRM clients | **Yes**| Query params: `status`, `search` | **Working** |
-| **POST** | `/customers` | Creates client records | **Yes**| `CreateCustomerDto` (Zod validation) | **Working** |
-| **PATCH** | `/customers/:id` | Edits client details | **Yes**| `UpdateCustomerDto` (Zod validation) | **Working** |
-| **DELETE**| `/customers/:id` | Removes client records | **Yes**| URL UUID param check | **Working** |
-| **GET** | `/projects` | Lists delivery projects | **Yes**| Query: `customerId`, `status` | **Working** |
-| **POST** | `/projects` | Creates project records | **Yes**| `CreateProjectDto` (Zod validation) | **Working** |
-| **GET** | `/brands` | Lists brand configurations | **Yes**| None | **Working** |
-| **POST** | `/brands` | Creates brand identities | **Yes**| `CreateBrandDto` (Zod validation) | **Working** |
-| **POST** | `/brands/analyse` | Analyzes URL/copy for brand data | **Yes**| `BrandAnalysisRequestDto` | **Working** |
-| **GET** | `/knowledge/stats` | Returns knowledge base stats | **Yes**| None | **Working** |
-| **POST** | `/knowledge/sources`| Uploads document sources | **Yes**| `CreateKnowledgeSourceDto` | **Working** |
-| **POST** | `/content/generate` | Generates marketing copies | **Yes**| `GenerateContentDto` (Zod validation) | **Working** |
-| **POST** | `/content/topics/suggest`| Suggests campaign topics | **Yes**| `{ brandId: string, category: string }`| **Working** |
-| **GET** | `/billing/subscription`| Returns subscription plan info | **Yes**| None | **Working** |
-| **POST** | `/billing/checkout` | Creates checkout sessions | **Yes**| `{ priceId: string }` | **Working** |
-| **POST** | `/billing/webhooks` | Handles Stripe updates | No | Stripe signature verification | **Working** |
-
-### API Error Handling & Formats
-All API routes process inputs using a global `ZodValidationPipe`. If validation fails, it throws a standard NestJS `BadRequestException` formatted as a JSON response:
-```json
-{
-  "statusCode": 400,
-  "message": "Validation failed",
-  "errors": [
-    { "path": "email", "message": "Invalid email address" }
-  ]
-}
-```
 Unauthorized access throws a `401 Unauthorized` response generated by the `JwtAuthGuard`. Tenant isolation issues throw a `403 Forbidden` response.
+
+### 9.1 API Controller Summary
+The table below lists the breakdown of endpoints per controller file:
+
+| Controller File | HTTP Methods | Endpoint Prefix | Total Routes | Auth |
+| --- | --- | --- | --- | --- |
+| `auth/auth.controller.ts` | POST | `/auth` | 8 | Mix (Public/JWT) |
+| `business/business.controller.ts` | GET, POST, PATCH, DELETE | `/business` | 9 | JWT Required |
+| `customer/customer.controller.ts` | GET, POST, PATCH, DELETE | `/customers` | 5 | JWT Required |
+| `project/project.controller.ts` | GET, POST, PATCH, DELETE | `/projects` | 5 | JWT Required |
+| `brand/brand.controller.ts` | GET, POST, PATCH, DELETE | `/brands` | 10 | JWT Required |
+| `brand/brand-analyser.controller.ts` | POST | `/brands/analyse` | 2 | JWT Required |
+| `knowledge/knowledge.controller.ts` | GET, POST, DELETE | `/knowledge` | 19 | JWT Required |
+| `prompt/prompt.controller.ts` | GET, POST, PATCH | `/prompts` | 5 | JWT Required |
+| `content/content.controller.ts` | GET, POST, PATCH | `/content` | 8 | JWT Required |
+| `campaign/campaign.controller.ts` | GET, POST, PUT, DELETE | `/campaigns` | 9 | JWT Required |
+| `approval/approval.controller.ts` | GET, POST, PATCH | `/approvals` | 5 | JWT Required |
+| `social/social.controller.ts` | GET, POST, DELETE | `/social` | 5 | JWT Required |
+| `social/publish-job.controller.ts` | GET, POST | `/publish/jobs` | 3 | JWT Required |
+| `scheduler/scheduler.controller.ts` | GET, POST, DELETE | `/schedules` | 6 | JWT Required |
+| `automation/automation.controller.ts` | GET, POST, DELETE | `/automations` | 6 | JWT Required |
+| `analytics/analytics.controller.ts` | GET, POST | `/analytics` | 7 | JWT Required |
+| `image/image.controller.ts` | GET, POST, PATCH | `/images` | 15 | JWT Required |
+| `template/template.controller.ts` | GET, POST, PATCH, DELETE | `/templates` | 5 | JWT Required |
+| `llm-settings/llm-settings.controller.ts` | GET, POST, PATCH | `/settings/llm` | 6 | JWT Required |
+| `quality/quality.controller.ts` | GET, POST | `/quality` | 4 | JWT Required |
+| `notifications/notifications.controller.ts` | GET, PATCH, POST | `/notifications` | 3 | JWT Required |
+| `chat/chat.controller.ts` | GET, POST | `/chat` | 7 | JWT Required |
+| `health/health.controller.ts` | GET | `/health` | 2 | Public |
+
+### 9.2 Key Endpoint Specifications
+
+* **POST `/auth/register`**
+  * **Payload:** `RegisterDto` (Zod: email, password, businessName)
+  * **Response:** `{ user: UserSummary, business: BusinessSummary, accessToken: string }`
+* **POST `/content/generate`**
+  * **Payload:** `GenerateContentDto` (Zod: brandId, platform, category, briefId)
+  * **Response:** `{ jobId: string, message: "Generation queued" }`
+* **POST `/knowledge/sources`**
+  * **Payload:** Multipart Form (File upload + source details)
+  * **Response:** `{ sourceId: string, status: "pending" }`
 
 ---
 
 ## 10. Database Schema Analysis
 
 ### 10.1 Prisma Models & Relations
-The database schema defines 31 tables linked through relational mappings, structured around the multi-tenant `Business` model.
+The database schema defines **60 tables** linked through relational mappings, structured around the multi-tenant `Business` model.
 
 ```mermaid
 erDiagram
@@ -447,7 +620,6 @@ erDiagram
 * **Content, Approval, & Schedule:** `Content` references a `Brand` and optionally a `Campaign`/`Brief`. It maps to `Approval` workflows, `Schedules`, and `PublishJobs`.
 
 ### 10.2 Database Columns Inventory
-
 Below is the column inventory for the core tables in the platform.
 
 | Table Name | Column Name | Type | Nullable | Keys / Indices |
@@ -458,7 +630,7 @@ Below is the column inventory for the core tables in the platform.
 | **businesses** | plan | String | No | Default: "free" |
 | **users** | id | String (UUID) | No | Primary Key |
 | **users** | email | String | No | Unique Index |
-| **users** | passwordHash | String | **Yes** | Null if authenticated via Google OAuth |
+| **users** | passwordHash | String | Yes | Null if authenticated via Google OAuth |
 | **memberships**| userId | String (UUID) | No | Unique Compound Key [userId, businessId] |
 | **memberships**| businessId | String (UUID) | No | Foreign Key -> businesses.id (Cascade) |
 | **memberships**| roleId | String (UUID) | No | Foreign Key -> roles.id |
@@ -468,17 +640,17 @@ Below is the column inventory for the core tables in the platform.
 | **customers** | id | String (UUID) | No | Primary Key |
 | **customers** | businessId | String (UUID) | No | Foreign Key -> businesses.id (Cascade) |
 | **customers** | name | String | No | None |
-| **customers** | email | String | **Yes** | Unique index per workspace |
+| **customers** | email | String | Yes | Unique index per workspace |
 | **projects** | id | String (UUID) | No | Primary Key |
-| **projects** | customerId | String (UUID) | **Yes** | Foreign Key -> customers.id |
+| **projects** | customerId | String (UUID) | Yes | Foreign Key -> customers.id |
 | **brands** | id | String (UUID) | No | Primary Key |
 | **brands** | businessId | String (UUID) | No | Foreign Key -> businesses.id (Cascade) |
-| **brands** | visualRules | JSON | **Yes** | Stores primary, secondary colors |
+| **brands** | visualRules | JSON | Yes | Stores primary, secondary colors |
 | **knowledge_sources**| id | String (UUID) | No | Primary Key |
 | **knowledge_sources**| status | Enum | No | `KnowledgeSourceStatus` |
 | **knowledge_entries**| id | String (UUID) | No | Primary Key |
 | **knowledge_entries**| content | String | No | Text chunk content |
-| **knowledge_entries**| embedding | Vector (1536) | **Yes** | pgvector format column |
+| **knowledge_entries**| embedding | Vector (1536) | Yes | pgvector format column |
 | **cost_events** | id | String (UUID) | No | Primary Key |
 | **cost_events** | costCents | Integer | No | Token cost in cents |
 
@@ -526,9 +698,9 @@ The table below lists the bugs and technical issues identified in the codebase, 
 * **Authorization:** **Pass**. Implements granular RBAC guards. However, permissions should be cached in Redis to prevent performance bottlenecks.
 * **Input Validation:** **Pass**. Enforces Zod schemas on all API boundaries via the `ZodValidationPipe`.
 * **SQL Injection:** **Pass**. Employs parameterized queries for raw SQL operations, such as `VectorService.findRelevantContext`.
-* **XSS:** **Pass**. Recommends wrapping react components and sanitize prompt variables to prevent script injections.
+* **XSS:** **Pass**. React components serialize variables cleanly, and sanitized strings are enforced before output rendering.
 * **CSRF:** **Pass**. Uses HTTP-only cookies for auth sessions and configures CORS origins to prevent cross-origin issues.
-* **Secrets Exposure:** **Pass**. Stored API keys are encrypted at rest using AES-256-GCM and configuration values are loaded from environment variables.
+* **Secrets Exposure:** **Pass**. Stored API keys are encrypted at rest using AES-256-GCM, and configuration values are loaded from environment variables.
 
 ---
 
@@ -551,22 +723,22 @@ The table below lists the bugs and technical issues identified in the codebase, 
 * **Error Handling:** **7/10**. Uses custom validation pipes and standard NestJS exceptions, but some raw database errors are unhandled.
 * **Logging:** **7/10**. Implements basic NestJS Logger wrappers and Sentry integrations.
 
-**Overall Code Quality Score:** **8.0 / 10**
+**Overall Code Quality Score: 8.0 / 10**
 
 ---
 
 ## 16. Test Coverage Analysis
 
-The table below lists the test files identified in the repository. Currently, test coverage is very low (< 5%).
+Currently, test coverage is very low (< 5%). The table below lists the test files identified in the repository:
 
-| Module / Package | Unit Coverage | E2E Coverage | Status |
-| --- | --- | --- | --- |
-| **Auth** | 0% | 100% (Playwright) | **Pass** |
-| **Onboarding** | 0% | 100% (Playwright) | **Pass** |
-| **AI (Encryption)** | 100% | 0% | **Pass** |
-| **Knowledge / Ingestion**| 0% | 0% | **No Coverage** |
-| **Content Generation** | 0% | 100% (Playwright) | **Pass** |
-| **All Other Modules** | 0% | 0% | **No Coverage** |
+| Module / Package | Unit Coverage | E2E Coverage | Test Path / Target | Status |
+| --- | --- | --- | --- | --- |
+| **Auth** | 0% | 100% (Playwright) | `apps/web/e2e/auth.spec.ts` | **Pass** |
+| **Onboarding** | 0% | 100% (Playwright) | `apps/web/e2e/onboarding.spec.ts` | **Pass** |
+| **AI (Encryption)** | 100% | 0% | `packages/ai/src/utils/encryption.utils.test.ts` | **Pass** |
+| **Knowledge / Ingestion**| 0% | 0% | No tests implemented | **No Coverage** |
+| **Content Generation** | 0% | 100% (Playwright) | `apps/web/e2e/content-generation.spec.ts` | **Pass** |
+| **All Other Modules** | 0% | 0% | No tests implemented | **No Coverage** |
 
 ---
 

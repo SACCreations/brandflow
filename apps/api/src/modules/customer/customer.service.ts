@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/database/prisma.service';
-import type { Prisma } from '@brandflow/db';
 import type { CreateCustomerDto, UpdateCustomerDto } from '@brandflow/shared';
+import { Prisma } from '@prisma/client';
 
 
 @Injectable()
@@ -68,12 +68,19 @@ export class CustomerService {
     };
     await this.ensureUniqueEmail(businessId, payload.email ?? null);
 
-    return this.prisma.client.customer.create({
-      data: payload,
-      include: {
-        _count: { select: { projects: true } },
-      },
-    });
+    try {
+      return await this.prisma.client.customer.create({
+        data: payload,
+        include: {
+          _count: { select: { projects: true } },
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('A client with this email already exists in the workspace.');
+      }
+      throw error;
+    }
   }
 
   async update(id: string, businessId: string, data: UpdateCustomerDto) {
@@ -91,13 +98,20 @@ export class CustomerService {
     };
     await this.ensureUniqueEmail(businessId, normalizedEmail ?? null, id);
 
-    return this.prisma.client.customer.update({
-      where: { id },
-      data: payload,
-      include: {
-        _count: { select: { projects: true } },
-      },
-    });
+    try {
+      return await this.prisma.client.customer.update({
+        where: { id },
+        data: payload,
+        include: {
+          _count: { select: { projects: true } },
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('A client with this email already exists in the workspace.');
+      }
+      throw error;
+    }
   }
 
   async remove(id: string, businessId: string) {

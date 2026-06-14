@@ -65,7 +65,12 @@ export class SchedulerService {
       throw new BadRequestException('Selected campaign does not match the content campaign.');
     }
 
-    if (new Date(dto.scheduledAt) <= new Date()) {
+    const scheduledTime = new Date(dto.scheduledAt);
+    if (isNaN(scheduledTime.getTime())) {
+      throw new BadRequestException('Invalid scheduled date');
+    }
+
+    if (scheduledTime <= new Date()) {
       throw new BadRequestException('scheduledAt must be in the future');
     }
 
