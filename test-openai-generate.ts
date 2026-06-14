@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import * as crypto from 'crypto';
+import OpenAI from 'openai';
 
-// Re-implement simple decrypt logic from packages/ai/src/utils/encryption.utils.ts to run standalone
 function decrypt(encryptedText: string, keyHex: string): string {
   try {
     const [ivHex, encryptedHex, authTagHex] = encryptedText.split(':');
@@ -25,23 +25,30 @@ const prisma = new PrismaClient();
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
 async function main() {
-  const jobId = 'dd7b9a6f-d17e-4e6d-88cd-29256e3a988f';
-  const gen = await prisma.generatedImage.findFirst({
-    where: { jobId },
-    include: { asset: true }
-  });
-  console.log("=== Job Generated Image & Asset ===");
-  if (gen) {
-    console.log(`Gen ID: ${gen.id}`);
-    console.log(`Aspect Ratio: ${gen.aspectRatio}, Size: ${gen.width}x${gen.height}`);
-    console.log(`Prompt: ${gen.promptUsed}`);
-    if (gen.asset) {
-      console.log(`Asset ID: ${gen.asset.id}`);
-      console.log(`Asset URL: ${gen.asset.cdnUrl.substring(0, 100)}...`);
-      console.log(`Asset Metadata:`, gen.asset.metadata);
+  const settings = await prisma.llmSettings.findFirst();
+  if (!settings || !settings.imageApiKey) {
+    console.error("No imageApiKey settings found in database");
+    return;
+  }
+  const key = decrypt(settings.imageApiKey, ENCRYPTION_KEY);
+  console.log("Using decrypted imageApiKey:", key ? `${key.substring(0, 15)}...` : null);
+
+  const client = new OpenAI({ apiKey: key });
+  const modelsToTry = ['chatgpt-image-latest', 'gpt-image-1'];
+  for (const model of modelsToTry) {
+    console.log(`\n--- Testing image generation with model: ${model} ---`);
+    try {
+      const response = await client.images.generate({
+        model: model,
+        prompt: 'A beautiful marketing poster of a high-tech modern office space, abstract geometric shapes, 8K detail',
+        n: 1,
+        size: '1024x1024',
+      });
+      console.log(`Success with ${model}:`, response.data);
+    } catch (err: any) {
+      console.error(`Failed with ${model}:`, err.message);
     }
-  } else {
-    console.log("No generated image found for this job ID");
   }
 }
+
 main().catch(console.error).finally(() => prisma.$disconnect());

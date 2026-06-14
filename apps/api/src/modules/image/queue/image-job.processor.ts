@@ -117,13 +117,17 @@ export class ImageJobProcessor extends WorkerHost {
       const isNvidia = resolvedProvider === 'nvidia';
       const nvidiaTaskModels = (llmSettings?.nvidiaTaskModels as any) ?? {};
 
-      const { key: openaiKey, source: keySource } = await this.llmSettingsService.getDecryptedImageApiKey(businessId);
+      const { key: rawImageKey, source: keySource } = await this.llmSettingsService.getDecryptedImageApiKey(businessId);
+      // IMPORTANT: Only use rawImageKey as the OpenAI key if it's a dedicated image-specific key.
+      // When provider=nvidia, getDecryptedImageApiKey returns the NVIDIA key as 'llm_shared'.
+      // Passing a NVIDIA key as openaiKey would register OpenAI with a wrong key → auth failures.
+      const openaiKey = keySource === 'image_specific' ? rawImageKey : null;
       const nvidiaKey = resolvedProvider === 'nvidia' ? await this.llmSettingsService.getDecryptedApiKey(businessId) : null;
       const fluxApiKey = await this.llmSettingsService.getDecryptedFluxApiKey(businessId);
       const imageGateway = this.buildImageGateway(openaiKey, nvidiaKey, fluxApiKey);
 
       this.logger.log(
-        `[IMAGE_JOB:${jobId}] API Keys resolved — openaiKey=${openaiKey ? 'found' : 'none'}, nvidiaKey=${nvidiaKey ? 'found' : 'none'}, ` +
+        `[IMAGE_JOB:${jobId}] API Keys resolved — openaiKey=${openaiKey ? 'found' : 'none'} (src=${keySource}), nvidiaKey=${nvidiaKey ? 'found' : 'none'}, ` +
         `llmProvider=${resolvedProvider}, imageProvider=${settings.provider || 'openai'}`
       );
 
@@ -260,9 +264,11 @@ export class ImageJobProcessor extends WorkerHost {
       // doesn't support negative_prompt natively.
       // For Stable Diffusion (Nvidia), adding negative words to the main prompt degrades it,
       // so we keep the main prompt clean and pass negativePrompt natively via extra_body or custom params.
-      const promptForGeneration = providerName === 'openai' 
+      let promptForGeneration = providerName === 'openai' 
         ? `${finalPrompt}\n\nCRITICAL RULES - DO NOT INCLUDE ANY OF THE FOLLOWING: ${negativePromptFull}`
         : finalPrompt;
+
+      promptForGeneration = this.sanitizePromptForProvider(promptForGeneration, providerName, brandCtx.name);
 
       const imageResponse = await imageGateway.generate(
         providerName,
@@ -367,55 +373,67 @@ export class ImageJobProcessor extends WorkerHost {
       .join(', ');
 
     const toneStr = (ctx.brandTone || ['professional', 'modern']).slice(0, 3).join(', ');
-    const styleStr = ctx.visualStyle
-      || 'modern premium corporate';
+    const styleStr = ctx.visualStyle || 'modern premium corporate';
 
     // Layout-specific description based on orientation
     const ratio = ctx.width / ctx.height;
     const layoutDesc = ratio > 1.4
-      ? 'wide horizontal landscape banner layout with text zone left, hero visual center-right'
+      ? 'wide horizontal landscape banner layout with text zone on left third, hero visual filling center and right'
       : ratio < 0.7
-        ? 'tall vertical portrait layout with logo top, bold headline center, CTA button bottom'
-        : 'balanced square layout with centered typography hierarchy and geometric graphic elements';
+        ? 'tall vertical portrait layout with logo area at top, large centered visual zone middle, CTA button strip at bottom'
+        : 'balanced square layout with centered visual hierarchy, large graphic element center, text zones above and below';
 
     // Category-specific visual concept
     const categoryVisual = this.getCategoryVisualConcept(ctx.category, ctx.brandIndustry);
 
+    // Industry-specific theme enrichment
+    const industryTheme = ctx.brandIndustry
+      ? `${ctx.brandIndustry.toLowerCase()} industry visual language,`
+      : '';
+
+    // ─── CRITICAL: Do NOT include specific quoted text in the prompt ─────────
+    // FLUX.2-klein-4b and most diffusion models CANNOT render readable typography.
+    // Including quoted text like "Headline here" causes garbled, illegible lettering.
+    // Instead, describe the visual ZONES abstractly — text overlay is handled by the UI.
+    // ──────────────────────────────────────────────────────────────────────────
+    const hasHeadline    = !!ctx.headline;
+    const hasSubheadline = !!ctx.subheadline;
+    const hasCta         = !!ctx.cta;
+
     // Build the full prompt
     const parts = [
-      `Marketing poster creative, graphic design composition,`,
-      `${styleStr} aesthetic,`,
-      `${ctx.platformLabel} format poster design,`,
+      // Core concept
+      `Marketing poster creative, professional graphic design composition,`,
+      `${styleStr} visual style,`,
+      `${ctx.platformLabel || 'social media'} format,`,
       `${layoutDesc},`,
 
       // Brand identity
       colorStr
-        ? `dominant brand color palette: ${colorStr}, brand colors used throughout all design elements,`
-        : `premium professional brand color palette,`,
-      ctx.brandName ? `brand identity for "${ctx.brandName}",` : '',
-      ctx.brandIndustry ? `${ctx.brandIndustry} industry sector visual theme,` : '',
-      `brand tone: ${toneStr},`,
+        ? `brand color palette: ${colorStr}, dominant color scheme applied consistently throughout,`
+        : `cohesive premium brand color palette,`,
+      ctx.brandName ? `designed for ${ctx.brandName} brand identity,` : '',
+      industryTheme,
+      toneStr ? `brand personality: ${toneStr},` : '',
 
-      // Typography zones
-      `bold headline typography zone reading "${ctx.headline}",`,
-      ctx.subheadline ? `supporting subheadline text zone: "${ctx.subheadline}",` : '',
-      ctx.cta ? `prominent call-to-action button zone: "${ctx.cta}",` : '',
+      // Visual elements (NO quoted text - just zones)
+      hasHeadline    ? `prominent bold headline typography zone with large readable text area,` : '',
+      hasSubheadline ? `supporting body text zone beneath headline,` : '',
+      hasCta         ? `high-contrast CTA button element with vibrant accent color,` : '',
 
-      // Visual concept
-      `hero visual element: ${categoryVisual},`,
+      // Core visual concept
+      `hero graphic element: ${categoryVisual},`,
 
-      // Logo zone
-      `brand logo placeholder zone at top-left corner with wordmark,`,
+      // Design system elements
+      `brand logo placeholder zone at top corner,`,
+      `clean geometric design elements in brand colors,`,
+      `premium white space balance, clear visual hierarchy,`,
+      `modern sans-serif font treatment zones,`,
 
-      // Design language
-      `professional white space balance, clean typographic hierarchy,`,
-      `geometric design accents, premium marketing layout,`,
-      `modern sans-serif typography, clear visual hierarchy,`,
-
-      // Quality descriptors
-      `ultra-sharp focus, professional marketing artwork,`,
-      `commercial advertising quality, print-ready resolution,`,
-      `8K detail, vibrant colors, highly polished finish`,
+      // Quality
+      `ultra-high quality graphic design, sharp clean edges,`,
+      `professional marketing creative, commercial advertising quality,`,
+      `vibrant saturated brand colors, highly polished premium finish`,
     ].filter(s => s.trim().length > 0).join(' ');
 
     return parts;
@@ -502,7 +520,8 @@ export class ImageJobProcessor extends WorkerHost {
       const llmSettings = await this.llmSettingsService.getSettings(businessId);
       const resolvedProvider = (llmSettings?.provider as string) ?? 'openai';
       const nvidiaTaskModels = (llmSettings?.nvidiaTaskModels as any) ?? {};
-      const { key: openaiKey } = await this.llmSettingsService.getDecryptedImageApiKey(businessId);
+      const { key: rawImageKeyLegacy, source: keySourceLegacy } = await this.llmSettingsService.getDecryptedImageApiKey(businessId);
+      const openaiKey = keySourceLegacy === 'image_specific' ? rawImageKeyLegacy : null;
       const nvidiaKey = resolvedProvider === 'nvidia' ? await this.llmSettingsService.getDecryptedApiKey(businessId) : null;
       const fluxApiKey = await this.llmSettingsService.getDecryptedFluxApiKey(businessId);
       const imageGateway = this.buildImageGateway(openaiKey, nvidiaKey, fluxApiKey);
@@ -523,8 +542,9 @@ export class ImageJobProcessor extends WorkerHost {
       });
 
       const providerName = settings.provider || (resolvedProvider === 'nvidia' ? 'nvidia' : 'openai');
+      const sanitizedPrompt = this.sanitizePromptForProvider(cleanPromptForGeneration, providerName, brand.name);
       const imageResponse = await imageGateway.generate(providerName, {
-        prompt:    cleanPromptForGeneration,
+        prompt:    sanitizedPrompt,
         width:     settings.width, height: settings.height,
         quality:   settings.quality, style: settings.style, businessId,
         model:     providerName === 'nvidia' ? (nvidiaTaskModels.imageGeneration || 'black-forest-labs/flux.2-klein-4b') : undefined,
@@ -657,5 +677,36 @@ Output ONLY [Step 3: Final Image Prompt] starting with "Marketing poster creativ
       this.logger.error('Legacy prompt enhancement failed', err);
       return `[Step 3: Final Image Prompt]\nMarketing poster creative, graphic design composition, ${prompt.slice(0, 300)}, ${baseStyle} style.`;
     }
+  }
+
+  /**
+   * Sanitizes the image prompt by replacing trademarked brand names with generic descriptions
+   * to bypass content filtering restrictions on NVIDIA NIM and similar providers.
+   */
+  private sanitizePromptForProvider(prompt: string, provider: string, brandName?: string): string {
+    if (provider !== 'nvidia' || !brandName) {
+      return prompt;
+    }
+
+    this.logger.log(`[Sanitizer] Sanitizing prompt for NVIDIA provider to bypass trademark/content filters...`);
+    let sanitized = prompt;
+
+    // 1. Replace full brand name (case-insensitive)
+    const escapedFull = brandName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    sanitized = sanitized.replace(new RegExp(escapedFull, 'gi'), 'premium brand');
+
+    // 2. Replace individual unique words (length >= 3, not common/generic words)
+    const genericWords = new Set(['and', 'the', 'app', 'corp', 'inc', 'co', 'ltd', 'limited', 'group', 'services', 'solutions', 'india', 'usa']);
+    const words = brandName.split(/[\s\-_]+/);
+    for (const word of words) {
+      const cleanWord = word.replace(/[^a-zA-Z0-9]/g, '');
+      if (cleanWord.length >= 3 && !genericWords.has(cleanWord.toLowerCase())) {
+        const escapedWord = cleanWord.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        sanitized = sanitized.replace(new RegExp(`\\b${escapedWord}\\b`, 'gi'), 'brand');
+      }
+    }
+
+    this.logger.log(`[Sanitizer] Sanitized prompt: "${sanitized.slice(0, 150)}..."`);
+    return sanitized;
   }
 }

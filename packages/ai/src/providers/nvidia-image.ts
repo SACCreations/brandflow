@@ -36,11 +36,23 @@ export class NvidiaImageProvider implements ImageProvider {
     }
 
     try {
-      const width = request.width ?? 1024;
-      const height = request.height ?? 1024;
+      // Coerce dimensions to valid multiples of 16 within NVIDIA NIM limits.
+      // NVIDIA NIM total pixel budget: ~1,062,400 pixels (≈ 1031×1031).
+      // Use Math.floor to avoid rounding UP (e.g. 1080 → 1088 would exceed budget).
+      // Hard cap: 1024 to guarantee width×height ≤ 1,048,576 (safe within budget).
+      const rawWidth  = request.width  ?? 1024;
+      const rawHeight = request.height ?? 1024;
+      const MAX_DIM   = 1024; // safe maximum for NVIDIA NIM square images
+      const width  = Math.max(512, Math.min(MAX_DIM, Math.floor(rawWidth  / 16) * 16));
+      const height = Math.max(512, Math.min(MAX_DIM, Math.floor(rawHeight / 16) * 16));
+
+      // Truncate prompt to max 800 characters to comply with NIM schema
+      const prompt = request.prompt.length > 800 
+        ? request.prompt.substring(0, 795) 
+        : request.prompt;
 
       const payload: any = {
-        prompt: request.prompt,
+        prompt,
         seed: 0,
         steps: 4,
         width,

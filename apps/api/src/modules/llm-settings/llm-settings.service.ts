@@ -115,12 +115,14 @@ export class LlmSettingsService {
    * Resolves the best API key for IMAGE GENERATION for a business.
    *
    * Priority order:
-   * 1. Dedicated imageApiKey (set specifically for image generation)
-   * 2. Main LLM apiKey (if provider is 'openai' — same key works for DALL-E)
-   * 3. null (will use mock provider)
+   * 1. Dedicated imageApiKey (set specifically for image generation via UI) → source: 'image_specific'
+   * 2. Main LLM apiKey if provider is 'openai' (same key works for DALL-E) → source: 'llm_shared'
+   * 3. null → source: 'none'
    *
-   * This is the method the ImageJobProcessor must use — NOT getDecryptedApiKey()
-   * when the user's LLM provider is NVIDIA (those keys don't work for DALL-E).
+   * ⚠️  For NVIDIA users: the main apiKey is the NVIDIA key, NOT an OpenAI key.
+   *     Callers must check source === 'image_specific' before using this for OpenAI DALL-E.
+   *     The ImageJobProcessor handles this correctly — it calls getDecryptedApiKey() separately
+   *     for the NVIDIA key and only uses this key for OpenAI when source === 'image_specific'.
    */
   async getDecryptedImageApiKey(businessId: string): Promise<{ key: string | null; source: 'image_specific' | 'llm_shared' | 'none' }> {
     const settings = await prisma.llmSettings.findUnique({
@@ -130,7 +132,7 @@ export class LlmSettingsService {
 
     if (!settings) return { key: null, source: 'none' };
 
-    // Try dedicated image API key first
+    // 1. Try dedicated image API key first (always an OpenAI key, safe to use for DALL-E)
     if (settings.imageApiKey) {
       try {
         const key = encryption.decrypt(settings.imageApiKey, this.encryptionKey);
@@ -140,8 +142,8 @@ export class LlmSettingsService {
       }
     }
 
-    // Fall back to main API key if provider is openai or nvidia (same key works for their respective image generators)
-    if (settings.apiKey && (settings.provider === 'openai' || settings.provider === 'nvidia')) {
+    // 2. Fall back to main API key ONLY for OpenAI provider (nvidia keys don't work for DALL-E)
+    if (settings.apiKey && settings.provider === 'openai') {
       try {
         const key = encryption.decrypt(settings.apiKey, this.encryptionKey);
         if (key) return { key, source: 'llm_shared' };

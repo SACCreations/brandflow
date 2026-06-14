@@ -87,6 +87,12 @@ interface ImageJob {
       cdnUrl: string;
       fileName: string;
     };
+    metadata?: {
+      provider?: string;
+      model?: string;
+      isMock?: boolean;
+      costCents?: number;
+    };
   }>;
 }
 
@@ -1326,13 +1332,45 @@ export default function ImageGeneratorPage() {
                         isSelectionMode && selectedJobIds.has(job.id) ? 'opacity-80' : ''
                       }`}>
                         {job.status === 'COMPLETED' && img?.asset ? (
-                        <div className="relative aspect-video w-full bg-slate-950 border-b border-slate-800">
+                        <div className="relative w-full bg-slate-950 border-b border-slate-800 overflow-hidden" style={{ aspectRatio: job.settings?.aspectRatio === '9:16' ? '9/16' : job.settings?.aspectRatio === '16:9' ? '16/9' : '1/1', maxHeight: '320px' }}>
                           <img
                             src={img.asset.cdnUrl}
                             alt={`Generated poster: ${headline.slice(0, 80)}`}
-                            className="h-full w-full object-cover filter brightness-[0.85] group-hover:brightness-100 transition-all"
+                            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700"
                           />
-                          <div className="absolute top-2.5 right-2.5 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                          {/* ── Text Overlay for Real AI Images ─────────────────────────── */}
+                          {/* FLUX/NVIDIA cannot render readable text. We overlay it as CSS. */}
+                          {(job.posterContext?.headline || job.posterContext?.subheadline || job.posterContext?.cta) && (
+                            <div className="absolute inset-0 flex flex-col justify-end">
+                              {/* Gradient backdrop for text readability */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                              <div className="relative px-4 pb-4 pt-8 space-y-1.5">
+                                {job.posterContext?.headline && (
+                                  <p className="text-white font-black text-sm leading-tight drop-shadow-lg"
+                                     style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7)' }}>
+                                    {job.posterContext.headline}
+                                  </p>
+                                )}
+                                {job.posterContext?.subheadline && (
+                                  <p className="text-white/85 text-[10px] font-semibold leading-snug drop-shadow"
+                                     style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
+                                    {job.posterContext.subheadline}
+                                  </p>
+                                )}
+                                {job.posterContext?.cta && (
+                                  <div className="mt-2 inline-block">
+                                    <span className="text-[9px] font-black uppercase tracking-wider bg-white text-black px-3 py-1 rounded-full shadow-lg">
+                                      {job.posterContext.cta}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* ── Action Buttons (hover) ──────────────────────────────────── */}
+                          <div className="absolute top-2.5 right-2.5 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                             <button
                               onClick={() => { navigator.clipboard.writeText(img.asset.cdnUrl); toast({ title: 'URL copied' }); }}
                               className="p-1.5 bg-slate-900/80 hover:bg-slate-900 rounded-lg text-slate-300 border border-slate-700/50 hover:text-white transition-colors"
@@ -1351,11 +1389,22 @@ export default function ImageGeneratorPage() {
                               <Download className="h-3.5 w-3.5" />
                             </a>
                           </div>
-                          {/* Poster badge */}
-                          <div className="absolute top-2.5 left-2.5">
-                            <span className="text-[8px] font-black uppercase bg-slate-900/80 border border-slate-700/50 text-emerald-400 px-2 py-0.5 rounded">
-                              ✓ Branded Poster
-                            </span>
+
+                          {/* ── Provider Badge ──────────────────────────────────────────── */}
+                          <div className="absolute top-2.5 left-2.5 z-10">
+                            {(() => {
+                              const provider = img.metadata?.provider || 'unknown';
+                              const isMock = provider === 'mock';
+                              return (
+                                <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded border backdrop-blur-sm ${
+                                  isMock
+                                    ? 'bg-amber-900/80 border-amber-500/40 text-amber-300'
+                                    : 'bg-emerald-900/80 border-emerald-500/40 text-emerald-300'
+                                }`}>
+                                  {isMock ? '⚠ Placeholder' : `✓ ${provider === 'nvidia' ? 'NVIDIA AI' : provider === 'openai' ? 'DALL·E 3' : provider === 'flux' ? 'FLUX AI' : 'AI Generated'}`}
+                                </span>
+                              );
+                            })()}
                           </div>
                         </div>
                       ) : (
@@ -1527,6 +1576,72 @@ export default function ImageGeneratorPage() {
               <div className="text-xs text-slate-500 text-center py-6">Loading brand context...</div>
             )}
           </Card>
+
+          {/* Poster Content Preview Panel */}
+          {(headlineText || subheadlineText || ctaText) && selectedBrandId && (
+            <Card className="border-slate-800 bg-slate-900/50 overflow-hidden">
+              <div className="flex items-center gap-2.5 border-b border-slate-800 p-4 pb-3">
+                <ImageIcon className="h-4 w-4 text-indigo-400" />
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Poster Preview</h3>
+                <span className="ml-auto text-[8px] font-bold uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">Live</span>
+              </div>
+              {/* Mock-up of the generated image with text overlay */}
+              <div
+                className="relative w-full overflow-hidden flex items-end"
+                style={{
+                  aspectRatio: selectedPlatform?.includes('story') || selectedPlatform?.includes('reel') ? '9/16' : '1/1',
+                  maxHeight: '220px',
+                  background: brandColors.length > 0
+                    ? `linear-gradient(135deg, ${brandColors[0] || '#1e293b'} 0%, ${brandColors[1] || brandColors[0] || '#0f172a'} 100%)`
+                    : 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                }}
+              >
+                {/* Geometric accent */}
+                <div className="absolute top-0 right-0 w-20 h-20 rounded-full opacity-20"
+                  style={{ background: brandColors[2] || brandColors[0] || '#6366f1', transform: 'translate(30%, -30%)' }} />
+                <div className="absolute bottom-0 left-0 w-14 h-14 rounded-full opacity-15"
+                  style={{ background: brandColors[1] || '#818cf8', transform: 'translate(-30%, 30%)' }} />
+
+                {/* Brand name top */}
+                {selectedBrand?.name && (
+                  <div className="absolute top-3 left-3">
+                    <span className="text-[8px] font-black uppercase tracking-widest text-white/60">
+                      {selectedBrand.name}
+                    </span>
+                  </div>
+                )}
+
+                {/* Text overlay at bottom */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="relative px-3 pb-3 pt-8 space-y-1 w-full">
+                  {headlineText && (
+                    <p className="text-white font-black text-xs leading-tight drop-shadow-lg"
+                       style={{ textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>
+                      {headlineText.slice(0, 60)}{headlineText.length > 60 ? '...' : ''}
+                    </p>
+                  )}
+                  {subheadlineText && (
+                    <p className="text-white/80 text-[8px] font-semibold leading-snug"
+                       style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
+                      {subheadlineText.slice(0, 80)}{subheadlineText.length > 80 ? '...' : ''}
+                    </p>
+                  )}
+                  {ctaText && (
+                    <div className="mt-1.5 inline-block">
+                      <span className="text-[7px] font-black uppercase tracking-wider bg-white text-black px-2.5 py-0.5 rounded-full shadow">
+                        {ctaText}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="px-4 py-2.5 bg-slate-950/50 border-t border-slate-800">
+                <p className="text-[9px] text-slate-500 text-center">
+                  Text overlay applied on AI-generated background
+                </p>
+              </div>
+            </Card>
+          )}
 
           {/* Platform Preview Panel */}
           {selectedPlatform && (

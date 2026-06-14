@@ -8,7 +8,7 @@ const VALID_CATEGORIES = [
   'AD_CREATIVE', 'SOCIAL_COVER', 'THUMBNAIL',
 ];
 
-const VALID_PROVIDERS = ['stability', 'openai'];
+const VALID_PROVIDERS = ['stability', 'openai', 'nvidia', 'flux'];
 const VALID_QUALITIES = ['standard', 'hd'];
 
 export class GenerateImageSettingsDto {

@@ -24,14 +24,14 @@ export const VALID_POSTER_CATEGORIES = [
 
 export type PosterCategory = (typeof VALID_POSTER_CATEGORIES)[number];
 
-export const VALID_POSTER_PROVIDERS = ['openai', 'flux', 'stability'] as const;
+export const VALID_POSTER_PROVIDERS = ['openai', 'flux', 'stability', 'nvidia'] as const;
 export const VALID_POSTER_QUALITIES = ['standard', 'hd'] as const;
 
 export class GeneratePosterSettingsDto {
-  @ApiPropertyOptional({ enum: VALID_POSTER_PROVIDERS, description: 'AI image provider (openai=DALL-E 3, flux=FLUX.1-dev, stability=SD3)' })
+  @ApiPropertyOptional({ enum: VALID_POSTER_PROVIDERS, description: 'AI image provider (openai=DALL-E 3, flux=FLUX.1-dev, stability=SD3, nvidia=NVIDIA NIM)' })
   @IsOptional()
   @IsIn(VALID_POSTER_PROVIDERS)
-  provider?: 'openai' | 'flux' | 'stability';
+  provider?: 'openai' | 'flux' | 'stability' | 'nvidia';
 
   @ApiPropertyOptional({ enum: VALID_POSTER_QUALITIES })
   @IsOptional()

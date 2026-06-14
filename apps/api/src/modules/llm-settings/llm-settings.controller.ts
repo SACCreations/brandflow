@@ -82,10 +82,18 @@ export class LlmSettingsController {
   @ApiOperation({ summary: 'Check if a dedicated image API key is configured' })
   async getImageApiKeyStatus(@CurrentUser() user: JwtPayload) {
     const { key, source } = await this.llmSettingsService.getDecryptedImageApiKey(user.businessId);
+    let masked = null;
+    if (key) {
+      if (key.startsWith('nvapi-')) {
+        masked = `nvapi-...${key.slice(-4)}`;
+      } else {
+        masked = `sk-...${key.slice(-4)}`;
+      }
+    }
     return {
       hasImageApiKey: !!key,
       source,
-      masked: key ? `sk-...${key.slice(-4)}` : null,
+      masked,
     };
   }
 }

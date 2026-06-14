@@ -17,26 +17,31 @@ async function run() {
   console.log("LLM Settings Provider:", resolvedProvider);
 
   // Decrypt keys exactly like image-job.processor.ts does:
-  let userApiKey: string | null = null;
+  let openaiKey: string | null = null;
   if (settings.imageApiKey) {
-    userApiKey = encryption.decrypt(settings.imageApiKey, ENCRYPTION_KEY);
+    openaiKey = encryption.decrypt(settings.imageApiKey, ENCRYPTION_KEY);
   } else if (settings.apiKey && (settings.provider === 'openai' || settings.provider === 'nvidia')) {
-    userApiKey = encryption.decrypt(settings.apiKey, ENCRYPTION_KEY);
+    openaiKey = encryption.decrypt(settings.apiKey, ENCRYPTION_KEY);
   }
-  
+
+  const nvidiaKey = resolvedProvider === 'nvidia' && settings.apiKey
+    ? encryption.decrypt(settings.apiKey, ENCRYPTION_KEY)
+    : null;
+
   let fluxApiKey: string | null = null;
   if (settings.fluxApiKey) {
     fluxApiKey = encryption.decrypt(settings.fluxApiKey, ENCRYPTION_KEY);
   }
 
-  console.log("Resolved userApiKey:", userApiKey ? `${userApiKey.substring(0, 12)}...` : null);
+  console.log("Resolved openaiKey:", openaiKey ? `${openaiKey.substring(0, 12)}...` : null);
+  console.log("Resolved nvidiaKey:", nvidiaKey ? `${nvidiaKey.substring(0, 12)}...` : null);
   console.log("Resolved fluxApiKey:", fluxApiKey ? `${fluxApiKey.substring(0, 8)}...` : null);
 
   const keys = {
-    openai: userApiKey || null,
+    openai: openaiKey || null,
     flux: fluxApiKey || null,
     stability: null,
-    nvidia: resolvedProvider === 'nvidia' ? (userApiKey || null) : null,
+    nvidia: nvidiaKey || null,
   };
 
   const gateway = new ImageGateway(
