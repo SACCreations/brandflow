@@ -25,7 +25,7 @@ async function testFlux() {
 
   console.log('Testing FLUX API connection...');
   try {
-    const submitRes = await fetch('https://api.bfl.ml/v1/flux-dev', {
+    const submitRes = await fetch('https://api.bfl.ai/v1/flux-dev', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

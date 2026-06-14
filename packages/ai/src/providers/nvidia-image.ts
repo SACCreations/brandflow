@@ -7,7 +7,7 @@ export class NvidiaImageProvider implements ImageProvider {
   private model: string;
   private apiKey: string;
 
-  constructor(apiKey: string, model = 'stabilityai/stable-diffusion-3-medium') {
+  constructor(apiKey: string, model = 'black-forest-labs/flux.2-klein-4b') {
     this.apiKey = apiKey;
     this.model = model;
     this.client = new OpenAI({ 
@@ -24,48 +24,63 @@ export class NvidiaImageProvider implements ImageProvider {
     return {
       supportedAspectRatios: ['1:1', '16:9', '9:16'],
       maxResolution: 1024,
-      supportsNegativePrompt: true,
+      supportsNegativePrompt: false, // FLUX.2-klein-4b does not support negative prompts
     };
   }
 
   async generate(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {
     const modelToUse = request.model ?? this.model;
 
-    if (!this.client) {
-      throw new Error('Nvidia Image Client not initialized — API key is required');
+    if (!this.apiKey) {
+      throw new Error('Nvidia API key is required');
     }
 
     try {
+      const width = request.width ?? 1024;
+      const height = request.height ?? 1024;
+
       const payload: any = {
-        model: modelToUse,
         prompt: request.prompt,
-        n: request.numberOfImages ?? 1,
-        size: '1024x1024',
-        response_format: 'b64_json',
+        seed: 0,
+        steps: 4,
+        width,
+        height,
+        samples: request.numberOfImages ?? 1,
       };
-      if (request.negativePrompt) {
-        // Pass as negative_prompt to the OpenAI wrapper which usually maps it appropriately for NIM SD endpoints
-        payload.negative_prompt = request.negativePrompt;
+
+      const response = await fetch(`https://ai.api.nvidia.com/v1/genai/${modelToUse}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`NVIDIA NIM generation failed [${response.status}]: ${errText}`);
       }
 
-      const response = await this.client.images.generate(payload);
+      const data = (await response.json()) as any;
 
-      const costPerImage = 2.0; // Approx cost in cents for NIM SD3 Medium
-      if (!response.data || response.data.length === 0) {
+      if (!data.artifacts || data.artifacts.length === 0) {
         throw new Error('NVIDIA NIM returned an empty image payload');
       }
       
-      const images = response.data.map((img) => {
-        if (!img.b64_json && !img.url) {
+      const images = data.artifacts.map((art: any) => {
+        const base64Data = art.base64 || art.blob;
+        if (!base64Data) {
           throw new Error('NVIDIA NIM returned invalid image format');
         }
         return {
-          url: img.url,
-          base64: img.b64_json,
-          seed: Math.floor(Math.random() * 1000000),
+          base64: base64Data,
+          seed: data.seed ?? Math.floor(Math.random() * 1000000),
         };
       });
 
+      const costPerImage = 2.0; // Approx cost in cents for NIM FLUX.2-klein-4b
       return {
         images,
         costCents: costPerImage * images.length,
@@ -78,3 +93,4 @@ export class NvidiaImageProvider implements ImageProvider {
     }
   }
 }
+

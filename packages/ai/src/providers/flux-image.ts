@@ -2,7 +2,7 @@ import type { ImageProvider, ImageGenerationRequest, ImageGenerationResponse } f
 
 /**
  * FLUX.1-dev Provider via Black Forest Labs (BFL) API
- * API Docs: https://docs.bfl.ml/
+ * API Docs: https://docs.bfl.ai/
  *
  * Uses async polling pattern: submit → poll for result.
  * FLUX produces exceptionally high-quality marketing creatives and posters.
@@ -32,7 +32,7 @@ export class FluxImageProvider implements ImageProvider {
     const height = this.snapToFluxDimension(request.height);
 
     // Step 1: Submit generation request
-    const submitRes = await fetch('https://api.bfl.ml/v1/flux-dev', {
+    const submitRes = await fetch('https://api.bfl.ai/v1/flux-dev', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ export class FluxImageProvider implements ImageProvider {
     for (let i = 0; i < maxAttempts; i++) {
       await new Promise(r => setTimeout(r, 2000)); // 2 second polling interval
 
-      const res = await fetch(`https://api.bfl.ml/v1/get_result?id=${requestId}`, {
+      const res = await fetch(`https://api.bfl.ai/v1/get_result?id=${requestId}`, {
         headers: { 'X-Key': this.apiKey },
       });
 

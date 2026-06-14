@@ -259,6 +259,7 @@ export default function ImageGeneratorPage() {
   const estimatedCost = useMemo(() => {
     if (selectedProvider === 'openai') return selectedQuality === 'hd' ? 8.0 : 4.0;
     if (selectedProvider === 'flux') return 3.5;
+    if (selectedProvider === 'nvidia') return 1.5;
     return 3.0;
   }, [selectedProvider, selectedQuality]);
 
@@ -327,6 +328,86 @@ export default function ImageGeneratorPage() {
     staleTime: 30_000,
   });
 
+  const { data: llmSettings } = useQuery<any>({
+    queryKey: ['llm-settings-status'],
+    queryFn: async () => (await apiClient.get('/settings/llm')).data,
+    staleTime: 30_000,
+  });
+
+  const isProviderConfigured = useMemo(() => {
+    if (!imageKeyStatus || !llmSettings) return true;
+    if (selectedProvider === 'openai') {
+      if (llmSettings.provider === 'nvidia') {
+        return imageKeyStatus.source === 'image_specific';
+      }
+      return imageKeyStatus.hasImageApiKey;
+    }
+    if (selectedProvider === 'nvidia') {
+      return llmSettings.provider === 'nvidia' && llmSettings.hasApiKey;
+    }
+    if (selectedProvider === 'flux') {
+      return !!llmSettings.fluxApiKey || imageKeyStatus.source === 'image_specific';
+    }
+    return true;
+  }, [selectedProvider, imageKeyStatus, llmSettings]);
+
+  const providerWarning = useMemo(() => {
+    if (isProviderConfigured) return null;
+    if (selectedProvider === 'openai') {
+      return {
+        title: '⚠️ No OpenAI API Key — Running in Mock Mode',
+        desc: 'Without a dedicated OpenAI API key, the system falls back to mock images instead of generating real AI branded posters. Add your OpenAI key below to activate DALL-E 3 poster generation.',
+        action: (
+          <>
+            <button
+              onClick={() => setShowKeyModal(true)}
+              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-4 py-2 rounded-lg transition-colors"
+            >
+              <Key className="h-3.5 w-3.5" /> Add OpenAI API Key
+            </button>
+            <a
+              href="https://platform.openai.com/api-keys"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 border border-amber-500/30 px-4 py-2 rounded-lg transition-colors"
+            >
+              Get API Key <ExternalLink className="h-3 w-3" />
+            </a>
+          </>
+        )
+      };
+    }
+    if (selectedProvider === 'nvidia') {
+      return {
+        title: '⚠️ No NVIDIA API Key — Running in Mock Mode',
+        desc: 'Please configure your NVIDIA API Key and set NVIDIA as your active LLM provider in settings to generate posters using NVIDIA NIM (FLUX.1-dev / Klein).',
+        action: (
+          <Link
+            href="/settings/llm"
+            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-4 py-2 rounded-lg transition-colors"
+          >
+            <Settings className="h-3.5 w-3.5" /> Go to LLM Settings
+          </Link>
+        )
+      };
+    }
+    if (selectedProvider === 'flux') {
+      return {
+        title: '⚠️ No FLUX API Key — Running in Mock Mode',
+        desc: 'Please configure your Black Forest Labs FLUX.1-dev API Key in settings to generate posters using FLUX.',
+        action: (
+          <Link
+            href="/settings/llm"
+            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-4 py-2 rounded-lg transition-colors"
+          >
+            <Settings className="h-3.5 w-3.5" /> Go to LLM Settings
+          </Link>
+        )
+      };
+    }
+    return null;
+  }, [isProviderConfigured, selectedProvider]);
+
   // Polling fallback when WS disconnected
   useQuery({
     queryKey: ['active-image-job', activeJobId],
@@ -354,6 +435,16 @@ export default function ImageGeneratorPage() {
     if (categoryParam) setSelectedCategory(categoryParam);
     if (contentIdParam) { setSelectedContentId(contentIdParam); setContentMode('content'); }
   }, [brandIdParam, campaignIdParam, categoryParam, contentIdParam]);
+
+  useEffect(() => {
+    if (llmSettings?.provider) {
+      if (llmSettings.provider === 'nvidia') {
+        setSelectedProvider('nvidia');
+      } else if (llmSettings.provider === 'openai') {
+        setSelectedProvider('openai');
+      }
+    }
+  }, [llmSettings]);
 
   useEffect(() => {
     if (!selectedBrandId && brands.length > 0 && brands[0]) {
@@ -607,17 +698,24 @@ export default function ImageGeneratorPage() {
 
         <div className="flex items-center gap-3">
           {/* Configure API Key button */}
+          {/* Configure API Key button */}
           <button
-            onClick={() => setShowKeyModal(true)}
+            onClick={() => {
+              if (selectedProvider === 'openai') {
+                setShowKeyModal(true);
+              } else {
+                router.push('/settings/llm');
+              }
+            }}
             className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border transition-all ${
-              imageKeyStatus?.hasImageApiKey
+              isProviderConfigured
                 ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10'
-                : 'border-amber-500/40 text-amber-400 bg-amber-500/10 hover:bg-amber-500/15 animate-pulse'
+                : 'border-amber-500/40 text-amber-400 bg-amber-500/10 hover:bg-amber-500/15'
             }`}
-            title={imageKeyStatus?.hasImageApiKey ? `Key active: ${imageKeyStatus.masked}` : 'Configure OpenAI API key for DALL-E 3'}
+            title={isProviderConfigured ? `Provider ${selectedProvider.toUpperCase()} is configured & active` : `Configure key for ${selectedProvider.toUpperCase()}`}
           >
             <Key className="h-3.5 w-3.5" />
-            {imageKeyStatus?.hasImageApiKey ? `DALL-E 3 ✓` : 'Add API Key'}
+            {isProviderConfigured ? `${selectedProvider.toUpperCase()} ✓` : `Config ${selectedProvider.toUpperCase()}`}
           </button>
           <div className="flex flex-col items-end gap-1">
             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Est. Cost</span>
@@ -639,32 +737,16 @@ export default function ImageGeneratorPage() {
       </div>
 
       {/* ── Mock Mode Warning Banner ──────────────────────────────────────── */}
-      {imageKeyStatus && !imageKeyStatus.hasImageApiKey && (
-        <div className="flex items-start gap-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5">
+      {providerWarning && (
+        <div className="flex items-start gap-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 animate-in slide-in-from-top-2 duration-300">
           <div className="rounded-xl bg-amber-500/15 p-2.5 flex-shrink-0">
             <AlertCircle className="h-6 w-6 text-amber-400" />
           </div>
           <div className="flex-1 space-y-1">
-            <p className="text-sm font-black text-amber-300">⚠️ No Image API Key — Running in Mock Mode</p>
-            <p className="text-xs text-amber-200/70 leading-relaxed">
-              Without an OpenAI API key, the system returns stock placeholder images instead of
-              real AI-generated branded posters. Add your OpenAI key below to activate DALL-E 3 poster generation.
-            </p>
+            <p className="text-sm font-black text-amber-300">{providerWarning.title}</p>
+            <p className="text-xs text-amber-200/70 leading-relaxed">{providerWarning.desc}</p>
             <div className="pt-2 flex gap-3 flex-wrap">
-              <button
-                onClick={() => setShowKeyModal(true)}
-                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black px-4 py-2 rounded-lg transition-colors"
-              >
-                <Key className="h-3.5 w-3.5" /> Add OpenAI API Key
-              </button>
-              <a
-                href="https://platform.openai.com/api-keys"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 border border-amber-500/30 px-4 py-2 rounded-lg transition-colors"
-              >
-                Get API Key <ExternalLink className="h-3 w-3" />
-              </a>
+              {providerWarning.action}
             </div>
           </div>
         </div>
@@ -1064,6 +1146,7 @@ export default function ImageGeneratorPage() {
                     aria-label="Select AI image provider"
                   >
                     <option value="openai">OpenAI DALL-E 3 (Vivid — Poster Quality)</option>
+                    <option value="nvidia">NVIDIA NIM (FLUX.1-dev / Klein)</option>
                     <option value="flux">FLUX.1-dev via BFL (Premium Quality)</option>
                     <option value="stability">Stability AI SDXL (Fallback)</option>
                   </select>

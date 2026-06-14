@@ -29,6 +29,7 @@ export class LlmSettingsService {
         nvidiaTaskModels: {
           contentCreation: 'meta/llama-3.1-70b-instruct',
           imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
+          imageGeneration: 'black-forest-labs/flux.2-klein-4b',
           socialMediaCaptions: 'meta/llama-3.1-70b-instruct',
           campaignStrategy: 'nvidia/llama-3.1-nemotron-70b-instruct',
         },

@@ -117,12 +117,13 @@ export class ImageJobProcessor extends WorkerHost {
       const isNvidia = resolvedProvider === 'nvidia';
       const nvidiaTaskModels = (llmSettings?.nvidiaTaskModels as any) ?? {};
 
-      const { key: userApiKey, source: keySource } = await this.llmSettingsService.getDecryptedImageApiKey(businessId);
+      const { key: openaiKey, source: keySource } = await this.llmSettingsService.getDecryptedImageApiKey(businessId);
+      const nvidiaKey = resolvedProvider === 'nvidia' ? await this.llmSettingsService.getDecryptedApiKey(businessId) : null;
       const fluxApiKey = await this.llmSettingsService.getDecryptedFluxApiKey(businessId);
-      const imageGateway = this.buildImageGateway(userApiKey, resolvedProvider, fluxApiKey);
+      const imageGateway = this.buildImageGateway(openaiKey, nvidiaKey, fluxApiKey);
 
       this.logger.log(
-        `[IMAGE_JOB:${jobId}] Image API key: ${userApiKey ? `found (source=${keySource})` : 'NONE — using mock provider'}. ` +
+        `[IMAGE_JOB:${jobId}] API Keys resolved — openaiKey=${openaiKey ? 'found' : 'none'}, nvidiaKey=${nvidiaKey ? 'found' : 'none'}, ` +
         `llmProvider=${resolvedProvider}, imageProvider=${settings.provider || 'openai'}`
       );
 
@@ -193,7 +194,8 @@ export class ImageJobProcessor extends WorkerHost {
       let finalPrompt = directPosterPrompt;
 
       // Only call LLM to ENRICH the prompt if user has a valid API key
-      if (userApiKey) {
+      const llmApiKey = resolvedProvider === 'nvidia' ? nvidiaKey : (resolvedProvider === 'openai' ? await this.llmSettingsService.getDecryptedApiKey(businessId) : null);
+      if (llmApiKey) {
         try {
           this.logger.log(`[IMAGE_JOB:${jobId}] LLM enrichment enabled. Calling LLM (${resolvedProvider})...`);
           const llmModel = isNvidia
@@ -204,7 +206,7 @@ export class ImageJobProcessor extends WorkerHost {
             provider:    resolvedProvider as any,
             model:       llmModel,
             temperature: 0.65,
-            apiKey:      userApiKey,
+            apiKey:      llmApiKey,
           });
 
           const llmPrompt = response.content.trim();
@@ -272,6 +274,7 @@ export class ImageJobProcessor extends WorkerHost {
         quality:        settings.quality,
         style:          settings.style,
         businessId,
+        model:          providerName === 'nvidia' ? (nvidiaTaskModels.imageGeneration || 'black-forest-labs/flux.2-klein-4b') : undefined,
         posterContext: {
           primaryColor:   brandCtx.primaryColor,
           secondaryColor: brandCtx.secondaryColor,
@@ -456,13 +459,13 @@ export class ImageJobProcessor extends WorkerHost {
    *    imageApiKey (DALL-E-specific) → apiKey (if OpenAI LLM provider) → null
    *  - If userApiKey is null → only mock provider will be available
    */
-  private buildImageGateway(userApiKey: string | null, llmProvider: string, fluxApiKey: string | null = null): ImageGateway {
-    // Inject the key directly — no process.env mutation (thread-safe for concurrent jobs)
+  private buildImageGateway(openaiKey: string | null, nvidiaKey: string | null, fluxApiKey: string | null = null): ImageGateway {
+    // Inject the keys directly — no process.env mutation (thread-safe for concurrent jobs)
     const keys: ImageProviderKeys = {
-      openai: userApiKey || null,  // Works for both 'openai' and 'nvidia' LLM providers
-      flux:   fluxApiKey || null,  // Custom BFL key from user settings
-      stability: null,             // Future: extend to support stability key
-      nvidia: llmProvider === 'nvidia' ? (userApiKey || null) : null,
+      openai: openaiKey || null,
+      flux:   fluxApiKey || null,
+      stability: null,
+      nvidia: nvidiaKey || null,
     };
 
     const gateway = new ImageGateway(
@@ -498,14 +501,17 @@ export class ImageJobProcessor extends WorkerHost {
 
       const llmSettings = await this.llmSettingsService.getSettings(businessId);
       const resolvedProvider = (llmSettings?.provider as string) ?? 'openai';
-      const userApiKey = await this.llmSettingsService.getDecryptedApiKey(businessId);
+      const nvidiaTaskModels = (llmSettings?.nvidiaTaskModels as any) ?? {};
+      const { key: openaiKey } = await this.llmSettingsService.getDecryptedImageApiKey(businessId);
+      const nvidiaKey = resolvedProvider === 'nvidia' ? await this.llmSettingsService.getDecryptedApiKey(businessId) : null;
       const fluxApiKey = await this.llmSettingsService.getDecryptedFluxApiKey(businessId);
-      const imageGateway = this.buildImageGateway(userApiKey, resolvedProvider, fluxApiKey);
+      const imageGateway = this.buildImageGateway(openaiKey, nvidiaKey, fluxApiKey);
 
       await this.updateJobProgress(jobId, 30);
       this.wsGateway.emitJobProgress(businessId, { jobId, progress: 30, status: 'PROCESSING', stage: 'enhancing' });
 
-      const enhancedPrompt = await this.enhanceLegacyPrompt(rawPrompt, brand.visualRules, category, settings.style, businessId, userApiKey);
+      const llmApiKey = resolvedProvider === 'nvidia' ? nvidiaKey : (resolvedProvider === 'openai' ? await this.llmSettingsService.getDecryptedApiKey(businessId) : null);
+      const enhancedPrompt = await this.enhanceLegacyPrompt(rawPrompt, brand.visualRules, category, settings.style, businessId, llmApiKey);
       const cleanPromptForGeneration = this.extractStep3Prompt(enhancedPrompt);
 
       await this.prismaService.client.imageGenerationJob.update({
@@ -516,10 +522,12 @@ export class ImageJobProcessor extends WorkerHost {
         jobId, progress: 50, status: 'PROCESSING', stage: 'generating', finalPrompt: enhancedPrompt,
       });
 
-      const imageResponse = await imageGateway.generate(settings.provider || (resolvedProvider === 'nvidia' ? 'nvidia' : 'openai'), {
+      const providerName = settings.provider || (resolvedProvider === 'nvidia' ? 'nvidia' : 'openai');
+      const imageResponse = await imageGateway.generate(providerName, {
         prompt:    cleanPromptForGeneration,
         width:     settings.width, height: settings.height,
         quality:   settings.quality, style: settings.style, businessId,
+        model:     providerName === 'nvidia' ? (nvidiaTaskModels.imageGeneration || 'black-forest-labs/flux.2-klein-4b') : undefined,
       });
 
       await this.updateJobProgress(jobId, 80);

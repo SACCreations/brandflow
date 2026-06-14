@@ -65,6 +65,15 @@ const NVIDIA_TASKS = [
     defaultModel: 'nvidia/nemotron-nano-8b-instruct',
   },
   {
+    key: 'imageGeneration' as const,
+    label: 'Image Generation',
+    description: 'Generate marketing creatives and branded visuals',
+    icon: Zap,
+    color: 'text-orange-400',
+    bg: 'bg-orange-400/10 border-orange-400/20',
+    defaultModel: 'black-forest-labs/flux.2-klein-4b',
+  },
+  {
     key: 'socialMediaCaptions' as const,
     label: 'Social Media Captions',
     description: 'Platform-specific captions for LinkedIn, Instagram, Facebook, X',
@@ -83,16 +92,6 @@ const NVIDIA_TASKS = [
     defaultModel: 'nvidia/llama-3.1-nemotron-70b-instruct',
   },
 ];
-
-// Image generation is informational only (uses FLUX.1-dev, no user override)
-const IMAGE_GENERATION_INFO = {
-  label: 'Image Generation',
-  description: 'Generate marketing creatives and branded visuals',
-  model: 'FLUX.1-dev',
-  icon: Zap,
-  color: 'text-orange-400',
-  bg: 'bg-orange-400/10 border-orange-400/20',
-};
 
 // ─── Provider Card Component ───────────────────────────────────────
 function ProviderCard({ id, name, logo, description, badge, selected, onClick }: ProviderCardProps) {
@@ -204,6 +203,7 @@ export default function LlmSettingsPage() {
       nvidiaTaskModels: {
         contentCreation: 'meta/llama-3.1-70b-instruct',
         imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
+        imageGeneration: 'black-forest-labs/flux.2-klein-4b',
         socialMediaCaptions: 'meta/llama-3.1-70b-instruct',
         campaignStrategy: 'nvidia/llama-3.1-nemotron-70b-instruct',
       },
@@ -230,6 +230,7 @@ export default function LlmSettingsPage() {
       nvidiaTaskModels: settings.nvidiaTaskModels ?? {
         contentCreation: 'meta/llama-3.1-70b-instruct',
         imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
+        imageGeneration: 'black-forest-labs/flux.2-klein-4b',
         socialMediaCaptions: 'meta/llama-3.1-70b-instruct',
         campaignStrategy: 'nvidia/llama-3.1-nemotron-70b-instruct',
       },
@@ -463,28 +464,6 @@ export default function LlmSettingsPage() {
                   </div>
                 );
               })}
-
-              {/* Image Generation — informational (fixed FLUX.1-dev) */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl border border-border/40 bg-surface-2/20 opacity-70">
-                <div className="flex items-center gap-3 sm:w-72 shrink-0">
-                  <div className={`p-2 rounded-lg border ${IMAGE_GENERATION_INFO.bg}`}>
-                    <IMAGE_GENERATION_INFO.icon className={`w-4 h-4 ${IMAGE_GENERATION_INFO.color}`} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{IMAGE_GENERATION_INFO.label}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{IMAGE_GENERATION_INFO.description}</p>
-                  </div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-border hidden sm:block shrink-0" />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 px-3 h-10 glass-panel border border-border/30 rounded-xl">
-                    <span className="text-sm text-foreground font-mono">{IMAGE_GENERATION_INFO.model}</span>
-                    <Badge variant="outline" className="ml-auto text-[10px] uppercase font-bold text-orange-400 border-orange-400/20 bg-orange-400/5">
-                      Fixed
-                    </Badge>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Routing Logic accordion */}
@@ -512,11 +491,6 @@ export default function LlmSettingsPage() {
                     <span className="text-emerald-400">{`[selected model]`}</span>
                   </p>
                 ))}
-                <p>
-                  <span className="text-[hsl(var(--ai))]">IF</span> task = <span className="text-foreground">Image Generation</span>{' '}
-                  <span className="text-[hsl(var(--ai))]">→</span>{' '}
-                  <span className="text-orange-400">FLUX.1-dev</span>
-                </p>
               </div>
             )}
           </Card>
@@ -798,7 +772,7 @@ export default function LlmSettingsPage() {
                 )}
               </div>
               <p className="text-xs text-muted-foreground mb-2">
-                Required for generating high-quality marketing creatives with the FLUX.1-dev model. Get your key from <a href="https://api.bfl.ml/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">api.bfl.ml</a>.
+                Required for generating high-quality marketing creatives with the direct FLUX.1-dev model. (Not required if using NVIDIA NIM routing, which uses your NVIDIA API Key instead). Get your key from <a href="https://api.bfl.ai/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">api.bfl.ai</a>.
               </p>
               <div className="flex gap-2">
                 <div className="flex-1">

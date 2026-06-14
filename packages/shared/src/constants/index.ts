@@ -229,6 +229,7 @@ export type AIProvider = (typeof AI_PROVIDERS)[number];
 export const NVIDIA_TASK_MODELS = {
   contentCreation: 'meta/llama-3.1-70b-instruct',
   imagePromptCreation: 'nvidia/nemotron-nano-8b-instruct',
+  imageGeneration: 'black-forest-labs/flux.2-klein-4b',
   socialMediaCaptions: 'meta/llama-3.1-70b-instruct',
   campaignStrategy: 'nvidia/llama-3.1-nemotron-70b-instruct',
 } as const;
@@ -271,6 +272,12 @@ export const NVIDIA_MODEL_LIST = [
     label: 'Mistral Nemo Minitron 8B',
     description: 'Compact and cost-efficient for high-volume tasks',
     tasks: ['contentCreation', 'socialMediaCaptions'],
+  },
+  {
+    id: 'black-forest-labs/flux.2-klein-4b',
+    label: 'FLUX.2 Klein 4B',
+    description: 'Distilled ultra-fast image generation model',
+    tasks: ['imageGeneration'],
   },
 ] as const;
 

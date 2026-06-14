@@ -895,6 +895,7 @@ export const updateLlmSettingsSchema = z.object({
   nvidiaTaskModels: z.object({
     contentCreation: z.string().max(150).nullish(),
     imagePromptCreation: z.string().max(150).nullish(),
+    imageGeneration: z.string().max(150).nullish(),
     socialMediaCaptions: z.string().max(150).nullish(),
     campaignStrategy: z.string().max(150).nullish(),
   }).nullish(),
